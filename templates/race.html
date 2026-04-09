@@ -608,11 +608,19 @@ function showHorse(idx, btn) {
     '#ef476f','#ffd166','#118ab2','#073b4c',
   ];
 
+  // Build horse name lookup from summaries
+  const horseNames = {};
+  {% if summaries %}
+  {% for h in summaries %}
+  horseNames['horse_{{ h.horse_index }}'] = {{ (h.chara_id | chara_name if h.chara_id else 'Horse ' ~ h.horse_index) | tojson }};
+  {% endfor %}
+  {% endif %}
+
   const frameLabels = frames.map(f => f.time != null ? f.time.toFixed(1) + 's' : f.frame_index);
 
   function buildDatasets(field) {
     return horseKeys.map((key, i) => ({
-      label: key.replace('_', ' '),
+      label: horseNames[key] || key.replace('_', ' '),
       data: frames.map(f => f[key] ? f[key][field] : null),
       borderColor: COLORS[i % COLORS.length],
       backgroundColor: COLORS[i % COLORS.length] + '20',
@@ -687,7 +695,7 @@ function showHorse(idx, btn) {
         return +((nxt.speed - cur.speed) / dt).toFixed(4);
       });
       return {
-        label: key.replace('_', ' '),
+        label: horseNames[key] || key.replace('_', ' '),
         data: data,
         borderColor: COLORS[i % COLORS.length],
         backgroundColor: COLORS[i % COLORS.length] + '20',
