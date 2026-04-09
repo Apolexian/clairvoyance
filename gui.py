@@ -64,7 +64,15 @@ def _tool_cmd(tool: str, *args: str) -> list[str]:
     """
     if FROZEN:
         exe = _APP_DIR / f"{tool}.exe"
+        log.debug("Looking for tool: %s (APP_DIR=%s)", exe, _APP_DIR)
         if not exe.exists():
+            # List what IS in the directory so the log shows the real layout
+            siblings = [p.name for p in _APP_DIR.iterdir()] if _APP_DIR.is_dir() else []
+            log.error(
+                "Tool not found: %s — APP_DIR contents: %s",
+                exe,
+                siblings,
+            )
             raise FileNotFoundError(f"Bundled tool not found: {exe}")
         return [str(exe), *args]
     return [sys.executable, str(SCRIPT_DIR / f"{tool}.py"), *args]

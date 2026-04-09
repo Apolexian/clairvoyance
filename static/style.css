@@ -47,20 +47,6 @@ a:hover { text-decoration: underline; }
   z-index: 100;
 }
 
-.brand {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text) !important;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.brand:hover { text-decoration: none; }
-.brand-icon {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
 
 .nav-links {
   display: flex;

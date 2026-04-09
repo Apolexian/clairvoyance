@@ -111,18 +111,31 @@ def build_tool(script: str, name: str):
 
 
 def post_build():
-    """Move tool .exe files up into the main dist folder so they're siblings."""
-    # PyInstaller puts each build into dist/Clairvoyance/<name>/
-    # but with --distpath=dist/Clairvoyance they end up as:
-    #   dist/Clairvoyance/Clairvoyance.exe  (onedir contents)
-    #   dist/Clairvoyance/collect/collect.exe
-    #   dist/Clairvoyance/discover/discover.exe
-    #   dist/Clairvoyance/analyse/analyse.exe
+    """Move all .exe files to the top-level dist folder so they're siblings."""
+    # PyInstaller --onedir puts each build into a <name>/ subdirectory under
+    # the distpath, so after all four builds we have:
     #
-    # We want all .exe files at the top level sharing _internal/.
-    # The simplest approach: build the GUI first (it creates _internal/),
-    # then for each tool, just move the .exe up.
+    #   dist/Clairvoyance/Clairvoyance/Clairvoyance.exe   + _internal/
+    #   dist/Clairvoyance/collect/collect.exe              + _internal/
+    #   dist/Clairvoyance/discover/discover.exe            + _internal/
+    #   dist/Clairvoyance/analyse/analyse.exe              + _internal/
+    #
+    # We want everything flat at dist/Clairvoyance/ sharing one _internal/.
 
+    # ── Step 1: Hoist the GUI exe + _internal out of its nested subdir ──
+    gui_subdir = DIST / "Clairvoyance"
+    if gui_subdir.is_dir():
+        gui_exe = gui_subdir / "Clairvoyance.exe"
+        gui_internal = gui_subdir / "_internal"
+        if gui_exe.exists():
+            print(f"  Moving {gui_exe} → {DIST / 'Clairvoyance.exe'}")
+            shutil.move(str(gui_exe), str(DIST / "Clairvoyance.exe"))
+        if gui_internal.is_dir():
+            print(f"  Moving {gui_internal} → {DIST / '_internal'}")
+            shutil.move(str(gui_internal), str(DIST / "_internal"))
+        shutil.rmtree(str(gui_subdir), ignore_errors=True)
+
+    # ── Step 2: Hoist each tool exe and merge its _internal ─────────────
     for tool in ("collect", "discover", "analyse"):
         tool_dir = DIST / tool
         if tool_dir.is_dir():
@@ -131,7 +144,7 @@ def post_build():
                 dest = DIST / f"{tool}.exe"
                 print(f"  Moving {exe} → {dest}")
                 shutil.move(str(exe), str(dest))
-            # Move any unique DLLs from tool's _internal to main _internal
+            # Merge any unique files from tool's _internal into main _internal
             tool_internal = tool_dir / "_internal"
             main_internal = DIST / "_internal"
             if tool_internal.is_dir() and main_internal.is_dir():
@@ -145,9 +158,17 @@ def post_build():
             # Clean up the tool subdirectory
             shutil.rmtree(str(tool_dir), ignore_errors=True)
 
-    # Create placeholder directories
+    # ── Step 3: Create placeholder directories ──────────────────────────
     (DIST / "sessions").mkdir(exist_ok=True)
     (DIST / "discovery").mkdir(exist_ok=True)
+
+    # ── Verify final layout ─────────────────────────────────────────────
+    expected = ["Clairvoyance.exe", "collect.exe", "discover.exe", "analyse.exe", "_internal"]
+    missing = [name for name in expected if not (DIST / name).exists()]
+    if missing:
+        print(f"\n  ⚠ WARNING: Missing in output: {missing}")
+    else:
+        print(f"\n  All executables verified in {DIST}")
 
     print(f"\n{'=' * 60}")
     print("  ✓ Build complete!")
