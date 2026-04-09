@@ -1,6 +1,183 @@
 {% extends "layout.html" %}
 {% block title %}Session — {{ session.label or session.name }}{% endblock %}
 
+{% block head %}
+<style>
+  /* ── View Tabs ── */
+  .view-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .view-tab {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .view-tab:hover { color: var(--text); }
+  .view-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .view-panel { display: none; }
+  .view-panel.active { display: block; }
+
+  /* ── Summary Cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .summary-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+  .summary-card h3 {
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .chara-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .chara-portrait {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-dim);
+    flex-shrink: 0;
+  }
+  .chara-info .chara-name { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+  .chara-info .chara-card { font-size: 0.82rem; color: var(--text-muted); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .stat-item { text-align: center; padding: 0.4rem; background: var(--bg); border-radius: 6px; }
+  .stat-item .stat-val { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+  .stat-item .stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+
+  .stats-secondary {
+    display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem;
+    font-size: 0.82rem; color: var(--text-muted);
+  }
+  .stats-secondary span { white-space: nowrap; }
+  .stats-secondary strong { color: var(--text); }
+
+  .support-list { list-style: none; padding: 0; }
+  .support-list li {
+    padding: 0.3rem 0; font-size: 0.82rem; color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  .support-list li:last-child { border-bottom: none; }
+  .support-id { font-size: 0.72rem; color: var(--text-muted); margin-left: 0.4rem; }
+
+  .skill-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
+  .skill-list li {
+    padding: 0.25rem 0; font-size: 0.82rem; color: var(--text);
+    display: flex; justify-content: space-between; border-bottom: 1px solid var(--border);
+  }
+  .skill-list li:last-child { border-bottom: none; }
+  .skill-turn { font-size: 0.72rem; color: var(--text-muted); }
+
+  .race-results-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .race-results-table th {
+    text-align: left; font-weight: 600; color: var(--accent);
+    padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.78rem;
+  }
+  .race-results-table td { padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text); }
+  .result-1st { color: var(--gold); font-weight: 700; }
+  .result-2nd { color: var(--silver); }
+  .result-3rd { color: var(--bronze); }
+
+  .api-breakdown { max-height: 300px; overflow-y: auto; }
+  .api-breakdown table { width: 100%; border-collapse: collapse; font-size: 0.78rem; font-family: monospace; }
+  .api-breakdown th { text-align: left; padding: 0.25rem 0.5rem; color: var(--accent); font-weight: 600; border-bottom: 1px solid var(--border); }
+  .api-breakdown td { padding: 0.25rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text); }
+  .api-breakdown td:last-child { text-align: right; color: var(--orange); }
+
+  .summary-empty { color: var(--text-muted); font-size: 0.85rem; font-style: italic; padding: 0.5rem 0; }
+  .stats-chart-wrap { margin-top: 0.75rem; height: 200px; }
+
+  /* ── Event Choices ── */
+  .event-choices-list { max-height: 400px; overflow-y: auto; }
+  .event-choice-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .event-choice-item:last-child { border-bottom: none; }
+  .event-choice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .event-choice-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .event-choice-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+  }
+  .event-source {
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .event-source.support { color: #58a6ff; }
+  .event-source.card { color: #f9c74f; }
+  .event-source.scenario { color: #8b949e; }
+  .event-choice-badge {
+    background: var(--accent-dim, rgba(88,166,255,0.15));
+    color: var(--accent);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .event-deltas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+  }
+  .delta-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .delta-badge.positive { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .delta-badge.negative { background: rgba(248,81,73,0.15); color: #f85149; }
+  .event-source-tag { font-size: 0.7rem; margin-left: 0.2rem; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="breadcrumb">
   <a href="/">Sessions</a> / <strong>{{ session.label or session.name }}</strong>
@@ -25,80 +202,287 @@
   </div>
 </div>
 
-<!-- Races section -->
-{% if races %}
-<section class="section">
-  <h2>Races</h2>
-  <div class="race-list">
-    {% for race in races %}
-    <a href="/session/{{ session.name }}/race/{{ race._race_index }}" class="race-card">
-      <div class="race-card-header">
-        <span class="race-label">{{ race._race_label }}</span>
-        <span class="race-badge {{ race._source }}">{{ race._source }}</span>
-      </div>
-      <div class="race-card-body">
-        {% if race._source == 'dump' %}
-          <span>{{ race.num_horses }} horses · {{ race.total_frames }} frames · ~{{ race.estimated_total_distance }}m</span>
-        {% elif race.horse_summaries %}
-          <span>{{ race.horse_summaries | length }} horses
-            {% if race.phases and race.phases.total_distance %}
-              · {{ race.phases.total_distance }}m
-            {% endif %}
-            {% if race.skill_activations %}
-              · {{ race.skill_activations | length }} skills
-            {% endif %}
-          </span>
-        {% else %}
-          <span>{{ race.get('horse_count', '?') }} horses</span>
-        {% endif %}
-      </div>
-    </a>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
+<!-- View Tabs -->
+<div class="view-tabs">
+  <button class="view-tab active" onclick="switchView('summary', this)">Summary</button>
+  <button class="view-tab" onclick="switchView('rawdata', this)">Raw Data</button>
+</div>
 
-<!-- Network API Timeline -->
-{% if network %}
-<section class="section">
-  <h2>Network Events</h2>
-  <div class="timeline-filter">
-    <input type="text" id="filter-api" placeholder="Filter by API name..." oninput="filterTimeline()" class="input-sm">
-  </div>
-  <div class="timeline" id="network-timeline">
-    {% for ev in network %}
-    <div class="timeline-event {% if 'Race' in ev.api %}race-highlight{% endif %}" data-api="{{ ev.api }}" data-idx="{{ loop.index0 }}">
-      <div class="timeline-time">{{ ev._ts[11:19] if ev._ts else '' }}</div>
-      <div class="timeline-content">
-        <div class="timeline-summary" onclick="toggleDetail(this, '{{ session.name }}', {{ loop.index0 }})">
-          <span class="timeline-badge {{ ev.event }}">{{ ev.event }}</span>
-          <strong>{{ ev.api }}</strong>
-          <span class="timeline-expand-icon">▶</span>
-          {% if ev.chara_stats %}
-          <div class="chara-stats-inline">
-            SPD:{{ ev.chara_stats.speed }}
-            STA:{{ ev.chara_stats.stamina }}
-            POW:{{ ev.chara_stats.power }}
-            GUT:{{ ev.chara_stats.guts }}
-            WIZ:{{ ev.chara_stats.wiz }}
-            · T{{ ev.chara_stats.turn }} VIT:{{ ev.chara_stats.vital }}
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  SUMMARY VIEW                                                  -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="view-summary" class="view-panel active">
+  {% if summary and summary.latest_stats %}
+  <div class="summary-grid">
+    <!-- Character & Stats -->
+    <div class="summary-card">
+      <h3>Character</h3>
+      <div class="chara-header">
+        {% if summary.chara_image %}
+        <img src="{{ summary.chara_image }}" alt="" class="chara-portrait">
+        {% endif %}
+        <div class="chara-info">
+          <div class="chara-name">{{ summary.chara_name or ('chara:' ~ summary.chara_id) }}</div>
+          {% if summary.card_name %}
+          <div class="chara-card">{{ summary.card_name }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.speed }}</div><div class="stat-lbl">Speed</div></div>
+        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.stamina }}</div><div class="stat-lbl">Stamina</div></div>
+        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.power }}</div><div class="stat-lbl">Power</div></div>
+        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.guts }}</div><div class="stat-lbl">Guts</div></div>
+        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.wiz }}</div><div class="stat-lbl">Wiz</div></div>
+      </div>
+
+      <div class="stats-secondary">
+        <span>Turn <strong>{{ summary.latest_stats.turn }}</strong></span>
+        <span>Vital <strong>{{ summary.latest_stats.vital }}/{{ summary.latest_stats.max_vital }}</strong></span>
+        <span>Fans <strong>{{ "{:,}".format(summary.latest_stats.fans) }}</strong></span>
+        <span>SP <strong>{{ summary.latest_stats.skill_point }}</strong></span>
+        {% set motiv = summary.latest_stats.motivation %}
+        <span>Mood <strong>{% if motiv == 5 %}🔥{% elif motiv == 4 %}😊{% elif motiv == 3 %}😐{% elif motiv == 2 %}😟{% else %}😢{% endif %}</strong></span>
+      </div>
+
+      {% if summary.stats_history | length > 2 %}
+      <div class="stats-chart-wrap"><canvas id="statsChart"></canvas></div>
+      {% endif %}
+    </div>
+
+    <!-- Support Cards -->
+    <div class="summary-card">
+      <h3>Support Cards</h3>
+      {% if summary.support_card_names %}
+      <ul class="support-list">
+        {% for sc in summary.support_card_names %}
+        <li>{{ sc.name }}<span class="support-id">#{{ sc.id }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="summary-empty">No support card data captured</div>
+      {% endif %}
+    </div>
+
+    <!-- Race Results -->
+    <div class="summary-card">
+      <h3>Race Results</h3>
+      {% if summary.race_results %}
+      <table class="race-results-table">
+        <thead><tr><th>Race</th><th>Result</th><th>Turn</th></tr></thead>
+        <tbody>
+          {% for rr in summary.race_results %}
+          <tr>
+            <td>{{ rr.race_name or ('race:' ~ rr.race_instance_id) }}</td>
+            <td>
+              {% if rr.result_order == 1 %}<span class="result-1st">🥇 1st</span>
+              {% elif rr.result_order == 2 %}<span class="result-2nd">🥈 2nd</span>
+              {% elif rr.result_order == 3 %}<span class="result-3rd">🥉 3rd</span>
+              {% elif rr.result_order %}{{ rr.result_order }}th
+              {% else %}<span style="color:var(--text-muted)">—</span>{% endif %}
+              {% if rr.entry_count %}<span style="color:var(--text-muted); font-size:0.72rem">/{{ rr.entry_count }}</span>{% endif %}
+            </td>
+            <td class="skill-turn">T{{ rr.turn }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="summary-empty">No race data captured</div>
+      {% endif %}
+    </div>
+
+    <!-- Skills Acquired -->
+    <div class="summary-card">
+      <h3>Skills Acquired ({{ summary.skills_acquired | length }})</h3>
+      {% if summary.skills_acquired %}
+      <ul class="skill-list">
+        {% for sk in summary.skills_acquired %}
+        <li><span>{{ sk.name }}</span><span class="skill-turn">T{{ sk.turn }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="summary-empty">No skills captured yet</div>
+      {% endif %}
+    </div>
+
+    <!-- Event Choices -->
+    <div class="summary-card">
+      <h3>Event Choices ({{ summary.event_choices | length }})</h3>
+      {% if summary.event_choices %}
+      <div class="event-choices-list">
+        {% for ec in summary.event_choices %}
+        <div class="event-choice-item">
+          <div class="event-choice-header">
+            <span class="event-choice-name">{{ ec.name or ('story:' ~ ec.story_id) }}</span>
+            <span class="skill-turn">T{{ ec.turn }}</span>
+          </div>
+          <div class="event-choice-meta">
+            {% if ec.source_type == 'support' and ec.source_name %}
+              <span class="event-source support" title="Support card event">🃏 {{ ec.source_name }}</span>
+            {% elif ec.source_type == 'card' and ec.source_name %}
+              <span class="event-source card" title="Trainee card event">🏇 {{ ec.source_name }}</span>
+            {% elif ec.source_type == 'scenario' %}
+              <span class="event-source scenario">📋 Scenario</span>
+            {% endif %}
+            {% if ec.choice_number %}
+              <span class="event-choice-badge">Chose option {{ ec.choice_number }}{% if ec.num_branches %} of {{ ec.num_branches }}{% endif %}</span>
+            {% endif %}
+          </div>
+          {% if ec.stat_deltas %}
+          <div class="event-deltas">
+            {% for stat, delta in ec.stat_deltas.items() %}
+              <span class="delta-badge {% if delta > 0 %}positive{% else %}negative{% endif %}">
+                {{ stat }}
+                {% if delta > 0 %}+{% endif %}{{ delta }}
+              </span>
+            {% endfor %}
           </div>
           {% endif %}
         </div>
-        <div class="timeline-detail" style="display:none">
-          <div class="detail-loading">Loading…</div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="summary-empty">No event choices captured</div>
+      {% endif %}
+    </div>
+
+    <!-- Events Seen -->
+    <div class="summary-card">
+      <h3>Events ({{ summary.events_seen | length }})</h3>
+      {% if summary.events_seen %}
+      <ul class="skill-list">
+        {% for ev in summary.events_seen %}
+        <li>
+          <span>
+            {{ ev.name or ('story:' ~ ev.story_id) }}
+            {% if ev.source_type == 'support' %}<span class="event-source-tag">🃏</span>{% endif %}
+            {% if ev.source_type == 'card' %}<span class="event-source-tag">🏇</span>{% endif %}
+            {% if ev.has_choice %}<span class="event-source-tag" title="{{ ev.num_branches }} branches">🔀</span>{% endif %}
+          </span>
+          <span class="skill-turn">T{{ ev.turn }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="summary-empty">No events captured</div>
+      {% endif %}
+    </div>
+
+    <!-- API Call Breakdown -->
+    <div class="summary-card">
+      <h3>API Calls ({{ summary.total_api_calls }})</h3>
+      {% if summary.api_breakdown %}
+      <div class="api-breakdown">
+        <table>
+          <thead><tr><th>API</th><th>Count</th></tr></thead>
+          <tbody>
+            {% for api, count in summary.api_breakdown | dictsort(by='value', reverse=true) %}
+            <tr><td>{{ api }}</td><td>{{ count }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+      {% if summary.first_ts and summary.last_ts %}
+      <div style="margin-top:0.5rem; font-size:0.75rem; color:var(--text-muted);">
+        {{ summary.first_ts[:19] }} → {{ summary.last_ts[:19] }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div class="summary-empty" style="text-align:center; padding:2rem;">
+    No career/training data found in this session.<br>
+    The summary view shows character stats, support cards, races, and skills
+    extracted from Single Mode API responses.
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  RAW DATA VIEW                                                 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="view-rawdata" class="view-panel">
+  {% if races %}
+  <section class="section">
+    <h2>Races</h2>
+    <div class="race-list">
+      {% for race in races %}
+      <a href="/session/{{ session.name }}/race/{{ race._race_index }}" class="race-card">
+        <div class="race-card-header">
+          <span class="race-label">{{ race._race_label }}</span>
+          <span class="race-badge {{ race._source }}">{{ race._source }}</span>
+        </div>
+        <div class="race-card-body">
+          {% if race._source == 'dump' %}
+            <span>{{ race.num_horses }} horses · {{ race.total_frames }} frames · ~{{ race.estimated_total_distance }}m</span>
+          {% elif race.horse_summaries %}
+            <span>{{ race.horse_summaries | length }} horses
+              {% if race.phases and race.phases.total_distance %}· {{ race.phases.total_distance }}m{% endif %}
+              {% if race.skill_activations %}· {{ race.skill_activations | length }} skills{% endif %}
+            </span>
+          {% else %}
+            <span>{{ race.get('horse_count', '?') }} horses</span>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if network %}
+  <section class="section">
+    <h2>Network Events</h2>
+    <div class="timeline-filter">
+      <input type="text" id="filter-api" placeholder="Filter by API name..." oninput="filterTimeline()" class="input-sm">
+    </div>
+    <div class="timeline" id="network-timeline">
+      {% for ev in network %}
+      <div class="timeline-event {% if 'Race' in ev.api %}race-highlight{% endif %}" data-api="{{ ev.api }}" data-idx="{{ loop.index0 }}">
+        <div class="timeline-time">{{ ev._ts[11:19] if ev._ts else '' }}</div>
+        <div class="timeline-content">
+          <div class="timeline-summary" onclick="toggleDetail(this, '{{ session.name }}', {{ loop.index0 }})">
+            <span class="timeline-badge {{ ev.event }}">{{ ev.event }}</span>
+            <strong>{{ ev.api }}</strong>
+            <span class="timeline-expand-icon">▶</span>
+            {% if ev.chara_stats %}
+            <div class="chara-stats-inline">
+              SPD:{{ ev.chara_stats.speed }}
+              STA:{{ ev.chara_stats.stamina }}
+              POW:{{ ev.chara_stats.power }}
+              GUT:{{ ev.chara_stats.guts }}
+              WIZ:{{ ev.chara_stats.wiz }}
+              · T{{ ev.chara_stats.turn }} VIT:{{ ev.chara_stats.vital }}
+            </div>
+            {% endif %}
+          </div>
+          <div class="timeline-detail" style="display:none">
+            <div class="detail-loading">Loading…</div>
+          </div>
         </div>
       </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
+  </section>
+  {% endif %}
+</div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
+/* ── View Switching ──────────────────────────────────── */
+function switchView(view, btn) {
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── Network Timeline ────────────────────────────────── */
 function filterTimeline() {
   const q = document.getElementById('filter-api').value.toLowerCase();
   document.querySelectorAll('#network-timeline .timeline-event').forEach(el => {
@@ -131,10 +515,8 @@ async function toggleDetail(summaryEl, sessionName, idx) {
     if (data.error) {
       detailEl.innerHTML = `<div class="detail-error">${data.error}</div>`;
     } else {
-      // Extract annotations (master DB lookups) before building viewer
       const annotations = data._annotations || data.msgpack_decoded?._annotations || {};
       const obj = data.msgpack_decoded || data;
-      // Remove _annotations from display object so it doesn't show in the tree
       delete obj._annotations;
       if (data.msgpack_decoded) delete data._annotations;
       detailEl.innerHTML = '';
@@ -152,7 +534,6 @@ function buildJsonViewer(data, annotations) {
   const wrapper = document.createElement('div');
   wrapper.className = 'json-viewer';
 
-  // Toolbar
   const toolbar = document.createElement('div');
   toolbar.className = 'jv-toolbar';
   toolbar.innerHTML = `
@@ -162,7 +543,6 @@ function buildJsonViewer(data, annotations) {
   `;
   wrapper.appendChild(toolbar);
 
-  // Store raw data for copy
   const pre = document.createElement('pre');
   pre.className = 'detail-json jv-tree';
   pre.dataset.raw = JSON.stringify(data, null, 2);
@@ -181,74 +561,44 @@ function renderNode(value, key, depth, isLast, annotations, parentPath) {
   const comma = isLast ? '' : ',';
   const keyStr = key !== '' ? `<span class="json-key">"${esc(key)}"</span>: ` : '';
 
-  // Build the full JSON path for this node (for annotation lookup)
   const currentPath = key !== '' ? (parentPath ? parentPath + '.' + key : key) : parentPath;
-  // Check if there's an annotation for this path
   const annotation = currentPath && annotations[currentPath];
   const annotBadge = annotation ? ` <span class="jv-annotation" title="${esc(currentPath)}">${esc(annotation)}</span>` : '';
 
-  if (value === null) {
-    return textFrag(`${indent}${keyStr}<span class="json-null">null</span>${comma}\n`);
-  }
-  if (typeof value === 'boolean') {
-    return textFrag(`${indent}${keyStr}<span class="json-boolean">${value}</span>${comma}\n`);
-  }
-  if (typeof value === 'number') {
-    return textFrag(`${indent}${keyStr}<span class="json-number">${value}</span>${annotBadge}${comma}\n`);
-  }
-  if (typeof value === 'string') {
-    return textFrag(`${indent}${keyStr}<span class="json-string">"${esc(value)}"</span>${annotBadge}${comma}\n`);
-  }
+  if (value === null) return textFrag(`${indent}${keyStr}<span class="json-null">null</span>${comma}\n`);
+  if (typeof value === 'boolean') return textFrag(`${indent}${keyStr}<span class="json-boolean">${value}</span>${comma}\n`);
+  if (typeof value === 'number') return textFrag(`${indent}${keyStr}<span class="json-number">${value}</span>${annotBadge}${comma}\n`);
+  if (typeof value === 'string') return textFrag(`${indent}${keyStr}<span class="json-string">"${esc(value)}"</span>${annotBadge}${comma}\n`);
 
-  // Object or Array
   const isArray = Array.isArray(value);
   const entries = isArray ? value.map((v, i) => [i, v]) : Object.entries(value);
   const open = isArray ? '[' : '{';
   const close = isArray ? ']' : '}';
   const count = entries.length;
 
-  if (count === 0) {
-    return textFrag(`${indent}${keyStr}${open}${close}${comma}\n`);
-  }
+  if (count === 0) return textFrag(`${indent}${keyStr}${open}${close}${comma}\n`);
 
   const frag = document.createDocumentFragment();
-
-  // Collapsible toggle line
   const toggle = document.createElement('span');
   toggle.className = 'jv-toggle';
-  toggle.dataset.depth = depth;
-  toggle.innerHTML =
-    `${indent}${keyStr}<span class="jv-arrow">▼</span>${open} ` +
-    `<span class="jv-count">${count} ${isArray ? (count === 1 ? 'item' : 'items') : (count === 1 ? 'key' : 'keys')}</span>\n`;
+  toggle.innerHTML = `${indent}${keyStr}<span class="jv-arrow">▼</span>${open} <span class="jv-count">${count} ${isArray ? (count === 1 ? 'item' : 'items') : (count === 1 ? 'key' : 'keys')}</span>\n`;
 
   const body = document.createElement('span');
   body.className = 'jv-body';
   entries.forEach(([k, v], i) => {
-    const childKey = isArray ? String(k) : String(k);
-    body.appendChild(renderNode(v, isArray ? String(k) : String(k), depth + 1, i === count - 1, annotations, currentPath));
+    body.appendChild(renderNode(v, String(k), depth + 1, i === count - 1, annotations, currentPath));
   });
 
   const closeLine = textFrag(`${indent}${close}${comma}\n`);
   closeLine.className = 'jv-close-line';
 
-  // Collapsed placeholder (hidden by default)
   const collapsed = document.createElement('span');
   collapsed.className = 'jv-collapsed';
   collapsed.style.display = 'none';
   collapsed.innerHTML = `${indent}${keyStr}<span class="jv-arrow jv-arrow-right">▶</span>${open}<span class="jv-ellipsis">…${count}</span>${close}${comma}\n`;
 
-  toggle.addEventListener('click', () => {
-    body.style.display = 'none';
-    closeLine.style.display = 'none';
-    toggle.style.display = 'none';
-    collapsed.style.display = '';
-  });
-  collapsed.addEventListener('click', () => {
-    body.style.display = '';
-    closeLine.style.display = '';
-    toggle.style.display = '';
-    collapsed.style.display = 'none';
-  });
+  toggle.addEventListener('click', () => { body.style.display='none'; closeLine.style.display='none'; toggle.style.display='none'; collapsed.style.display=''; });
+  collapsed.addEventListener('click', () => { body.style.display=''; closeLine.style.display=''; toggle.style.display=''; collapsed.style.display='none'; });
 
   frag.appendChild(toggle);
   frag.appendChild(body);
@@ -257,13 +607,8 @@ function renderNode(value, key, depth, isLast, annotations, parentPath) {
   return frag;
 }
 
-function textFrag(html) {
-  const span = document.createElement('span');
-  span.innerHTML = html;
-  return span;
-}
+function textFrag(html) { const span = document.createElement('span'); span.innerHTML = html; return span; }
 
-/* Toolbar actions */
 function jvExpandAll(btn) {
   const tree = btn.closest('.json-viewer').querySelector('.jv-tree');
   tree.querySelectorAll('.jv-toggle').forEach(t => t.style.display = '');
@@ -271,7 +616,6 @@ function jvExpandAll(btn) {
   tree.querySelectorAll('.jv-close-line').forEach(c => c.style.display = '');
   tree.querySelectorAll('.jv-collapsed').forEach(c => c.style.display = 'none');
 }
-
 function jvCollapseAll(btn) {
   const tree = btn.closest('.json-viewer').querySelector('.jv-tree');
   tree.querySelectorAll('.jv-toggle').forEach(t => t.style.display = 'none');
@@ -279,14 +623,42 @@ function jvCollapseAll(btn) {
   tree.querySelectorAll('.jv-close-line').forEach(c => c.style.display = 'none');
   tree.querySelectorAll('.jv-collapsed').forEach(c => c.style.display = '');
 }
-
 function jvCopy(btn) {
   const raw = btn.closest('.json-viewer').querySelector('.jv-tree').dataset.raw;
   navigator.clipboard.writeText(raw).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = '✓ Copied!';
-    setTimeout(() => btn.textContent = orig, 1500);
+    const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 1500);
   });
 }
+
+/* ── Stats Chart ─────────────────────────────────────── */
+{% if summary and summary.stats_history | length > 2 %}
+(function() {
+  const history = {{ summary.stats_history | tojson }};
+  const ctx = document.getElementById('statsChart');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: history.map(h => 'T' + h.turn),
+      datasets: [
+        { label: 'Speed', data: history.map(h => h.speed), borderColor: '#58a6ff', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+        { label: 'Stamina', data: history.map(h => h.stamina), borderColor: '#f85149', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+        { label: 'Power', data: history.map(h => h.power), borderColor: '#f9c74f', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+        { label: 'Guts', data: history.map(h => h.guts), borderColor: '#3fb950', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+        { label: 'Wiz', data: history.map(h => h.wiz), borderColor: '#bc8cff', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8b949e', boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        x: { ticks: { color: '#8b949e', font: { size: 10 }, maxTicksLimit: 12 }, grid: { color: '#30363d' } },
+        y: { ticks: { color: '#8b949e', font: { size: 10 } }, grid: { color: '#30363d' } },
+      },
+    },
+  });
+})();
+{% endif %}
 </script>
 {% endblock %}

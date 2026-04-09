@@ -527,3 +527,279 @@ def get_timeline(session_name: str) -> list[dict]:
     timeline.sort(key=lambda e: e.get("_ts", ""))
 
     return timeline
+
+
+def build_session_summary(session_name: str) -> dict:
+    """
+    Build a structured summary of a session by parsing network event payloads.
+
+    Extracts:
+      - character info (name, card, latest stats, motivation, fans, turn)
+      - support cards used
+      - skills acquired
+      - race results
+      - training actions taken
+      - stats progression over turns
+    """
+    records = read_domain(session_name, "network")
+
+    summary: dict = {
+        "chara_id": None,
+        "card_id": None,
+        "scenario_id": None,
+        "support_card_ids": [],
+        "latest_stats": {},
+        "stats_history": [],  # [{turn, speed, stamina, power, guts, wiz, vital, fans}]
+        "skills_acquired": [],  # [{skill_id, turn}]
+        "skill_tips": [],  # [{skill_id, turn}]
+        "race_results": [],  # [{turn, race_instance_id, result_order, api}]
+        "training_actions": [],  # [{turn, command_id, api}]
+        "events_seen": [],  # [{story_id, turn, api}]
+        "event_choices": [],  # [{story_id, turn, choice_number, stat_deltas, _ts}]
+        "total_api_calls": len(records),
+        "api_breakdown": {},  # {api_name: count}
+        "first_ts": None,
+        "last_ts": None,
+    }
+
+    seen_skills: set[int] = set()
+    seen_support: set[int] = set()
+
+    # For computing stat deltas around choice events: track the last stats snapshot
+    _STAT_KEYS = ("speed", "stamina", "power", "guts", "wiz", "vital", "skill_point", "motivation")
+    _last_stats: dict[str, int] = {}
+    # Pending choice: we see the request first, then the response with updated stats
+    _pending_choice: dict | None = None
+
+    for rec in records:
+        api = rec.get("api", "")
+        ts = rec.get("_ts", "")
+
+        # Track first/last timestamps
+        if ts:
+            if summary["first_ts"] is None:
+                summary["first_ts"] = ts
+            summary["last_ts"] = ts
+
+        # Count API calls
+        if api:
+            summary["api_breakdown"][api] = summary["api_breakdown"].get(api, 0) + 1
+
+        decoded = rec.get("msgpack_decoded", {})
+        if not isinstance(decoded, dict):
+            continue
+        data = decoded.get("data", {})
+        if not isinstance(data, dict):
+            continue
+
+        # ── Character info ──────────────────────────────────────
+        chara = data.get("chara_info", {})
+        if isinstance(chara, dict) and chara.get("speed"):
+            cid = chara.get("chara_id")
+            card = chara.get("card_id")
+            if cid and not summary["chara_id"]:
+                summary["chara_id"] = cid
+            if card and not summary["card_id"]:
+                summary["card_id"] = card
+
+            turn = chara.get("turn", 0)
+            stats_snap = {
+                "turn": turn,
+                "speed": chara.get("speed", 0),
+                "stamina": chara.get("stamina", 0),
+                "power": chara.get("pow") or chara.get("power", 0),
+                "guts": chara.get("guts", 0),
+                "wiz": chara.get("wiz", 0),
+                "vital": chara.get("vital", 0),
+                "max_vital": chara.get("max_vital", 0),
+                "fans": chara.get("fans", 0),
+                "motivation": chara.get("motivation", 0),
+                "skill_point": chara.get("skill_point", 0),
+            }
+            summary["latest_stats"] = stats_snap
+
+            # Avoid duplicating turns in history
+            if not summary["stats_history"] or summary["stats_history"][-1].get("turn") != turn:
+                summary["stats_history"].append(stats_snap)
+
+            # ── Compute stat deltas if we have a pending choice ──
+            if _pending_choice is not None:
+                deltas: dict[str, int] = {}
+                for k in _STAT_KEYS:
+                    new_val = stats_snap.get(k, 0)
+                    old_val = _last_stats.get(k, 0)
+                    diff = new_val - old_val
+                    if diff != 0:
+                        deltas[k] = diff
+                _pending_choice["stat_deltas"] = deltas
+                _pending_choice["turn"] = turn
+                summary["event_choices"].append(_pending_choice)
+                _pending_choice = None
+
+            # Snapshot current stats for future delta computation
+            _last_stats = {k: stats_snap.get(k, 0) for k in _STAT_KEYS}
+
+            # Skills on the chara
+            skill_array = chara.get("skill_array", [])
+            if isinstance(skill_array, list):
+                for sk in skill_array:
+                    if isinstance(sk, dict):
+                        sid = sk.get("skill_id")
+                        if sid and sid not in seen_skills:
+                            seen_skills.add(sid)
+                            summary["skills_acquired"].append({"skill_id": sid, "turn": turn})
+
+            # Skill tips (hints)
+            skill_tips = chara.get("skill_tips_array", [])
+            if isinstance(skill_tips, list):
+                for tip in skill_tips:
+                    if isinstance(tip, dict):
+                        sid = tip.get("skill_id")
+                        if sid and sid not in seen_skills:
+                            summary["skill_tips"].append({"skill_id": sid, "turn": turn})
+
+        # ── Scenario id ─────────────────────────────────────────
+        if data.get("single_mode_scenario_id") and not summary["scenario_id"]:
+            summary["scenario_id"] = data["single_mode_scenario_id"]
+
+        # ── Support cards ───────────────────────────────────────
+        support_array = data.get("support_card_array") or data.get("support_card_deck_array", [])
+        if isinstance(support_array, list):
+            for sc in support_array:
+                if isinstance(sc, dict):
+                    scid = sc.get("support_card_id")
+                    if scid and scid not in seen_support:
+                        seen_support.add(scid)
+                        summary["support_card_ids"].append(scid)
+
+        # ── Race results ────────────────────────────────────────
+        race_result = data.get("race_result_info") or data.get("race_scenario", {})
+        if isinstance(race_result, dict) and race_result.get("result_order"):
+            turn = 0
+            if isinstance(chara, dict):
+                turn = chara.get("turn", 0)
+            summary["race_results"].append(
+                {
+                    "turn": turn,
+                    "race_instance_id": race_result.get("race_instance_id"),
+                    "program_id": race_result.get("program_id"),
+                    "result_order": race_result.get("result_order"),
+                    "entry_count": race_result.get("entry_count") or race_result.get("num"),
+                    "api": api,
+                    "_ts": ts,
+                }
+            )
+
+        # Also check race_start_info / race_horse_data for race entries
+        race_start = data.get("race_start_info", {})
+        if (
+            isinstance(race_start, dict)
+            and race_start.get("race_instance_id")
+            and not any(
+                r.get("race_instance_id") == race_start.get("race_instance_id")
+                for r in summary["race_results"]
+            )
+        ):
+            summary["race_results"].append(
+                {
+                    "turn": chara.get("turn", 0) if isinstance(chara, dict) else 0,
+                    "race_instance_id": race_start.get("race_instance_id"),
+                    "program_id": race_start.get("program_id"),
+                    "result_order": None,  # not finished yet
+                    "api": api,
+                    "_ts": ts,
+                }
+            )
+
+        # ── Training actions ────────────────────────────────────
+        if "ExecCommand" in api or "training" in api.lower():
+            command = data.get("command_info", {})
+            if isinstance(command, dict) and command.get("command_id"):
+                turn = 0
+                if isinstance(chara, dict):
+                    turn = chara.get("turn", 0)
+                summary["training_actions"].append(
+                    {
+                        "turn": turn,
+                        "command_id": command["command_id"],
+                        "api": api,
+                        "_ts": ts,
+                    }
+                )
+
+        # ── Story events ────────────────────────────────────────
+        unchecked = data.get("unchecked_event_array", [])
+        if isinstance(unchecked, list):
+            for ev in unchecked:
+                if isinstance(ev, dict) and ev.get("story_id"):
+                    turn = 0
+                    if isinstance(chara, dict):
+                        turn = chara.get("turn", 0)
+                    summary["events_seen"].append(
+                        {
+                            "story_id": ev["story_id"],
+                            "turn": turn,
+                            "event_id": ev.get("event_id"),
+                        }
+                    )
+
+        # ── Event choice tracking ──────────────────────────────
+        # When the player picks a choice, the game sends a
+        # *GetChoiceReward or *ChoiceReward API.  The request
+        # payload contains choice_number (1-based).  The RESPONSE
+        # comes back with updated chara_info — we compute stat
+        # deltas by comparing with the previous snapshot.
+        is_choice_api = any(
+            p in api for p in ("ChoiceReward", "GetChoiceReward", "FreeChoiceReward")
+        )
+        if is_choice_api:
+            event_type = rec.get("event", "")
+
+            if event_type == "api_send":
+                # Request side — extract choice_number from decoded MsgPack
+                choice_num = None
+                if isinstance(decoded, dict):
+                    # Sometimes it's at top level, sometimes nested in data
+                    choice_num = decoded.get("choice_number") or (
+                        data.get("choice_number") if isinstance(data, dict) else None
+                    )
+                    # Also check responseFields / flat int fields
+                    if choice_num is None:
+                        resp_fields = rec.get("responseFields", {})
+                        if isinstance(resp_fields, dict):
+                            choice_num = resp_fields.get("choice_number")
+
+                if choice_num is not None:
+                    # Find the most recent story_id from events_seen
+                    recent_story_id = None
+                    if summary["events_seen"]:
+                        recent_story_id = summary["events_seen"][-1].get("story_id")
+
+                    _pending_choice = {
+                        "story_id": recent_story_id,
+                        "choice_number": int(choice_num),
+                        "api": api,
+                        "_ts": ts,
+                        "turn": 0,
+                        "stat_deltas": {},
+                    }
+
+            elif event_type == "api_response" and _pending_choice is not None:
+                # Response side — if we have chara_info, deltas will be
+                # computed in the chara_info block above on the next
+                # iteration.  But if decoded has choice_number we missed
+                # from the send, grab it now.
+                if _pending_choice.get("choice_number") is None:
+                    choice_num = None
+                    if isinstance(decoded, dict):
+                        choice_num = decoded.get("choice_number") or (
+                            data.get("choice_number") if isinstance(data, dict) else None
+                        )
+                    if choice_num is not None:
+                        _pending_choice["choice_number"] = int(choice_num)
+
+    # Flush any pending choice that never got a stat delta (end of session)
+    if _pending_choice is not None:
+        summary["event_choices"].append(_pending_choice)
+
+    return summary

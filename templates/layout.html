@@ -206,10 +206,10 @@
           startBtn.disabled = false;
           stopBtn.disabled = true;
           toggleBtn.classList.remove('recording');
-          // Recording just stopped — reload so the new session appears
+          // Recording just stopped — go to sessions page so the new session appears
           if (wasRecording) {
             wasRecording = false;
-            window.location.reload();
+            window.location.href = '/';
           }
         }
       } catch (e) {

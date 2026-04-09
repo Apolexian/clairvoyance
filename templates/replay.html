@@ -198,11 +198,42 @@ window.addEventListener('resize', resize);
 // ── Track geometry ────────────────────────────────────────────────────
 const MARGIN_L = 90;    // left gutter (for name labels)
 const MARGIN_R = 40;
-const LANE_H   = 28;    // px per horse lane
 const HORSE_R  = 10;    // horse dot radius
 
 function trackWidth()  { return wrap.clientWidth - MARGIN_L - MARGIN_R; }
 function trackTop()    { return 50; }  // top padding for phase labels
+function trackBottom() { return wrap.clientHeight - 30; }
+function trackHeight() { return trackBottom() - trackTop(); }
+
+// ── Lane position bounds (precomputed from all frames) ────────────────
+// lane is normalized 0–1 (raw u16 / 10000). Higher = further from inside rail.
+let _laneMin = Infinity, _laneMax = -Infinity;
+for (const f of FRAMES) {
+  for (let hi = 0; hi < NUM_H; hi++) {
+    const hd = f[hi];
+    if (hd && hd.lane !== undefined) {
+      if (hd.lane < _laneMin) _laneMin = hd.lane;
+      if (hd.lane > _laneMax) _laneMax = hd.lane;
+    }
+  }
+}
+const HAS_LANE_DATA = isFinite(_laneMin) && (_laneMax - _laneMin) > 0.005;
+if (!HAS_LANE_DATA) { _laneMin = 0; _laneMax = 1; }
+const LANE_PAD = Math.max(0.03, (_laneMax - _laneMin) * 0.15);
+const LANE_VIEW_MIN = _laneMin - LANE_PAD;
+const LANE_VIEW_MAX = _laneMax + LANE_PAD;
+
+function horseY(hd, hi) {
+  // Map lane position to Y: higher lane → top (outside rail), lower → bottom (inside)
+  const pad = HORSE_R + 6;
+  if (HAS_LANE_DATA && hd && hd.lane !== undefined) {
+    const ratio = (hd.lane - LANE_VIEW_MIN) / (LANE_VIEW_MAX - LANE_VIEW_MIN);
+    return trackBottom() - pad - ratio * (trackHeight() - pad * 2);
+  }
+  // Fallback: spread horses evenly (dump races with no lane data)
+  const step = NUM_H > 1 ? (trackHeight() - pad * 2) / (NUM_H - 1) : 0;
+  return trackTop() + pad + hi * step;
+}
 
 function distToX(d) {
   // Camera follows the pack: show a window of track around the pack center
@@ -227,9 +258,6 @@ function distToX(d) {
   return MARGIN_L + ((d - viewStart) / windowSize) * tw;
 }
 
-function horseLaneY(hi) {
-  return trackTop() + 30 + hi * LANE_H;
-}
 
 // ── Skill popup tracking ──────────────────────────────────────────────
 // Map: horse_index → [{skillId, startFrame, endFrame}]
@@ -296,7 +324,7 @@ function draw() {
         const rx = Math.max(x1, MARGIN_L);
         const rw = Math.min(x2, W - MARGIN_R) - rx;
         ctx.fillStyle = p.color;
-        ctx.fillRect(rx, trackTop(), rw, NUM_H * LANE_H + 50);
+        ctx.fillRect(rx, trackTop(), rw, trackHeight());
         // Phase label
         const mid = (rx + rx + rw) / 2;
         if (mid > MARGIN_L + 20 && mid < W - MARGIN_R - 20) {
@@ -312,7 +340,7 @@ function draw() {
 
   // ── Course profile overlays (slopes & corners) ─────────
   if (COURSE) {
-    const trackH = NUM_H * LANE_H + 50;
+    const trackH = trackHeight();
     const tTop = trackTop();
     // Slope bands (top strip)
     if (COURSE.slopes) {
@@ -363,9 +391,9 @@ function draw() {
     if (x > MARGIN_L && x < W - MARGIN_R) {
       ctx.beginPath();
       ctx.moveTo(x, trackTop() + 20);
-      ctx.lineTo(x, trackTop() + NUM_H * LANE_H + 40);
+      ctx.lineTo(x, trackBottom() - 10);
       ctx.stroke();
-      ctx.fillText(dm + 'm', x, trackTop() + NUM_H * LANE_H + 52);
+      ctx.fillText(dm + 'm', x, trackBottom() + 2);
     }
   }
 
@@ -377,7 +405,7 @@ function draw() {
     ctx.setLineDash([6, 4]);
     ctx.beginPath();
     ctx.moveTo(finishX, trackTop() + 20);
-    ctx.lineTo(finishX, trackTop() + NUM_H * LANE_H + 40);
+    ctx.lineTo(finishX, trackBottom() - 10);
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = '#fff';
@@ -386,15 +414,37 @@ function draw() {
     ctx.fillText('FINISH', finishX, trackTop() + 14);
   }
 
-  // ── Lane lines ────────────────────────────────────────
-  ctx.strokeStyle = '#ffffff08';
-  ctx.lineWidth = 1;
-  for (let hi = 0; hi <= NUM_H; hi++) {
-    const y = horseLaneY(hi) - LANE_H / 2 + HORSE_R;
-    ctx.beginPath();
-    ctx.moveTo(MARGIN_L, y);
-    ctx.lineTo(W - MARGIN_R, y);
-    ctx.stroke();
+  // ── Track rails & lane guides ───────────────────────────────────
+  if (HAS_LANE_DATA) {
+    // Subtle horizontal guide lines (quartiles of lane range)
+    ctx.strokeStyle = '#ffffff08';
+    ctx.lineWidth = 1;
+    for (let q = 0; q <= 4; q++) {
+      const ratio = q / 4;
+      const gy = trackBottom() - (HORSE_R + 6) - ratio * (trackHeight() - (HORSE_R + 6) * 2);
+      ctx.beginPath();
+      ctx.moveTo(MARGIN_L, gy);
+      ctx.lineTo(W - MARGIN_R, gy);
+      ctx.stroke();
+    }
+    // Inside rail label (bottom) and outside rail label (top)
+    ctx.fillStyle = '#ffffff25';
+    ctx.font = '8px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('INNER', MARGIN_L + 4, trackBottom() - 4);
+    ctx.fillText('OUTER', MARGIN_L + 4, trackTop() + 22);
+  } else {
+    // Fallback: simple guide lines when no lane data
+    ctx.strokeStyle = '#ffffff08';
+    ctx.lineWidth = 1;
+    for (let hi = 0; hi <= NUM_H; hi++) {
+      const step = NUM_H > 1 ? (trackHeight() - (HORSE_R + 6) * 2) / (NUM_H - 1) : 0;
+      const gy = trackTop() + (HORSE_R + 6) + hi * step - 4;
+      ctx.beginPath();
+      ctx.moveTo(MARGIN_L, gy);
+      ctx.lineTo(W - MARGIN_R, gy);
+      ctx.stroke();
+    }
   }
 
   // ── Horses ────────────────────────────────────────────
@@ -405,7 +455,7 @@ function draw() {
     const hd = f[hi];
     if (!hd) continue;
     const x = distToX(hd.d);
-    const y = horseLaneY(hi) + HORSE_R;
+    const y = horseY(hd, hi);
     const color = COLORS[hi % COLORS.length];
 
     // Is this horse activating a skill right now?
@@ -654,6 +704,7 @@ function updateInfoPanel() {
       <b>${label}</b>
       ${styleTag ? `<span style="color:var(--text-muted)">${styleTag}</span>` : ''}
       <span class="val">${Math.round(hd.d)}m</span>
+      ${HAS_LANE_DATA ? `<span class="val" style="color:var(--text-muted)">L ${(hd.lane * 100).toFixed(0)}</span>` : ''}
       <span class="val" style="color:${hpPct > 50 ? 'var(--green)' : hpPct > 20 ? 'var(--orange)' : 'var(--red)'}">HP ${hpPct}%</span>
       <span class="val" style="color:var(--text-muted)">SPD ${hd.s}</span>
       ${accelStr}

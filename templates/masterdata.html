@@ -12,7 +12,7 @@
 
   /* ── Sidebar ── */
   .mdb-sidebar {
-    width: 240px;
+    width: 260px;
     min-width: 180px;
     flex-shrink: 0;
     display: flex;
@@ -35,6 +35,25 @@
     flex: 1;
     font-size: 0.78rem;
   }
+  .mdb-sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+  .mdb-sidebar-tab {
+    flex: 1;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .mdb-sidebar-tab:hover { color: var(--text); }
+  .mdb-sidebar-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
   .mdb-table-list {
     flex: 1;
     overflow-y: auto;
@@ -42,7 +61,7 @@
   }
   .mdb-table-item {
     padding: 0.3rem 0.75rem;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-family: monospace;
     cursor: pointer;
     color: var(--text);
@@ -50,18 +69,61 @@
     justify-content: space-between;
     align-items: center;
     transition: background 0.1s;
+    gap: 0.5rem;
   }
   .mdb-table-item:hover {
     background: var(--bg-hover);
     color: var(--accent);
   }
+  .mdb-table-item .tbl-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
   .mdb-table-item .col-count {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .mdb-table-item .row-count {
+    font-size: 0.68rem;
+    color: var(--orange);
+    white-space: nowrap;
+    min-width: 40px;
+    text-align: right;
   }
   .mdb-table-item.active {
     background: var(--accent-dim);
     color: var(--accent);
+  }
+
+  /* ── Text category items ── */
+  .mdb-cat-item {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .mdb-cat-item:hover {
+    background: var(--bg-hover);
+  }
+  .mdb-cat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+  }
+  .mdb-cat-header .cat-id { color: var(--accent); }
+  .mdb-cat-header .cat-count { font-size: 0.68rem; color: var(--orange); }
+  .mdb-cat-samples {
+    margin-top: 0.2rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .mdb-cat-samples .cat-sample {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* ── Main area ── */
@@ -79,6 +141,30 @@
     gap: 0.4rem;
     margin-bottom: 0.5rem;
   }
+
+  /* Quick queries bar */
+  .mdb-quick-queries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.4rem;
+  }
+  .mdb-quick-btn {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .mdb-quick-btn:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
   .mdb-editor {
     width: 100%;
     min-height: 80px;
@@ -173,6 +259,38 @@
     white-space: pre-wrap;
   }
 
+  /* ── Schema panel ── */
+  .mdb-schema {
+    font-size: 0.78rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+    display: none;
+  }
+  .mdb-schema.visible { display: block; }
+  .mdb-schema-title {
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+  .mdb-schema-cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .mdb-schema-col {
+    font-family: monospace;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.4rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+  }
+  .mdb-schema-col.pk { color: var(--gold); border-color: var(--gold); }
+
   @media (max-width: 768px) {
     .mdb-wrap { flex-direction: column; height: auto; }
     .mdb-sidebar { width: 100%; max-height: 200px; }
@@ -192,12 +310,19 @@
 </div>
 {% else %}
 <div class="mdb-wrap">
-  <!-- Sidebar: table list -->
+  <!-- Sidebar: table list + text categories -->
   <div class="mdb-sidebar">
     <div class="mdb-sidebar-header">
-      <input type="text" id="table-filter" class="input-sm" placeholder="Filter tables…" oninput="filterTables()">
+      <input type="text" id="sidebar-filter" class="input-sm" placeholder="Filter…" oninput="filterSidebar()">
+    </div>
+    <div class="mdb-sidebar-tabs">
+      <button class="mdb-sidebar-tab active" onclick="switchSidebarTab('tables', this)">Tables</button>
+      <button class="mdb-sidebar-tab" onclick="switchSidebarTab('textdata', this)">text_data</button>
     </div>
     <div class="mdb-table-list" id="table-list">
+      <div class="mdb-empty" style="padding:1rem; font-size:0.8rem;">Loading…</div>
+    </div>
+    <div class="mdb-table-list" id="textdata-list" style="display:none">
       <div class="mdb-empty" style="padding:1rem; font-size:0.8rem;">Loading…</div>
     </div>
   </div>
@@ -205,6 +330,24 @@
   <!-- Main: editor + results -->
   <div class="mdb-main">
     <div class="mdb-editor-wrap">
+      <!-- Quick Queries -->
+      <div class="mdb-quick-queries" id="quick-queries">
+        <button class="mdb-quick-btn" onclick="quickQuery('characters')">Characters</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('cards')">Cards</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('skills')">Skills</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('races')">Races</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('support')">Support Cards</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('items')">Items</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('stories')">Stories</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('gacha')">Gacha</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('race_course')">Race Courses</button>
+        <button class="mdb-quick-btn" onclick="quickQuery('single_mode')">Single Mode</button>
+      </div>
+      <!-- Schema display -->
+      <div class="mdb-schema" id="schema-panel">
+        <div class="mdb-schema-title" id="schema-title"></div>
+        <div class="mdb-schema-cols" id="schema-cols"></div>
+      </div>
       <textarea class="mdb-editor" id="sql-editor" placeholder="SELECT * FROM skill_data LIMIT 100"
                 spellcheck="false"></textarea>
       <div class="mdb-toolbar">
@@ -226,13 +369,103 @@
 <script>
 // ── State ──────────────────────────────────────────────────────
 let tables = [];
+let tableCounts = {};
+let textCategories = [];
 let lastResult = null;
+let currentSidebarTab = 'tables';
+
+// ── Quick Queries ──────────────────────────────────────────────
+const QUICK_QUERIES = {
+  characters: `SELECT cd.id, t.text as name, cv.text as cv,
+  cd.birth_month, cd.birth_day, cd.height
+FROM chara_data cd
+JOIN text_data t ON t.category = 6 AND t."index" = cd.id
+LEFT JOIN text_data cv ON cv.category = 7 AND cv."index" = cd.id
+ORDER BY cd.id
+LIMIT 200`,
+  cards: `SELECT cd.id, t.text as name, tt.text as title,
+  cd.chara_id, cd.default_rarity, cd.running_style
+FROM card_data cd
+JOIN text_data t ON t.category = 4 AND t."index" = cd.id
+LEFT JOIN text_data tt ON tt.category = 5 AND tt."index" = cd.id
+ORDER BY cd.id
+LIMIT 200`,
+  skills: `SELECT sd.id, t.text as name, td.text as description,
+  sd.rarity, sd.group_id, sd.skill_category, sd.grade_value
+FROM skill_data sd
+JOIN text_data t ON t.category = 47 AND t."index" = sd.id
+LEFT JOIN text_data td ON td.category = 48 AND td."index" = sd.id
+ORDER BY sd.rarity DESC, sd.id
+LIMIT 200`,
+  races: `SELECT ri.id, t.text as name, r.grade,
+  rcs.distance, rcs.ground, rcs.inout, rcs.turn,
+  rt.text as track_name
+FROM race_instance ri
+JOIN race r ON r.id = ri.race_id
+JOIN race_course_set rcs ON rcs.id = r.course_set
+JOIN text_data t ON t.category = 28 AND t."index" = ri.id
+LEFT JOIN text_data rt ON rt.category = 34 AND rt."index" = rcs.race_track_id
+ORDER BY ri.id
+LIMIT 200`,
+  support: `SELECT sc.id, t.text as title, sc.chara_id,
+  cn.text as chara_name, sc.rarity, sc.command_type
+FROM support_card_data sc
+JOIN text_data t ON t.category = 76 AND t."index" = sc.id
+LEFT JOIN text_data cn ON cn.category = 6 AND cn."index" = sc.chara_id
+ORDER BY sc.rarity DESC, sc.id
+LIMIT 200`,
+  items: `SELECT id.id, t.text as name, td.text as description,
+  id.item_category, id.rare, id.limit_num
+FROM item_data id
+JOIN text_data t ON t.category = 23 AND t."index" = id.id
+LEFT JOIN text_data td ON td.category = 24 AND td."index" = id.id
+ORDER BY id.id
+LIMIT 200`,
+  stories: `SELECT DISTINCT td.category, td."index", td.text
+FROM text_data td
+WHERE td.category IN (181, 189, 191, 94)
+ORDER BY td.category, td."index"
+LIMIT 300`,
+  gacha: `SELECT gd.id, t.text as name, gd.type, gd.card_type,
+  gd.start_date, gd.end_date
+FROM gacha_data gd
+LEFT JOIN text_data t ON t.category = 13 AND t."index" = gd.id
+ORDER BY gd.start_date DESC
+LIMIT 200`,
+  race_course: `SELECT rcs.id, rcs.race_track_id,
+  rt.text as track_name,
+  rcs.distance, rcs.ground, rcs.inout, rcs.turn,
+  rcs.finish_time_min, rcs.finish_time_max
+FROM race_course_set rcs
+LEFT JOIN text_data rt ON rt.category = 34 AND rt."index" = rcs.race_track_id
+ORDER BY rcs.race_track_id, rcs.distance
+LIMIT 200`,
+  single_mode: `SELECT smp.id, ri_t.text as race_name,
+  smp.month, smp.half, smp.grade_rate_id,
+  smp.need_fan_count
+FROM single_mode_program smp
+LEFT JOIN text_data ri_t ON ri_t.category = 28 AND ri_t."index" = smp.race_instance_id
+WHERE smp.race_instance_id > 0
+ORDER BY smp.month, smp.half
+LIMIT 200`,
+};
+
+function quickQuery(key) {
+  const sql = QUICK_QUERIES[key];
+  if (!sql) return;
+  document.getElementById('sql-editor').value = sql;
+  runQuery();
+}
 
 // ── Load tables ────────────────────────────────────────────────
 async function loadTables() {
   try {
-    const res = await fetch('/api/masterdata/tables');
-    tables = await res.json();
+    const [tablesRes, countsRes] = await Promise.all([
+      fetch('/api/masterdata/tables'),
+      fetch('/api/masterdata/table_counts'),
+    ]);
+    tables = await tablesRes.json();
+    tableCounts = await countsRes.json();
     renderTableList();
   } catch (e) {
     document.getElementById('table-list').innerHTML =
@@ -240,8 +473,19 @@ async function loadTables() {
   }
 }
 
+async function loadTextCategories() {
+  try {
+    const res = await fetch('/api/masterdata/text_categories');
+    textCategories = await res.json();
+    renderTextCategories();
+  } catch (e) {
+    document.getElementById('textdata-list').innerHTML =
+      '<div class="mdb-error">Failed to load categories</div>';
+  }
+}
+
 function renderTableList() {
-  const q = (document.getElementById('table-filter').value || '').toLowerCase();
+  const q = (document.getElementById('sidebar-filter').value || '').toLowerCase();
   const list = document.getElementById('table-list');
   const filtered = q ? tables.filter(t => t.name.toLowerCase().includes(q)) : tables;
 
@@ -250,24 +494,87 @@ function renderTableList() {
     return;
   }
 
-  list.innerHTML = filtered.map(t =>
-    `<div class="mdb-table-item" onclick="selectTable('${t.name}')" title="${t.columns.map(c => c.name + ' (' + c.type + ')').join(', ')}">
-      <span>${t.name}</span>
-      <span class="col-count">${t.columns.length} cols</span>
-    </div>`
-  ).join('');
+  list.innerHTML = filtered.map(t => {
+    const rc = tableCounts[t.name];
+    const rcStr = rc !== undefined ? rc.toLocaleString() : '';
+    return `<div class="mdb-table-item" onclick="selectTable('${t.name}')" title="${t.columns.map(c => c.name + ' (' + c.type + ')').join(', ')}">
+      <span class="tbl-name">${t.name}</span>
+      <span class="row-count">${rcStr}</span>
+      <span class="col-count">${t.columns.length}c</span>
+    </div>`;
+  }).join('');
 }
 
-function filterTables() { renderTableList(); }
+function renderTextCategories() {
+  const q = (document.getElementById('sidebar-filter').value || '').toLowerCase();
+  const list = document.getElementById('textdata-list');
+  const filtered = q
+    ? textCategories.filter(c => {
+        const idMatch = String(c.id).includes(q);
+        const textMatch = c.samples.some(s => s.text.toLowerCase().includes(q));
+        return idMatch || textMatch;
+      })
+    : textCategories;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="mdb-empty" style="padding:1rem; font-size:0.8rem;">No categories found</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(c => {
+    const samplesHtml = c.samples.map(s =>
+      `<span class="cat-sample">${s.index}: ${escHtml(s.text)}</span>`
+    ).join('');
+    return `<div class="mdb-cat-item" onclick="selectCategory(${c.id})">
+      <div class="mdb-cat-header">
+        <span class="cat-id">cat ${c.id}</span>
+        <span class="cat-count">${c.count.toLocaleString()} rows</span>
+      </div>
+      <div class="mdb-cat-samples">${samplesHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function switchSidebarTab(tab, btn) {
+  currentSidebarTab = tab;
+  document.querySelectorAll('.mdb-sidebar-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('table-list').style.display = tab === 'tables' ? '' : 'none';
+  document.getElementById('textdata-list').style.display = tab === 'textdata' ? '' : 'none';
+  filterSidebar();
+}
+
+function filterSidebar() {
+  if (currentSidebarTab === 'tables') renderTableList();
+  else renderTextCategories();
+}
 
 function selectTable(name) {
   // Highlight
   document.querySelectorAll('.mdb-table-item').forEach(el =>
-    el.classList.toggle('active', el.textContent.trim().startsWith(name))
+    el.classList.toggle('active', el.querySelector('.tbl-name').textContent === name)
   );
+  // Show schema
+  const tbl = tables.find(t => t.name === name);
+  if (tbl) {
+    const panel = document.getElementById('schema-panel');
+    document.getElementById('schema-title').textContent = name + ' — ' + (tableCounts[name] || 0).toLocaleString() + ' rows';
+    document.getElementById('schema-cols').innerHTML = tbl.columns.map(c =>
+      `<span class="mdb-schema-col ${c.pk ? 'pk' : ''}" title="${c.type}${c.pk ? ' (PK)' : ''}">${c.name}</span>`
+    ).join('');
+    panel.classList.add('visible');
+  }
   // Set query and run
   const editor = document.getElementById('sql-editor');
   editor.value = `SELECT * FROM "${name}" LIMIT 200`;
+  runQuery();
+}
+
+function selectCategory(catId) {
+  const editor = document.getElementById('sql-editor');
+  editor.value = `SELECT "index", text FROM text_data\nWHERE category = ${catId}\nORDER BY "index"\nLIMIT 500`;
+  // Hide schema panel for text queries
+  document.getElementById('schema-panel').classList.remove('visible');
   runQuery();
 }
 
@@ -368,12 +675,10 @@ function escHtml(s) {
 
 // ── Keyboard shortcuts ─────────────────────────────────────────
 document.getElementById('sql-editor').addEventListener('keydown', e => {
-  // Ctrl+Enter / Cmd+Enter → run query
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     e.preventDefault();
     runQuery();
   }
-  // Tab → insert 2 spaces
   if (e.key === 'Tab') {
     e.preventDefault();
     const ta = e.target;
@@ -385,6 +690,7 @@ document.getElementById('sql-editor').addEventListener('keydown', e => {
 
 // ── Init ───────────────────────────────────────────────────────
 loadTables();
+loadTextCategories();
 </script>
 {% endif %}
 {% endblock %}

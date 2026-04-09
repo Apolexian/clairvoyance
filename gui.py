@@ -31,15 +31,20 @@ from flask import Flask, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
 
 from lib.master_db import (
+    card_name,
     chara_name,
+    event_info,
     execute_query,
     get_db_path,
     get_table_schema,
     item_name,
     race_instance_name,
+    race_name,
+    race_track_name,
     set_db_path,
     skill_name,
     story_name,
+    support_card_name,
 )
 from lib.master_db import (
     is_available as master_db_available,
@@ -48,6 +53,7 @@ from lib.master_db import (
     list_tables as master_list_tables,
 )
 from lib.session_reader import (
+    build_session_summary,
     get_network_event_detail,
     get_network_events,
     get_race_replay_data,
@@ -107,8 +113,12 @@ app.config["JSON_SORT_KEYS"] = False
 app.jinja_env.filters["skill_name"] = skill_name
 app.jinja_env.filters["chara_name"] = chara_name
 app.jinja_env.filters["race_name"] = race_instance_name
+app.jinja_env.filters["race_base_name"] = race_name
 app.jinja_env.filters["story_name"] = story_name
 app.jinja_env.filters["item_name"] = item_name
+app.jinja_env.filters["card_name"] = card_name
+app.jinja_env.filters["support_card_name"] = support_card_name
+app.jinja_env.filters["race_track_name"] = race_track_name
 
 # ── Uma portrait lookup ────────────────────────────────────────────────
 # Scan static/uma/ once and build a {charaId: {cardId: filename}} map
@@ -242,11 +252,64 @@ def session_detail(name: str):
     session = get_session(name)
     if not session:
         return "Session not found", 404
+
+    summary = build_session_summary(name)
+
+    # Resolve IDs to human-readable names via master DB
+    if summary.get("chara_id"):
+        summary["chara_name"] = chara_name(summary["chara_id"])
+        summary["chara_image"] = uma_image_url(summary["chara_id"], summary.get("card_id"))
+    if summary.get("card_id"):
+        summary["card_name"] = card_name(summary["card_id"])
+    for sc_id in summary.get("support_card_ids", []):
+        summary.setdefault("support_card_names", []).append(
+            {
+                "id": sc_id,
+                "name": support_card_name(sc_id),
+            }
+        )
+    for sk in summary.get("skills_acquired", []):
+        sk["name"] = skill_name(sk["skill_id"])
+    for sk in summary.get("skill_tips", []):
+        sk["name"] = skill_name(sk["skill_id"])
+    for rr in summary.get("race_results", []):
+        if rr.get("race_instance_id"):
+            rr["race_name"] = race_instance_name(rr["race_instance_id"])
+
+    # Enrich events with master DB lookups
+    for ev in summary.get("events_seen", []):
+        sid = ev.get("story_id")
+        if sid:
+            ei = event_info(sid)
+            if ei:
+                ev["name"] = ei["name"]
+                ev["source_type"] = ei["source_type"]
+                ev["source_name"] = ei["source_name"]
+                ev["source_chara"] = ei["source_chara"]
+                ev["has_choice"] = ei["has_choice"]
+                ev["num_branches"] = ei["num_branches"]
+            else:
+                ev["name"] = story_name(sid)
+
+    for ec in summary.get("event_choices", []):
+        sid = ec.get("story_id")
+        if sid:
+            ei = event_info(sid)
+            if ei:
+                ec["name"] = ei["name"]
+                ec["source_type"] = ei["source_type"]
+                ec["source_name"] = ei["source_name"]
+                ec["source_chara"] = ei["source_chara"]
+                ec["num_branches"] = ei["num_branches"]
+            else:
+                ec["name"] = story_name(sid)
+
     return render_template(
         "session.html",
         session=session,
         races=get_races(name),
         network=get_network_events(name),
+        summary=summary,
     )
 
 
@@ -412,6 +475,55 @@ def api_masterdata_tables():
         schema = get_table_schema(t)
         result.append({"name": t, "columns": schema})
     return jsonify(result)
+
+
+@app.route("/api/masterdata/table_counts")
+def api_masterdata_table_counts():
+    """Return row count for each table."""
+    from lib.master_db import execute_query as _eq
+
+    tables = master_list_tables()
+    counts = {}
+    for t in tables:
+        res = _eq(f'SELECT COUNT(*) as n FROM "{t}"', limit=1)
+        if res.get("rows"):
+            counts[t] = res["rows"][0][0]
+        else:
+            counts[t] = 0
+    return jsonify(counts)
+
+
+@app.route("/api/masterdata/text_categories")
+def api_masterdata_text_categories():
+    """Return all text_data categories with sample entries."""
+    from lib.master_db import execute_query as _eq
+
+    # Get all categories and their counts
+    res = _eq(
+        "SELECT category, COUNT(*) as cnt FROM text_data GROUP BY category ORDER BY category",
+        limit=5000,
+    )
+    if res.get("error") or not res.get("rows"):
+        return jsonify([])
+
+    categories = []
+    for row in res["rows"]:
+        cat_id = row[0]
+        count = row[1]
+        # Get a few sample entries for this category
+        samples_res = _eq(
+            f'SELECT "index", text FROM text_data WHERE category = {cat_id} ORDER BY "index" LIMIT 3',
+            limit=3,
+        )
+        samples = []
+        if samples_res.get("rows"):
+            for sr in samples_res["rows"]:
+                text = sr[1] or ""
+                if len(text) > 80:
+                    text = text[:80] + "…"
+                samples.append({"index": sr[0], "text": text})
+        categories.append({"id": cat_id, "count": count, "samples": samples})
+    return jsonify(categories)
 
 
 @app.route("/api/masterdata/query", methods=["POST"])
