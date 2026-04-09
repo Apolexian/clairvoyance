@@ -1,0 +1,52 @@
+[project]
+name = "clairvoyance"
+version = "0.1.0"
+description = "Passive background data collector for Uma Musume — captures skill activations, events, race data, and more for guide writers."
+requires-python = ">=3.10"
+dependencies = [
+    "frida",
+    "frida-tools",
+]
+
+[project.scripts]
+discover = "clairvoyance.discover:main"
+collect = "clairvoyance.collect:main"
+
+# ── Dev dependencies (formatting / linting) ────────────────────────────
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pre-commit",
+]
+
+# ── Ruff ───────────────────────────────────────────────────────────────
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific
+]
+ignore = [
+    "E501",   # line too long — formatter handles what it can
+    "SIM108", # ternary — readability preference
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["lib"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+

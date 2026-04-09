@@ -1,0 +1,254 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "frida",
+# ]
+# ///
+
+"""
+Clairvoyance — Phase 2: Background Collector
+─────────────────────────────────────────────
+Attaches to Uma Musume and silently collects skill activations, event text,
+race results, and other game data while you play.
+
+All data is written to per-session JSONL files under sessions/.
+
+Usage:
+  uv run collect.py                # start collecting
+  uv run collect.py --label test1  # custom session label
+  uv run collect.py --modules skills events races  # choose what to hook
+"""
+
+from __future__ import annotations
+
+import argparse
+import logging
+import os
+import sys
+import time
+import traceback
+
+from lib.attach import attach
+from lib.session import Session
+
+# ── Paths ──────────────────────────────────────────────────────────────────
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+JS_DIR = os.path.join(SCRIPT_DIR, "js")
+
+
+# ── Logging ────────────────────────────────────────────────────────────────
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+log = logging.getLogger("clairvoyance")
+
+# ── CLI ────────────────────────────────────────────────────────────────────
+
+parser = argparse.ArgumentParser(description="Clairvoyance Collector")
+parser.add_argument("--label", default="", help="Optional label for the session directory")
+parser.add_argument(
+    "--modules",
+    nargs="*",
+    default=["skills", "events", "races", "network"],
+    help="Which hook modules to load (default: all)",
+)
+parser.add_argument(
+    "--timeout", type=int, default=0, help="Auto-stop after N seconds (0 = run until Ctrl+C)"
+)
+args = parser.parse_args()
+
+# ── Available hook modules ─────────────────────────────────────────────────
+
+HOOK_MODULES = {
+    "skills": "hook_skills.js",
+    "events": "hook_events.js",
+    "races": "hook_races.js",
+    "network": "hook_network.js",
+}
+
+
+def load_js(filename: str) -> str:
+    path = os.path.join(JS_DIR, filename)
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+
+def build_collector_script(modules: list[str]) -> str:
+    """Build the combined collector script from helpers + selected hook modules."""
+    helpers = load_js("il2cpp_helpers.js")
+
+    hook_code = []
+    for mod in modules:
+        if mod not in HOOK_MODULES:
+            log.warning("Unknown module '%s', skipping.", mod)
+            continue
+        hook_code.append(f"// ── Module: {mod} ──")
+        hook_code.append(load_js(HOOK_MODULES[mod]))
+
+    combined = "\n\n".join(hook_code)
+    return f"(function(){{\n{helpers}\n\n{combined}\n}})();"
+
+
+# ── Session + message handling ─────────────────────────────────────────────
+
+session_data: Session | None = None
+hook_statuses: dict[str, int] = {}
+is_ready = False
+has_error = False
+
+
+def on_message(message, data):
+    global is_ready, has_error
+
+    msg_type = message.get("type")
+
+    if msg_type == "send":
+        payload = message.get("payload")
+        if not isinstance(payload, dict):
+            return
+
+        ptype = payload.get("type")
+
+        if ptype == "error":
+            has_error = True
+            log.error("  [X] %s", payload.get("message", ""))
+
+        elif ptype == "hook_status":
+            mod = payload.get("module", "?")
+            count = payload.get("hookCount", 0)
+            hook_statuses[mod] = count
+            log.info("  [%s] %d hooks installed", mod, count)
+
+            # Consider ready when we've heard from all modules
+            if len(hook_statuses) >= len(args.modules):
+                is_ready = True
+
+        elif ptype == "collect":
+            # This is the main data pathway
+            domain = payload.get("domain", "raw")
+            record = payload.get("data", {})
+
+            # If the JS side sent binary data (e.g. SSL_read/write buffers),
+            # attach it to the record as a hex + utf8-attempt representation.
+            if data is not None and len(data) > 0:
+                # Try to decode as UTF-8 text (HTTP headers are ASCII)
+                try:
+                    text = bytes(data).decode("utf-8", errors="replace")
+                    record["raw_text"] = text[:4096]  # cap for sanity
+                except Exception:
+                    pass
+                # Always include hex prefix for binary inspection
+                record["raw_hex_preview"] = bytes(data)[:256].hex()
+                record["raw_bytes_len"] = len(data)
+
+            if session_data:
+                session_data.write(domain, record)
+
+    elif msg_type == "error":
+        has_error = True
+        log.error("  [X] JS Error: %s", message.get("description", ""))
+        stack = message.get("stack")
+        if stack:
+            for line in str(stack).splitlines()[:5]:
+                log.error("      %s", line)
+
+    elif msg_type == "log":
+        log.info("  [JS] %s", message.get("payload", ""))
+
+
+# ── Main ───────────────────────────────────────────────────────────────────
+
+
+def main():
+    global session_data
+
+    log.info("=" * 60)
+    log.info("  Clairvoyance — Collector")
+    log.info("=" * 60)
+    log.info("")
+    log.info("  Modules: %s", ", ".join(args.modules))
+    if args.label:
+        log.info("  Label: %s", args.label)
+    log.info("")
+
+    # Create session
+    session_data = Session(label=args.label)
+
+    # Attach to game
+    frida_session = attach()
+    if frida_session is None:
+        sys.exit(1)
+
+    try:
+        src = build_collector_script(args.modules)
+        script = frida_session.create_script(src, runtime="v8")
+        script.on("message", on_message)
+        log.info("[*] Loading hooks...")
+        script.load()
+    except Exception as e:
+        log.error("[X] Failed to load script: %s: %s", type(e).__name__, e)
+        traceback.print_exc()
+        sys.exit(1)
+
+    # Wait for hooks to be ready
+    for _ in range(60):
+        time.sleep(0.5)
+        if is_ready or has_error:
+            break
+
+    if has_error:
+        log.error("\n[X] Script failed.")
+        sys.exit(1)
+
+    total_hooks = sum(hook_statuses.values())
+    log.info("")
+    log.info("  ✓ %d total hooks active across %d modules.", total_hooks, len(hook_statuses))
+    log.info("  Session: %s", session_data.dir)
+    log.info("")
+    log.info("  Collecting data — play the game!")
+    log.info("  Ctrl+C to stop.")
+    log.info("")
+
+    # Status ticker
+    try:
+        tick = 0
+        duration = args.timeout if args.timeout > 0 else 999999
+        while tick < duration:
+            time.sleep(10)
+            tick += 10
+            if has_error:
+                break
+            counts = session_data.counts
+            if counts:
+                parts = [f"{k}: {v}" for k, v in sorted(counts.items())]
+                log.info("  [%ds] Collected — %s", tick, " | ".join(parts))
+            else:
+                log.info("  [%ds] Waiting for game events...", tick)
+    except KeyboardInterrupt:
+        log.info("\n[*] Stopped by user.")
+
+    # Save manifest and close
+    session_data.write_manifest(
+        modules=args.modules,
+        hookStatuses=hook_statuses,
+    )
+    session_data.close()
+
+    log.info("")
+    log.info("  Session saved: %s", session_data.dir)
+    counts = session_data.counts
+    if counts:
+        for k, v in sorted(counts.items()):
+            log.info("    %s: %d records", k, v)
+    log.info("")
+    log.info("=" * 60)
+    log.info("  Done.")
+    log.info("=" * 60)
+
+
+if __name__ == "__main__":
+    main()
