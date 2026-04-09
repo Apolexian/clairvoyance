@@ -1,0 +1,50 @@
+2026-04-09 13:30:05,720 [INFO] ============================================================
+2026-04-09 13:30:05,720 [INFO]   Clairvoyance — Collector
+2026-04-09 13:30:05,720 [INFO] ============================================================
+2026-04-09 13:30:05,721 [INFO] 
+2026-04-09 13:30:05,721 [INFO]   Modules: dump, network
+2026-04-09 13:30:05,721 [INFO]   Label: run
+2026-04-09 13:30:05,721 [INFO] 
+2026-04-09 13:30:05,721 [INFO] Session directory: C:\Users\nikit\Documents\clairvoyance\sessions\2026-04-09T12-30-05_run
+2026-04-09 13:30:05,959 [INFO] Attached to UmamusumePrettyDerby.exe
+2026-04-09 13:30:06,036 [INFO]   [dump] Loaded 100 target classes (score >= 30, max 100) from interesting.json
+2026-04-09 13:30:06,071 [INFO] [*] Loading hooks...
+2026-04-09 13:30:06,256 [INFO]   [dump] 178 hooks installed
+2026-04-09 13:30:06,557 [INFO]   [network] 306 hooks installed
+2026-04-09 13:30:07,058 [INFO] 
+2026-04-09 13:30:07,058 [INFO]   ✓ 484 total hooks active across 2 modules.
+2026-04-09 13:30:07,059 [INFO]   Session: C:\Users\nikit\Documents\clairvoyance\sessions\2026-04-09T12-30-05_run
+2026-04-09 13:30:07,059 [INFO] 
+2026-04-09 13:30:07,059 [INFO]   Collecting data — play the game!
+2026-04-09 13:30:07,059 [INFO]   Ctrl+C to stop.
+2026-04-09 13:30:07,059 [INFO] 
+2026-04-09 13:30:17,060 [INFO]   [10s] Collected — network: 1
+2026-04-09 13:30:27,060 [INFO]   [20s] Collected — network: 3
+2026-04-09 13:30:37,060 [INFO]   [30s] Collected — network: 7
+2026-04-09 13:30:47,061 [INFO]   [40s] Collected — network: 11
+2026-04-09 13:30:57,061 [INFO]   [50s] Collected — network: 16
+2026-04-09 13:31:07,062 [INFO]   [60s] Collected — network: 20
+2026-04-09 13:31:17,062 [INFO]   [70s] Collected — network: 24
+2026-04-09 13:31:27,063 [INFO]   [80s] Collected — network: 30
+2026-04-09 13:31:37,064 [INFO]   [90s] Collected — network: 34
+2026-04-09 13:31:47,064 [INFO]   [100s] Collected — network: 38
+2026-04-09 13:31:57,064 [INFO]   [110s] Collected — network: 42
+2026-04-09 13:32:07,065 [INFO]   [120s] Collected — network: 43 | race: 1170
+2026-04-09 13:32:17,065 [INFO]   [130s] Collected — network: 43 | race: 1170
+2026-04-09 13:32:27,066 [INFO]   [140s] Collected — network: 44 | race: 1170
+2026-04-09 13:32:37,067 [INFO]   [150s] Collected — network: 48 | race: 1170
+2026-04-09 13:32:47,067 [INFO]   [160s] Collected — network: 50 | race: 1170
+2026-04-09 13:32:57,067 [INFO]   [170s] Collected — network: 53 | race: 1170
+2026-04-09 13:32:58,721 [INFO] 
+[*] Stopped by user.
+2026-04-09 13:32:58,722 [INFO] 
+2026-04-09 13:32:58,722 [INFO]   Session saved: C:\Users\nikit\Documents\clairvoyance\sessions\2026-04-09T12-30-05_run
+2026-04-09 13:32:58,722 [INFO]     network: 53 records
+2026-04-09 13:32:58,722 [INFO]     race: 1170 records
+2026-04-09 13:32:58,722 [INFO] 
+2026-04-09 13:32:58,722 [INFO] ============================================================
+2026-04-09 13:32:58,722 [INFO]   Done.
+2026-04-09 13:32:58,722 [INFO]   Log files:
+2026-04-09 13:32:58,722 [INFO]     Main:    C:\Users\nikit\Documents\clairvoyance\collect.log
+2026-04-09 13:32:58,722 [INFO]     JS:      C:\Users\nikit\Documents\clairvoyance\collect_js.log
+2026-04-09 13:32:58,722 [INFO] ============================================================
