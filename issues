@@ -1,0 +1,19 @@
+game runs at 15fps so replay should be at 15fps
+
+characters in replay very squished on top of eachother (unsure if can fix)
+
+the lavels in replay are very small, all the colours clash, the race replay window has a lot of dead space, basically half the replay window is unsused
+
+in race summary the frame by frame charts dont have names just horse 0,1,2,3 etc and also have no filtering
+
+The skill activation timeline should be presented as a timeline not as a list i.e. for each uma show a timeline of the track and their activations and durations, same for spot struggle and dueling, can probbaly combine this into one view. 
+
+Sessions summary cant find support cards, race results or event choices
+
+race summary should also have links to races
+
+character says chara:None
+
+raw data network events dont take up space all the way to bottom of window, they are stuck in container and hence have to scroll moew
+
+api_send and api_response are unclear labels we should say sent to server or got back from server
