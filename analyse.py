@@ -14,10 +14,18 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-DISCOVERY_DIR = Path(__file__).parent / "discovery"
+_FROZEN = getattr(sys, "frozen", False)
+
+if _FROZEN:
+    _APP_DIR = Path(sys.executable).resolve().parent
+else:
+    _APP_DIR = Path(__file__).parent
+
+DISCOVERY_DIR = _APP_DIR / "discovery"
 DUMP_FILE = DISCOVERY_DIR / "class_dump.json"
 OUTPUT_MD = DISCOVERY_DIR / "analysis.md"
 OUTPUT_JSON = DISCOVERY_DIR / "interesting.json"

@@ -35,8 +35,17 @@ from lib.session import save_discovery
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-JS_DIR = os.path.join(SCRIPT_DIR, "js")
+_FROZEN = getattr(sys, "frozen", False)
+
+if _FROZEN:
+    # PyInstaller: data files (js/) live in the temp _MEIPASS bundle,
+    # but working directories (discovery/, logs) live next to the .exe.
+    _BUNDLE_DIR = os.path.dirname(os.path.abspath(__file__))  # _MEIPASS
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    JS_DIR = os.path.join(_BUNDLE_DIR, "js")
+else:
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    JS_DIR = os.path.join(SCRIPT_DIR, "js")
 
 
 # ── Logging ────────────────────────────────────────────────────────────────
