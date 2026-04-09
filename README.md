@@ -3,70 +3,179 @@
 Passive background data collector for Uma Musume Pretty Derby.
 
 Hooks into the running game via Frida and silently captures skill activations,
-event text, proc chances, race results, and other game data — then organises
-everything into structured session logs for guide writers to reference later.
+event text, proc chances, race results, network traffic, and other game data —
+then organises everything into structured session logs for guide writers to
+reference later.
 
 ## Prerequisites
 
 - Python 3.10+
-- [uv](https://docs.astral.sh/uv/) (recommended) or pip
+- [uv](https://docs.astral.sh/uv/)
 - Uma Musume running (Windows/Steam or Linux)
 
-## Quick Start
+## Quick Start (test machine, no Make)
 
 ```bash
-# Phase 1 — Discover what the game exposes
-uv run discover.py                # broad class scan → discovery/class_dump.json
-uv run discover.py --trace        # live-trace: log method calls during gameplay
+uv run run.py                    # full pipeline: discover → analyse → dump
+uv run run.py --skip-discover    # reuse existing class_dump.json
+uv run run.py --step discover    # only discovery
+uv run run.py --step analyse     # only analysis
+uv run run.py --step dump        # only dump collector
+```
 
-# Phase 2 — Collect data while playing
-uv run collect.py                 # start background collector
-uv run collect.py --dashboard     # with live TUI status
+## Workflow
+
+```
+1. Discover  →  2. Analyse  →  3. Collect / Dump
+```
+
+### 1. Discover — scan the game binary
+
+```bash
+uv run discover.py --all           # full Gallop namespace + keyword + signature scan
+uv run discover.py                  # keyword + signature scan only
+uv run discover.py --trace          # live-trace: log method call frequency while playing
+```
+
+Outputs `discovery/class_dump.json` — every class in the game with methods,
+fields, offsets, and types.
+
+### 2. Analyse — score and filter the dump
+
+```bash
+make analyse
+```
+
+Reads `class_dump.json` and produces:
+
+- **`discovery/analysis.md`** — human-readable report, top classes per domain
+- **`discovery/interesting.json`** — filtered/scored JSON for the dump module
+
+### 3. Collect — capture data while playing
+
+```bash
+# Targeted hooks (skills, events, races, network)
+uv run collect.py
+
+# Data-driven dump — reads field layouts from interesting.json,
+# hooks top-scored classes, dumps all field values at runtime
+uv run collect.py --modules dump --label my-session
+uv run collect.py --modules dump --dump-min-score 40 --dump-max-classes 50
+
+# Combine modules
+uv run collect.py --modules dump network skills
+
+# Network capture only
+uv run collect.py --modules network
+```
+
+Session output:
+
+```
+sessions/<timestamp>_<label>/
+  manifest.json       # session metadata, modules, hook counts
+  skills.jsonl        # skill activations + lottery/proc results
+  events.jsonl        # training/story events + choices
+  races.jsonl         # race results + conditions
+  network.jsonl       # API traffic (SSL, MsgPack, Cute.Http tasks)
+  raw.jsonl           # anything else
+```
+
+## Makefile
+
+```bash
+make fmt              # format Python (ruff) + JS (prettier)
+make lint             # lint Python
+make check            # CI check — fails if anything is unformatted
+make clean            # remove logs + sessions (keeps discovery/)
+make nuke             # remove everything including discovery/
+make analyse          # run analyse.py on discovery/class_dump.json
+make dump             # run collector with dump module
+make install-hooks    # install pre-commit git hooks
 ```
 
 ## How It Works
 
-### Phase 1: Discovery (`discover.py`)
+### Discovery (`discover.py`)
 
-Scans every class in `GameAssembly.dll` / `libil2cpp.so` for keywords across
-all guide-relevant domains (skills, events, races, training, story, etc.) and
-dumps the full class layouts (methods + fields + offsets) to JSON.
+Scans every class in `GameAssembly.dll` / `libil2cpp.so` using three strategies:
 
-The `--trace` flag hooks key entry points and logs which methods fire during
-gameplay, sorted by call frequency — this tells you exactly what to target.
+1. **Keyword** — class name contains skill, race, event, training, etc.
+2. **Namespace** (`--all`) — every class in the `Gallop` namespace
+3. **Signature** — class has methods/fields named Activate, Deserialize, SkillId, etc.
 
-### Phase 2: Collection (`collect.py`)
+The `--trace` flag hooks entry-point methods and logs call frequency during
+gameplay — tells you which classes are actually active vs dead code.
 
-Attaches targeted hooks to the methods discovered in Phase 1 and silently
-records every interesting event to per-session JSONL files:
+### Analysis (`analyse.py`)
 
-```
-sessions/
-  2026-04-09T12-00-00/
-    manifest.json       # session metadata, game version, character
-    skills.jsonl        # skill activations + lottery/proc results
-    events.jsonl        # training/story events + choices
-    races.jsonl         # race results + conditions
-    raw.jsonl           # anything else interesting
-```
+Scores every discovered class by how useful it is for guide writing:
+
+| Signal | Points |
+|--------|-------:|
+| Has Activate, LotActivate, BeginRace, Deserialize, etc. | +10/method |
+| Has SkillId, AbilityType, RaceResult fields | +8/field |
+| Is a `*Request`/`*Response`/`*Task` (API pattern) | +15 |
+| Is a `*Formatter` (MsgPack serializer) | +10 |
+| Is `Master*` (game master data) | +8 |
+| Compiler-generated / library noise | -100 |
+
+### Collection (`collect.py`)
+
+Modular hook system — pick what you need:
+
+| Module | What it captures |
+|--------|-----------------|
+| `skills` | Skill activation, lottery/proc rolls, trigger checks |
+| `events` | Training/story events, user choices, view transitions |
+| `races` | Race lifecycle, results, jikkyo commentary |
+| `network` | SSL read/write, MsgPack formatters, Cute.Http API tasks |
+| `dump` | Data-driven: reads all fields from top-scored classes at runtime |
+
+The `dump` module is the most powerful — it uses the field layouts from
+`interesting.json` to read actual game state (stats, IDs, aptitudes, etc.)
+whenever a hooked method fires.
+
+### Network Capture (3 layers)
+
+1. **SSL_read / SSL_write** — hooks TLS plaintext inside the process (no MITM needed)
+2. **MsgPack Formatters** — hooks `Gallop.MsgPack.Formatters.*.Serialize/Deserialize`
+3. **Cute.Http base class** — hooks `Send`/`Deserialize`/`OnError` on the HTTP task base class, identifies concrete task by reading the il2cpp class name at runtime
 
 ## Project Structure
 
 ```
 clairvoyance/
-  discover.py           # Phase 1: broad class scanner + live tracer
-  collect.py            # Phase 2: background data collector
+  run.py                  # all-in-one: discover → analyse → dump
+  discover.py             # Phase 1: class scanner + live tracer
+  analyse.py              # Phase 1.5: score and filter class dump
+  collect.py              # Phase 2: modular background collector
+  Makefile                # fmt, lint, clean, analyse, dump
+  pyproject.toml          # dependencies + ruff config
   js/
-    il2cpp_helpers.js   # shared il2cpp reflection engine
-    discover_scan.js    # broad keyword scan across all assemblies
-    discover_trace.js   # live-trace hooks for method call logging
-    hook_skills.js      # skill activation + lottery hooks
-    hook_events.js      # event/story hooks
-    hook_races.js       # race result hooks
+    il2cpp_helpers.js     # shared il2cpp reflection engine
+    discover_scan.js      # keyword + namespace + signature scan
+    discover_trace.js     # live-trace hooks for call frequency
+    hook_skills.js        # skill activation + lottery hooks
+    hook_events.js        # event/story hooks
+    hook_races.js         # race lifecycle hooks
+    hook_network.js       # SSL + MsgPack + Cute.Http hooks
+    hook_dump.js          # data-driven field dumper
   lib/
-    attach.py           # process finder + Frida attach logic
-    session.py          # session directory + JSONL writer
-  discovery/            # output from Phase 1 scans
-  sessions/             # output from Phase 2 collection
+    __init__.py
+    attach.py             # process finder + Frida attach with retry
+    session.py            # session directory + JSONL writer
+  discovery/              # output from discover.py + analyse.py
+  sessions/               # output from collect.py
 ```
 
+## Logging
+
+Each script writes two log files:
+
+| File | Contents |
+|------|----------|
+| `discover.log` / `collect.log` | Important events, errors, summaries |
+| `discover_js.log` / `collect_js.log` | Verbose Frida JS console output |
+
+Errors appear in both. JS noise stays out of the main log and console.

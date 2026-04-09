@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import sys
@@ -74,10 +75,23 @@ parser.add_argument(
     "--modules",
     nargs="*",
     default=["skills", "events", "races", "network"],
-    help="Which hook modules to load (default: all)",
+    help="Which hook modules to load (default: skills events races network). "
+    "Add 'dump' for data-driven field capture from interesting.json.",
 )
 parser.add_argument(
     "--timeout", type=int, default=0, help="Auto-stop after N seconds (0 = run until Ctrl+C)"
+)
+parser.add_argument(
+    "--dump-min-score",
+    type=int,
+    default=30,
+    help="[dump module] Minimum class score to hook (default: 30)",
+)
+parser.add_argument(
+    "--dump-max-classes",
+    type=int,
+    default=100,
+    help="[dump module] Maximum number of classes to hook (default: 100)",
 )
 args = parser.parse_args()
 
@@ -88,13 +102,41 @@ HOOK_MODULES = {
     "events": "hook_events.js",
     "races": "hook_races.js",
     "network": "hook_network.js",
+    "dump": "hook_dump.js",  # data-driven, needs interesting.json
 }
+
+DISCOVERY_DIR = os.path.join(SCRIPT_DIR, "discovery")
 
 
 def load_js(filename: str) -> str:
     path = os.path.join(JS_DIR, filename)
     with open(path, encoding="utf-8") as f:
         return f.read()
+
+
+def load_dump_targets(min_score: int, max_classes: int) -> list[dict]:
+    """Load top-scored classes from interesting.json for the dump module."""
+    path = os.path.join(DISCOVERY_DIR, "interesting.json")
+    if not os.path.exists(path):
+        log.error("  [X] discovery/interesting.json not found. Run: make analyse")
+        return []
+
+    with open(path, encoding="utf-8") as f:
+        all_classes = json.load(f)
+
+    # Filter to classes above min_score, take top N
+    filtered = [c for c in all_classes if c.get("score", 0) >= min_score]
+    filtered.sort(key=lambda c: -c.get("score", 0))
+    targets = filtered[:max_classes]
+
+    log.info(
+        "  [dump] Loaded %d target classes (score >= %d, max %d) from interesting.json",
+        len(targets),
+        min_score,
+        max_classes,
+    )
+
+    return targets
 
 
 def build_collector_script(modules: list[str]) -> str:
@@ -106,8 +148,22 @@ def build_collector_script(modules: list[str]) -> str:
         if mod not in HOOK_MODULES:
             log.warning("Unknown module '%s', skipping.", mod)
             continue
+
+        js_src = load_js(HOOK_MODULES[mod])
+
+        # The dump module needs class layouts injected
+        if mod == "dump":
+            targets = load_dump_targets(
+                min_score=args.dump_min_score,
+                max_classes=args.dump_max_classes,
+            )
+            if not targets:
+                log.warning("  [dump] No targets loaded, skipping dump module.")
+                continue
+            js_src = js_src.replace("INJECTED_DUMP_TARGETS", json.dumps(targets))
+
         hook_code.append(f"// ── Module: {mod} ──")
-        hook_code.append(load_js(HOOK_MODULES[mod]))
+        hook_code.append(js_src)
 
     combined = "\n\n".join(hook_code)
     return f"(function(){{\n{helpers}\n\n{combined}\n}})();"
