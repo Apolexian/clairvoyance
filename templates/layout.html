@@ -78,6 +78,7 @@
     // ── State ───────────────────────────────────────────────
     let recorderVisible = false;
     let setupReady = false;
+    let wasRecording = false;  // track state transitions
 
     // ── Safe JSON parser ────────────────────────────────────
     async function safeJSON(res) {
@@ -176,10 +177,16 @@
           startBtn.disabled = true;
           stopBtn.disabled = false;
           toggleBtn.classList.add('recording');
+          wasRecording = true;
         } else {
           startBtn.disabled = false;
           stopBtn.disabled = true;
           toggleBtn.classList.remove('recording');
+          // Recording just stopped — reload so the new session appears
+          if (wasRecording) {
+            wasRecording = false;
+            window.location.reload();
+          }
         }
       } catch (e) {
         console.error('pollRecorderStatus error:', e);

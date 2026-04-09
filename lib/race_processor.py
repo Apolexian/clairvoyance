@@ -309,14 +309,35 @@ def try_process_race(record: dict, include_frames: str = "sampled") -> dict | No
     if not decoded or not isinstance(decoded, dict):
         return None
 
+    is_race = is_race_api(api_name) or is_race_result_api(api_name)
+
     # Check if this is a race-related API
-    if not (is_race_api(api_name) or is_race_result_api(api_name)):
+    if not is_race:
         # Also check if decoded data contains race simulation data
         sim_data = _extract_race_simulate_data(decoded)
         if sim_data is None:
             return None
+        log.info("  [race] Found race_simulate_data in non-race API: %s", api_name)
     else:
         sim_data = _extract_race_simulate_data(decoded)
+        if sim_data is None:
+            # Log the top-level keys so we can see what the response looks like
+            top_keys = list(decoded.keys())[:20] if isinstance(decoded, dict) else []
+            data_obj = decoded.get("data", {})
+            data_keys = list(data_obj.keys())[:20] if isinstance(data_obj, dict) else []
+            log.warning(
+                "  [race] Race API '%s' detected but no race_simulate_data found. "
+                "Top keys: %s, data keys: %s",
+                api_name,
+                top_keys,
+                data_keys,
+            )
+        else:
+            log.info(
+                "  [race] Found race_simulate_data in %s (len=%d)",
+                api_name,
+                len(sim_data) if sim_data else 0,
+            )
 
     race_record: dict = {
         "event": "race_simulation",

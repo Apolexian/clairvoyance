@@ -19,15 +19,15 @@ check:
 	uv tool run ruff check .
 	@command -v npx >/dev/null 2>&1 && npx -y prettier --check "js/**/*.js" || echo "npx not found, skipping JS check"
 
-# Remove logs, sessions, pycache (keeps discovery/)
+# Remove sessions, pycache, build artifacts (keeps logs and discovery/)
 clean:
-	rm -f *.log
 	rm -rf sessions/
 	rm -rf __pycache__/ lib/__pycache__/
 	rm -rf build/ dist/
 
-# Remove EVERYTHING including discovery (full reset)
+# Remove EVERYTHING including discovery and logs (full reset)
 nuke: clean
+	rm -f *.log
 	rm -rf discovery/
 
 # Analyse discovery class dump → discovery/analysis.md + discovery/interesting.json

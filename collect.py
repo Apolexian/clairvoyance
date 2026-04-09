@@ -297,17 +297,28 @@ def on_message(message, data):
             # When we see a decoded MsgPack response from a race API,
             # parse the race_simulate_data binary blob and write a
             # structured race record to the "race" domain.
-            if (
-                domain == "network"
-                and record.get("event") in ("api_response", "api_send")
-                and "msgpack_decoded" in record
-            ):
-                try:
-                    race_record = try_process_race(record)
-                    if race_record and session_data:
-                        session_data.write("race", race_record)
-                except Exception as e:
-                    log.debug("  [race] Processing error: %s", e)
+            if domain == "network" and record.get("event") in ("api_response", "api_send"):
+                api = record.get("api", "")
+                has_decoded = "msgpack_decoded" in record
+                if has_decoded:
+                    try:
+                        race_record = try_process_race(record)
+                        if race_record and session_data:
+                            session_data.write("race", race_record)
+                            log.info(
+                                "  [race] Wrote race record from %s (%s)",
+                                api,
+                                race_record.get("event", "?"),
+                            )
+                    except Exception as e:
+                        log.warning("  [race] Processing error for %s: %s", api, e)
+                elif any(p in api for p in ("Race", "race")):
+                    log.warning(
+                        "  [race] Race-related API '%s' had no decoded msgpack data "
+                        "(raw_bytes_len=%s)",
+                        api,
+                        record.get("raw_bytes_len", "N/A"),
+                    )
 
             # ── Accumulate dump-hook race frame data ───────────────────
             # Records from RaceSimulateHorseFrameData.Deserialize are
@@ -411,6 +422,12 @@ def main():
         log.info("\n[*] Stopped by user.")
 
     # ── Process accumulated dump-hook race frames ────────────────────────
+    log.info(
+        "  [race-dump] Accumulated: %d frame records, %d lifecycle, %d skill",
+        len(_dump_frame_records),
+        len(_race_lifecycle_records),
+        len(_race_skill_records),
+    )
     if _dump_frame_records:
         log.info(
             "  [race-dump] Processing %d accumulated frame records...",
