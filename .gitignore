@@ -1,16 +1,8 @@
 # Session data (can be huge)
 sessions/
-
-# Discovery dumps (regenerate per game version)
-discovery/
-
 # Python
 __pycache__/
 *.pyc
 *.egg-info/
 dist/
 build/
-
-# Logs
-*.log
-
