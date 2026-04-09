@@ -361,77 +361,92 @@
     console.log("[network] " + formatterHooks + " MsgPack Formatter hooks installed.");
 
     // ══════════════════════════════════════════════════════════════════
-    // LAYER 3: Cute.Http base class hooks
+    // LAYER 3: Gallop.*Task API hooks (il2cpp)
     // ══════════════════════════════════════════════════════════════════
     //
-    // Every API task (Gallop.*Task) inherits from a base class in the
-    // Cute.Http namespace. They all share the same layout:
+    // Every API call in the game is a `Gallop.*Task` class, e.g.
+    //   Gallop.SingleModeCheckEventTask
+    //   Gallop.SingleModeExecCommandTask
+    // They all share the same field layout:
     //   offset 16: postData (byte[])
     //   offset 24: onSuccess callback
     //   offset 32: onError callback
     //   offset 40: headers dict
     //   offset 48: request (Cute.Http.IWebRequest)
     //
-    // Instead of hooking hundreds of subclasses, we find the base class
-    // and hook Send + Deserialize once. We identify the specific API call
-    // by reading the il2cpp class name from the 'this' pointer at runtime.
+    // We scan for ALL Gallop.*Task classes and hook Send + Deserialize
+    // on each one. When Send fires, `this` IS the task, so we can read
+    // the class name and postData directly.
 
-    console.log("[network] Scanning for Cute.Http base task class...");
+    console.log("[network] Scanning for Gallop API Task classes...");
 
-    var cuteHttpClasses = {};
+    // Helper: read the il2cpp class name from an object pointer
+    function readClassName(objPtr) {
+        try {
+            var klass = objPtr.readPointer();
+            if (klass.isNull()) return null;
+            var n = readCStr(fn.class_get_name(klass));
+            var ns = readCStr(fn.class_get_namespace(klass));
+            return ns ? ns + "." + n : n;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // Helper: read il2cpp array length
+    function readArrayLength(arrPtr) {
+        if (!arrPtr || arrPtr.isNull()) return -1;
+        try {
+            var lenOffset = ptrSize === 8 ? 24 : 12;
+            return arrPtr.add(lenOffset).readS32();
+        } catch (e) {
+            return -1;
+        }
+    }
+
+    var taskClasses = {};
 
     iterAssemblyClasses(function (classPtr, fullName, ns, name) {
-        // Look for Cute.Http namespace classes and also the Gallop tasks
-        if (ns === "Cute.Http" || (ns === "Cute" && name.indexOf("Http") !== -1)) {
-            cuteHttpClasses[fullName] = { classPtr: classPtr };
-        }
+        // Match Gallop.*Task classes (the API call wrappers)
+        if (ns !== "Gallop") return;
+        if (!name.endsWith("Task")) return;
+        // Skip obvious non-API classes
+        if (name.indexOf("UniTask") !== -1) return;
+        if (name.indexOf("Coroutine") !== -1) return;
+        taskClasses[fullName] = classPtr;
     });
 
-    var cuteCount = Object.keys(cuteHttpClasses).length;
-    console.log(
-        "[network] Found " +
-            cuteCount +
-            " Cute.Http classes: " +
-            Object.keys(cuteHttpClasses).join(", "),
-    );
+    var taskCount = Object.keys(taskClasses).length;
+    console.log("[network] Found " + taskCount + " Gallop.*Task classes.");
 
-    // Try to hook Send and Deserialize on the base class(es)
-    var baseHooks = 0;
+    // Hook Send and Deserialize on each task class
+    var taskHooks = 0;
+    var MAX_TASK_HOOKS = 600; // safety cap (2 hooks × ~300 tasks)
 
-    for (var chName in cuteHttpClasses) {
-        (function (className) {
-            var info = extractClassInfo(cuteHttpClasses[className].classPtr, className);
-            var methods = Object.keys(info.methods);
-            console.log("[network] " + className + " methods: " + methods.join(", "));
+    for (var taskFqn in taskClasses) {
+        if (taskHooks >= MAX_TASK_HOOKS) break;
 
-            // Hook Send — this is where outgoing requests go
+        (function (fullName) {
+            var classPtr = taskClasses[fullName];
+            var info = extractClassInfo(classPtr, fullName);
+
+            // Derive a short API name: "Gallop.SingleModeCheckEventTask" → "SingleModeCheckEvent"
+            var shortName = fullName.replace("Gallop.", "").replace(/Task$/, "");
+
+            // Hook Send — fires when the game sends this API request
             if (info.methods["Send"]) {
                 if (
                     hookMethod(info, "Send", -1, {
                         onEnter: function (args) {
                             var self = args[0];
-                            // Try to identify the concrete Task class name
-                            var taskName = className;
-                            try {
-                                // il2cpp object layout: offset 0 = klass pointer
-                                var klass = self.readPointer();
-                                if (!klass.isNull()) {
-                                    var namePtr = fn.class_get_name(klass);
-                                    var nsPtr = fn.class_get_namespace(klass);
-                                    var n = readCStr(namePtr);
-                                    var ns = readCStr(nsPtr);
-                                    taskName = ns ? ns + "." + n : n;
-                                }
-                            } catch (e) {}
+                            // Read actual concrete class name (handles inheritance)
+                            var taskName = readClassName(self) || fullName;
 
-                            // Try to read postData size (byte[] at offset 16)
+                            // Read postData size (byte[] at offset 16)
                             var postDataSize = -1;
                             try {
                                 var arrPtr = self.add(16).readPointer();
-                                if (!arrPtr.isNull()) {
-                                    // il2cpp array: length at offset 24 (64-bit) or 12 (32-bit)
-                                    postDataSize = arrPtr.add(ptrSize === 8 ? 24 : 12).readS32();
-                                }
+                                postDataSize = readArrayLength(arrPtr);
                             } catch (e) {}
 
                             send({
@@ -440,45 +455,39 @@
                                 data: {
                                     event: "api_send",
                                     task: taskName,
+                                    api: shortName,
                                     postDataBytes: postDataSize,
                                 },
                             });
                         },
                     })
-                )
-                    baseHooks++;
+                ) {
+                    taskHooks++;
+                }
             }
 
-            // Hook Deserialize — this is where incoming responses are parsed
+            // Hook Deserialize — fires when the response is parsed
             if (info.methods["Deserialize"]) {
                 if (
                     hookMethod(info, "Deserialize", -1, {
                         onEnter: function (args) {
                             var self = args[0];
-                            var taskName = className;
-                            try {
-                                var klass = self.readPointer();
-                                if (!klass.isNull()) {
-                                    var namePtr = fn.class_get_name(klass);
-                                    var nsPtr = fn.class_get_namespace(klass);
-                                    var n = readCStr(namePtr);
-                                    var ns = readCStr(nsPtr);
-                                    taskName = ns ? ns + "." + n : n;
-                                }
-                            } catch (e) {}
+                            var taskName = readClassName(self) || fullName;
 
                             send({
                                 type: "collect",
                                 domain: "network",
                                 data: {
-                                    event: "api_deserialize",
+                                    event: "api_response",
                                     task: taskName,
+                                    api: shortName,
                                 },
                             });
                         },
                     })
-                )
-                    baseHooks++;
+                ) {
+                    taskHooks++;
+                }
             }
 
             // Hook OnError
@@ -487,16 +496,7 @@
                     hookMethod(info, "OnError", -1, {
                         onEnter: function (args) {
                             var self = args[0];
-                            var taskName = className;
-                            try {
-                                var klass = self.readPointer();
-                                if (!klass.isNull()) {
-                                    taskName =
-                                        readCStr(fn.class_get_namespace(klass)) +
-                                        "." +
-                                        readCStr(fn.class_get_name(klass));
-                                }
-                            } catch (e) {}
+                            var taskName = readClassName(self) || fullName;
 
                             send({
                                 type: "collect",
@@ -504,18 +504,20 @@
                                 data: {
                                     event: "api_error",
                                     task: taskName,
+                                    api: shortName,
                                 },
                             });
                         },
                     })
-                )
-                    baseHooks++;
+                ) {
+                    taskHooks++;
+                }
             }
-        })(chName);
+        })(taskFqn);
     }
 
-    hookCount += baseHooks;
-    console.log("[network] " + baseHooks + " Cute.Http base hooks installed.");
+    hookCount += taskHooks;
+    console.log("[network] " + taskHooks + " Gallop Task hooks installed.");
 
     // ── Summary ───────────────────────────────────────────────────────
 

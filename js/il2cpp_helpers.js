@@ -289,13 +289,16 @@ function iterAssemblyClasses(callback) {
 
 // ── Hook helper ───────────────────────────────────────────────────────
 
+// Track addresses we've already hooked to avoid duplicate attach errors
+const _hookedAddrs = {};
+
 /**
  * Hook a method on a class that has already been extracted via extractClassInfo.
  * @param {Object} classInfo - result of extractClassInfo()
  * @param {string} methodName
  * @param {number} paramCount - expected param count (-1 = any)
  * @param {Object} callback - Interceptor.attach callback { onEnter, onLeave }
- * @returns {boolean} true if hooked
+ * @returns {boolean} true if hooked (or already hooked at that address)
  */
 function hookMethod(classInfo, methodName, paramCount, callback) {
     if (!classInfo) return false;
@@ -311,8 +314,15 @@ function hookMethod(classInfo, methodName, paramCount, callback) {
     const addr = ptr(match.compiledAddr);
     if (addr.isNull()) return false;
 
+    const addrStr = addr.toString();
+    if (addrStr in _hookedAddrs) {
+        // Already hooked (inherited method shared across subclasses)
+        return false;
+    }
+
     try {
         Interceptor.attach(addr, callback);
+        _hookedAddrs[addrStr] = classInfo.fullName + "." + methodName;
         return true;
     } catch (e) {
         console.log("[HOOK FAIL] " + classInfo.fullName + "." + methodName + ": " + e);

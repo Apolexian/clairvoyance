@@ -49,6 +49,40 @@
         hookMethodSet[HOOK_METHODS[i].toLowerCase()] = true;
     }
 
+    // Prefix patterns — any method whose lowercased name starts with one
+    // of these is also hookable.  Catches versioned variants like
+    // Deserialize_Ver20201027_OrNewer without listing every one.
+    var HOOK_PREFIXES = ["deserialize_", "serialize_"];
+
+    function isHookable(methodName) {
+        var lower = methodName.toLowerCase();
+        if (lower in hookMethodSet) return true;
+        for (var pi = 0; pi < HOOK_PREFIXES.length; pi++) {
+            if (lower.indexOf(HOOK_PREFIXES[pi]) === 0) return true;
+        }
+        return false;
+    }
+
+    // Methods that populate `this` — must read fields AFTER the call returns.
+    // Record also writes into `this` (snapshots current state into the struct).
+    // ToRaceHorseData converts data into the struct.
+    var READ_ON_LEAVE = {
+        deserialize: true,
+        serialize: true,
+        record: true,
+        toracehorse: true, // prefix match below
+    };
+
+    function shouldReadOnLeave(methodName) {
+        var lower = methodName.toLowerCase();
+        if (lower in READ_ON_LEAVE) return true;
+        // Any Deserialize_*, Serialize_* variant
+        if (lower.indexOf("deserialize") === 0) return true;
+        if (lower.indexOf("serialize") === 0) return true;
+        if (lower.indexOf("torace") === 0) return true;
+        return false;
+    }
+
     // ── Type readers ──────────────────────────────────────────────────
     // Given a field type string and a pointer, read the value.
 
@@ -151,41 +185,79 @@
                 }
             }
 
+            // Helper: build the snapshot and send it
+            function makeSnapshotSender(clsName, mName, cat, rFields) {
+                return function (self) {
+                    if (!self || self.isNull()) return;
+                    var snapshot = Object.create(null);
+                    for (var ri = 0; ri < rFields.length; ri++) {
+                        var rf = rFields[ri];
+                        var val = readField(self, rf.offset, rf.type);
+                        if (val !== undefined) {
+                            snapshot[rf.name] = val;
+                        }
+                    }
+                    send({
+                        type: "collect",
+                        domain: cat,
+                        data: {
+                            event: "dump",
+                            class: clsName,
+                            method: mName,
+                            fields: snapshot,
+                        },
+                    });
+                };
+            }
+
             // Find hookable methods on this class
             var methodNames = Object.keys(info.methods);
             for (var mi = 0; mi < methodNames.length; mi++) {
                 (function (methodName) {
-                    if (!(methodName.toLowerCase() in hookMethodSet)) return;
+                    if (!isHookable(methodName)) return;
 
-                    if (
-                        hookMethod(info, methodName, -1, {
+                    var doSnapshot = makeSnapshotSender(
+                        className,
+                        methodName,
+                        category,
+                        readableFields,
+                    );
+
+                    var useLeave = shouldReadOnLeave(methodName);
+                    var cb;
+                    if (useLeave) {
+                        // Deserialize / Record / etc.: fields are populated
+                        // during the call, so read them AFTER the method returns.
+                        // Also try retval — some Deserialize methods return a
+                        // new struct instead of writing to `this`.
+                        cb = {
                             onEnter: function (args) {
-                                var self = args[0];
-                                if (!self || self.isNull()) return;
-
-                                // Read all fields from this
-                                var snapshot = Object.create(null);
-                                for (var ri = 0; ri < readableFields.length; ri++) {
-                                    var rf = readableFields[ri];
-                                    var val = readField(self, rf.offset, rf.type);
-                                    if (val !== undefined) {
-                                        snapshot[rf.name] = val;
-                                    }
-                                }
-
-                                send({
-                                    type: "collect",
-                                    domain: category,
-                                    data: {
-                                        event: "dump",
-                                        class: className,
-                                        method: methodName,
-                                        fields: snapshot,
-                                    },
-                                });
+                                this._self = args[0];
                             },
-                        })
-                    ) {
+                            onLeave: function (retval) {
+                                doSnapshot(this._self);
+                                // If retval is a non-null pointer that differs
+                                // from self, also snapshot it (struct returned
+                                // by value is common for Deserialize).
+                                try {
+                                    if (
+                                        !retval.isNull() &&
+                                        retval.toString() !== this._self.toString()
+                                    ) {
+                                        doSnapshot(retval);
+                                    }
+                                } catch (e) {}
+                            },
+                        };
+                    } else {
+                        cb = {
+                            onEnter: function (args) {
+                                doSnapshot(args[0]);
+                            },
+                        };
+                    }
+
+                    if (hookMethod(info, methodName, -1, cb)) {
                         hookCount++;
                     }
                 })(methodNames[mi]);
