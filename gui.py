@@ -269,45 +269,44 @@ def api_setup_status():
             "interesting": interesting.exists(),
             "analysis": analysis.exists(),
             "ready": interesting.exists(),  # the key gate for recording
-            "running": _setup_process is not None and _setup_process.poll() is None,
+            "running": _setup_running,
             "log": _setup_log[-80:],
         }
     )
 
 
 _setup_process: subprocess.Popen | None = None
+_setup_running: bool = False
 _setup_log: list[str] = []
 _setup_lock = threading.Lock()
 
 
-def _stream_setup_output(proc: subprocess.Popen) -> None:
-    global _setup_process
+def _stream_output(proc: subprocess.Popen, log_list: list[str], lock: threading.Lock) -> None:
+    """Read subprocess stdout line-by-line into a shared log list. Blocks until EOF."""
     try:
         for line in iter(proc.stdout.readline, ""):
             if not line:
                 break
-            with _setup_lock:
-                _setup_log.append(line.rstrip("\n"))
-                if len(_setup_log) > 500:
-                    _setup_log.pop(0)
+            with lock:
+                log_list.append(line.rstrip("\n"))
+                if len(log_list) > 500:
+                    log_list.pop(0)
     except Exception:
         pass
     finally:
         proc.wait()
-        log.info("Setup process exited with code %d", proc.returncode)
-        with _setup_lock:
-            _setup_log.append(f"[setup] Exited with code {proc.returncode}")
-            if _setup_process is proc:
-                _setup_process = None
+        log.info("Process exited with code %d (pid %d)", proc.returncode, proc.pid)
+        with lock:
+            log_list.append(f"[setup] Exited with code {proc.returncode}")
 
 
 @app.route("/api/setup/run", methods=["POST"])
 def api_setup_run():
-    """Run the full discover → analyse pipeline."""
-    global _setup_process
+    """Run the full discover -> analyse pipeline."""
+    global _setup_process, _setup_running
 
     with _setup_lock:
-        if _setup_process is not None and _setup_process.poll() is None:
+        if _setup_running:
             return jsonify({"error": "Setup already running"}), 400
 
     try:
@@ -327,6 +326,7 @@ def api_setup_run():
             _setup_log.append(f"[setup] Starting: {' '.join(cmd)}")
             if not skip_discover:
                 _setup_log.append("[setup] Phase 1: Scanning game binary (this takes a while)...")
+            _setup_running = True
 
         kwargs: dict = dict(
             stdout=subprocess.PIPE,
@@ -356,49 +356,65 @@ def api_setup_run():
 def _run_setup_pipeline(proc: subprocess.Popen, skip_discover: bool) -> None:
     """
     Stream output from discover, then chain analyse if discover succeeds.
+    Sets _setup_running = False when the entire pipeline is done.
     """
-    global _setup_process
-    # Stream output from first command
-    _stream_setup_output(proc)
+    global _setup_process, _setup_running
+    try:
+        # Stream output from first command
+        _stream_output(proc, _setup_log, _setup_lock)
 
-    # If we just ran discover (not skip), now run analyse
-    if not skip_discover and proc.returncode == 0:
-        with _setup_lock:
-            _setup_log.append("")
-            _setup_log.append("[setup] Phase 2: Analysing class dump...")
-        try:
-            analyse_cmd = _tool_cmd("analyse")
-            kwargs: dict = dict(
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                cwd=str(SCRIPT_DIR),
-            )
-            if os.name == "nt":
-                kwargs["creationflags"] = (
-                    subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+        # If we just ran discover (not skip), now run analyse
+        if not skip_discover and proc.returncode == 0:
+            with _setup_lock:
+                _setup_log.append("")
+                _setup_log.append("[setup] Phase 2: Analysing class dump...")
+            try:
+                analyse_cmd = _tool_cmd("analyse")
+                kwargs: dict = dict(
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    cwd=str(SCRIPT_DIR),
                 )
-            analyse_proc = subprocess.Popen(analyse_cmd, **kwargs)
-            with _setup_lock:
-                _setup_process = analyse_proc
-            _stream_setup_output(analyse_proc)
-            if analyse_proc.returncode == 0:
+                if os.name == "nt":
+                    kwargs["creationflags"] = (
+                        subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+                    )
+                analyse_proc = subprocess.Popen(analyse_cmd, **kwargs)
                 with _setup_lock:
-                    _setup_log.append("[setup] ✓ Setup complete — ready to record!")
-            else:
+                    _setup_process = analyse_proc
+                _stream_output(analyse_proc, _setup_log, _setup_lock)
+                if analyse_proc.returncode == 0:
+                    with _setup_lock:
+                        _setup_log.append("[setup] Setup complete - ready to record!")
+                else:
+                    with _setup_lock:
+                        _setup_log.append("[setup] Analyse failed.")
+            except Exception as e:
                 with _setup_lock:
-                    _setup_log.append("[setup] ✗ Analyse failed.")
-        except Exception as e:
+                    _setup_log.append(f"[setup] Analyse error: {e}")
+        elif skip_discover and proc.returncode == 0:
             with _setup_lock:
-                _setup_log.append(f"[setup] ✗ Analyse error: {e}")
-    elif skip_discover and proc.returncode == 0:
+                _setup_log.append("[setup] Analysis complete - ready to record!")
+        else:
+            with _setup_lock:
+                _setup_log.append("[setup] Discovery failed - check that the game is running.")
+
+        # Verify the key output file actually exists
+        ij = DISCOVERY_DIR / "interesting.json"
+        if ij.exists():
+            log.info("Setup pipeline done - interesting.json confirmed at %s", ij)
+        else:
+            log.warning("Setup pipeline done but interesting.json NOT found at %s", ij)
+            with _setup_lock:
+                _setup_log.append("[setup] WARNING: interesting.json not found after setup.")
+    finally:
+        # Always clear the running flag when the pipeline ends
         with _setup_lock:
-            _setup_log.append("[setup] ✓ Analysis complete — ready to record!")
-    else:
-        with _setup_lock:
-            _setup_log.append("[setup] ✗ Discovery failed — check that the game is running.")
+            _setup_running = False
+            _setup_process = None
 
 
 # ── Routes: Recorder ───────────────────────────────────────────────────
