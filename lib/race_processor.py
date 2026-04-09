@@ -101,15 +101,21 @@ def _extract_horse_info(decoded: dict) -> list[dict] | None:
 
 
 def _extract_race_simulate_data(decoded: dict) -> str | None:
-    """Extract the base64-encoded race_simulate_data field."""
-    for key in ("race_simulate_data", "simulate_data", "race_result_info"):
+    """Extract the base64-encoded race simulation data field.
+
+    The game has used different names across versions:
+    - race_scenario (current, confirmed by CarrotJuicer)
+    - race_simulate_data (older)
+    - simulate_data (alternative)
+    """
+    for key in ("race_scenario", "race_simulate_data", "simulate_data", "race_result_info"):
         result = _find_key_recursive(decoded, key)
         if result is not None:
             if isinstance(result, str):
                 return result
             # It might be nested inside another dict
             if isinstance(result, dict):
-                for sub_key in ("race_simulate_data", "simulate_data"):
+                for sub_key in ("race_scenario", "race_simulate_data", "simulate_data"):
                     if sub_key in result and isinstance(result[sub_key], str):
                         return result[sub_key]
     return None
@@ -464,9 +470,15 @@ def process_dump_race_frames(
     into a structured race analysis.
 
     The dump hooks capture each horse's frame data as the game deserialises
-    the race simulation binary.  Records arrive in sequence: all horses for
-    frame 0, then all horses for frame 1, etc.  Horses are identified by
-    their consistent LanePosition value across frames.
+    the race simulation binary.  Records arrive sequentially: all N horses
+    for frame 0, then all N horses for frame 1, etc.
+
+    IMPORTANT: LanePosition is NOT a stable horse identifier — it changes
+    every frame as horses move laterally.  We detect horse count from the
+    first frame and use sequential chunking (every N records = 1 frame).
+
+    The game may deserialise the binary twice (preview + playback), producing
+    duplicate data which we detect and deduplicate.
 
     Args:
         records: List of dump event dicts with fields:
@@ -480,73 +492,114 @@ def process_dump_race_frames(
     if not records or len(records) < 2:
         return None
 
-    # ── Step 1: Identify horses by unique LanePosition ─────────────────
-    # Collect all unique lane positions in order of first appearance
-    lane_order: list[float] = []
-    lane_set: set[float] = set()
-    for rec in records:
-        fields = rec.get("fields", rec)
-        lane = fields.get("LanePosition")
-        if lane is not None and lane not in lane_set:
-            lane_order.append(lane)
-            lane_set.add(lane)
+    # ── Step 1: Detect horse count from the first frame ─────────────────
+    # The first frame has all horses at Distance ≈ 0.  We find horse_count
+    # by looking for the first record whose (LanePosition, Hp) matches
+    # record[0] — that's horse 0 appearing again in frame 1.
+    first = records[0].get("fields", records[0])
+    first_lane = first.get("LanePosition")
+    first_hp = first.get("Hp")
 
-    num_horses = len(lane_order)
-    if num_horses == 0:
+    num_horses = 0
+    for i in range(1, min(len(records), 50)):  # cap search at 50
+        fields = records[i].get("fields", records[i])
+        if fields.get("LanePosition") == first_lane and fields.get("Hp") == first_hp:
+            num_horses = i
+            break
+
+    if num_horses < 2:
+        # Fallback: count unique initial LanePositions (frame 0 all have Distance=0)
+        seen_lanes: list[float] = []
+        for rec in records:
+            fields = rec.get("fields", rec)
+            lane = fields.get("LanePosition")
+            dist = fields.get("Distance", 0)
+            if dist > 0.5:
+                break  # past frame 0
+            if lane is not None and lane not in seen_lanes:
+                seen_lanes.append(lane)
+            elif lane in seen_lanes:
+                break  # wrapped around
+        num_horses = len(seen_lanes) if len(seen_lanes) >= 2 else 0
+
+    if num_horses < 2:
+        log.warning("  [race-dump] Could not detect horse count from %d records", len(records))
         return None
 
-    # Map lane position → horse index
-    lane_to_idx = {lane: idx for idx, lane in enumerate(lane_order)}
+    log.info("  [race-dump] Detected %d horses from initial frame pattern", num_horses)
 
-    # ── Step 2: Group records into frames ───────────────────────────────
-    # Records arrive sequentially: horses 0..N-1 for frame 0, then frame 1, etc.
-    # We group by cycling through all horses.
-    frames: list[dict[int, dict]] = []
-    current_frame: dict[int, dict] = {}
-    seen_in_frame: set[int] = set()
+    # ── Step 2: Group records into sequential frames ────────────────────
+    # Every num_horses consecutive records = one frame.
+    # Horse index within frame = position % num_horses.
+    total_records = len(records)
+    total_possible_frames = total_records // num_horses
 
-    for rec in records:
-        fields = rec.get("fields", rec)
-        lane = fields.get("LanePosition")
-        if lane is None or lane not in lane_to_idx:
-            continue
-        idx = lane_to_idx[lane]
-
-        # If we've already seen this horse in the current frame, start a new frame
-        if idx in seen_in_frame:
-            if current_frame:
-                frames.append(current_frame)
-            current_frame = {}
-            seen_in_frame = set()
-
-        current_frame[idx] = {
-            "distance": fields.get("Distance", 0),
-            "lane_position": lane,
-            "speed": fields.get("Speed", 0),
-            "hp": fields.get("Hp", 0),
-            "temptation_mode": fields.get("TemptationMode", 0),
-            "block_front": fields.get("BlockFrontHorseIndex", -1),
-        }
-        seen_in_frame.add(idx)
-
-    # Don't forget the last frame
-    if current_frame:
-        frames.append(current_frame)
-
-    if not frames:
+    if total_possible_frames < 2:
+        log.warning(
+            "  [race-dump] Only %d records for %d horses — not enough frames",
+            total_records,
+            num_horses,
+        )
         return None
 
+    frames: list[list[dict]] = []  # frames[f][h] = horse data
+    for fi in range(total_possible_frames):
+        frame_data: list[dict] = []
+        base = fi * num_horses
+        for hi in range(num_horses):
+            rec = records[base + hi]
+            fields = rec.get("fields", rec)
+            frame_data.append(
+                {
+                    "distance": fields.get("Distance", 0),
+                    "lane_position": fields.get("LanePosition", 0),
+                    "speed": fields.get("Speed", 0),
+                    "hp": fields.get("Hp", 0),
+                    "temptation_mode": fields.get("TemptationMode", 0),
+                    "block_front": fields.get("BlockFrontHorseIndex", -1),
+                }
+            )
+        frames.append(frame_data)
+
+    # ── Step 3: Detect and remove duplicate deserialization ──────────────
+    # The game often deserialises the binary twice (preview + playback).
+    # If the first and second halves look identical, keep only one.
+    if len(frames) >= 4 and len(frames) % 2 == 0:
+        half = len(frames) // 2
+        # Compare a few sampled frames from each half
+        is_duplicate = True
+        for check_idx in [0, half // 4, half // 2, half - 1]:
+            if check_idx >= half:
+                break
+            f1 = frames[check_idx]
+            f2 = frames[half + check_idx]
+            for hi in range(num_horses):
+                if (
+                    abs(f1[hi]["distance"] - f2[hi]["distance"]) > 0.01
+                    or abs(f1[hi]["hp"] - f2[hi]["hp"]) > 1
+                ):
+                    is_duplicate = False
+                    break
+            if not is_duplicate:
+                break
+        if is_duplicate:
+            log.info(
+                "  [race-dump] Detected double deserialization — using first half (%d frames)", half
+            )
+            frames = frames[:half]
+
+    total_frames = len(frames)
     log.info(
         "  [race-dump] Assembled %d frames x %d horses from %d dump records",
-        len(frames),
+        total_frames,
         num_horses,
-        len(records),
+        total_records,
     )
 
-    # ── Step 3: Build per-horse time series ────────────────────────────
+    # ── Step 4: Build per-horse time series ────────────────────────────
     horse_series: dict[int, list[dict]] = defaultdict(list)
     for frame_idx, frame in enumerate(frames):
-        for horse_idx, data in frame.items():
+        for horse_idx, data in enumerate(frame):
             horse_series[horse_idx].append(
                 {
                     "frame": frame_idx,
@@ -554,7 +607,7 @@ def process_dump_race_frames(
                 }
             )
 
-    # ── Step 4: Compute per-horse summaries ────────────────────────────
+    # ── Step 5: Compute per-horse summaries ────────────────────────────
     horse_summaries = []
     for horse_idx in range(num_horses):
         series = horse_series.get(horse_idx, [])
@@ -622,7 +675,7 @@ def process_dump_race_frames(
         }
         horse_summaries.append(summary)
 
-    # ── Step 5: Race-level analysis ────────────────────────────────────
+    # ── Step 6: Race-level analysis ────────────────────────────────────
 
     # Estimate total race distance from max distance across all horses
     total_distance = max((s["max_distance"] for s in horse_summaries), default=0)
@@ -646,15 +699,14 @@ def process_dump_race_frames(
     for rank, h in enumerate(finish_order, 1):
         h["estimated_rank"] = rank
 
-    # ── Step 6: Sampled frame data for output ──────────────────────────
+    # ── Step 7: Sampled frame data for output ──────────────────────────
     # Output a subset of frames (every Nth) to keep the record manageable
-    total_frames = len(frames)
     sample_interval = max(1, total_frames // 30)  # ~30 samples
     sampled_frames = []
     for fi in range(0, total_frames, sample_interval):
         frame = frames[fi]
-        sampled = {"frame_index": fi}
-        for horse_idx, data in sorted(frame.items()):
+        sampled: dict = {"frame_index": fi}
+        for horse_idx, data in enumerate(frame):
             sampled[f"horse_{horse_idx}"] = {
                 "distance": round(data["distance"], 2),
                 "speed": round(data["speed"], 4),
@@ -663,7 +715,7 @@ def process_dump_race_frames(
             }
         sampled_frames.append(sampled)
 
-    # ── Step 7: Include lifecycle and skill data ───────────────────────
+    # ── Step 8: Include lifecycle and skill data ───────────────────────
     lifecycle_info = []
     if lifecycle_records:
         for rec in lifecycle_records:

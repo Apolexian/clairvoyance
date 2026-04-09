@@ -19,9 +19,9 @@ Double-click gui.py to launch (if uv is on PATH).
 from __future__ import annotations
 
 import argparse
+import contextlib
 import logging
 import os
-import signal
 import subprocess
 import sys
 import threading
@@ -444,6 +444,7 @@ def api_recorder_start():
             _recorder_log.clear()
             _recorder_log.append(f"[gui] Starting: {' '.join(cmd)}")
         kwargs: dict = dict(
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -451,11 +452,9 @@ def api_recorder_start():
             errors="replace",
             cwd=str(SCRIPT_DIR),
         )
-        # On Windows, hide console window + create new process group for CTRL_BREAK
+        # On Windows, hide console window
         if os.name == "nt":
-            kwargs["creationflags"] = (
-                subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
-            )
+            kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
         proc = subprocess.Popen(cmd, **kwargs)
         with _recorder_lock:
             _recorder_process = proc
@@ -469,18 +468,33 @@ def api_recorder_start():
 
 @app.route("/api/recorder/stop", methods=["POST"])
 def api_recorder_stop():
-    global _recorder_process
     with _recorder_lock:
         proc = _recorder_process
         if proc is None or proc.poll() is not None:
             return jsonify({"status": "not_running"})
     try:
-        if os.name == "nt":
-            # Windows: send CTRL_BREAK to the process group
-            proc.send_signal(signal.CTRL_BREAK_EVENT)
-        else:
-            proc.send_signal(signal.SIGINT)
-        _recorder_log.append("[gui] Sent stop signal")
+        # Close stdin to signal the collector to stop gracefully.
+        # The collector monitors stdin; EOF triggers clean shutdown
+        # (saves manifest, processes dump frames, etc).
+        # This avoids CTRL_BREAK_EVENT which crashes Frida's C++ threads.
+        if proc.stdin:
+            with contextlib.suppress(Exception):
+                proc.stdin.close()
+        with _recorder_lock:
+            _recorder_log.append("[gui] Sent stop signal")
+
+        # Watchdog: if the process doesn't exit within 15s, force-kill it.
+        # This runs in a background thread so the HTTP response returns immediately.
+        def _watchdog():
+            try:
+                proc.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                log.warning("Recorder did not exit in time, terminating")
+                proc.terminate()
+                with _recorder_lock:
+                    _recorder_log.append("[gui] Recorder force-terminated after timeout")
+
+        threading.Thread(target=_watchdog, daemon=True).start()
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     return jsonify({"status": "stopping"})

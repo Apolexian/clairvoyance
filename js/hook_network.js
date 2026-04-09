@@ -1,5 +1,9 @@
 // hook_network.js
-// Captures game-server API traffic via two layers:
+// Captures game-server API traffic via multiple layers:
+//
+// Layer 0: libnative.dll — hooks the game's own decryption/decompression
+//          function to capture clean, decrypted MsgPack data. This is the
+//          most reliable method (inspired by CarrotJuicer).
 //
 // Layer 1: SSL_read / SSL_write — hooks the TLS library to capture raw
 //          decrypted HTTP traffic (request + response bytes). Works
@@ -21,6 +25,73 @@
     console.log("[network] Initialising network capture...");
 
     let hookCount = 0;
+
+    // ══════════════════════════════════════════════════════════════════
+    // LAYER 0: libnative.dll decryption hook
+    // ══════════════════════════════════════════════════════════════════
+    //
+    // The game uses libnative.dll for packet encryption/decryption.
+    // CarrotJuicer hooks the decryption function to capture clean
+    // MsgPack data. We look for LZ4_decompress_safe (used after
+    // decryption) or the decrypt export itself.
+
+    var libnativeHooked = false;
+
+    try {
+        var libnative = Process.getModuleByName("libnative.dll");
+        if (libnative) {
+            console.log("[network] Found libnative.dll at " + libnative.base);
+
+            // Look for LZ4_decompress_safe — called after decryption,
+            // output buffer contains the clean MsgPack response
+            var lz4Addr = libnative.findExportByName("LZ4_decompress_safe");
+            if (lz4Addr) {
+                Interceptor.attach(lz4Addr, {
+                    onEnter: function (args) {
+                        this.src = args[0];
+                        this.dst = args[1];
+                        this.srcSize = args[2].toInt32();
+                        this.dstCapacity = args[3].toInt32();
+                    },
+                    onLeave: function (retval) {
+                        var decompressedSize = retval.toInt32();
+                        if (decompressedSize <= 0 || decompressedSize > 4194304) return;
+
+                        try {
+                            var captureLen = Math.min(decompressedSize, 524288);
+                            var data = this.dst.readByteArray(captureLen);
+                            send(
+                                {
+                                    type: "collect",
+                                    domain: "network",
+                                    data: {
+                                        event: "libnative_decrypt",
+                                        bytes: decompressedSize,
+                                        captured: captureLen,
+                                        truncated: decompressedSize > captureLen,
+                                        srcSize: this.srcSize,
+                                    },
+                                },
+                                data,
+                            );
+                        } catch (e) {}
+                    },
+                });
+                hookCount++;
+                libnativeHooked = true;
+                console.log("[network] Hooked libnative.dll LZ4_decompress_safe");
+            }
+
+            // Also scan for exported functions that look like encrypt/decrypt
+            var exports = libnative.enumerateExports();
+            for (var ei = 0; ei < exports.length; ei++) {
+                var exp = exports[ei];
+                console.log("[network] libnative export: " + exp.name + " @ " + exp.address);
+            }
+        }
+    } catch (e) {
+        console.log("[network] libnative.dll not found or hook failed: " + e);
+    }
 
     // ══════════════════════════════════════════════════════════════════
     // LAYER 1: SSL_read / SSL_write hooks

@@ -158,11 +158,21 @@ def get_races(session_name: str) -> list[dict]:
     Returns a list of race dicts, each containing:
     - Race simulation data (from API)
     - Dump-based race analysis (from frame hooks)
+
+    If the session has raw dump records but no pre-processed analysis
+    (e.g. process was killed before cleanup), we assemble the analysis
+    on the fly.
     """
     records = read_domain(session_name, "race")
 
     races = []
     race_idx = 0
+    has_analysis = False
+
+    # Accumulators for on-the-fly processing
+    dump_frame_records: list[dict] = []
+    lifecycle_records: list[dict] = []
+    skill_records: list[dict] = []
 
     for rec in records:
         event = rec.get("event", "")
@@ -181,7 +191,8 @@ def get_races(session_name: str) -> list[dict]:
             races.append(rec)
 
         elif event == "race_analysis_from_dump":
-            # Dump-hook assembled race
+            # Dump-hook assembled race (pre-processed at session end)
+            has_analysis = True
             race_idx += 1
             rec["_race_index"] = race_idx
             num_horses = rec.get("num_horses", "?")
@@ -189,6 +200,40 @@ def get_races(session_name: str) -> list[dict]:
             rec["_race_label"] = f"Race {race_idx} (dump, {num_horses} horses, {dist}m)"
             rec["_source"] = "dump"
             races.append(rec)
+
+        elif event == "dump" and "RaceSimulateHorseFrameData" in rec.get("class", ""):
+            dump_frame_records.append(rec)
+        elif event == "race_lifecycle":
+            lifecycle_records.append(rec)
+        elif event == "race_skill_activate":
+            skill_records.append(rec)
+
+    # If we have raw dump records but no pre-processed analysis, assemble now
+    if dump_frame_records and not has_analysis:
+        try:
+            from .race_processor import process_dump_race_frames
+
+            analysis = process_dump_race_frames(
+                dump_frame_records,
+                lifecycle_records=lifecycle_records or None,
+                skill_records=skill_records or None,
+            )
+            if analysis:
+                race_idx += 1
+                analysis["_race_index"] = race_idx
+                num_horses = analysis.get("num_horses", "?")
+                dist = analysis.get("estimated_total_distance", "?")
+                analysis["_race_label"] = f"Race {race_idx} (dump, {num_horses} horses, {dist}m)"
+                analysis["_source"] = "dump"
+                races.append(analysis)
+                log.info(
+                    "Assembled race from %d raw dump records: %d horses, %d frames",
+                    len(dump_frame_records),
+                    analysis.get("num_horses", 0),
+                    analysis.get("total_frames", 0),
+                )
+        except Exception as e:
+            log.warning("Failed to assemble race from raw dump records: %s", e)
 
     return races
 

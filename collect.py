@@ -28,6 +28,7 @@ import json
 import logging
 import os
 import sys
+import threading
 import time
 import traceback
 
@@ -193,6 +194,21 @@ hook_statuses: dict[str, int] = {}
 is_ready = False
 has_error = False
 
+# Clean shutdown: the GUI closes our stdin pipe to signal stop.
+# This avoids CTRL_BREAK_EVENT which crashes Frida's C++ threads on Windows.
+_stop_event = threading.Event()
+
+
+def _monitor_stdin_for_close() -> None:
+    """Background thread: wait for stdin to close (EOF), then signal stop."""
+    try:
+        if sys.stdin is not None:
+            sys.stdin.read()  # blocks until EOF
+    except Exception:
+        pass
+    _stop_event.set()
+
+
 # Accumulators for dump-hook race frame data
 _dump_frame_records: list[dict] = []
 _race_lifecycle_records: list[dict] = []
@@ -218,24 +234,63 @@ def _try_msgpack_decode(raw: bytes) -> dict | list | None:
 
     The game's C# MsgPack serialiser encodes byte[] fields as old-spec str
     (not bin), so raw=False (force UTF-8) fails on responses with binary blobs.
-    """
-    # Strategy 1: raw=True — safest, treats all str/bin as bytes
-    try:
-        decoded = msgpack.unpackb(raw, raw=True, strict_map_key=False)
-        return _sanitise_bytes(decoded)
-    except msgpack.ExtraData as e:
-        # Valid msgpack followed by trailing bytes — take the valid part
-        log.debug("  [msgpack] ExtraData — using partial decode")
-        return _sanitise_bytes(e.unpacked)
-    except Exception as e:
-        log.debug("  [msgpack] raw=True failed: %s: %s", type(e).__name__, e)
 
-    # Strategy 2: raw=False — nicer strings, but fails on binary blobs
-    try:
-        decoded = msgpack.unpackb(raw, raw=False, strict_map_key=False)
-        return decoded
-    except Exception as e:
-        log.debug("  [msgpack] raw=False failed: %s: %s", type(e).__name__, e)
+    Game requests have a header: first 4 bytes = LE uint32 offset (usually 166),
+    then MsgPack payload starts at offset+4. We try stripping this if direct
+    decode fails (discovered via CarrotJuicer).
+    """
+
+    def _try_decode(buf: bytes) -> dict | list | None:
+        # raw=True — safest, treats all str/bin as bytes
+        try:
+            decoded = msgpack.unpackb(buf, raw=True, strict_map_key=False)
+            return _sanitise_bytes(decoded)
+        except msgpack.ExtraData as e:
+            log.debug("  [msgpack] ExtraData — using partial decode")
+            return _sanitise_bytes(e.unpacked)
+        except Exception:
+            pass
+
+        # raw=False — nicer strings, but fails on binary blobs
+        try:
+            decoded = msgpack.unpackb(buf, raw=False, strict_map_key=False)
+            return decoded
+        except Exception:
+            pass
+        return None
+
+    # Strategy 1: Try decoding the raw bytes directly
+    result = _try_decode(raw)
+    if result is not None:
+        return result
+
+    # Strategy 2: Strip game request header (4-byte LE offset + header, then MsgPack)
+    # CarrotJuicer: offset is at bytes[0:4], MsgPack starts at offset+4
+    if len(raw) > 170:
+        try:
+            import struct
+
+            offset = struct.unpack_from("<I", raw, 0)[0]
+            if 100 <= offset <= 500 and offset + 4 < len(raw):
+                result = _try_decode(raw[offset + 4 :])
+                if result is not None:
+                    log.debug(
+                        "  [msgpack] Decoded after stripping %d-byte request header", offset + 4
+                    )
+                    return result
+        except Exception:
+            pass
+
+    # Strategy 3: Skip HTTP chunked/framing — look for first MsgPack-like byte
+    # MsgPack maps start with 0x80-0x8f (fixmap) or 0xde/0xdf (map16/map32)
+    for start in range(1, min(len(raw), 512)):
+        b = raw[start]
+        if b in (0xDE, 0xDF) or (0x80 <= b <= 0x8F):
+            result = _try_decode(raw[start:])
+            if result is not None:
+                log.debug("  [msgpack] Decoded after skipping %d framing bytes", start)
+                return result
+            break  # only try the first plausible offset
 
     return None
 
@@ -294,11 +349,14 @@ def on_message(message, data):
                     record["raw_b64"] = base64.b64encode(raw).decode("ascii")
 
             # ── Race data extraction ──────────────────────────────────
-            # When we see a decoded MsgPack response from a race API,
-            # parse the race_simulate_data binary blob and write a
-            # structured race record to the "race" domain.
-            if domain == "network" and record.get("event") in ("api_response", "api_send"):
-                api = record.get("api", "")
+            # When we see decoded MsgPack data (from API hooks or libnative
+            # decryption), try to extract race simulation data.
+            event_name = record.get("event", "")
+            is_api_event = event_name in ("api_response", "api_send")
+            is_decrypt_event = event_name in ("libnative_decrypt",)
+
+            if domain == "network" and (is_api_event or is_decrypt_event):
+                api = record.get("api", "") if is_api_event else ""
                 has_decoded = "msgpack_decoded" in record
                 if has_decoded:
                     try:
@@ -307,12 +365,12 @@ def on_message(message, data):
                             session_data.write("race", race_record)
                             log.info(
                                 "  [race] Wrote race record from %s (%s)",
-                                api,
+                                api or event_name,
                                 race_record.get("event", "?"),
                             )
                     except Exception as e:
-                        log.warning("  [race] Processing error for %s: %s", api, e)
-                elif any(p in api for p in ("Race", "race")):
+                        log.warning("  [race] Processing error for %s: %s", api or event_name, e)
+                elif is_api_event and any(p in api for p in ("Race", "race")):
                     log.warning(
                         "  [race] Race-related API '%s' had no decoded msgpack data "
                         "(raw_bytes_len=%s)",
@@ -403,14 +461,21 @@ def main():
     log.info("  Ctrl+C to stop.")
     log.info("")
 
+    # Start stdin monitor for clean GUI-initiated shutdown
+    threading.Thread(target=_monitor_stdin_for_close, daemon=True).start()
+
     # Status ticker
     try:
         tick = 0
         duration = args.timeout if args.timeout > 0 else 999999
-        while tick < duration:
-            time.sleep(10)
+        while tick < duration and not _stop_event.is_set():
+            # Use short sleeps so we respond to _stop_event quickly
+            for _ in range(10):
+                if _stop_event.is_set():
+                    break
+                time.sleep(1)
             tick += 10
-            if has_error:
+            if has_error or _stop_event.is_set():
                 break
             counts = session_data.counts
             if counts:
@@ -419,7 +484,9 @@ def main():
             else:
                 log.info("  [%ds] Waiting for game events...", tick)
     except KeyboardInterrupt:
-        log.info("\n[*] Stopped by user.")
+        pass
+
+    log.info("\n[*] Stopping collector...")
 
     # ── Process accumulated dump-hook race frames ────────────────────────
     log.info(
