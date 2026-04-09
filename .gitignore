@@ -1,5 +1,3 @@
-# Session data (can be huge)
-sessions/
 # Python
 __pycache__/
 *.pyc
