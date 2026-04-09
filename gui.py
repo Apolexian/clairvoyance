@@ -28,6 +28,7 @@ import threading
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request
+from werkzeug.exceptions import HTTPException
 
 from lib.session_reader import (
     get_network_events,
@@ -76,7 +77,39 @@ app = Flask(
 )
 app.config["JSON_SORT_KEYS"] = False
 
+LOG_FILE = SCRIPT_DIR / "gui.log"
+
 log = logging.getLogger("clairvoyance.gui")
+log.setLevel(logging.DEBUG)
+
+# File handler — always active, captures everything (persists across runs)
+_fh = logging.FileHandler(str(LOG_FILE), mode="a", encoding="utf-8")
+_fh.setLevel(logging.DEBUG)
+_fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s — %(message)s"))
+log.addHandler(_fh)
+
+# Console handler — useful in dev mode (uv run gui.py)
+_ch = logging.StreamHandler(sys.stdout)
+_ch.setLevel(logging.INFO)
+_ch.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
+log.addHandler(_ch)
+
+log.info("Clairvoyance GUI starting — log file: %s", LOG_FILE)
+
+
+@app.errorhandler(Exception)
+def _handle_exception(exc):
+    """Guarantee JSON responses for /api/ routes — never return HTML error pages."""
+    if request.path.startswith("/api/"):
+        code = exc.code if isinstance(exc, HTTPException) else 500
+        log.exception("API error on %s: %s", request.path, exc)
+        return jsonify({"error": str(exc)}), code
+    # Non-API routes: let Flask handle normally (HTML pages)
+    if isinstance(exc, HTTPException):
+        return exc
+    log.exception("Unhandled exception: %s", exc)
+    raise exc
+
 
 # ── Recording state ────────────────────────────────────────────────────
 
@@ -100,6 +133,7 @@ def _stream_recorder_output(proc: subprocess.Popen) -> None:
         pass
     finally:
         proc.wait()
+        log.info("Recorder process exited with code %d", proc.returncode)
         with _recorder_lock:
             _recorder_log.append(f"[recorder] Process exited with code {proc.returncode}")
             if _recorder_process is proc:
@@ -252,6 +286,7 @@ def _stream_setup_output(proc: subprocess.Popen) -> None:
         pass
     finally:
         proc.wait()
+        log.info("Setup process exited with code %d", proc.returncode)
         with _setup_lock:
             _setup_log.append(f"[setup] Exited with code {proc.returncode}")
             if _setup_process is proc:
@@ -267,24 +302,24 @@ def api_setup_run():
         if _setup_process is not None and _setup_process.poll() is None:
             return jsonify({"error": "Setup already running"}), 400
 
-    data = request.get_json(silent=True) or {}
-    skip_discover = data.get("skip_discover", False)
-
-    # Build the command
-    if skip_discover and (DISCOVERY_DIR / "class_dump.json").exists():
-        # Only run analyse
-        cmd = _tool_cmd("analyse")
-    else:
-        # Full discover (--all scans the entire Gallop namespace)
-        cmd = _tool_cmd("discover", "--all")
-
-    with _setup_lock:
-        _setup_log.clear()
-        _setup_log.append(f"[setup] Starting: {' '.join(cmd)}")
-        if not skip_discover:
-            _setup_log.append("[setup] Phase 1: Scanning game binary (this takes a while)...")
-
     try:
+        data = request.get_json(silent=True) or {}
+        skip_discover = data.get("skip_discover", False)
+
+        # Build the command
+        if skip_discover and (DISCOVERY_DIR / "class_dump.json").exists():
+            # Only run analyse
+            cmd = _tool_cmd("analyse")
+        else:
+            # Full discover (--all scans the entire Gallop namespace)
+            cmd = _tool_cmd("discover", "--all")
+
+        with _setup_lock:
+            _setup_log.clear()
+            _setup_log.append(f"[setup] Starting: {' '.join(cmd)}")
+            if not skip_discover:
+                _setup_log.append("[setup] Phase 1: Scanning game binary (this takes a while)...")
+
         kwargs: dict = dict(
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -299,8 +334,10 @@ def api_setup_run():
         threading.Thread(
             target=_run_setup_pipeline, args=(proc, skip_discover), daemon=True
         ).start()
+        log.info("Setup started (pid=%d): %s", proc.pid, " ".join(cmd))
         return jsonify({"status": "started", "pid": proc.pid})
     except Exception as e:
+        log.exception("api_setup_run failed")
         return jsonify({"error": str(e)}), 500
 
 
@@ -365,15 +402,15 @@ def api_recorder_start():
         if _recorder_process is not None and _recorder_process.poll() is None:
             return jsonify({"error": "Recorder already running"}), 400
 
-    data = request.get_json(silent=True) or {}
-    label = data.get("label", "gui")
-    modules = data.get("modules", ["dump", "network", "races"])
-    cmd = _tool_cmd("collect", "--label", label, "--modules", *modules)
-
-    with _recorder_lock:
-        _recorder_log.clear()
-        _recorder_log.append(f"[gui] Starting: {' '.join(cmd)}")
     try:
+        data = request.get_json(silent=True) or {}
+        label = data.get("label", "gui")
+        modules = data.get("modules", ["dump", "network", "races"])
+        cmd = _tool_cmd("collect", "--label", label, "--modules", *modules)
+
+        with _recorder_lock:
+            _recorder_log.clear()
+            _recorder_log.append(f"[gui] Starting: {' '.join(cmd)}")
         kwargs: dict = dict(
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -387,8 +424,10 @@ def api_recorder_start():
         with _recorder_lock:
             _recorder_process = proc
         threading.Thread(target=_stream_recorder_output, args=(proc,), daemon=True).start()
+        log.info("Recorder started (pid=%d): %s", proc.pid, " ".join(cmd))
         return jsonify({"status": "started", "pid": proc.pid})
     except Exception as e:
+        log.exception("api_recorder_start failed")
         return jsonify({"error": str(e)}), 500
 
 

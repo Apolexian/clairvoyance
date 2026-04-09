@@ -93,6 +93,16 @@
     let recorderVisible = false;
     let setupReady = false;
 
+    // ── Safe JSON parser ────────────────────────────────────
+    async function safeJSON(res) {
+      // If the server returned a non-OK status or HTML instead of JSON,
+      // read the body as text and throw a clear error (not "unexpected token <").
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) return res.json();
+      const text = (await res.text()).slice(0, 300);
+      throw new Error(`Server ${res.status}: ${text}`);
+    }
+
     // ── Panel toggle ────────────────────────────────────────
     function toggleRecorder() {
       recorderVisible = !recorderVisible;
@@ -117,7 +127,7 @@
     async function pollSetupStatus() {
       try {
         const res = await fetch('/api/setup/status');
-        const d = await res.json();
+        const d = await safeJSON(res);
 
         setupReady = d.ready;
 
@@ -169,7 +179,7 @@
     async function pollRecorderStatus() {
       try {
         const res = await fetch('/api/recorder/status');
-        const data = await res.json();
+        const data = await safeJSON(res);
         const logEl = document.getElementById('rec-log');
         logEl.textContent = data.log.join('\n') || 'Recorder idle.';
         logEl.scrollTop = logEl.scrollHeight;
@@ -208,7 +218,7 @@
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({skip_discover: skipDiscover}),
         });
-        const data = await res.json();
+        const data = await safeJSON(res);
         if (data.error) {
           document.getElementById('setup-log').textContent += '\n[gui] Error: ' + data.error;
         }
@@ -248,7 +258,7 @@
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({label, modules}),
         });
-        const data = await res.json();
+        const data = await safeJSON(res);
         if (data.error) {
           document.getElementById('rec-log').textContent += '\n[gui] Error: ' + data.error;
         }
@@ -261,7 +271,7 @@
     async function stopRecording() {
       try {
         const res = await fetch('/api/recorder/stop', {method: 'POST'});
-        const data = await res.json();
+        const data = await safeJSON(res);
         if (data.error) alert(data.error);
       } catch (e) {
         alert('Stop failed: ' + e);
