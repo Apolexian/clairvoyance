@@ -97,8 +97,8 @@
                     var bytesRead = retval.toInt32();
                     if (bytesRead <= 0) return;
 
-                    // Cap at 32KB to avoid sending huge blobs
-                    var captureLen = Math.min(bytesRead, 32768);
+                    // Cap at 256KB to capture full race responses
+                    var captureLen = Math.min(bytesRead, 262144);
                     try {
                         var data = this.buf.readByteArray(captureLen);
                         send(
@@ -199,7 +199,7 @@
                     var num = args[2].toInt32();
                     if (num <= 0) return;
 
-                    var captureLen = Math.min(num, 32768);
+                    var captureLen = Math.min(num, 262144);
                     try {
                         var data = buf.readByteArray(captureLen);
                         send(
@@ -567,7 +567,7 @@
                                 if (arrPtr && !arrPtr.isNull()) {
                                     postDataSize = readArrayLength(arrPtr);
                                     if (postDataSize > 0 && postDataSize <= 1048576) {
-                                        postDataBuf = readIl2cppByteArray(arrPtr, 65536);
+                                        postDataBuf = readIl2cppByteArray(arrPtr, 262144);
                                         if (!postDataBuf) {
                                             console.log(
                                                 "[network] WARN: readIl2cppByteArray returned null for " +
@@ -629,7 +629,7 @@
                                     // Check if it looks like an il2cpp array
                                     var len = readArrayLength(rawArg);
                                     if (len > 0 && len < 1048576) {
-                                        this._rawBuf = readIl2cppByteArray(rawArg, 65536);
+                                        this._rawBuf = readIl2cppByteArray(rawArg, 262144);
                                     }
                                 }
                             } catch (e) {}

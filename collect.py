@@ -31,6 +31,7 @@ import time
 import traceback
 
 from lib.attach import attach
+from lib.race_processor import try_process_race
 from lib.session import Session
 
 # ── Paths ──────────────────────────────────────────────────────────────────
@@ -177,6 +178,51 @@ hook_statuses: dict[str, int] = {}
 is_ready = False
 has_error = False
 
+# ── MsgPack decode helpers ─────────────────────────────────────────────
+
+import base64
+
+import msgpack
+
+
+def _sanitise_bytes(obj: object) -> object:
+    """Recursively convert bytes values to lossy UTF-8 strings for JSON safety."""
+    if isinstance(obj, bytes):
+        return obj.decode("utf-8", errors="replace")
+    if isinstance(obj, dict):
+        return {_sanitise_bytes(k): _sanitise_bytes(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitise_bytes(v) for v in obj]
+    return obj
+
+
+def _try_msgpack_decode(raw: bytes) -> dict | list | None:
+    """
+    Try to decode raw bytes as MsgPack with multiple fallback strategies.
+
+    The game's C# MsgPack serialiser encodes byte[] fields as old-spec str
+    (not bin), so raw=False (force UTF-8) fails on responses with binary blobs.
+    """
+    # Strategy 1: raw=True — safest, treats all str/bin as bytes
+    try:
+        decoded = msgpack.unpackb(raw, raw=True, strict_map_key=False)
+        return _sanitise_bytes(decoded)
+    except msgpack.ExtraData as e:
+        # Valid msgpack followed by trailing bytes — take the valid part
+        log.debug("  [msgpack] ExtraData — using partial decode")
+        return _sanitise_bytes(e.unpacked)
+    except Exception as e:
+        log.debug("  [msgpack] raw=True failed: %s: %s", type(e).__name__, e)
+
+    # Strategy 2: raw=False — nicer strings, but fails on binary blobs
+    try:
+        decoded = msgpack.unpackb(raw, raw=False, strict_map_key=False)
+        return decoded
+    except Exception as e:
+        log.debug("  [msgpack] raw=False failed: %s: %s", type(e).__name__, e)
+
+    return None
+
 
 def on_message(message, data):
     global is_ready, has_error
@@ -212,23 +258,43 @@ def on_message(message, data):
             # If the JS side sent binary data (e.g. SSL_read/write buffers,
             # or postData byte arrays from Task hooks), decode it.
             if data is not None and len(data) > 0:
-                # Try to decode as MsgPack first (game uses MsgPack serialization)
-                try:
-                    import msgpack
-
-                    decoded = msgpack.unpackb(bytes(data), raw=False, strict_map_key=False)
+                raw = bytes(data)
+                # Try to decode as MsgPack (game uses MsgPack serialization).
+                # The game's C# MsgPack serializer encodes some byte[] fields
+                # (e.g. race_simulate_data) as old-spec str type, not bin.
+                # raw=False would force UTF-8 decode on those and fail.
+                # Strategy: try raw=True first (safe), then sanitise bytes→str.
+                decoded = _try_msgpack_decode(raw)
+                if decoded is not None:
                     record["msgpack_decoded"] = decoded
-                except Exception:
-                    pass
                 # Try to decode as UTF-8 text (HTTP headers are ASCII)
                 try:
-                    text = bytes(data).decode("utf-8", errors="replace")
-                    record["raw_text"] = text[:4096]  # cap for sanity
+                    text = raw.decode("utf-8", errors="replace")
+                    record["raw_text"] = text[:8192]  # generous cap for race data
                 except Exception:
                     pass
                 # Always include hex prefix for binary inspection
-                record["raw_hex_preview"] = bytes(data)[:256].hex()
-                record["raw_bytes_len"] = len(data)
+                record["raw_hex_preview"] = raw[:256].hex()
+                record["raw_bytes_len"] = len(raw)
+                # Save full raw bytes as base64 for offline re-decode
+
+                record["raw_b64"] = base64.b64encode(raw).decode("ascii")
+
+            # ── Race data extraction ──────────────────────────────────
+            # When we see a decoded MsgPack response from a race API,
+            # parse the race_simulate_data binary blob and write a
+            # structured race record to the "race" domain.
+            if (
+                domain == "network"
+                and record.get("event") in ("api_response", "api_send")
+                and "msgpack_decoded" in record
+            ):
+                try:
+                    race_record = try_process_race(record)
+                    if race_record and session_data:
+                        session_data.write("race", race_record)
+                except Exception as e:
+                    log.debug("  [race] Processing error: %s", e)
 
             if session_data:
                 session_data.write(domain, record)

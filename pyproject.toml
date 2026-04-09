@@ -6,6 +6,7 @@ requires-python = ">=3.10"
 dependencies = [
     "frida",
     "frida-tools",
+    "msgpack",
 ]
 
 [project.scripts]

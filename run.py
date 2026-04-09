@@ -79,7 +79,7 @@ def step_dump() -> bool:
         return False
 
     return run(
-        [PYTHON, "collect.py", "--modules", "dump", "network", "--label", "run"],
+        [PYTHON, "collect.py", "--modules", "dump", "network", "races", "--label", "run"],
         "Phase 3: Dump (capturing game state — play the game, Ctrl+C to stop)",
     )
 
