@@ -118,32 +118,47 @@ SCAN_KEYWORDS = [
     "msgpack",
     "httpclien",
     "webrequest",
+    "cute.http",
 ]
 
 # For trace mode: which classes to look at
 TRACE_CLASS_KEYWORDS = [
+    # Skills
     "skillbase",
     "skilldetail",
     "skillmanager",
+    "skillability",
+    # Race
     "racemana",
     "raceresult",
+    "racesimulate",
+    "racehorsedata",
+    "racehorsesimulate",
+    "raceui",
+    # Events / training
     "singlemodeevent",
     "singlemodechar",
+    "singlemodeload",
+    "singlemodestart",
+    "singlemodegain",
     "storyevent",
     "choicereward",
     "trainingview",
     "trainingcontrol",
-    # Network / API
-    "msgpack.formatter",
-    "task",
-    "httpclient",
-    "webrequest",
+    # Network / API — base classes
+    "cute.http",
+    "cutehttp",
+    "iwebrequest",
+    # Jikkyo
+    "jikkyomanag",
+    "jikkyocomment",
 ]
 
 # For trace mode: which method names are interesting (low-frequency event methods)
 TRACE_METHOD_PATTERNS = [
     "activate",
     "begin",
+    "beginview",
     "start",
     "end",
     "finish",
@@ -157,7 +172,13 @@ TRACE_METHOD_PATTERNS = [
     "deserialize",
     "serialize",
     "onclick",
-    "beginview",
+    "send",
+    "onerror",
+    "onsuccess",
+    "oncomplete",
+    "setheader",
+    "record",
+    "torace",
 ]
 
 # Signature patterns: method/field name substrings that indicate a class is
