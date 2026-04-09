@@ -200,7 +200,12 @@ function getNestedTypes(classPtr) {
 }
 
 function extractClassInfo(classPtr, fullName) {
-    const classInfo = { fullName, methods: {}, fields: {}, fieldList: [] };
+    const classInfo = {
+        fullName,
+        methods: Object.create(null),
+        fields: Object.create(null),
+        fieldList: [],
+    };
 
     // Methods
     const iter = Memory.alloc(ptrSize);

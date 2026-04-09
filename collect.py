@@ -39,12 +39,32 @@ JS_DIR = os.path.join(SCRIPT_DIR, "js")
 
 # ── Logging ────────────────────────────────────────────────────────────────
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
-)
+LOG_FILE = os.path.join(SCRIPT_DIR, "collect.log")
+JS_LOG_FILE = os.path.join(SCRIPT_DIR, "collect_js.log")
+
+# Main logger — console + file, important events only
 log = logging.getLogger("clairvoyance")
+log.setLevel(logging.DEBUG)
+
+_console = logging.StreamHandler(sys.stdout)
+_console.setLevel(logging.INFO)
+_console.setFormatter(logging.Formatter("%(message)s"))
+log.addHandler(_console)
+
+_logfile = logging.FileHandler(LOG_FILE, mode="w", encoding="utf-8")
+_logfile.setLevel(logging.DEBUG)
+_logfile.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+log.addHandler(_logfile)
+
+# JS logger — verbose Frida console.log output, file only (no console spam)
+js_log = logging.getLogger("clairvoyance.js")
+js_log.setLevel(logging.DEBUG)
+js_log.propagate = False
+
+_js_logfile = logging.FileHandler(JS_LOG_FILE, mode="w", encoding="utf-8")
+_js_logfile.setLevel(logging.DEBUG)
+_js_logfile.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
+js_log.addHandler(_js_logfile)
 
 # ── CLI ────────────────────────────────────────────────────────────────────
 
@@ -151,13 +171,16 @@ def on_message(message, data):
     elif msg_type == "error":
         has_error = True
         log.error("  [X] JS Error: %s", message.get("description", ""))
+        js_log.error("[JS ERROR] %s", message.get("description", ""))
         stack = message.get("stack")
         if stack:
             for line in str(stack).splitlines()[:5]:
                 log.error("      %s", line)
+                js_log.error("  %s", line)
 
     elif msg_type == "log":
-        log.info("  [JS] %s", message.get("payload", ""))
+        # Verbose JS console output → file only, not console
+        js_log.info("%s", message.get("payload", ""))
 
 
 # ── Main ───────────────────────────────────────────────────────────────────
@@ -247,6 +270,11 @@ def main():
     log.info("")
     log.info("=" * 60)
     log.info("  Done.")
+    log.info("  Log files:")
+    log.info("    Main:    %s", LOG_FILE)
+    log.info("    JS:      %s", JS_LOG_FILE)
+    if has_error:
+        log.info("  ⚠ Errors occurred — check logs above.")
     log.info("=" * 60)
 
 
