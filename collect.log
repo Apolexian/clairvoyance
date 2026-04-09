@@ -1,0 +1,51 @@
+2026-04-09 15:42:45,075 [INFO] ============================================================
+2026-04-09 15:42:45,075 [INFO]   Clairvoyance — Collector
+2026-04-09 15:42:45,075 [INFO] ============================================================
+2026-04-09 15:42:45,075 [INFO] 
+2026-04-09 15:42:45,075 [INFO]   Modules: dump, network, races
+2026-04-09 15:42:45,076 [INFO]   Label: run
+2026-04-09 15:42:45,076 [INFO] 
+2026-04-09 15:42:45,076 [INFO] Session directory: C:\Users\nikit\Documents\clairvoyance\sessions\2026-04-09T14-42-45_run
+2026-04-09 15:42:45,289 [INFO] Attached to UmamusumePrettyDerby.exe
+2026-04-09 15:42:45,355 [INFO]   [dump] Loaded 100 target classes (score >= 30, max 100) from interesting.json
+2026-04-09 15:42:45,370 [INFO] [*] Loading hooks...
+2026-04-09 15:42:45,563 [INFO]   [dump] 180 hooks installed
+2026-04-09 15:42:46,044 [INFO]   [network] 903 hooks installed
+2026-04-09 15:42:46,281 [INFO]   [races] 8 hooks installed
+2026-04-09 15:42:46,783 [INFO] 
+2026-04-09 15:42:46,783 [INFO]   ✓ 1091 total hooks active across 3 modules.
+2026-04-09 15:42:46,783 [INFO]   Session: C:\Users\nikit\Documents\clairvoyance\sessions\2026-04-09T14-42-45_run
+2026-04-09 15:42:46,783 [INFO] 
+2026-04-09 15:42:46,783 [INFO]   Collecting data — play the game!
+2026-04-09 15:42:46,783 [INFO]   Ctrl+C to stop.
+2026-04-09 15:42:46,783 [INFO] 
+2026-04-09 15:42:56,784 [INFO]   [10s] Collected — network: 6
+2026-04-09 15:43:06,784 [INFO]   [20s] Collected — network: 10
+2026-04-09 15:43:16,701 [INFO]   [race] Race API detected but no simulation binary (horse info only)
+2026-04-09 15:43:16,784 [INFO]   [30s] Collected — network: 16 | race: 2323
+2026-04-09 15:43:26,785 [INFO]   [40s] Collected — network: 16 | race: 2347
+2026-04-09 15:43:36,785 [INFO]   [50s] Collected — network: 16 | race: 2347
+2026-04-09 15:43:46,785 [INFO]   [60s] Collected — network: 16 | race: 2347
+2026-04-09 15:43:56,785 [INFO]   [70s] Collected — network: 16 | race: 2347
+2026-04-09 15:44:06,785 [INFO]   [80s] Collected — network: 16 | race: 2347
+2026-04-09 15:44:16,786 [INFO]   [90s] Collected — network: 16 | race: 2348
+2026-04-09 15:44:26,786 [INFO]   [100s] Collected — network: 20 | race: 2366
+2026-04-09 15:44:36,786 [INFO]   [110s] Collected — network: 30 | race: 2366
+2026-04-09 15:44:46,787 [INFO]   [120s] Collected — network: 30 | race: 2366
+2026-04-09 15:44:53,556 [INFO] 
+[*] Stopped by user.
+2026-04-09 15:44:53,556 [INFO]   [race-dump] Processing 2322 accumulated frame records...
+2026-04-09 15:44:53,558 [INFO]   [race-dump] Assembled 291 frames x 991 horses from 2322 dump records
+2026-04-09 15:44:53,562 [INFO]   [race-dump] Analysis: 991 horses, 291 frames, distance=2044, 23 skills, 20 lifecycle
+2026-04-09 15:44:53,566 [INFO]   [race-dump] Race analysis written to race.jsonl
+2026-04-09 15:44:53,567 [INFO] 
+2026-04-09 15:44:53,567 [INFO]   Session saved: C:\Users\nikit\Documents\clairvoyance\sessions\2026-04-09T14-42-45_run
+2026-04-09 15:44:53,567 [INFO]     network: 32 records
+2026-04-09 15:44:53,567 [INFO]     race: 2367 records
+2026-04-09 15:44:53,567 [INFO] 
+2026-04-09 15:44:53,567 [INFO] ============================================================
+2026-04-09 15:44:53,567 [INFO]   Done.
+2026-04-09 15:44:53,567 [INFO]   Log files:
+2026-04-09 15:44:53,567 [INFO]     Main:    C:\Users\nikit\Documents\clairvoyance\collect.log
+2026-04-09 15:44:53,567 [INFO]     JS:      C:\Users\nikit\Documents\clairvoyance\collect_js.log
+2026-04-09 15:44:53,567 [INFO] ============================================================

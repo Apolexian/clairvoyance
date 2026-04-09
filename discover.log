@@ -1,0 +1,145 @@
+2026-04-09 15:42:38,591 [INFO] ============================================================
+2026-04-09 15:42:38,591 [INFO]   Clairvoyance — Discovery
+2026-04-09 15:42:38,591 [INFO] ============================================================
+2026-04-09 15:42:38,591 [INFO] 
+2026-04-09 15:42:38,592 [INFO]   MODE: FULL NAMESPACE DUMP + KEYWORD + SIGNATURE
+2026-04-09 15:42:38,592 [INFO]   Dumping EVERY class in Gallop namespace,
+2026-04-09 15:42:38,592 [INFO]   plus keyword matches and signature-based discovery.
+2026-04-09 15:42:38,592 [INFO]   Keywords: ability, choice, cute.http, event, factor, formatter, httpclien, jikkyo, masterdata, msgpack, parameter, race, request, response, result, scenario, singlemode, skill, status, story, task, training, webrequest
+2026-04-09 15:42:38,592 [INFO]   Signatures: abilitytype, abilityvalue, activate, beginrace, charaid, choicereward, deserialize, eventchoice, finishrace, lot, lottery, onresponse, proc, raceresult, sendrequest, serialize, skillid, trainedchara
+2026-04-09 15:42:38,592 [INFO] 
+2026-04-09 15:42:38,801 [INFO] Attached to UmamusumePrettyDerby.exe
+2026-04-09 15:42:38,808 [INFO] [*] Loading script...
+2026-04-09 15:42:41,882 [INFO] 
+2026-04-09 15:42:41,882 [INFO] ============================================================
+2026-04-09 15:42:41,883 [INFO]   SCAN COMPLETE
+2026-04-09 15:42:41,883 [INFO]   17841 classes matched out of 49322 total
+2026-04-09 15:42:41,883 [INFO]     by keyword:   14621
+2026-04-09 15:42:41,883 [INFO]     by namespace: 2549
+2026-04-09 15:42:41,883 [INFO]     by signature: 1558
+2026-04-09 15:42:41,883 [INFO] ============================================================
+2026-04-09 15:42:41,890 [INFO] 
+2026-04-09 15:42:41,890 [INFO]   ── SKILL (544 classes) ──
+2026-04-09 15:42:41,890 [INFO]     <CoroutineSkillGetChangeView>d__40  [6 methods, 5 fields]
+2026-04-09 15:42:41,891 [INFO]     <OnEndSkillCutin>d__110  [6 methods, 5 fields]
+2026-04-09 15:42:41,891 [INFO]     <PlaySkillCutInForSkip>d__71  [6 methods, 3 fields]
+2026-04-09 15:42:41,891 [INFO]     <PlaySkillCutinCoroutine>d__63  [6 methods, 16 fields]
+2026-04-09 15:42:41,891 [INFO]     <PlaySkillListOutAnimation>d__24  [6 methods, 4 fields]
+2026-04-09 15:42:41,891 [INFO]     <SkipSkillCutInWithWaitingReadyToPlay>d__72  [6 methods, 3 fields]
+2026-04-09 15:42:41,891 [INFO]     AcquirableSkill  [2 methods, 1 fields]
+2026-04-09 15:42:41,891 [INFO]     AcquiredSkill  [2 methods, 0 fields]
+2026-04-09 15:42:41,891 [INFO]     ActivateSpecificTagGroupSkillCountCoef  [1 methods, 2 fields]
+2026-04-09 15:42:41,891 [INFO]     AvailableSkillSet  [1 methods, 4 fields]
+2026-04-09 15:42:41,891 [INFO]     DialogSingleModeSkillUpgradeCondition  [2 methods, 2 fields]
+2026-04-09 15:42:41,891 [INFO]     Gallop.CardGetCardEventSkillRequest  [2 methods, 1 fields]
+2026-04-09 15:42:41,891 [INFO]     Gallop.CardGetCardEventSkillResponse  [1 methods, 1 fields]
+2026-04-09 15:42:41,891 [INFO]     Gallop.CardGetCardEventSkillResponse.CommonResponse  [1 methods, 1 fields]
+2026-04-09 15:42:41,892 [INFO]     Gallop.CardGetCardEventSkillTask  [7 methods, 5 fields]
+2026-04-09 15:42:41,892 [INFO]     Gallop.CardSkillUpgradeRequest  [2 methods, 4 fields]
+2026-04-09 15:42:41,892 [INFO]     Gallop.CardSkillUpgradeResponse  [1 methods, 1 fields]
+2026-04-09 15:42:41,892 [INFO]     Gallop.CardSkillUpgradeResponse.CommonResponse  [1 methods, 2 fields]
+2026-04-09 15:42:41,892 [INFO]     Gallop.CardSkillUpgradeTask  [7 methods, 5 fields]
+2026-04-09 15:42:41,892 [INFO]     Gallop.CutIn.Cutt.CutInTimelineData.SkillCutSettings  [2 methods, 8 fields]
+2026-04-09 15:42:41,892 [INFO]     ... and 524 more (see JSON dump)
+2026-04-09 15:42:41,892 [INFO] 
+2026-04-09 15:42:41,892 [INFO]   ── RACE (4051 classes) ──
+2026-04-09 15:42:41,892 [INFO]     <CancelReservedRaceIfReservedTurn>d__105  [6 methods, 2 fields]
+2026-04-09 15:42:41,892 [INFO]     <CaptureRace>d__32  [6 methods, 4 fields]
+2026-04-09 15:42:41,892 [INFO]     <ChallengeMatchRaceStartCommunication>d__9  [6 methods, 4 fields]
+2026-04-09 15:42:41,892 [INFO]     <ChangeViewDailyLegendRaceCoroutine>d__157  [6 methods, 2 fields]
+2026-04-09 15:42:41,892 [INFO]     <CloseDialogAndRaceReplayCoroutine>d__150  [6 methods, 3 fields]
+2026-04-09 15:42:41,892 [INFO]     <CloseDialogAndRaceStartCoroutine>d__142  [6 methods, 3 fields]
+2026-04-09 15:42:41,892 [INFO]     <CoroutineChangeGradeListToRaceList>d__40  [6 methods, 3 fields]
+2026-04-09 15:42:41,893 [INFO]     <CoroutineChangeRaceListToGradeList>d__38  [6 methods, 4 fields]
+2026-04-09 15:42:41,893 [INFO]     <CreateBossRaceCharacterModel>d__75  [6 methods, 10 fields]
+2026-04-09 15:42:41,893 [INFO]     <DailyRaceStartCommunication>d__7  [6 methods, 4 fields]
+2026-04-09 15:42:41,893 [INFO]     <DownloadRaceInfoAssets>d__37  [6 methods, 4 fields]
+2026-04-09 15:42:41,893 [INFO]     <DownloadRaceInfoAssets>d__40  [6 methods, 3 fields]
+2026-04-09 15:42:41,893 [INFO]     <EndRaceSkipCoroutine>d__214  [6 methods, 4 fields]
+2026-04-09 15:42:41,893 [INFO]     <EntryRaceAsync>d__94  [6 methods, 6 fields]
+2026-04-09 15:42:41,893 [INFO]     <ExecChangeViewSingleModeScenarioTeamRace>d__160  [6 methods, 2 fields]
+2026-04-09 15:42:41,893 [INFO]     <GetRaceReward>d__29  [6 methods, 3 fields]
+2026-04-09 15:42:41,893 [INFO]     <GoToRace>d__39  [6 methods, 3 fields]
+2026-04-09 15:42:41,893 [INFO]     <GoToRaceAsync>d__15  [6 methods, 3 fields]
+2026-04-09 15:42:41,894 [INFO]     <GoToRaceAsync>d__4  [6 methods, 3 fields]
+2026-04-09 15:42:41,894 [INFO]     <GoToRaceAsync>d__5  [6 methods, 3 fields]
+2026-04-09 15:42:41,894 [INFO]     ... and 4031 more (see JSON dump)
+2026-04-09 15:42:41,894 [INFO] 
+2026-04-09 15:42:41,894 [INFO]   ── EVENT (2575 classes) ──
+2026-04-09 15:42:41,894 [INFO]     <Amazon-Runtime-IPaginator<Amazon-CognitoIdentityProvider-Model-AdminListUserAuthEventsResponse>-PaginateAsync>d__8  [13 methods, 12 fields]
+2026-04-09 15:42:41,894 [INFO]     <CoroutinePartListToStoryList>d__24  [6 methods, 4 fields]
+2026-04-09 15:42:41,894 [INFO]     <CoroutinePartListToStoryList>d__25  [6 methods, 4 fields]
+2026-04-09 15:42:41,894 [INFO]     <CoroutineStoryListToPartList>d__18  [6 methods, 3 fields]
+2026-04-09 15:42:41,894 [INFO]     <CoroutineStoryListToPartList>d__21  [6 methods, 3 fields]
+2026-04-09 15:42:41,894 [INFO]     <DelayEvent>d__1  [6 methods, 4 fields]
+2026-04-09 15:42:41,894 [INFO]     <ExecuteEventTopApi>d__37  [6 methods, 3 fields]
+2026-04-09 15:42:41,894 [INFO]     <GetAllSubStoryDownloadAssets>d__14  [6 methods, 4 fields]
+2026-04-09 15:42:41,894 [INFO]     <GetAllSubStoryDownloadAssetsForExtra>d__2  [6 methods, 7 fields]
+2026-04-09 15:42:41,894 [INFO]     <GetAllSubStoryDownloadAssetsForMainStory>d__53  [6 methods, 7 fields]
+2026-04-09 15:42:41,894 [INFO]     <InitializeForStory>d__27  [6 methods, 4 fields]
+2026-04-09 15:42:41,894 [INFO]     <InitializeStory>d__18  [6 methods, 4 fields]
+2026-04-09 15:42:41,894 [INFO]     <InitializeViewPlayStory>d__25  [6 methods, 4 fields]
+2026-04-09 15:42:41,894 [INFO]     <LoadStoryEventTop>d__22  [6 methods, 2 fields]
+2026-04-09 15:42:41,894 [INFO]     <PlayInspirationEvent>d__48  [6 methods, 11 fields]
+2026-04-09 15:42:41,894 [INFO]     <PlayShortStoryAsync>d__88  [6 methods, 3 fields]
+2026-04-09 15:42:41,894 [INFO]     <PlayStorySuccessionStartAsync>d__385  [6 methods, 5 fields]
+2026-04-09 15:42:41,894 [INFO]     <PlayTrainingTipsEventText>d__50  [6 methods, 7 fields]
+2026-04-09 15:42:41,894 [INFO]     <PlayTrainingTipsEventWipe>d__52  [6 methods, 17 fields]
+2026-04-09 15:42:41,894 [INFO]     <ShowNewStory>d__48  [6 methods, 4 fields]
+2026-04-09 15:42:41,894 [INFO]     ... and 2555 more (see JSON dump)
+2026-04-09 15:42:41,894 [INFO] 
+2026-04-09 15:42:41,895 [INFO]   ── TRAINING (2236 classes) ──
+2026-04-09 15:42:41,895 [INFO]     <<PlayTrainingCut>g__CoroutineEndCutSnapShot|10>d  [6 methods, 3 fields]
+2026-04-09 15:42:41,895 [INFO]     <>c__DisplayClass57_0.<<PlayTrainingCut>g__CoroutineEndCutSnapShot|10>d  [6 methods, 3 fields]
+2026-04-09 15:42:41,895 [INFO]     <BackFromTraining>d__116  [6 methods, 3 fields]
+2026-04-09 15:42:41,895 [INFO]     <LoadAndSimulateWithSingleModeRetry>d__3  [6 methods, 5 fields]
+2026-04-09 15:42:41,895 [INFO]     <OpenRankListSingleModeBehavior>d__255  [6 methods, 3 fields]
+2026-04-09 15:42:41,895 [INFO]     <PlayAoharuTrainingCutin>d__5  [6 methods, 9 fields]
+2026-04-09 15:42:41,895 [INFO]     <PlayScenarioTrainingCut>d__78  [6 methods, 5 fields]
+2026-04-09 15:42:41,896 [INFO]     <PlaySingleModeRouteResultDialogAsync>d__379  [6 methods, 5 fields]
+2026-04-09 15:42:41,896 [INFO]     <PlayTrainingCut>d__57  [6 methods, 18 fields]
+2026-04-09 15:42:41,896 [INFO]     <PlayTrainingCutEndAsync>d__60  [6 methods, 6 fields]
+2026-04-09 15:42:41,896 [INFO]     <PlayTrainingCutt>d__4  [7 methods, 9 fields]
+2026-04-09 15:42:41,896 [INFO]     <PlayTrainingSaboriAsync>d__56  [6 methods, 8 fields]
+2026-04-09 15:42:41,896 [INFO]     <SendSingleModeLoadRequest>d__54  [6 methods, 6 fields]
+2026-04-09 15:42:41,896 [INFO]     <SingleModeContinueDialog>d__258  [6 methods, 3 fields]
+2026-04-09 15:42:41,896 [INFO]     <SingleModeTrophy>d__272  [6 methods, 4 fields]
+2026-04-09 15:42:41,896 [INFO]     <TrainingAsync>d__55  [6 methods, 11 fields]
+2026-04-09 15:42:41,896 [INFO]     <TrainingChallengeSequence>d__49  [6 methods, 3 fields]
+2026-04-09 15:42:41,896 [INFO]     <TrainingChallengeTop>d__50  [6 methods, 3 fields]
+2026-04-09 15:42:41,896 [INFO]     <WaitSingleModeStart>d__32  [6 methods, 2 fields]
+2026-04-09 15:42:41,896 [INFO]     AbstractTrainingCuttScenarioController  [7 methods, 1 fields]
+2026-04-09 15:42:41,896 [INFO]     ... and 2216 more (see JSON dump)
+2026-04-09 15:42:41,896 [INFO] 
+2026-04-09 15:42:41,896 [INFO]   ── OTHER (8435 classes) ──
+2026-04-09 15:42:41,896 [INFO]     <>c  [29 methods, 23 fields]
+2026-04-09 15:42:41,896 [INFO]     <>c__DisplayClass0_0  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass0_1  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass100_1  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass105_0  [2 methods, 2 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass10_0  [2 methods, 8 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass10_1  [2 methods, 2 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass10_2  [2 methods, 7 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass10_3  [3 methods, 3 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass10_4  [2 methods, 3 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass111_0  [3 methods, 3 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass114_0  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass115_0  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass116_0  [2 methods, 2 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass117_0  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass11_0  [4 methods, 2 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass11_1  [3 methods, 2 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass12_0  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass131_0  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     <>c__DisplayClass13_0  [2 methods, 1 fields]
+2026-04-09 15:42:41,897 [INFO]     ... and 8415 more (see JSON dump)
+2026-04-09 15:42:43,549 [INFO] Saved discovery artifact: C:\Users\nikit\Documents\clairvoyance\discovery\class_dump.json
+2026-04-09 15:42:43,549 [INFO] 
+2026-04-09 15:42:43,549 [INFO]   Full class dump saved: C:\Users\nikit\Documents\clairvoyance\discovery\class_dump.json
+2026-04-09 15:42:43,549 [INFO] 
+2026-04-09 15:42:43,549 [INFO] ============================================================
+2026-04-09 15:42:43,549 [INFO]   Done.
+2026-04-09 15:42:43,549 [INFO]   Log files:
+2026-04-09 15:42:43,549 [INFO]     Main:    C:\Users\nikit\Documents\clairvoyance\discover.log
+2026-04-09 15:42:43,549 [INFO]     JS:      C:\Users\nikit\Documents\clairvoyance\discover_js.log
+2026-04-09 15:42:43,549 [INFO] ============================================================
