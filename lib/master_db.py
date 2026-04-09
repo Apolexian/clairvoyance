@@ -253,7 +253,7 @@ def chara_name(chara_id: int | str | None) -> str:
         return str(chara_id)
 
     names = _load_text_data(CATEGORY_CHARA_NAME)
-    return names.get(cid, f"chara:{cid}")
+    return names.get(cid, f"Character #{cid}")
 
 
 def race_instance_name(race_instance_id: int | str | None) -> str:

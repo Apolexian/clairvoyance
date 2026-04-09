@@ -222,7 +222,7 @@
         <img src="{{ summary.chara_image }}" alt="" class="chara-portrait">
         {% endif %}
         <div class="chara-info">
-          <div class="chara-name">{{ summary.chara_name or ('chara:' ~ summary.chara_id) }}</div>
+          <div class="chara-name">{{ summary.chara_name or 'Unknown Character' }}</div>
           {% if summary.card_name %}
           <div class="chara-card">{{ summary.card_name }}</div>
           {% endif %}
@@ -274,7 +274,14 @@
         <tbody>
           {% for rr in summary.race_results %}
           <tr>
-            <td>{{ rr.race_name or ('race:' ~ rr.race_instance_id) }}</td>
+            <td>
+              {% set race_name_display = rr.race_name or ('Race ' ~ loop.index) %}
+              {% if races and loop.index0 < races|length %}
+                <a href="/session/{{ session.name }}/race/{{ races[loop.index0]._race_index }}" style="color:var(--accent); text-decoration:none;">{{ race_name_display }}</a>
+              {% else %}
+                {{ race_name_display }}
+              {% endif %}
+            </td>
             <td>
               {% if rr.result_order == 1 %}<span class="result-1st">🥇 1st</span>
               {% elif rr.result_order == 2 %}<span class="result-2nd">🥈 2nd</span>
@@ -391,6 +398,25 @@
       </div>
       {% endif %}
     </div>
+
+    <!-- Detected Races (links to detail pages) -->
+    {% if races %}
+    <div class="summary-card" style="grid-column: 1 / -1;">
+      <h3>Detected Races ({{ races | length }})</h3>
+      <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+        {% for race in races %}
+        <a href="/session/{{ session.name }}/race/{{ race._race_index }}" style="text-decoration:none; padding:0.4rem 0.8rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.82rem; color:var(--text); transition:border-color 0.15s, background 0.15s; display:inline-block;">
+          <span style="color:var(--accent); font-weight:600;">{{ race._race_label }}</span>
+          <span style="color:var(--text-muted); font-size:0.72rem; margin-left:0.3rem;">
+            {{ race._source }}
+            {% if race.horse_summaries %}· {{ race.horse_summaries | length }} horses{% endif %}
+          </span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
   </div>
   {% else %}
   <div class="summary-empty" style="text-align:center; padding:2rem;">
@@ -445,7 +471,7 @@
         <div class="timeline-time">{{ ev._ts[11:19] if ev._ts else '' }}</div>
         <div class="timeline-content">
           <div class="timeline-summary" onclick="toggleDetail(this, '{{ session.name }}', {{ loop.index0 }})">
-            <span class="timeline-badge {{ ev.event }}">{{ ev.event }}</span>
+            <span class="timeline-badge {{ ev.event }}">{% if ev.event == 'api_send' %}→ Sent{% elif ev.event == 'api_response' %}← Response{% else %}{{ ev.event }}{% endif %}</span>
             <strong>{{ ev.api }}</strong>
             <span class="timeline-expand-icon">▶</span>
             {% if ev.chara_stats %}

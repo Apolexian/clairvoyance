@@ -256,10 +256,10 @@ def session_detail(name: str):
     summary = build_session_summary(name)
 
     # Resolve IDs to human-readable names via master DB
-    if summary.get("chara_id"):
+    if summary.get("chara_id") not in (None, 0, ""):
         summary["chara_name"] = chara_name(summary["chara_id"])
         summary["chara_image"] = uma_image_url(summary["chara_id"], summary.get("card_id"))
-    if summary.get("card_id"):
+    if summary.get("card_id") not in (None, 0, ""):
         summary["card_name"] = card_name(summary["card_id"])
     for sc_id in summary.get("support_card_ids", []):
         summary.setdefault("support_card_names", []).append(

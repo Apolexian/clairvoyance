@@ -289,8 +289,8 @@ function trackWidth() { return wrap.clientWidth - MARGIN_L - MARGIN_R; }
 // ── Camera ────────────────────────────────────────────────────────────
 let _cam = { centerD: 0, windowSize: 400, viewStart: 0, viewEnd: 400 };
 
-function updateCamera() {
-  const f = FRAMES[frameIdx];
+function updateCamera(interpFrame) {
+  const f = interpFrame || FRAMES[frameIdx];
   if (!f) return;
   let minD = Infinity, maxD = -Infinity;
   for (let i = 0; i < NUM_H; i++) {
@@ -331,11 +331,11 @@ const LANE_VIEW_MIN = _laneMin - LANE_PAD;
 const LANE_VIEW_MAX = _laneMax + LANE_PAD;
 
 // ── Terrain Y ─────────────────────────────────────────────────────────
-function terrainBaseY() { return wrap.clientHeight * 0.58; }
+function terrainBaseY() { return wrap.clientHeight * 0.78; }
 
 function terrainScale() {
   if (!HAS_ELEVATION) return 0;
-  const maxPx = wrap.clientHeight * 0.25;
+  const maxPx = wrap.clientHeight * 0.18;
   return Math.min(maxPx / ELEV_RANGE, 300);
 }
 
@@ -349,8 +349,8 @@ function getTerrainY(d) {
 function horseY(hd, hi) {
   const d = hd ? hd.d : 0;
   const surfY = getTerrainY(d);
-  const LANE_HEIGHT = Math.min(120, wrap.clientHeight * 0.22);
-  const pad = HORSE_R + 4;
+  const LANE_HEIGHT = Math.min(280, wrap.clientHeight * 0.45);
+  const pad = HORSE_R + 6;
 
   if (HAS_LANE_DATA && hd && hd.lane !== undefined) {
     const ratio = (hd.lane - LANE_VIEW_MIN) / (LANE_VIEW_MAX - LANE_VIEW_MIN);
@@ -383,6 +383,40 @@ function updateActiveSkills() {
   }
 }
 
+// ── Frame interpolation (lerp between data frames for smooth motion) ──
+// The game sends ~1 data frame per second but we render at 60fps.
+// Hakuraku does the same: lerp distance, lane, speed, hp between frames.
+function lerpVal(a, b, t) { return a + (b - a) * t; }
+
+function getInterpolatedFrame() {
+  if (FRAMES.length === 0) return null;
+  const i = frameIdx;
+  const f0 = FRAMES[i];
+  const f1 = FRAMES[i + 1] || f0;
+  const t0 = f0.time || 0;
+  const t1 = f1.time || t0;
+  const alpha = (i < FRAMES.length - 1 && t1 > t0)
+    ? Math.max(0, Math.min(1, (simTime - t0) / (t1 - t0)))
+    : 0;
+
+  // Build interpolated frame
+  const interp = { time: lerpVal(t0, t1, alpha) };
+  for (let hi = 0; hi < NUM_H; hi++) {
+    const h0 = f0[hi];
+    const h1 = f1[hi] || h0;
+    if (!h0) continue;
+    interp[hi] = {
+      d:    lerpVal(h0.d    || 0, h1.d    || 0, alpha),
+      s:    lerpVal(h0.s    || 0, h1.s    || 0, alpha),
+      hp:   lerpVal(h0.hp   || 0, h1.hp   || 0, alpha),
+      lane: lerpVal(h0.lane || 0, h1.lane || 0, alpha),
+      t_id: alpha >= 0.5 ? (h1.t_id || 0) : (h0.t_id || 0),
+      blk:  alpha >= 0.5 ? (h1.blk  || -1) : (h0.blk  || -1),
+    };
+  }
+  return interp;
+}
+
 // ── Main draw ─────────────────────────────────────────────────────────
 function draw() {
   const W = wrap.clientWidth;
@@ -397,8 +431,8 @@ function draw() {
     return;
   }
 
-  const f = FRAMES[frameIdx];
-  updateCamera();
+  const f = getInterpolatedFrame();
+  updateCamera(f);
 
   // ── Sky gradient ──────────────────────────────────────
   const skyGrd = ctx.createLinearGradient(0, 0, 0, H * 0.4);
@@ -481,9 +515,9 @@ function draw() {
   if (HAS_LANE_DATA) {
     const refD = _cam.centerD;
     const sY = getTerrainY(refD);
-    const LH = Math.min(120, H * 0.22);
+    const LH = Math.min(280, H * 0.45);
     ctx.fillStyle = '#ffffff18';
-    ctx.font = '8px sans-serif';
+    ctx.font = '9px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('INNER', MARGIN_L + 4, sY - HORSE_R - 2);
     ctx.fillText('OUTER', MARGIN_L + 4, sY - HORSE_R - LH);
@@ -572,15 +606,15 @@ function draw() {
 
     // Name label in gutter
     const label = horseLabel(hi);
-    ctx.font = '11px sans-serif';
+    ctx.font = 'bold 12px sans-serif';
     const lw = ctx.measureText(label).width;
-    ctx.fillStyle = 'rgba(13,17,23,0.7)';
-    roundRect(ctx, MARGIN_L - lw - 16, y - 8, lw + 12, 16, 4);
+    ctx.fillStyle = 'rgba(13,17,23,0.8)';
+    roundRect(ctx, MARGIN_L - lw - 18, y - 9, lw + 14, 18, 4);
     ctx.fill();
     ctx.fillStyle = color;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    ctx.fillText(label, MARGIN_L - 10, y);
+    ctx.fillText(label, MARGIN_L - 11, y);
 
     // Skill popup above horse
     if (hasSkill) {
@@ -774,7 +808,7 @@ function setSort(field, btn) {
 }
 
 function updateInfoPanel() {
-  const f = FRAMES[frameIdx];
+  const f = getInterpolatedFrame();
   if (!f) return;
   const filter = (document.getElementById('horse-filter').value || '').toLowerCase();
   const curTime = f.time || 0;

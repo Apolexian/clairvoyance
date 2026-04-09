@@ -445,45 +445,130 @@
 </section>
 {% endif %}
 
-<!-- Skill activations for API races -->
+<!-- Skill activations for API races — Visual Timeline -->
 {% if race.skill_activations and source == 'api' %}
 <section class="section">
-  <h2>Skill Activation Timeline</h2>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Time</th><th>Horse</th><th>Skill</th>
-        <th>Duration</th><th>Distance</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for sk in race.skill_activations %}
-      <tr>
-        <td>{{ "%.1f"|format(sk.frame_time) }}s</td>
-        <td>
-          {% set hi = sk.horse_index %}
-          {% set match = summaries | selectattr('horse_index', 'equalto', hi) | first %}
-          {% if match and match.chara_id %}{{ match.chara_id | chara_name }}{% else %}Horse {{ hi }}{% endif %}
-        </td>
-        <td><span class="skill-badge" title="ID: {{ sk.skill_id }}">{{ sk.skill_id | skill_name }}</span></td>
-        <td>
-          {% if sk.duration_secs is defined and sk.duration_secs > 0 %}
-            {{ sk.duration_secs }}s
-          {% elif sk.duration_raw is defined and sk.duration_raw == 0 %}
-            <span style="color:var(--text-muted)">instant</span>
-          {% else %}
-            <span style="color:var(--text-muted)">passive</span>
+  <h2>Race Timeline</h2>
+  <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:0.75rem;">
+    Skills, dueling &amp; compete events shown per horse. Hover bars for details.
+  </p>
+
+  {% set ns = namespace(race_end_time=0) %}
+  {% for sk in race.skill_activations %}
+    {% set t = sk.frame_time + (sk.duration_secs or 2) %}
+    {% if t > ns.race_end_time %}{% set ns.race_end_time = t %}{% endif %}
+  {% endfor %}
+  {% if race.compete_events %}
+    {% for ce in race.compete_events %}
+      {% set t = ce.frame_time + (ce.duration or 0) %}
+      {% if t > ns.race_end_time %}{% set ns.race_end_time = t %}{% endif %}
+    {% endfor %}
+  {% endif %}
+  {% set race_end_time = ns.race_end_time %}
+
+  <!-- Distance ruler -->
+  <div style="margin-left:140px; margin-right:10px; display:flex; justify-content:space-between; font-size:0.65rem; color:var(--text-muted); margin-bottom:2px;">
+    <span>0s</span>
+    {% if race_end_time > 20 %}<span>{{ (race_end_time * 0.25)|int }}s</span>{% endif %}
+    <span>{{ (race_end_time * 0.5)|int }}s</span>
+    {% if race_end_time > 20 %}<span>{{ (race_end_time * 0.75)|int }}s</span>{% endif %}
+    <span>{{ race_end_time|int }}s</span>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:3px;">
+    {% for h in summaries %}
+    {% set hi = h.horse_index %}
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <!-- Horse label -->
+      <div style="min-width:130px; max-width:130px; text-align:right; font-size:0.78rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+        {% set img = uma_image(h.chara_id, h.card_id) %}
+        {% if img %}<img src="{{ img }}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; object-position:center 15%; vertical-align:middle; margin-right:4px;" alt="">{% endif %}
+        <strong>{% if h.chara_id %}{{ h.chara_id | chara_name }}{% else %}Horse {{ hi }}{% endif %}</strong>
+      </div>
+      <!-- Timeline bar -->
+      <div style="flex:1; position:relative; height:22px; background:var(--bg-card); border:1px solid var(--border); border-radius:3px; overflow:hidden;">
+        <!-- Skill activations -->
+        {% for sk in race.skill_activations %}
+        {% if sk.horse_index == hi and sk.duration_secs is defined and sk.duration_secs > 0 and race_end_time > 0 %}
+          {% set left = (sk.frame_time / race_end_time * 100)|round(2) %}
+          {% set width = (sk.duration_secs / race_end_time * 100)|round(2) %}
+          <div style="position:absolute; left:{{ left }}%; width:{{ width }}%; height:100%; background:rgba(249,199,79,0.4); border-left:2px solid var(--gold); display:flex; align-items:center; justify-content:center; overflow:hidden;"
+               title="{{ sk.skill_id | skill_name }} · {{ sk.frame_time|round(1) }}s–{{ (sk.frame_time + sk.duration_secs)|round(1) }}s ({{ sk.duration_secs }}s)">
+            <span style="font-size:0.55rem; color:var(--gold); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 2px;">{{ sk.skill_id | skill_name }}</span>
+          </div>
+        {% endif %}
+        {% endfor %}
+        <!-- Compete events -->
+        {% if race.compete_events %}
+        {% for ce in race.compete_events %}
+        {% if ce.horse_index == hi and ce.duration is defined and ce.duration > 0 and race_end_time > 0 %}
+          {% set left = (ce.frame_time / race_end_time * 100)|round(2) %}
+          {% set width = (ce.duration / race_end_time * 100)|round(2) %}
+          {% if ce.type_id == 5 %}
+          <div style="position:absolute; left:{{ left }}%; width:{{ width }}%; height:100%; background:rgba(248,113,113,0.3); border-left:2px solid #f87171; border-top:2px solid #f87171;"
+               title="⚔ Dueling · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
+          {% elif ce.type_id == 4 %}
+          <div style="position:absolute; left:{{ left }}%; width:{{ width }}%; height:100%; background:rgba(251,191,36,0.25); border-left:2px solid #fbbf24; border-top:2px solid #fbbf24;"
+               title="🏃 Spot Struggle · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
+          {% elif ce.type_id == 8 %}
+          <div style="position:absolute; left:{{ left }}%; width:{{ width }}%; height:100%; background:rgba(88,166,255,0.25); border-left:2px solid var(--accent);"
+               title="⚡ Before Spurt · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
           {% endif %}
-        </td>
-        <td>
-          {% if sk.start_distance is defined and sk.end_distance is defined and sk.duration_secs > 0 %}
-            {{ sk.start_distance|int }}–{{ sk.end_distance|int }}m
-          {% else %}-{% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex; gap:1rem; margin-top:0.5rem; font-size:0.72rem; color:var(--text-muted);">
+    <span><span style="display:inline-block; width:12px; height:12px; background:rgba(249,199,79,0.5); border-left:2px solid var(--gold); vertical-align:middle; margin-right:3px;"></span>Skill</span>
+    <span><span style="display:inline-block; width:12px; height:12px; background:rgba(248,113,113,0.35); border-left:2px solid #f87171; vertical-align:middle; margin-right:3px;"></span>Duel</span>
+    <span><span style="display:inline-block; width:12px; height:12px; background:rgba(251,191,36,0.3); border-left:2px solid #fbbf24; vertical-align:middle; margin-right:3px;"></span>Spot Struggle</span>
+    <span><span style="display:inline-block; width:12px; height:12px; background:rgba(88,166,255,0.3); border-left:2px solid var(--accent); vertical-align:middle; margin-right:3px;"></span>Before Spurt</span>
+  </div>
+
+  <!-- Detailed table (collapsed by default) -->
+  <details style="margin-top:0.75rem;">
+    <summary style="cursor:pointer; color:var(--accent); font-size:0.82rem;">Show detailed skill list</summary>
+    <table class="data-table" style="margin-top:0.5rem;">
+      <thead>
+        <tr>
+          <th>Time</th><th>Horse</th><th>Skill</th>
+          <th>Duration</th><th>Distance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sk in race.skill_activations %}
+        <tr>
+          <td>{{ "%.1f"|format(sk.frame_time) }}s</td>
+          <td>
+            {% set hi = sk.horse_index %}
+            {% set match = summaries | selectattr('horse_index', 'equalto', hi) | first %}
+            {% if match and match.chara_id %}{{ match.chara_id | chara_name }}{% else %}Horse {{ hi }}{% endif %}
+          </td>
+          <td><span class="skill-badge" title="ID: {{ sk.skill_id }}">{{ sk.skill_id | skill_name }}</span></td>
+          <td>
+            {% if sk.duration_secs is defined and sk.duration_secs > 0 %}
+              {{ sk.duration_secs }}s
+            {% elif sk.duration_raw is defined and sk.duration_raw == 0 %}
+              <span style="color:var(--text-muted)">instant</span>
+            {% else %}
+              <span style="color:var(--text-muted)">passive</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if sk.start_distance is defined and sk.end_distance is defined and sk.duration_secs > 0 %}
+              {{ sk.start_distance|int }}–{{ sk.end_distance|int }}m
+            {% else %}-{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </details>
 </section>
 {% endif %}
 
