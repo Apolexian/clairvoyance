@@ -1,0 +1,58 @@
+2026-04-09 18:44:11,850 [INFO] ============================================================
+2026-04-09 18:44:11,850 [INFO]   Clairvoyance — Collector
+2026-04-09 18:44:11,850 [INFO] ============================================================
+2026-04-09 18:44:11,850 [INFO] 
+2026-04-09 18:44:11,850 [INFO]   Modules: network, races, dump, skills, events
+2026-04-09 18:44:11,850 [INFO]   Label: 2
+2026-04-09 18:44:11,850 [INFO] 
+2026-04-09 18:44:11,851 [INFO] Session directory: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\sessions\2026-04-09T17-44-11_2
+2026-04-09 18:44:12,063 [INFO] Attached to UmamusumePrettyDerby.exe
+2026-04-09 18:44:12,183 [INFO]   [dump] Loaded 100 target classes (score >= 30, max 100) from interesting.json
+2026-04-09 18:44:12,199 [INFO] [*] Loading hooks...
+2026-04-09 18:44:12,723 [INFO]   [network] 903 hooks installed
+2026-04-09 18:44:12,966 [INFO]   [races] 8 hooks installed
+2026-04-09 18:44:13,141 [INFO]   [dump] 8 hooks installed
+2026-04-09 18:44:13,285 [INFO]   [skills] 4 hooks installed
+2026-04-09 18:44:13,461 [INFO]   [events] 1 hooks installed
+2026-04-09 18:44:13,968 [INFO] 
+2026-04-09 18:44:13,968 [INFO]   924 total hooks active across 5 modules.
+2026-04-09 18:44:13,968 [INFO]   Session: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\sessions\2026-04-09T17-44-11_2
+2026-04-09 18:44:13,968 [INFO] 
+2026-04-09 18:44:13,968 [INFO]   Collecting data — play the game!
+2026-04-09 18:44:13,968 [INFO]   Ctrl+C to stop.
+2026-04-09 18:44:13,968 [INFO] 
+2026-04-09 18:44:23,971 [INFO]   [10s] Collected - network: 4
+2026-04-09 18:44:33,974 [INFO]   [20s] Collected - network: 7
+2026-04-09 18:44:43,977 [INFO]   [30s] Collected - network: 12
+2026-04-09 18:44:50,529 [WARNING]   [race] Race API 'SingleModeFreeRaceStart' detected but no race_simulate_data found. Top keys: ['is_short', 'current_turn', 'viewer_id', 'device', 'device_id', 'device_name', 'graphics_device_name', 'ip_address', 'platform_os_version', 'carrier', 'keychain', 'locale', 'button_info', 'dmm_viewer_id', 'dmm_onetime_token', 'steam_id', 'steam_session_ticket'], data keys: []
+2026-04-09 18:44:51,878 [INFO]   [race] Found race_simulate_data in SingleModeFreeRaceStart (len=27372)
+2026-04-09 18:44:51,882 [INFO]   [race] Parsed race: 18 horses, 128 frames, 23 events, 12 skill activations
+2026-04-09 18:44:51,883 [INFO]   [race] Wrote race record from SingleModeFreeRaceStart (race_simulation)
+2026-04-09 18:44:53,979 [INFO]   [40s] Collected - network: 16 | race: 2306
+2026-04-09 18:45:03,982 [INFO]   [50s] Collected - network: 16 | race: 2349
+2026-04-09 18:45:13,986 [INFO]   [60s] Collected - network: 16 | race: 2349
+2026-04-09 18:45:23,988 [INFO]   [70s] Collected - network: 16 | race: 2349
+2026-04-09 18:45:33,991 [INFO]   [80s] Collected - network: 16 | race: 2349
+2026-04-09 18:45:43,993 [INFO]   [90s] Collected - network: 16 | race: 2349
+2026-04-09 18:45:53,995 [INFO]   [100s] Collected - network: 16 | race: 2365
+2026-04-09 18:46:03,998 [INFO]   [110s] Collected - network: 16 | race: 2368
+2026-04-09 18:46:14,002 [INFO]   [120s] Collected - network: 20 | race: 2368
+2026-04-09 18:46:24,006 [INFO] 
+[*] Stopping collector...
+2026-04-09 18:46:24,006 [INFO]   [race-dump] Accumulated: 2304 frame records, 20 lifecycle, 43 skill
+2026-04-09 18:46:24,006 [INFO]   [race-dump] Processing 2304 accumulated frame records...
+2026-04-09 18:46:24,006 [INFO]   [race-dump] Detected 18 horses from initial frame pattern
+2026-04-09 18:46:24,006 [INFO]   [race-dump] Assembled 128 frames x 18 horses from 2304 dump records
+2026-04-09 18:46:24,008 [INFO]   [race-dump] Analysis: 18 horses, 128 frames, distance=2071, 43 skills, 20 lifecycle
+2026-04-09 18:46:24,009 [INFO]   [race-dump] Race analysis written to race.jsonl
+2026-04-09 18:46:24,010 [INFO] 
+2026-04-09 18:46:24,010 [INFO]   Session saved: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\sessions\2026-04-09T17-44-11_2
+2026-04-09 18:46:24,010 [INFO]     network: 30 records
+2026-04-09 18:46:24,010 [INFO]     race: 2369 records
+2026-04-09 18:46:24,010 [INFO] 
+2026-04-09 18:46:24,011 [INFO] ============================================================
+2026-04-09 18:46:24,011 [INFO]   Done.
+2026-04-09 18:46:24,011 [INFO]   Log files:
+2026-04-09 18:46:24,011 [INFO]     Main:    C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\collect.log
+2026-04-09 18:46:24,011 [INFO]     JS:      C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\collect_js.log
+2026-04-09 18:46:24,011 [INFO] ============================================================

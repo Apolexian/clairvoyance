@@ -1,0 +1,21 @@
+{
+  "created": "2026-04-09T17:46:24.010406+00:00",
+  "counts": {
+    "network": 30,
+    "race": 2369
+  },
+  "modules": [
+    "network",
+    "races",
+    "dump",
+    "skills",
+    "events"
+  ],
+  "hookStatuses": {
+    "network": 903,
+    "races": 8,
+    "dump": 8,
+    "skills": 4,
+    "events": 1
+  }
+}

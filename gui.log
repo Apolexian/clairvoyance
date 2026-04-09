@@ -1,0 +1,32 @@
+2026-04-09 18:43:48,926 [INFO] clairvoyance.gui - Clairvoyance GUI starting - log file: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\gui.log
+2026-04-09 18:43:58,239 [DEBUG] clairvoyance.gui - Looking for tool: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discover.exe (APP_DIR=C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance)
+2026-04-09 18:43:58,324 [INFO] clairvoyance.gui - Setup started (pid=6920): C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discover.exe --all
+2026-04-09 18:44:04,226 [INFO] clairvoyance.gui - Process exited with code 0 (pid 6920)
+2026-04-09 18:44:04,227 [DEBUG] clairvoyance.gui - Looking for tool: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\analyse.exe (APP_DIR=C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance)
+2026-04-09 18:44:05,474 [INFO] clairvoyance.gui - Process exited with code 0 (pid 32224)
+2026-04-09 18:44:05,474 [INFO] clairvoyance.gui - Setup pipeline done - interesting.json confirmed at C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discovery\interesting.json
+2026-04-09 18:44:11,657 [DEBUG] clairvoyance.gui - Looking for tool: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\collect.exe (APP_DIR=C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance)
+2026-04-09 18:44:11,741 [INFO] clairvoyance.gui - Recorder started (pid=32632): C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\collect.exe --label 2 --modules network races dump skills events
+2026-04-09 18:46:24,030 [INFO] clairvoyance.gui - Recorder process exited with code 0
+2026-04-09 18:46:47,412 [ERROR] clairvoyance.gui - Unhandled exception: '<' not supported between instances of 'int' and 'str'
+Traceback (most recent call last):
+  File "flask\app.py", line 1523, in full_dispatch_request
+  File "flask\app.py", line 1509, in dispatch_request
+  File "gui.py", line 192, in race_replay
+  File "flask\templating.py", line 148, in render_template
+  File "flask\templating.py", line 128, in _render
+  File "jinja2\environment.py", line 1301, in render
+  File "jinja2\environment.py", line 936, in handle_exception
+  File "C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\_internal\templates\replay.html", line 1, in top-level template code
+    {% extends "layout.html" %}
+  File "C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\_internal\templates\layout.html", line 268, in top-level template code
+    {% block scripts %}{% endblock %}
+  File "C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\_internal\templates\replay.html", line 100, in block 'scripts'
+    const DATA    = {{ replay | tojson }};
+  File "jinja2\filters.py", line 1688, in do_tojson
+  File "jinja2\utils.py", line 658, in htmlsafe_json_dumps
+  File "flask\json\__init__.py", line 131, in dumps
+  File "json\__init__.py", line 238, in dumps
+  File "json\encoder.py", line 199, in encode
+  File "json\encoder.py", line 257, in iterencode
+TypeError: '<' not supported between instances of 'int' and 'str'
