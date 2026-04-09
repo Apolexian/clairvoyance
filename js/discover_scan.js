@@ -94,12 +94,14 @@
             fields: info.fieldList,
         };
 
-        // Only log to console in keyword/signature mode (namespace dumps too noisy)
-        if (!byNamespace || Object.keys(results).length <= 50) {
-            console.log("  [" + matchReason + "] " + fullName);
+        // Progress: log every 1000 matches instead of every single class
+        var totalSoFar = matchedByKeyword + matchedByNamespace + matchedBySignature;
+        if (totalSoFar % 1000 === 0) {
+            console.log("  ... " + totalSoFar + " matches so far (" + scanned + " scanned)");
         }
     });
 
+    // Also log periodic scan progress for really large assemblies
     var total = Object.keys(results).length;
     console.log("");
     console.log("Scan complete:");

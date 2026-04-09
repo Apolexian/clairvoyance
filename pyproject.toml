@@ -6,11 +6,15 @@ requires-python = ">=3.10"
 dependencies = [
     "frida",
     "frida-tools",
+    "msgpack",
+    "flask",
+    "pywebview",
 ]
 
 [project.scripts]
 discover = "clairvoyance.discover:main"
 collect = "clairvoyance.collect:main"
+gui = "clairvoyance.gui:main"
 
 # ── Dev dependencies (formatting / linting) ────────────────────────────
 
@@ -18,6 +22,10 @@ collect = "clairvoyance.collect:main"
 dev = [
     "ruff",
     "pre-commit",
+]
+build = [
+    "pyinstaller>=6.0",
+    "pillow>=10.0",
 ]
 
 # ── Ruff ───────────────────────────────────────────────────────────────
