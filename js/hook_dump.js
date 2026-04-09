@@ -83,64 +83,7 @@
         return false;
     }
 
-    // ── Type readers ──────────────────────────────────────────────────
-    // Given a field type string and a pointer, read the value.
-
-    function readField(objPtr, offset, typeName) {
-        try {
-            if (typeName === "System.Int32" || typeName === "int") {
-                return objPtr.add(offset).readS32();
-            }
-            if (typeName === "System.UInt32" || typeName === "uint") {
-                return objPtr.add(offset).readU32();
-            }
-            if (typeName === "System.Int64" || typeName === "long") {
-                return objPtr.add(offset).readS64().toNumber();
-            }
-            if (typeName === "System.UInt64" || typeName === "ulong") {
-                return objPtr.add(offset).readU64().toNumber();
-            }
-            if (typeName === "System.Single" || typeName === "float") {
-                return objPtr.add(offset).readFloat();
-            }
-            if (typeName === "System.Double" || typeName === "double") {
-                return objPtr.add(offset).readDouble();
-            }
-            if (typeName === "System.Boolean" || typeName === "bool") {
-                return objPtr.add(offset).readU8() !== 0;
-            }
-            if (typeName === "System.Byte" || typeName === "byte") {
-                return objPtr.add(offset).readU8();
-            }
-            if (typeName === "System.SByte" || typeName === "sbyte") {
-                return objPtr.add(offset).readS8();
-            }
-            if (typeName === "System.Int16" || typeName === "short") {
-                return objPtr.add(offset).readS16();
-            }
-            if (typeName === "System.UInt16" || typeName === "ushort") {
-                return objPtr.add(offset).readU16();
-            }
-            if (typeName === "System.String" || typeName === "string") {
-                var strPtr = objPtr.add(offset).readPointer();
-                if (strPtr.isNull()) return null;
-                return readIl2cppString(strPtr);
-            }
-            // For arrays, just report the length (reading elements would be recursive)
-            if (typeName.endsWith("[]")) {
-                var arrPtr = objPtr.add(offset).readPointer();
-                if (arrPtr.isNull()) return null;
-                // il2cpp array: length at offset 24 (64-bit) or 12 (32-bit)
-                var lenOffset = ptrSize === 8 ? 24 : 12;
-                var len = arrPtr.add(lenOffset).readS32();
-                return { _array: true, length: len };
-            }
-            // Skip complex types we can't read (other objects, generics, etc.)
-            return undefined;
-        } catch (e) {
-            return undefined;
-        }
-    }
+    // readField is now provided by il2cpp_helpers.js (shared utility)
 
     // ── Scan and hook ─────────────────────────────────────────────────
 
@@ -190,13 +133,17 @@
                 return function (self) {
                     if (!self || self.isNull()) return;
                     var snapshot = Object.create(null);
+                    var count = 0;
                     for (var ri = 0; ri < rFields.length; ri++) {
                         var rf = rFields[ri];
                         var val = readField(self, rf.offset, rf.type);
                         if (val !== undefined) {
                             snapshot[rf.name] = val;
+                            count++;
                         }
                     }
+                    // Skip empty snapshots (nothing readable)
+                    if (count === 0) return;
                     send({
                         type: "collect",
                         domain: cat,

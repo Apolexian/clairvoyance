@@ -2,6 +2,7 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #     "frida",
+#     "msgpack",
 # ]
 # ///
 
@@ -208,9 +209,17 @@ def on_message(message, data):
             domain = payload.get("domain", "raw")
             record = payload.get("data", {})
 
-            # If the JS side sent binary data (e.g. SSL_read/write buffers),
-            # attach it to the record as a hex + utf8-attempt representation.
+            # If the JS side sent binary data (e.g. SSL_read/write buffers,
+            # or postData byte arrays from Task hooks), decode it.
             if data is not None and len(data) > 0:
+                # Try to decode as MsgPack first (game uses MsgPack serialization)
+                try:
+                    import msgpack
+
+                    decoded = msgpack.unpackb(bytes(data), raw=False, strict_map_key=False)
+                    record["msgpack_decoded"] = decoded
+                except Exception:
+                    pass
                 # Try to decode as UTF-8 text (HTTP headers are ASCII)
                 try:
                     text = bytes(data).decode("utf-8", errors="replace")

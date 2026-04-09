@@ -41,6 +41,7 @@
             if (!classInfo.methods[mName]) continue;
 
             const captured = className + "." + mName;
+            const capturedInfo = classInfo;
             if (
                 hookMethod(classInfo, mName, -1, {
                     onEnter: function (args) {
@@ -49,29 +50,10 @@
                             class: captured,
                         };
 
-                        // Try to read any il2cpp string fields (event text, etc.)
+                        // Read all primitive fields using the shared utility
                         const self = args[0];
-                        for (const f of classInfo.fieldList) {
-                            const lower = f.name.toLowerCase();
-                            if (f.type === "System.String" || f.type === "string") {
-                                try {
-                                    const strPtr = self.add(f.offset).readPointer();
-                                    const str = readIl2cppString(strPtr);
-                                    if (str) record["field_" + f.name] = str;
-                                } catch (e) {}
-                            }
-                            // Read int32 fields that look interesting
-                            if (
-                                (lower.includes("id") ||
-                                    lower.includes("index") ||
-                                    lower.includes("count")) &&
-                                f.type.includes("Int32")
-                            ) {
-                                try {
-                                    record["field_" + f.name] = self.add(f.offset).readS32();
-                                } catch (e) {}
-                            }
-                        }
+                        var fields = readObjectFields(self, capturedInfo.fieldList);
+                        if (fields) record.fields = fields;
 
                         send({ type: "collect", domain: "events", data: record });
                     },
@@ -93,17 +75,44 @@
             if (!classInfo.methods[mName]) continue;
 
             const captured = className + "." + mName;
+            const capturedInfo = classInfo;
             if (
                 hookMethod(classInfo, mName, -1, {
                     onEnter: function (args) {
-                        send({
-                            type: "collect",
-                            domain: "events",
-                            data: {
-                                event: "user_choice",
-                                class: captured,
-                            },
-                        });
+                        var record = {
+                            event: "user_choice",
+                            class: captured,
+                        };
+
+                        // Read integer arguments — args[1] onwards are the
+                        // actual parameters (args[0] = this in il2cpp).
+                        // Choice methods commonly take an int index.
+                        try {
+                            var a1 = args[1];
+                            if (a1) {
+                                var intVal = a1.toInt32();
+                                // Sanity check — choice indices are small ints
+                                if (intVal >= 0 && intVal < 100) {
+                                    record.arg1_int = intVal;
+                                }
+                            }
+                        } catch (e) {}
+                        try {
+                            var a2 = args[2];
+                            if (a2) {
+                                var intVal2 = a2.toInt32();
+                                if (intVal2 >= 0 && intVal2 < 100000) {
+                                    record.arg2_int = intVal2;
+                                }
+                            }
+                        } catch (e) {}
+
+                        // Read fields from the controller (this)
+                        var self = args[0];
+                        var fields = readObjectFields(self, capturedInfo.fieldList);
+                        if (fields) record.fields = fields;
+
+                        send({ type: "collect", domain: "events", data: record });
                     },
                 })
             )

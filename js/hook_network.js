@@ -305,6 +305,19 @@
     var formatterHooks = 0;
     var MAX_FORMATTER_HOOKS = 300; // safety cap
 
+    // Note: Request/Response class lookup is handled by Layer 3's
+    // dataClassPtrs / getDataClassInfo. Formatters use the same cache.
+
+    function getReqRespFields(formatterShortName) {
+        // formatterShortName is e.g. "Gallop_SingleModeFreeChoiceRewardRequest"
+        // Convert to "Gallop.SingleModeFreeChoiceRewardRequest"
+        var className = formatterShortName.replace(/_/g, ".");
+        // Reuse Layer 3's data class lookup (populated later during setup,
+        // but formatter hooks fire at runtime after setup completes)
+        var info = getDataClassInfo(className);
+        return info ? info.fieldList : null;
+    }
+
     for (var fqn in formatterClasses) {
         if (formatterHooks >= MAX_FORMATTER_HOOKS) break;
 
@@ -313,19 +326,36 @@
             var info = extractClassInfo(entry.classPtr, fqn);
             var sName = entry.shortName;
 
-            // Hook Serialize
+            // Hook Serialize — reads the value being serialized (request data)
             if (info.methods["Serialize"]) {
                 if (
                     hookMethod(info, "Serialize", -1, {
-                        onEnter: function () {
+                        onEnter: function (args) {
+                            // args: [this, ref writer, value, options]
+                            // For instance methods, args[0]=this, args[1]=writer,
+                            // args[2]=value (the request/response object), args[3]=options
+                            var record = {
+                                event: "msgpack_serialize",
+                                formatter: sName,
+                                direction: "request",
+                            };
+
+                            // Try to read fields from the value object
+                            try {
+                                var valuePtr = args[2];
+                                if (valuePtr && !valuePtr.isNull()) {
+                                    var fields = getReqRespFields(sName);
+                                    if (fields) {
+                                        var data = readObjectFields(valuePtr, fields);
+                                        if (data) record.fields = data;
+                                    }
+                                }
+                            } catch (e) {}
+
                             send({
                                 type: "collect",
                                 domain: "network",
-                                data: {
-                                    event: "msgpack_serialize",
-                                    formatter: sName,
-                                    direction: "request",
-                                },
+                                data: record,
                             });
                         },
                     })
@@ -334,19 +364,35 @@
                 }
             }
 
-            // Hook Deserialize
+            // Hook Deserialize — reads the return value (response data)
             if (info.methods["Deserialize"]) {
                 if (
                     hookMethod(info, "Deserialize", -1, {
-                        onEnter: function () {
+                        onEnter: function (args) {
+                            this._formatterName = sName;
+                        },
+                        onLeave: function (retval) {
+                            var record = {
+                                event: "msgpack_deserialize",
+                                formatter: this._formatterName,
+                                direction: "response",
+                            };
+
+                            // Try to read fields from the return value
+                            try {
+                                if (retval && !retval.isNull()) {
+                                    var fields = getReqRespFields(this._formatterName);
+                                    if (fields) {
+                                        var data = readObjectFields(retval, fields);
+                                        if (data) record.fields = data;
+                                    }
+                                }
+                            } catch (e) {}
+
                             send({
                                 type: "collect",
                                 domain: "network",
-                                data: {
-                                    event: "msgpack_deserialize",
-                                    formatter: sName,
-                                    direction: "response",
-                                },
+                                data: record,
                             });
                         },
                     })
@@ -377,6 +423,13 @@
     // We scan for ALL Gallop.*Task classes and hook Send + Deserialize
     // on each one. When Send fires, `this` IS the task, so we can read
     // the class name and postData directly.
+    //
+    // IMPORTANT: Send, Deserialize, and OnError are base-class methods
+    // shared across ALL ~300 Task subclasses (same compiled address).
+    // hookMethod deduplicates — only ONE callback is installed.
+    // We use readClassName(self) at runtime to determine the concrete
+    // type, then look up the matching Request/Response class to read
+    // its fields dynamically.
 
     console.log("[network] Scanning for Gallop API Task classes...");
 
@@ -404,6 +457,67 @@
         }
     }
 
+    // Helper: derive API short name from a task class name
+    function taskToApiName(taskClassName) {
+        return taskClassName.replace("Gallop.", "").replace(/Task$/, "");
+    }
+
+    // ── Step 1: Pre-scan Request/Response data classes ────────────────
+    //
+    // Each API has matching Gallop.*Request and Gallop.*Response classes
+    // with actual data fields (story_id, choice_number, stat changes etc.)
+    // We extract their field lists so we can read Response objects after
+    // Deserialize returns them, and Request objects if we find them.
+
+    console.log("[network] Scanning for Request/Response data classes...");
+
+    var dataClassPtrs = Object.create(null); // className → classPtr
+
+    iterAssemblyClasses(function (classPtr, fullName, ns, name) {
+        if (ns !== "Gallop") return;
+        if (name.endsWith("Request") || name.endsWith("Response")) {
+            dataClassPtrs[fullName] = classPtr;
+        }
+    });
+
+    // Extract field info for each Request/Response class
+    var dataClassInfoCache = Object.create(null); // className → classInfo
+
+    function getDataClassInfo(className) {
+        if (className in dataClassInfoCache) return dataClassInfoCache[className];
+        var cp = dataClassPtrs[className];
+        if (!cp) {
+            dataClassInfoCache[className] = null;
+            return null;
+        }
+        var info = extractClassInfoWithParents(cp, className);
+        dataClassInfoCache[className] = info;
+        return info;
+    }
+
+    // Cache for task class info extracted at runtime (keyed by class name)
+    var taskClassInfoCache = Object.create(null);
+
+    function getTaskClassInfo(objPtr, className) {
+        if (className in taskClassInfoCache) return taskClassInfoCache[className];
+        try {
+            var klass = objPtr.readPointer();
+            if (!klass || klass.isNull()) return null;
+            var info = extractClassInfoWithParents(klass, className);
+            taskClassInfoCache[className] = info;
+            return info;
+        } catch (e) {
+            taskClassInfoCache[className] = null;
+            return null;
+        }
+    }
+
+    console.log(
+        "[network] Found " + Object.keys(dataClassPtrs).length + " Request/Response data classes.",
+    );
+
+    // ── Step 2: Scan Task classes ─────────────────────────────────────
+
     var taskClasses = {};
 
     iterAssemblyClasses(function (classPtr, fullName, ns, name) {
@@ -419,9 +533,15 @@
     var taskCount = Object.keys(taskClasses).length;
     console.log("[network] Found " + taskCount + " Gallop.*Task classes.");
 
-    // Hook Send and Deserialize on each task class
+    // ── Step 3: Install hooks ─────────────────────────────────────────
+    //
+    // Because Send/Deserialize/OnError are inherited base-class methods,
+    // hookMethod will only succeed for the FIRST task (dedup).
+    // The callbacks must NOT rely on closure-captured task-specific vars —
+    // they resolve everything dynamically via readClassName(self).
+
     var taskHooks = 0;
-    var MAX_TASK_HOOKS = 600; // safety cap (2 hooks × ~300 tasks)
+    var MAX_TASK_HOOKS = 600;
 
     for (var taskFqn in taskClasses) {
         if (taskHooks >= MAX_TASK_HOOKS) break;
@@ -430,35 +550,58 @@
             var classPtr = taskClasses[fullName];
             var info = extractClassInfo(classPtr, fullName);
 
-            // Derive a short API name: "Gallop.SingleModeCheckEventTask" → "SingleModeCheckEvent"
-            var shortName = fullName.replace("Gallop.", "").replace(/Task$/, "");
-
             // Hook Send — fires when the game sends this API request
             if (info.methods["Send"]) {
                 if (
                     hookMethod(info, "Send", -1, {
                         onEnter: function (args) {
                             var self = args[0];
-                            // Read actual concrete class name (handles inheritance)
-                            var taskName = readClassName(self) || fullName;
+                            var taskName = readClassName(self) || "UnknownTask";
+                            var apiName = taskToApiName(taskName);
 
-                            // Read postData size (byte[] at offset 16)
+                            // Read postData byte[] at offset 16
                             var postDataSize = -1;
+                            var postDataBuf = null;
                             try {
                                 var arrPtr = self.add(16).readPointer();
-                                postDataSize = readArrayLength(arrPtr);
-                            } catch (e) {}
+                                if (arrPtr && !arrPtr.isNull()) {
+                                    postDataSize = readArrayLength(arrPtr);
+                                    if (postDataSize > 0 && postDataSize <= 1048576) {
+                                        postDataBuf = readIl2cppByteArray(arrPtr, 65536);
+                                        if (!postDataBuf) {
+                                            console.log(
+                                                "[network] WARN: readIl2cppByteArray returned null for " +
+                                                    apiName +
+                                                    " (len=" +
+                                                    postDataSize +
+                                                    ", arrPtr=" +
+                                                    arrPtr +
+                                                    ")",
+                                            );
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                console.log(
+                                    "[network] ERROR reading postData for " + apiName + ": " + e,
+                                );
+                            }
 
-                            send({
-                                type: "collect",
-                                domain: "network",
-                                data: {
-                                    event: "api_send",
-                                    task: taskName,
-                                    api: shortName,
-                                    postDataBytes: postDataSize,
+                            var record = {
+                                event: "api_send",
+                                task: taskName,
+                                api: apiName,
+                                postDataBytes: postDataSize,
+                            };
+
+                            send(
+                                {
+                                    type: "collect",
+                                    domain: "network",
+                                    data: record,
                                 },
-                            });
+                                postDataBuf,
+                            );
                         },
                     })
                 ) {
@@ -466,23 +609,103 @@
                 }
             }
 
-            // Hook Deserialize — fires when the response is parsed
+            // Hook Deserialize — fires when the response is parsed.
+            // retval is the deserialized Response object.
+            // args[1] may be the raw response byte[] or a MessagePackReader.
             if (info.methods["Deserialize"]) {
                 if (
                     hookMethod(info, "Deserialize", -1, {
                         onEnter: function (args) {
-                            var self = args[0];
-                            var taskName = readClassName(self) || fullName;
+                            this._self = args[0];
+                            this._taskName = readClassName(args[0]) || "UnknownTask";
+                            this._apiName = taskToApiName(this._taskName);
 
-                            send({
-                                type: "collect",
-                                domain: "network",
-                                data: {
-                                    event: "api_response",
-                                    task: taskName,
-                                    api: shortName,
+                            // Try to capture raw response bytes from args[1]
+                            // (byte[] parameter to Deserialize)
+                            this._rawBuf = null;
+                            try {
+                                var rawArg = args[1];
+                                if (rawArg && !rawArg.isNull()) {
+                                    // Check if it looks like an il2cpp array
+                                    var len = readArrayLength(rawArg);
+                                    if (len > 0 && len < 1048576) {
+                                        this._rawBuf = readIl2cppByteArray(rawArg, 65536);
+                                    }
+                                }
+                            } catch (e) {}
+                        },
+                        onLeave: function (retval) {
+                            var record = {
+                                event: "api_response",
+                                task: this._taskName,
+                                api: this._apiName,
+                            };
+
+                            // ── Read Response object fields from retval ──
+                            // Deserialize returns the typed Response object
+                            // (e.g. SingleModeFreeCheckEventResponse).
+                            // Look up its class info and read all primitive fields.
+                            try {
+                                if (retval && !retval.isNull()) {
+                                    // Get the actual Response class name from retval's klass
+                                    var retClassName = readClassName(retval);
+                                    if (retClassName) {
+                                        record.responseClass = retClassName;
+                                        var respInfo = getDataClassInfo(retClassName);
+                                        if (!respInfo) {
+                                            // Fallback: extract fields on the fly via IL2CPP reflection
+                                            try {
+                                                var retKlass = retval.readPointer();
+                                                if (!retKlass.isNull()) {
+                                                    respInfo = extractClassInfoWithParents(
+                                                        retKlass,
+                                                        retClassName,
+                                                    );
+                                                }
+                                            } catch (e) {}
+                                        }
+                                        if (respInfo && respInfo.fieldList.length > 0) {
+                                            var fields = readObjectFields(
+                                                retval,
+                                                respInfo.fieldList,
+                                            );
+                                            if (fields) record.responseFields = fields;
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                console.log(
+                                    "[network] WARN: failed reading retval for " +
+                                        this._apiName +
+                                        ": " +
+                                        e,
+                                );
+                            }
+
+                            // ── Also try reading task object fields after Deserialize ──
+                            // Task classes end in "Task" not "Request"/"Response",
+                            // so they're not in dataClassPtrs. Extract live (cached).
+                            try {
+                                if (this._self && !this._self.isNull()) {
+                                    var taskInfo = getTaskClassInfo(this._self, this._taskName);
+                                    if (taskInfo && taskInfo.fieldList.length > 0) {
+                                        var tFields = readObjectFields(
+                                            this._self,
+                                            taskInfo.fieldList,
+                                        );
+                                        if (tFields) record.taskFields = tFields;
+                                    }
+                                }
+                            } catch (e) {}
+
+                            send(
+                                {
+                                    type: "collect",
+                                    domain: "network",
+                                    data: record,
                                 },
-                            });
+                                this._rawBuf || null,
+                            );
                         },
                     })
                 ) {
@@ -496,7 +719,7 @@
                     hookMethod(info, "OnError", -1, {
                         onEnter: function (args) {
                             var self = args[0];
-                            var taskName = readClassName(self) || fullName;
+                            var taskName = readClassName(self) || "UnknownTask";
 
                             send({
                                 type: "collect",
@@ -504,7 +727,7 @@
                                 data: {
                                     event: "api_error",
                                     task: taskName,
-                                    api: shortName,
+                                    api: taskToApiName(taskName),
                                 },
                             });
                         },
