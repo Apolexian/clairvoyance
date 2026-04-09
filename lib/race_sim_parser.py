@@ -12,11 +12,11 @@ Binary layout (all little-endian):
                i32 horseFrameSize, i32 horseResultSize             (16 bytes)
   Padding1:    i32 size + <size> bytes
   FrameBlock:  i32 frameCount, i32 frameSize, then frameCount frames
-    Frame:     f32 time + horseNum × HorseFrame
+    Frame:     f32 time + horseNum x HorseFrame
     HorseFrame: f32 distance, u16 lanePos, u16 speed,
                 u16 hp, i8 temptationMode, i8 blockFrontHorseIndex (12 bytes)
   Padding2:    i32 size + <size> bytes
-  HorseResults: horseNum × HorseResult
+  HorseResults: horseNum x HorseResult
     HorseResult: i32 finishOrder, f32 finishTime, f32 finishDiffTime,
                  f32 startDelayTime, u8 gutsOrder, u8 wizOrder,
                  f32 lastSpurtStartDistance, u8 runningStyle,
@@ -25,7 +25,7 @@ Binary layout (all little-endian):
   EventBlock:  i32 eventCount, then eventCount events
     Event:     i16 eventSize, then:
                f32 frameTime, i8 type, i8 paramCount,
-               paramCount × i32 param
+               paramCount x i32 param
 """
 
 from __future__ import annotations
@@ -36,7 +36,6 @@ import logging
 import struct
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
 
 log = logging.getLogger("clairvoyance")
 
@@ -54,10 +53,10 @@ class TemptationMode(IntEnum):
 
 class RunningStyle(IntEnum):
     NONE = 0
-    NIGE = 1       # Front-runner
-    SENKO = 2      # Stalker
-    SASHI = 3      # Betweener
-    OIKOMI = 4     # Chaser
+    NIGE = 1  # Front-runner
+    SENKO = 2  # Stalker
+    SASHI = 3  # Betweener
+    OIKOMI = 4  # Chaser
 
 
 class SimulateEventType(IntEnum):
@@ -298,7 +297,7 @@ def deserialize(data: bytes) -> RaceSimulateData:
     for _ in range(event_count):
         event_size = _read_i16(data, offset)
         offset += 2
-        event, new_offset = _deserialize_event(data, offset)
+        event, _new_offset = _deserialize_event(data, offset)
         result.events.append(event)
         offset += event_size
 
@@ -340,11 +339,11 @@ def _is_valid_frame_start(data: bytes, offset: int, horse_num: int) -> bool:
 
 
 def _normalize_lane_position(value: int) -> int:
-    return max(0, min(10000, round(value)))
+    return max(0, min(10000, value))
 
 
 def _normalize_speed(value: int) -> int:
-    return max(0, round(value))
+    return max(0, value)
 
 
 def _read_horse_frame_jp(data: bytes, offset: int) -> HorseFrame:
@@ -378,7 +377,9 @@ def _read_frame_jp(data: bytes, offset: int, horse_num: int) -> Frame:
     return frame
 
 
-def _find_next_block_start(data: bytes, search_start: int, horse_num: int, last_time: float) -> Optional[int]:
+def _find_next_block_start(
+    data: bytes, search_start: int, horse_num: int, last_time: float
+) -> int | None:
     frame_size = 4 + horse_num * HORSE_FRAME_SIZE
     offset = search_start
     while offset <= len(data) - frame_size:
@@ -411,8 +412,11 @@ def _comprehensive_block_detection(data: bytes, horse_num: int) -> list[Frame]:
     frame_size = 4 + horse_num * HORSE_FRAME_SIZE
     all_frames: list[Frame] = []
 
-    current_start = 32 if _is_valid_frame_start(data, 32, horse_num) else \
-        _find_next_block_start(data, 32, horse_num, -1.0)
+    current_start = (
+        32
+        if _is_valid_frame_start(data, 32, horse_num)
+        else _find_next_block_start(data, 32, horse_num, -1.0)
+    )
     last_time = -1.0
 
     while current_start is not None:
@@ -481,8 +485,9 @@ def _read_horse_result_jp(data: bytes, offset: int) -> tuple[HorseResult, int]:
     return result, next_offset
 
 
-def _parse_horse_results_near_offset(data: bytes, start_guess: int, horse_num: int) \
-        -> tuple[list[HorseResult], Optional[int]]:
+def _parse_horse_results_near_offset(
+    data: bytes, start_guess: int, horse_num: int
+) -> tuple[list[HorseResult], int | None]:
     end = min(start_guess + 128, len(data) - 1)
     for start_offset in range(start_guess, end, 4):
         results: list[HorseResult] = []
@@ -534,8 +539,9 @@ def _read_event_jp(data: bytes, offset: int) -> tuple[RaceEvent, int, int]:
     return event, type_id, cursor
 
 
-def _parse_event_sequence_with_count(data: bytes, start_offset: int, event_count: int) \
-        -> list[tuple[RaceEvent, int]]:
+def _parse_event_sequence_with_count(
+    data: bytes, start_offset: int, event_count: int
+) -> list[tuple[RaceEvent, int]]:
     events: list[tuple[RaceEvent, int]] = []
     offset = start_offset
     for _ in range(event_count):
@@ -551,8 +557,9 @@ def _parse_event_sequence_with_count(data: bytes, start_offset: int, event_count
     return events
 
 
-def _parse_events_near_offset(data: bytes, start_guess: int, event_count: int) \
-        -> list[tuple[RaceEvent, int]]:
+def _parse_events_near_offset(
+    data: bytes, start_guess: int, event_count: int
+) -> list[tuple[RaceEvent, int]]:
     best: list[tuple[RaceEvent, int]] = []
     for padding in range(9):
         start_offset = start_guess + padding
@@ -587,7 +594,7 @@ def deserialize_jp(data: bytes) -> RaceSimulateData:
     offset += RACE_STRUCT_SIZE
 
     # Padding 1
-    padding_size_1 = _read_i32(data, offset)
+    _padding_size_1 = _read_i32(data, offset)
 
     # Heuristic frame detection
     frames = _comprehensive_block_detection(data, horse_num)
@@ -596,11 +603,13 @@ def deserialize_jp(data: bytes) -> RaceSimulateData:
 
     # Horse results
     horse_results: list[HorseResult] = []
-    results_end_offset: Optional[int] = None
+    results_end_offset: int | None = None
 
     if post_frame_offset + 12 <= len(data):
         start_guess = post_frame_offset + 12
-        horse_results, results_end_offset = _parse_horse_results_near_offset(data, start_guess, horse_num)
+        horse_results, results_end_offset = _parse_horse_results_near_offset(
+            data, start_guess, horse_num
+        )
 
     if not horse_results:
         raise ValueError("Failed to parse JP horse results")
@@ -646,8 +655,7 @@ def deserialize_from_bytes(raw: bytes) -> RaceSimulateData:
             return deserialize_jp(raw)
         except Exception as jp_err:
             raise ValueError(
-                f"Failed to parse race data. "
-                f"Global: {global_err}. JP: {jp_err}"
+                f"Failed to parse race data. Global: {global_err}. JP: {jp_err}"
             ) from jp_err
 
 
@@ -674,17 +682,23 @@ def running_style_name(style: int) -> str:
 
 
 def temptation_mode_name(mode: int) -> str:
-    names = {0: "NULL", 1: "POSITION_SASHI", 2: "POSITION_SENKO",
-             3: "POSITION_NIGE", 4: "BOOST"}
+    names = {0: "NULL", 1: "POSITION_SASHI", 2: "POSITION_SENKO", 3: "POSITION_NIGE", 4: "BOOST"}
     return names.get(mode, f"UNKNOWN_{mode}")
 
 
 def event_type_name(t: int) -> str:
     names = {
-        0: "SCORE", 1: "CHALLENGE_MATCH_POINT", 2: "NOUSE_2",
-        3: "SKILL", 4: "COMPETE_TOP", 5: "COMPETE_FIGHT",
-        6: "RELEASE_CONSERVE_POWER", 7: "STAMINA_LIMIT_BREAK_BUFF",
-        8: "COMPETE_BEFORE_SPURT", 9: "STAMINA_KEEP", 10: "SECURE_LEAD",
+        0: "SCORE",
+        1: "CHALLENGE_MATCH_POINT",
+        2: "NOUSE_2",
+        3: "SKILL",
+        4: "COMPETE_TOP",
+        5: "COMPETE_FIGHT",
+        6: "RELEASE_CONSERVE_POWER",
+        7: "STAMINA_LIMIT_BREAK_BUFF",
+        8: "COMPETE_BEFORE_SPURT",
+        9: "STAMINA_KEEP",
+        10: "SECURE_LEAD",
     }
     return names.get(t, f"UNKNOWN_{t}")
 
@@ -772,9 +786,11 @@ def _event_to_dict(e: RaceEvent) -> dict:
         if len(e.params) >= 3:
             d["skill_duration_raw"] = e.params[2]
     # Annotate compete events
-    elif e.type in (SimulateEventType.COMPETE_TOP, SimulateEventType.COMPETE_FIGHT,
-                    SimulateEventType.COMPETE_BEFORE_SPURT):
+    elif e.type in (
+        SimulateEventType.COMPETE_TOP,
+        SimulateEventType.COMPETE_FIGHT,
+        SimulateEventType.COMPETE_BEFORE_SPURT,
+    ):
         if len(e.params) >= 1:
             d["horse_index"] = e.params[0]
     return d
-

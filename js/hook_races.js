@@ -111,9 +111,13 @@
                                 ) {
                                     try {
                                         if (f.type.includes("Single")) {
-                                            record["field_" + f.name] = self.add(f.offset).readFloat();
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readFloat();
                                         } else {
-                                            record["field_" + f.name] = self.add(f.offset).readS32();
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readS32();
                                         }
                                     } catch (e) {}
                                 }
@@ -189,9 +193,13 @@
                                 ) {
                                     try {
                                         if (f.type.includes("Single")) {
-                                            record["field_" + f.name] = self.add(f.offset).readFloat();
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readFloat();
                                         } else {
-                                            record["field_" + f.name] = self.add(f.offset).readS32();
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readS32();
                                         }
                                     } catch (e) {}
                                 }
@@ -259,11 +267,18 @@
                                 ) {
                                     try {
                                         if (f.type.includes("Single")) {
-                                            record["field_" + f.name] = self.add(f.offset).readFloat();
-                                        } else if (f.type.includes("Byte") || f.type.includes("SByte")) {
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readFloat();
+                                        } else if (
+                                            f.type.includes("Byte") ||
+                                            f.type.includes("SByte")
+                                        ) {
                                             record["field_" + f.name] = self.add(f.offset).readS8();
                                         } else {
-                                            record["field_" + f.name] = self.add(f.offset).readS32();
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readS32();
                                         }
                                     } catch (e) {}
                                 }
@@ -300,7 +315,8 @@
         var uci = classInfos[ucn];
         var ucnLower = ucn.toLowerCase();
         // Only hook frame updates on actual race manager classes
-        if (!ucnLower.includes("racemanager") && !ucnLower.includes("racemodelcontroller")) continue;
+        if (!ucnLower.includes("racemanager") && !ucnLower.includes("racemodelcontroller"))
+            continue;
 
         for (var ui = 0; ui < UPDATE_METHODS.length; ui++) {
             var updateMeth = UPDATE_METHODS[ui];
@@ -335,9 +351,13 @@
                                 ) {
                                     try {
                                         if (f.type.includes("Single")) {
-                                            record["field_" + f.name] = self.add(f.offset).readFloat();
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readFloat();
                                         } else {
-                                            record["field_" + f.name] = self.add(f.offset).readS32();
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readS32();
                                         }
                                     } catch (e) {}
                                 }
@@ -356,13 +376,7 @@
     // Commentary triggers tell us what the game thinks is happening
     // (e.g. "Surging ahead!", "Falling behind!", "Last spurt!")
 
-    var jikkyoMethods = [
-        "PlayComment",
-        "TriggerComment",
-        "OnComment",
-        "AddComment",
-        "ShowComment",
-    ];
+    var jikkyoMethods = ["PlayComment", "TriggerComment", "OnComment", "AddComment", "ShowComment"];
 
     for (var jcn in classInfos) {
         var jci = classInfos[jcn];
@@ -402,7 +416,9 @@
                                             var str = readIl2cppString(strPtr);
                                             if (str) record["field_" + f.name] = str;
                                         } else {
-                                            record["field_" + f.name] = self.add(f.offset).readS32();
+                                            record["field_" + f.name] = self
+                                                .add(f.offset)
+                                                .readS32();
                                         }
                                     } catch (e) {}
                                 }

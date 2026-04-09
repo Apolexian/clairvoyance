@@ -4,12 +4,16 @@ Race Data Processor
 Takes decoded MsgPack API responses, detects race endpoints,
 extracts and parses the race_simulate_data binary blob, and
 produces structured race records.
+
+Also processes dump-hook frame records from
+RaceSimulateHorseFrameData.Deserialize into structured race analyses.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from collections import defaultdict
+from typing import Any
 
 from .race_sim_parser import (
     RaceSimulateData,
@@ -87,7 +91,7 @@ def _find_key_recursive(obj: Any, key: str, max_depth: int = 10) -> Any:
 # ── Extract race horse info ────────────────────────────────────────────
 
 
-def _extract_horse_info(decoded: dict) -> Optional[list[dict]]:
+def _extract_horse_info(decoded: dict) -> list[dict] | None:
     """Extract the race_horse_data_array from the decoded MsgPack response."""
     for key in ("race_horse_data_array", "race_horse_data"):
         result = _find_key_recursive(decoded, key)
@@ -96,7 +100,7 @@ def _extract_horse_info(decoded: dict) -> Optional[list[dict]]:
     return None
 
 
-def _extract_race_simulate_data(decoded: dict) -> Optional[str]:
+def _extract_race_simulate_data(decoded: dict) -> str | None:
     """Extract the base64-encoded race_simulate_data field."""
     for key in ("race_simulate_data", "simulate_data", "race_result_info"):
         result = _find_key_recursive(decoded, key)
@@ -143,12 +147,14 @@ def _extract_compete_events(rd: RaceSimulateData) -> list[dict]:
             SimulateEventType.COMPETE_FIGHT,
             SimulateEventType.COMPETE_BEFORE_SPURT,
         ):
-            competes.append({
-                "frame_time": round(event.frame_time, 4),
-                "type": event_type_name(event.type),
-                "horse_index": event.params[0] if event.params else -1,
-                "params": event.params,
-            })
+            competes.append(
+                {
+                    "frame_time": round(event.frame_time, 4),
+                    "type": event_type_name(event.type),
+                    "horse_index": event.params[0] if event.params else -1,
+                    "params": event.params,
+                }
+            )
     return competes
 
 
@@ -165,7 +171,7 @@ def _detect_pace_down_segments(rd: RaceSimulateData) -> dict[int, list[dict]]:
 
     for horse_idx in range(rd.horse_num):
         horse_segments: list[dict] = []
-        current_segment: Optional[dict] = None
+        current_segment: dict | None = None
 
         for frame in rd.frames:
             if horse_idx >= len(frame.horse_frames):
@@ -240,7 +246,7 @@ def _detect_phases(rd: RaceSimulateData) -> dict:
     }
 
 
-def _summarize_horse(rd: RaceSimulateData, idx: int) -> Optional[dict]:
+def _summarize_horse(rd: RaceSimulateData, idx: int) -> dict | None:
     """Build a per-horse summary from simulation data."""
     if idx >= len(rd.horse_results):
         return None
@@ -263,7 +269,8 @@ def _summarize_horse(rd: RaceSimulateData, idx: int) -> Optional[dict]:
 
     # Count skill activations for this horse
     skills = [
-        e for e in rd.events
+        e
+        for e in rd.events
         if e.type == SimulateEventType.SKILL and len(e.params) >= 2 and e.params[0] == idx
     ]
     summary["skill_activation_count"] = len(skills)
@@ -284,7 +291,7 @@ def _summarize_horse(rd: RaceSimulateData, idx: int) -> Optional[dict]:
 # ── Main API ───────────────────────────────────────────────────────────
 
 
-def try_process_race(record: dict, include_frames: str = "sampled") -> Optional[dict]:
+def try_process_race(record: dict, include_frames: str = "sampled") -> dict | None:
     """
     Attempt to extract and process race simulation data from a network record.
 
@@ -390,7 +397,7 @@ def try_process_race(record: dict, include_frames: str = "sampled") -> Optional[
     return race_record
 
 
-def try_process_race_from_raw(raw_bytes: bytes, api_name: str = "") -> Optional[dict]:
+def try_process_race_from_raw(raw_bytes: bytes, api_name: str = "") -> dict | None:
     """
     Attempt to parse race simulation data directly from raw bytes
     (e.g. if we have the binary blob itself, not base64).
@@ -407,19 +414,299 @@ def try_process_race_from_raw(raw_bytes: bytes, api_name: str = "") -> Optional[
         "simulation": race_data_to_dict(rd, "sampled"),
         "skill_activations": _extract_skill_activations(rd),
         "compete_events": _extract_compete_events(rd),
-        "pace_down_segments": {
-            str(k): v for k, v in _detect_pace_down_segments(rd).items()
-        },
+        "pace_down_segments": {str(k): v for k, v in _detect_pace_down_segments(rd).items()},
         "phases": _detect_phases(rd),
         "horse_summaries": [
-            s for i in range(rd.horse_num)
-            if (s := _summarize_horse(rd, i)) is not None
+            s for i in range(rd.horse_num) if (s := _summarize_horse(rd, i)) is not None
         ],
     }
 
     log.info(
         "  [race] Parsed raw race: %d horses, %d frames, %d events",
-        rd.horse_num, rd.frame_count, rd.event_count,
+        rd.horse_num,
+        rd.frame_count,
+        rd.event_count,
     )
     return race_record
 
+
+# ── Dump-frame race processor ──────────────────────────────────────────
+
+
+def process_dump_race_frames(
+    records: list[dict],
+    lifecycle_records: list[dict] | None = None,
+    skill_records: list[dict] | None = None,
+) -> dict | None:
+    """
+    Assemble individual dump frame records from RaceSimulateHorseFrameData.Deserialize
+    into a structured race analysis.
+
+    The dump hooks capture each horse's frame data as the game deserialises
+    the race simulation binary.  Records arrive in sequence: all horses for
+    frame 0, then all horses for frame 1, etc.  Horses are identified by
+    their consistent LanePosition value across frames.
+
+    Args:
+        records: List of dump event dicts with fields:
+                 {Distance, LanePosition, Speed, Hp, TemptationMode, BlockFrontHorseIndex}
+        lifecycle_records: Optional race_lifecycle events (OnFinish, etc.)
+        skill_records: Optional race_skill_activate events
+
+    Returns:
+        A structured race analysis dict, or None if insufficient data.
+    """
+    if not records or len(records) < 2:
+        return None
+
+    # ── Step 1: Identify horses by unique LanePosition ─────────────────
+    # Collect all unique lane positions in order of first appearance
+    lane_order: list[float] = []
+    lane_set: set[float] = set()
+    for rec in records:
+        fields = rec.get("fields", rec)
+        lane = fields.get("LanePosition")
+        if lane is not None and lane not in lane_set:
+            lane_order.append(lane)
+            lane_set.add(lane)
+
+    num_horses = len(lane_order)
+    if num_horses == 0:
+        return None
+
+    # Map lane position → horse index
+    lane_to_idx = {lane: idx for idx, lane in enumerate(lane_order)}
+
+    # ── Step 2: Group records into frames ───────────────────────────────
+    # Records arrive sequentially: horses 0..N-1 for frame 0, then frame 1, etc.
+    # We group by cycling through all horses.
+    frames: list[dict[int, dict]] = []
+    current_frame: dict[int, dict] = {}
+    seen_in_frame: set[int] = set()
+
+    for rec in records:
+        fields = rec.get("fields", rec)
+        lane = fields.get("LanePosition")
+        if lane is None or lane not in lane_to_idx:
+            continue
+        idx = lane_to_idx[lane]
+
+        # If we've already seen this horse in the current frame, start a new frame
+        if idx in seen_in_frame:
+            if current_frame:
+                frames.append(current_frame)
+            current_frame = {}
+            seen_in_frame = set()
+
+        current_frame[idx] = {
+            "distance": fields.get("Distance", 0),
+            "lane_position": lane,
+            "speed": fields.get("Speed", 0),
+            "hp": fields.get("Hp", 0),
+            "temptation_mode": fields.get("TemptationMode", 0),
+            "block_front": fields.get("BlockFrontHorseIndex", -1),
+        }
+        seen_in_frame.add(idx)
+
+    # Don't forget the last frame
+    if current_frame:
+        frames.append(current_frame)
+
+    if not frames:
+        return None
+
+    log.info(
+        "  [race-dump] Assembled %d frames x %d horses from %d dump records",
+        len(frames),
+        num_horses,
+        len(records),
+    )
+
+    # ── Step 3: Build per-horse time series ────────────────────────────
+    horse_series: dict[int, list[dict]] = defaultdict(list)
+    for frame_idx, frame in enumerate(frames):
+        for horse_idx, data in frame.items():
+            horse_series[horse_idx].append(
+                {
+                    "frame": frame_idx,
+                    **data,
+                }
+            )
+
+    # ── Step 4: Compute per-horse summaries ────────────────────────────
+    horse_summaries = []
+    for horse_idx in range(num_horses):
+        series = horse_series.get(horse_idx, [])
+        if not series:
+            continue
+
+        first = series[0]
+        last = series[-1]
+
+        # Max distance reached
+        max_dist = max(s["distance"] for s in series)
+
+        # HP consumed
+        hp_start = first["hp"]
+        hp_end = last["hp"]
+        hp_consumed = hp_start - hp_end
+
+        # Speed statistics
+        speeds = [s["speed"] for s in series if s["speed"] > 0]
+        avg_speed = sum(speeds) / len(speeds) if speeds else 0
+        max_speed = max(speeds) if speeds else 0
+        min_speed = min(speeds) if speeds else 0
+
+        # Detect pace-down segments (TemptationMode != 0)
+        pace_down_segments = []
+        current_pd = None
+        for s in series:
+            if s["temptation_mode"] != 0:
+                if current_pd is None:
+                    current_pd = {
+                        "start_frame": s["frame"],
+                        "start_distance": round(s["distance"], 2),
+                        "mode": s["temptation_mode"],
+                    }
+                current_pd["end_frame"] = s["frame"]
+                current_pd["end_distance"] = round(s["distance"], 2)
+            else:
+                if current_pd is not None:
+                    current_pd["duration_frames"] = (
+                        current_pd["end_frame"] - current_pd["start_frame"] + 1
+                    )
+                    pace_down_segments.append(current_pd)
+                    current_pd = None
+        if current_pd is not None:
+            current_pd["duration_frames"] = current_pd["end_frame"] - current_pd["start_frame"] + 1
+            pace_down_segments.append(current_pd)
+
+        # Blocking events (frames where BlockFrontHorseIndex != -1)
+        blocked_frames = sum(1 for s in series if s["block_front"] != -1)
+
+        summary = {
+            "horse_index": horse_idx,
+            "lane_position": round(first["lane_position"], 4),
+            "max_distance": round(max_dist, 2),
+            "hp_start": hp_start,
+            "hp_end": hp_end,
+            "hp_consumed": hp_consumed,
+            "avg_speed": round(avg_speed, 4),
+            "max_speed": round(max_speed, 4),
+            "min_speed": round(min_speed, 4),
+            "total_frames": len(series),
+            "pace_down_segments": pace_down_segments,
+            "total_pace_down_frames": sum(seg["duration_frames"] for seg in pace_down_segments),
+            "blocked_frames": blocked_frames,
+        }
+        horse_summaries.append(summary)
+
+    # ── Step 5: Race-level analysis ────────────────────────────────────
+
+    # Estimate total race distance from max distance across all horses
+    total_distance = max((s["max_distance"] for s in horse_summaries), default=0)
+
+    # Phase boundaries
+    phases = {}
+    if total_distance > 0:
+        phases = {
+            "total_distance": round(total_distance, 2),
+            "phase_1_end": round(total_distance / 6, 2),
+            "phase_2_end": round(total_distance * 2 / 3, 2),
+            "phase_3_end": round(total_distance * 5 / 6, 2),
+        }
+
+    # Finish order: sort horses by max distance (desc) — in a complete race
+    # all horses finish, but if interrupted we rank by progress
+    finish_order = sorted(
+        horse_summaries,
+        key=lambda h: -h["max_distance"],
+    )
+    for rank, h in enumerate(finish_order, 1):
+        h["estimated_rank"] = rank
+
+    # ── Step 6: Sampled frame data for output ──────────────────────────
+    # Output a subset of frames (every Nth) to keep the record manageable
+    total_frames = len(frames)
+    sample_interval = max(1, total_frames // 30)  # ~30 samples
+    sampled_frames = []
+    for fi in range(0, total_frames, sample_interval):
+        frame = frames[fi]
+        sampled = {"frame_index": fi}
+        for horse_idx, data in sorted(frame.items()):
+            sampled[f"horse_{horse_idx}"] = {
+                "distance": round(data["distance"], 2),
+                "speed": round(data["speed"], 4),
+                "hp": data["hp"],
+                "temptation": data["temptation_mode"],
+            }
+        sampled_frames.append(sampled)
+
+    # ── Step 7: Include lifecycle and skill data ───────────────────────
+    lifecycle_info = []
+    if lifecycle_records:
+        for rec in lifecycle_records:
+            info = {
+                "event": rec.get("event"),
+                "class": rec.get("class"),
+                "_ts": rec.get("_ts"),
+            }
+            # Include any field_ prefixed keys
+            for k, v in rec.items():
+                if k.startswith("field_"):
+                    info[k] = v
+            lifecycle_info.append(info)
+
+    skill_info = []
+    if skill_records:
+        for rec in skill_records:
+            info = {
+                "event": rec.get("event"),
+                "class": rec.get("class"),
+                "_ts": rec.get("_ts"),
+            }
+            for k, v in rec.items():
+                if k.startswith("field_"):
+                    info[k] = v
+            skill_info.append(info)
+
+    # Last spurt distances from lifecycle OnFinish events
+    last_spurt_distances = []
+    if lifecycle_records:
+        for rec in lifecycle_records:
+            cls = rec.get("class", "")
+            if "OnFinish" in cls:
+                lsd = rec.get("field__lastSpurtStartDistance")
+                if lsd is not None:
+                    last_spurt_distances.append(round(lsd, 2))
+
+    # ── Assemble the result ────────────────────────────────────────────
+    result: dict = {
+        "event": "race_analysis_from_dump",
+        "source": "RaceSimulateHorseFrameData.Deserialize",
+        "num_horses": num_horses,
+        "total_frames": total_frames,
+        "total_dump_records": len(records),
+        "estimated_total_distance": round(total_distance, 2),
+        "phases": phases,
+        "horse_summaries": horse_summaries,
+        "sampled_frames": sampled_frames,
+    }
+
+    if last_spurt_distances:
+        result["last_spurt_distances"] = last_spurt_distances
+    if lifecycle_info:
+        result["lifecycle_events"] = lifecycle_info
+    if skill_info:
+        result["skill_activations"] = skill_info
+
+    log.info(
+        "  [race-dump] Analysis: %d horses, %d frames, distance=%.0f, %d skills, %d lifecycle",
+        num_horses,
+        total_frames,
+        total_distance,
+        len(skill_info),
+        len(lifecycle_info),
+    )
+
+    return result

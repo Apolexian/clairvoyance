@@ -23,6 +23,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import logging
 import os
@@ -30,8 +31,10 @@ import sys
 import time
 import traceback
 
+import msgpack
+
 from lib.attach import attach
-from lib.race_processor import try_process_race
+from lib.race_processor import process_dump_race_frames, try_process_race
 from lib.session import Session
 
 # ── Paths ──────────────────────────────────────────────────────────────────
@@ -178,11 +181,12 @@ hook_statuses: dict[str, int] = {}
 is_ready = False
 has_error = False
 
+# Accumulators for dump-hook race frame data
+_dump_frame_records: list[dict] = []
+_race_lifecycle_records: list[dict] = []
+_race_skill_records: list[dict] = []
+
 # ── MsgPack decode helpers ─────────────────────────────────────────────
-
-import base64
-
-import msgpack
 
 
 def _sanitise_bytes(obj: object) -> object:
@@ -259,26 +263,23 @@ def on_message(message, data):
             # or postData byte arrays from Task hooks), decode it.
             if data is not None and len(data) > 0:
                 raw = bytes(data)
-                # Try to decode as MsgPack (game uses MsgPack serialization).
-                # The game's C# MsgPack serializer encodes some byte[] fields
-                # (e.g. race_simulate_data) as old-spec str type, not bin.
-                # raw=False would force UTF-8 decode on those and fail.
-                # Strategy: try raw=True first (safe), then sanitise bytes→str.
                 decoded = _try_msgpack_decode(raw)
                 if decoded is not None:
+                    # MsgPack decoded successfully — use clean structured data.
+                    # Only keep raw_b64 for archival re-decode; skip the
+                    # garbled raw_text / hex noise.
                     record["msgpack_decoded"] = decoded
-                # Try to decode as UTF-8 text (HTTP headers are ASCII)
-                try:
-                    text = raw.decode("utf-8", errors="replace")
-                    record["raw_text"] = text[:8192]  # generous cap for race data
-                except Exception:
-                    pass
-                # Always include hex prefix for binary inspection
-                record["raw_hex_preview"] = raw[:256].hex()
-                record["raw_bytes_len"] = len(raw)
-                # Save full raw bytes as base64 for offline re-decode
-
-                record["raw_b64"] = base64.b64encode(raw).decode("ascii")
+                    record["raw_b64"] = base64.b64encode(raw).decode("ascii")
+                else:
+                    # Decode failed — keep raw diagnostics so we can debug
+                    try:
+                        text = raw.decode("utf-8", errors="replace")
+                        record["raw_text"] = text[:8192]
+                    except Exception:
+                        pass
+                    record["raw_hex_preview"] = raw[:256].hex()
+                    record["raw_bytes_len"] = len(raw)
+                    record["raw_b64"] = base64.b64encode(raw).decode("ascii")
 
             # ── Race data extraction ──────────────────────────────────
             # When we see a decoded MsgPack response from a race API,
@@ -295,6 +296,18 @@ def on_message(message, data):
                         session_data.write("race", race_record)
                 except Exception as e:
                     log.debug("  [race] Processing error: %s", e)
+
+            # ── Accumulate dump-hook race frame data ───────────────────
+            # Records from RaceSimulateHorseFrameData.Deserialize are
+            # accumulated and batch-processed at session end.
+            if domain == "race":
+                event_type = record.get("event", "")
+                if event_type == "dump" and "RaceSimulateHorseFrameData" in record.get("class", ""):
+                    _dump_frame_records.append(record)
+                elif event_type == "race_lifecycle":
+                    _race_lifecycle_records.append(record)
+                elif event_type == "race_skill_activate":
+                    _race_skill_records.append(record)
 
             if session_data:
                 session_data.write(domain, record)
@@ -384,6 +397,24 @@ def main():
                 log.info("  [%ds] Waiting for game events...", tick)
     except KeyboardInterrupt:
         log.info("\n[*] Stopped by user.")
+
+    # ── Process accumulated dump-hook race frames ────────────────────────
+    if _dump_frame_records:
+        log.info(
+            "  [race-dump] Processing %d accumulated frame records...",
+            len(_dump_frame_records),
+        )
+        try:
+            race_analysis = process_dump_race_frames(
+                _dump_frame_records,
+                lifecycle_records=_race_lifecycle_records or None,
+                skill_records=_race_skill_records or None,
+            )
+            if race_analysis and session_data:
+                session_data.write("race", race_analysis)
+                log.info("  [race-dump] Race analysis written to race.jsonl")
+        except Exception as e:
+            log.warning("  [race-dump] Failed to process dump frames: %s", e)
 
     # Save manifest and close
     session_data.write_manifest(
