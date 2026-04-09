@@ -67,21 +67,27 @@
   </div>
   <div class="timeline" id="network-timeline">
     {% for ev in network %}
-    <div class="timeline-event {% if 'Race' in ev.api %}race-highlight{% endif %}" data-api="{{ ev.api }}">
+    <div class="timeline-event {% if 'Race' in ev.api %}race-highlight{% endif %}" data-api="{{ ev.api }}" data-idx="{{ loop.index0 }}">
       <div class="timeline-time">{{ ev._ts[11:19] if ev._ts else '' }}</div>
       <div class="timeline-content">
-        <span class="timeline-badge {{ ev.event }}">{{ ev.event }}</span>
-        <strong>{{ ev.api }}</strong>
-        {% if ev.chara_stats %}
-        <div class="chara-stats-inline">
-          SPD:{{ ev.chara_stats.speed }}
-          STA:{{ ev.chara_stats.stamina }}
-          POW:{{ ev.chara_stats.power }}
-          GUT:{{ ev.chara_stats.guts }}
-          WIZ:{{ ev.chara_stats.wiz }}
-          · T{{ ev.chara_stats.turn }} VIT:{{ ev.chara_stats.vital }}
+        <div class="timeline-summary" onclick="toggleDetail(this, '{{ session.name }}', {{ loop.index0 }})">
+          <span class="timeline-badge {{ ev.event }}">{{ ev.event }}</span>
+          <strong>{{ ev.api }}</strong>
+          <span class="timeline-expand-icon">▶</span>
+          {% if ev.chara_stats %}
+          <div class="chara-stats-inline">
+            SPD:{{ ev.chara_stats.speed }}
+            STA:{{ ev.chara_stats.stamina }}
+            POW:{{ ev.chara_stats.power }}
+            GUT:{{ ev.chara_stats.guts }}
+            WIZ:{{ ev.chara_stats.wiz }}
+            · T{{ ev.chara_stats.turn }} VIT:{{ ev.chara_stats.vital }}
+          </div>
+          {% endif %}
         </div>
-        {% endif %}
+        <div class="timeline-detail" style="display:none">
+          <div class="detail-loading">Loading…</div>
+        </div>
       </div>
     </div>
     {% endfor %}
@@ -98,6 +104,177 @@ function filterTimeline() {
   document.querySelectorAll('#network-timeline .timeline-event').forEach(el => {
     const api = el.dataset.api.toLowerCase();
     el.style.display = api.includes(q) ? '' : 'none';
+  });
+}
+
+async function toggleDetail(summaryEl, sessionName, idx) {
+  const detailEl = summaryEl.nextElementSibling;
+  const icon = summaryEl.querySelector('.timeline-expand-icon');
+  const isOpen = detailEl.style.display !== 'none';
+
+  if (isOpen) {
+    detailEl.style.display = 'none';
+    icon.textContent = '▶';
+    icon.classList.remove('open');
+    return;
+  }
+
+  detailEl.style.display = '';
+  icon.textContent = '▼';
+  icon.classList.add('open');
+
+  if (detailEl.dataset.loaded) return;
+
+  try {
+    const res = await fetch(`/api/session/${sessionName}/network/${idx}`);
+    const data = await res.json();
+    if (data.error) {
+      detailEl.innerHTML = `<div class="detail-error">${data.error}</div>`;
+    } else {
+      const obj = data.msgpack_decoded || data;
+      detailEl.innerHTML = '';
+      detailEl.appendChild(buildJsonViewer(obj));
+    }
+    detailEl.dataset.loaded = '1';
+  } catch (e) {
+    detailEl.innerHTML = `<div class="detail-error">Failed to load: ${e}</div>`;
+  }
+}
+
+/* ── Interactive JSON Viewer ─────────────────────────── */
+
+function buildJsonViewer(data) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'json-viewer';
+
+  // Toolbar
+  const toolbar = document.createElement('div');
+  toolbar.className = 'jv-toolbar';
+  toolbar.innerHTML = `
+    <button class="btn btn-sm jv-btn" onclick="jvExpandAll(this)">Expand All</button>
+    <button class="btn btn-sm jv-btn" onclick="jvCollapseAll(this)">Collapse All</button>
+    <button class="btn btn-sm jv-btn" onclick="jvCopy(this)">📋 Copy</button>
+  `;
+  wrapper.appendChild(toolbar);
+
+  // Store raw data for copy
+  const pre = document.createElement('pre');
+  pre.className = 'detail-json jv-tree';
+  pre.dataset.raw = JSON.stringify(data, null, 2);
+  pre.appendChild(renderNode(data, '', 0, true));
+  wrapper.appendChild(pre);
+
+  return wrapper;
+}
+
+function esc(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderNode(value, key, depth, isLast) {
+  const indent = '  '.repeat(depth);
+  const comma = isLast ? '' : ',';
+  const keyStr = key !== '' ? `<span class="json-key">"${esc(key)}"</span>: ` : '';
+
+  if (value === null) {
+    return textFrag(`${indent}${keyStr}<span class="json-null">null</span>${comma}\n`);
+  }
+  if (typeof value === 'boolean') {
+    return textFrag(`${indent}${keyStr}<span class="json-boolean">${value}</span>${comma}\n`);
+  }
+  if (typeof value === 'number') {
+    return textFrag(`${indent}${keyStr}<span class="json-number">${value}</span>${comma}\n`);
+  }
+  if (typeof value === 'string') {
+    return textFrag(`${indent}${keyStr}<span class="json-string">"${esc(value)}"</span>${comma}\n`);
+  }
+
+  // Object or Array
+  const isArray = Array.isArray(value);
+  const entries = isArray ? value.map((v, i) => [i, v]) : Object.entries(value);
+  const open = isArray ? '[' : '{';
+  const close = isArray ? ']' : '}';
+  const count = entries.length;
+
+  if (count === 0) {
+    return textFrag(`${indent}${keyStr}${open}${close}${comma}\n`);
+  }
+
+  const frag = document.createDocumentFragment();
+
+  // Collapsible toggle line
+  const toggle = document.createElement('span');
+  toggle.className = 'jv-toggle';
+  toggle.dataset.depth = depth;
+  toggle.innerHTML =
+    `${indent}${keyStr}<span class="jv-arrow">▼</span>${open} ` +
+    `<span class="jv-count">${count} ${isArray ? (count === 1 ? 'item' : 'items') : (count === 1 ? 'key' : 'keys')}</span>\n`;
+
+  const body = document.createElement('span');
+  body.className = 'jv-body';
+  entries.forEach(([k, v], i) => {
+    const childKey = isArray ? '' : String(k);
+    body.appendChild(renderNode(v, childKey, depth + 1, i === count - 1));
+  });
+
+  const closeLine = textFrag(`${indent}${close}${comma}\n`);
+  closeLine.className = 'jv-close-line';
+
+  // Collapsed placeholder (hidden by default)
+  const collapsed = document.createElement('span');
+  collapsed.className = 'jv-collapsed';
+  collapsed.style.display = 'none';
+  collapsed.innerHTML = `${indent}${keyStr}<span class="jv-arrow jv-arrow-right">▶</span>${open}<span class="jv-ellipsis">…${count}</span>${close}${comma}\n`;
+
+  toggle.addEventListener('click', () => {
+    body.style.display = 'none';
+    closeLine.style.display = 'none';
+    toggle.style.display = 'none';
+    collapsed.style.display = '';
+  });
+  collapsed.addEventListener('click', () => {
+    body.style.display = '';
+    closeLine.style.display = '';
+    toggle.style.display = '';
+    collapsed.style.display = 'none';
+  });
+
+  frag.appendChild(toggle);
+  frag.appendChild(body);
+  frag.appendChild(closeLine);
+  frag.appendChild(collapsed);
+  return frag;
+}
+
+function textFrag(html) {
+  const span = document.createElement('span');
+  span.innerHTML = html;
+  return span;
+}
+
+/* Toolbar actions */
+function jvExpandAll(btn) {
+  const tree = btn.closest('.json-viewer').querySelector('.jv-tree');
+  tree.querySelectorAll('.jv-toggle').forEach(t => t.style.display = '');
+  tree.querySelectorAll('.jv-body').forEach(b => b.style.display = '');
+  tree.querySelectorAll('.jv-close-line').forEach(c => c.style.display = '');
+  tree.querySelectorAll('.jv-collapsed').forEach(c => c.style.display = 'none');
+}
+
+function jvCollapseAll(btn) {
+  const tree = btn.closest('.json-viewer').querySelector('.jv-tree');
+  tree.querySelectorAll('.jv-toggle').forEach(t => t.style.display = 'none');
+  tree.querySelectorAll('.jv-body').forEach(b => b.style.display = 'none');
+  tree.querySelectorAll('.jv-close-line').forEach(c => c.style.display = 'none');
+  tree.querySelectorAll('.jv-collapsed').forEach(c => c.style.display = '');
+}
+
+function jvCopy(btn) {
+  const raw = btn.closest('.json-viewer').querySelector('.jv-tree').dataset.raw;
+  navigator.clipboard.writeText(raw).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
   });
 }
 </script>

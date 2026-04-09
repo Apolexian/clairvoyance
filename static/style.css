@@ -597,6 +597,135 @@ a:hover { text-decoration: underline; }
   margin-top: 0.1rem;
 }
 
+/* ── Timeline Detail (expand view) ───────────────────── */
+
+.timeline-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.timeline-summary:hover { color: var(--accent); }
+
+.timeline-expand-icon {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-left: 0.3rem;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.timeline-expand-icon.open {
+  color: var(--accent);
+}
+
+.timeline-detail {
+  margin-top: 0.4rem;
+  border-left: 2px solid var(--border);
+  padding-left: 0.75rem;
+}
+
+.detail-loading {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.detail-error {
+  font-size: 0.8rem;
+  color: var(--red);
+}
+
+.detail-json {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  margin: 0;
+  max-height: 500px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+/* JSON syntax colors */
+.json-key { color: var(--accent); }
+.json-string { color: var(--green); }
+.json-number { color: var(--orange); }
+.json-boolean { color: var(--purple); }
+.json-null { color: var(--text-muted); }
+
+/* ── Interactive JSON Viewer ─────────────────────────── */
+
+.json-viewer {
+  margin-top: 0.4rem;
+}
+
+.jv-toolbar {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+.jv-btn {
+  font-size: 0.75rem !important;
+  padding: 0.2rem 0.5rem !important;
+}
+
+.jv-tree {
+  tab-size: 2;
+}
+
+.jv-toggle {
+  cursor: pointer;
+}
+.jv-toggle:hover {
+  background: var(--bg-hover);
+  border-radius: 2px;
+}
+
+.jv-arrow {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-right: 2px;
+  display: inline-block;
+  user-select: none;
+}
+.jv-arrow-right {
+  font-size: 0.65rem;
+}
+
+.jv-count {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-style: italic;
+  user-select: none;
+}
+
+.jv-collapsed {
+  cursor: pointer;
+}
+.jv-collapsed:hover {
+  background: var(--bg-hover);
+  border-radius: 2px;
+}
+
+.jv-ellipsis {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  border-radius: 3px;
+  padding: 0 0.35rem;
+  margin: 0 2px;
+  user-select: none;
+}
+
 /* ── Charts ──────────────────────────────────────────── */
 
 .chart-grid {

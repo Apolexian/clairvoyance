@@ -31,6 +31,7 @@ from flask import Flask, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
 
 from lib.session_reader import (
+    get_network_event_detail,
     get_network_events,
     get_race_replay_data,
     get_races,
@@ -249,6 +250,12 @@ def api_race_replay(name: str, race_idx: int):
 @app.route("/api/session/<name>/network")
 def api_network(name: str):
     return jsonify(get_network_events(name))
+
+
+@app.route("/api/session/<name>/network/<int:idx>")
+def api_network_detail(name: str, idx: int):
+    detail = get_network_event_detail(name, idx)
+    return jsonify(detail) if detail else (jsonify({"error": "Event not found"}), 404)
 
 
 # ── Routes: Setup (discover + analyse) ─────────────────────────────────

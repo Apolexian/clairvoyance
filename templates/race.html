@@ -17,6 +17,24 @@
 
 {% set source = race._source %}
 
+<!-- Race metadata -->
+{% if race.race_metadata %}
+<div class="stats-bar">
+  {% if race.race_metadata.program_id %}
+  <div class="stat-card"><div class="stat-value">{{ race.race_metadata.program_id }}</div><div class="stat-label">program ID</div></div>
+  {% endif %}
+  {% if race.race_metadata.race_instance_id %}
+  <div class="stat-card"><div class="stat-value">{{ race.race_metadata.race_instance_id }}</div><div class="stat-label">instance ID</div></div>
+  {% endif %}
+  {% if race.race_metadata.weather is defined %}
+  <div class="stat-card"><div class="stat-value">{{ race.race_metadata.weather }}</div><div class="stat-label">weather</div></div>
+  {% endif %}
+  {% if race.race_metadata.ground_condition is defined %}
+  <div class="stat-card"><div class="stat-value">{{ race.race_metadata.ground_condition }}</div><div class="stat-label">ground</div></div>
+  {% endif %}
+</div>
+{% endif %}
+
 <!-- Race overview -->
 <div class="stats-bar">
   {% if source == 'dump' %}
@@ -72,7 +90,7 @@
     <button class="horse-tab active" onclick="showHorse(-1, this)">All</button>
     {% for h in summaries %}
     <button class="horse-tab" onclick="showHorse({{ h.horse_index }}, this)">
-      Horse {{ h.horse_index }}
+      {% if h.chara_id %}chara:{{ h.chara_id }}{% else %}Horse {{ h.horse_index }}{% endif %}
       {% if h.finish_order is defined %}
         <small>#{{ h.finish_order }}</small>
       {% elif h.estimated_rank is defined %}
@@ -101,7 +119,7 @@
       <tbody>
         {% for h in summaries %}
         <tr>
-          <td><strong>Horse {{ h.horse_index }}</strong></td>
+          <td><strong>{% if h.chara_id %}chara:{{ h.chara_id }}{% else %}Horse {{ h.horse_index }}{% endif %}</strong></td>
           {% if source == 'api' %}
           <td class="{% if h.finish_order == 1 %}gold{% elif h.finish_order == 2 %}silver{% elif h.finish_order == 3 %}bronze{% endif %}">#{{ h.finish_order }}</td>
           <td>{{ h.finish_time }}s</td>
@@ -131,7 +149,7 @@
   {% for h in summaries %}
   <div id="horse-{{ h.horse_index }}" class="horse-panel" style="display:none">
     <div class="horse-detail-header">
-      <h3>Horse {{ h.horse_index }} —
+      <h3>{% if h.chara_id %}chara:{{ h.chara_id }}{% else %}Horse {{ h.horse_index }}{% endif %} —
         {% if h.finish_order is defined %}
           Finish #{{ h.finish_order }}
         {% elif h.estimated_rank is defined %}
@@ -238,16 +256,16 @@
     <thead>
       <tr>
         <th>Time</th><th>Horse</th><th>Skill ID</th>
-        {% if race.skill_activations[0].duration_raw is defined %}<th>Duration</th>{% endif %}
+        <th>Duration</th>
       </tr>
     </thead>
     <tbody>
       {% for sk in race.skill_activations %}
       <tr>
-        <td>{{ sk.frame_time }}s</td>
+        <td>{{ "%.1f"|format(sk.frame_time) }}s</td>
         <td>Horse {{ sk.horse_index }}</td>
         <td><span class="skill-badge">{{ sk.skill_id }}</span></td>
-        {% if sk.duration_raw is defined %}<td>{{ sk.duration_raw }}</td>{% endif %}
+        <td>{% if sk.duration_raw is defined and sk.duration_raw > 0 %}{{ "%.1f"|format(sk.duration_raw / 1000) }}s{% elif sk.duration_raw is defined and sk.duration_raw == 0 %}instant{% else %}passive{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -313,7 +331,7 @@ function showHorse(idx, btn) {
     '#ef476f','#ffd166','#118ab2','#073b4c',
   ];
 
-  const frameLabels = frames.map(f => f.frame_index);
+  const frameLabels = frames.map(f => f.time != null ? f.time.toFixed(1) + 's' : f.frame_index);
 
   function buildDatasets(field) {
     return horseKeys.map((key, i) => ({
@@ -335,7 +353,7 @@ function showHorse(idx, btn) {
       legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, color: '#ccc' } },
     },
     scales: {
-      x: { title: { display: true, text: 'Frame', color: '#999' }, ticks: { color: '#888' }, grid: { color: '#333' } },
+      x: { title: { display: true, text: 'Time', color: '#999' }, ticks: { color: '#888' }, grid: { color: '#333' } },
       y: { ticks: { color: '#888' }, grid: { color: '#333' } },
     },
   };

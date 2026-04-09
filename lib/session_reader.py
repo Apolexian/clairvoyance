@@ -117,6 +117,10 @@ def _normalize_api_race_frames(race: dict) -> None:
     Also enriches horse_summaries with pace_down_segments from the
     race-level dict (API races store them separately).
 
+    The binary sim stores speed as uint16 (x100) and lane_position as
+    uint16 (0-10000).  We normalise to the same scale the dump hooks
+    produce: speed in m/s (float) and lane_position 0.0-1.0.
+
     API format:  simulation.frames[].{time, horses[].{distance, speed, hp, ...}}
     Target:      sampled_frames[].{frame_index, horse_0: {distance, speed, hp}, ...}
     """
@@ -129,12 +133,12 @@ def _normalize_api_race_frames(race: dict) -> None:
             step = max(1, len(frames) // 30)
             for i in range(0, len(frames), step):
                 f = frames[i]
-                entry: dict = {"frame_index": i}
+                entry: dict = {"frame_index": i, "time": f.get("time", 0)}
                 horses = f.get("horses", [])
                 for hi, h in enumerate(horses):
                     entry[f"horse_{hi}"] = {
                         "distance": h.get("distance", 0),
-                        "speed": h.get("speed", 0),
+                        "speed": round(h.get("speed", 0) / 100, 2),
                         "hp": h.get("hp", 0),
                         "temptation": h.get("temptation_mode", "NULL"),
                     }
@@ -155,21 +159,16 @@ def get_races(session_name: str) -> list[dict]:
     """
     Extract race records from a session.
 
-    Returns a list of race dicts, each containing:
-    - Race simulation data (from API)
-    - Dump-based race analysis (from frame hooks)
-
-    If the session has raw dump records but no pre-processed analysis
-    (e.g. process was killed before cleanup), we assemble the analysis
-    on the fly.
+    API races (``race_simulation``) are preferred — they contain the full
+    binary sim with skill activations, finish results, compete events, etc.
+    Dump-based races are only used as a fallback when no API race was captured.
     """
     records = read_domain(session_name, "race")
 
-    races = []
-    race_idx = 0
-    has_analysis = False
+    api_races: list[dict] = []
+    dump_analyses: list[dict] = []
 
-    # Accumulators for on-the-fly processing
+    # Accumulators for on-the-fly dump assembly (fallback only)
     dump_frame_records: list[dict] = []
     lifecycle_records: list[dict] = []
     skill_records: list[dict] = []
@@ -178,28 +177,17 @@ def get_races(session_name: str) -> list[dict]:
         event = rec.get("event", "")
 
         if event == "race_simulation":
-            # API-based race
-            race_idx += 1
-            rec["_race_index"] = race_idx
-            rec["_race_label"] = f"Race {race_idx} ({rec.get('api', 'unknown')})"
             rec["_source"] = "api"
             _normalize_api_race_frames(rec)
             # Drop heavy raw data after extracting what we need
             rec.pop("simulation", None)
             rec.pop("raw_b64", None)
             rec.pop("msgpack_decoded", None)
-            races.append(rec)
+            api_races.append(rec)
 
         elif event == "race_analysis_from_dump":
-            # Dump-hook assembled race (pre-processed at session end)
-            has_analysis = True
-            race_idx += 1
-            rec["_race_index"] = race_idx
-            num_horses = rec.get("num_horses", "?")
-            dist = rec.get("estimated_total_distance", "?")
-            rec["_race_label"] = f"Race {race_idx} (dump, {num_horses} horses, {dist}m)"
             rec["_source"] = "dump"
-            races.append(rec)
+            dump_analyses.append(rec)
 
         elif event == "dump" and "RaceSimulateHorseFrameData" in rec.get("class", ""):
             dump_frame_records.append(rec)
@@ -208,8 +196,23 @@ def get_races(session_name: str) -> list[dict]:
         elif event == "race_skill_activate":
             skill_records.append(rec)
 
-    # If we have raw dump records but no pre-processed analysis, assemble now
-    if dump_frame_records and not has_analysis:
+    # ── Decide which source to use ─────────────────────────────────
+    if api_races:
+        # API data is authoritative — skip dump races entirely
+        races = api_races
+        if dump_analyses or dump_frame_records:
+            log.info(
+                "Using %d API race(s), ignoring dump data (%d analyses, %d raw records)",
+                len(api_races),
+                len(dump_analyses),
+                len(dump_frame_records),
+            )
+    elif dump_analyses:
+        # Pre-processed dump analyses (no API data available)
+        races = dump_analyses
+    elif dump_frame_records:
+        # Raw dump records — assemble on the fly
+        races = []
         try:
             from .race_processor import process_dump_race_frames
 
@@ -219,11 +222,6 @@ def get_races(session_name: str) -> list[dict]:
                 skill_records=skill_records or None,
             )
             if analysis:
-                race_idx += 1
-                analysis["_race_index"] = race_idx
-                num_horses = analysis.get("num_horses", "?")
-                dist = analysis.get("estimated_total_distance", "?")
-                analysis["_race_label"] = f"Race {race_idx} (dump, {num_horses} horses, {dist}m)"
                 analysis["_source"] = "dump"
                 races.append(analysis)
                 log.info(
@@ -234,6 +232,23 @@ def get_races(session_name: str) -> list[dict]:
                 )
         except Exception as e:
             log.warning("Failed to assemble race from raw dump records: %s", e)
+    else:
+        races = []
+
+    # ── Number and label all races ─────────────────────────────────
+    for idx, rec in enumerate(races, 1):
+        rec["_race_index"] = idx
+        if rec["_source"] == "api":
+            meta = rec.get("race_metadata", {})
+            parts = [f"Race {idx}"]
+            if meta.get("program_id"):
+                parts.append(f"pgm:{meta['program_id']}")
+            parts.append(rec.get("api", "unknown"))
+            rec["_race_label"] = " · ".join(parts)
+        else:
+            num_horses = rec.get("num_horses", "?")
+            dist = rec.get("estimated_total_distance", "?")
+            rec["_race_label"] = f"Race {idx} (dump, {num_horses} horses, {dist}m)"
 
     return races
 
@@ -244,24 +259,29 @@ def get_race_replay_data(session_name: str, race_idx: int) -> dict | None:
 
     Returns ALL frames (not sampled) plus skill activations and metadata,
     structured for the canvas replay animation.
+
+    Uses the same API-first preference as :func:`get_races`.
     """
     records = read_domain(session_name, "race")
 
-    # Find the target race
-    current_idx = 0
-    target = None
+    # Collect races with API-first preference (mirrors get_races logic)
+    api_races: list[dict] = []
+    dump_races: list[dict] = []
     for rec in records:
         event = rec.get("event", "")
-        if event in ("race_simulation", "race_analysis_from_dump"):
-            current_idx += 1
-            if current_idx == race_idx:
-                target = rec
-                break
+        if event == "race_simulation":
+            api_races.append(rec)
+        elif event == "race_analysis_from_dump":
+            dump_races.append(rec)
 
-    if target is None:
+    races = api_races if api_races else dump_races
+
+    if race_idx < 1 or race_idx > len(races):
         return None
 
+    target = races[race_idx - 1]
     event = target.get("event", "")
+
     replay: dict = {
         "race_index": race_idx,
         "source": "api" if event == "race_simulation" else "dump",
@@ -282,12 +302,12 @@ def get_race_replay_data(session_name: str, race_idx: int) -> dict | None:
                 horses = f.get("horses", [])
                 frame: dict = {"idx": i, "time": f.get("time", 0)}
                 for hi, h in enumerate(horses):
-                    frame[hi] = {
+                    frame[str(hi)] = {
                         "d": round(h.get("distance", 0), 2),
-                        "s": h.get("speed", 0),
+                        "s": round(h.get("speed", 0) / 100, 2),
                         "hp": h.get("hp", 0),
                         "t": h.get("temptation_mode", "NULL"),
-                        "lane": h.get("lane_position", 0),
+                        "lane": round(h.get("lane_position", 0) / 10000, 4),
                     }
                 replay["frames"].append(frame)
             replay["num_horses"] = len(raw_frames[0].get("horses", [])) if raw_frames else 0
@@ -306,7 +326,7 @@ def get_race_replay_data(session_name: str, race_idx: int) -> dict | None:
             frame = {"idx": sf.get("frame_index", 0), "time": sf.get("frame_index", 0)}
             for hi in range(num_horses):
                 hdata = sf.get(f"horse_{hi}", {})
-                frame[hi] = {
+                frame[str(hi)] = {
                     "d": hdata.get("distance", 0),
                     "s": hdata.get("speed", 0),
                     "hp": hdata.get("hp", 0),
@@ -319,6 +339,42 @@ def get_race_replay_data(session_name: str, race_idx: int) -> dict | None:
         replay["skills"] = target.get("skill_activations", [])
 
     return replay
+
+
+# Keys that contain PII or non-game device/auth data — stripped from detail views
+_PII_KEYS = frozenset(
+    {
+        "viewer_id",
+        "device",
+        "device_id",
+        "device_name",
+        "graphics_device_name",
+        "ip_address",
+        "platform_os_version",
+        "carrier",
+        "keychain",
+        "button_info",
+        "dmm_viewer_id",
+        "dmm_onetime_token",
+        "steam_id",
+        "steam_session_ticket",
+        "sid",  # session token
+        "owner_viewer_id",  # friend viewer ids in support cards
+        "locale",
+    }
+)
+
+# Top-level record keys to drop entirely (binary blobs, internal metadata)
+_DROP_TOP_KEYS = frozenset({"raw_b64", "taskFields", "postDataBytes"})
+
+
+def _strip_pii(obj: object) -> object:
+    """Recursively strip PII / device keys from a JSON-like structure."""
+    if isinstance(obj, dict):
+        return {k: _strip_pii(v) for k, v in obj.items() if k not in _PII_KEYS}
+    if isinstance(obj, list):
+        return [_strip_pii(item) for item in obj]
+    return obj
 
 
 def get_network_events(session_name: str) -> list[dict]:
@@ -352,6 +408,32 @@ def get_network_events(session_name: str) -> list[dict]:
                     }
         events.append(summary)
     return events
+
+
+def get_network_event_detail(session_name: str, idx: int) -> dict | None:
+    """
+    Return the full cleaned data for a single network event (0-based index).
+
+    Strips PII/device fields and binary blobs so the user sees only
+    game-relevant data.
+    """
+    records = read_domain(session_name, "network")
+    if idx < 0 or idx >= len(records):
+        return None
+
+    rec = records[idx]
+    # Build a clean copy without binary blobs and top-level noise
+    cleaned: dict = {}
+    for k, v in rec.items():
+        if k in _DROP_TOP_KEYS:
+            continue
+        cleaned[k] = v
+
+    # Strip PII recursively from the decoded payload
+    if "msgpack_decoded" in cleaned:
+        cleaned["msgpack_decoded"] = _strip_pii(cleaned["msgpack_decoded"])
+
+    return cleaned
 
 
 def get_timeline(session_name: str) -> list[dict]:

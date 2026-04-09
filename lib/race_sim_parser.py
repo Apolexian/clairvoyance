@@ -703,13 +703,12 @@ def event_type_name(t: int) -> str:
     return names.get(t, f"UNKNOWN_{t}")
 
 
-def race_data_to_dict(rd: RaceSimulateData, include_frames: str = "sampled") -> dict:
+def race_data_to_dict(rd: RaceSimulateData, include_frames: str = "all") -> dict:
     """
     Convert RaceSimulateData to a JSON-serializable dict.
 
     include_frames:
-      "all"     - include every frame (can be huge)
-      "sampled" - every 15th frame (~1 per second)
+      "all"     - include every frame
       "none"    - omit frames entirely
     """
     d: dict = {
@@ -721,13 +720,8 @@ def race_data_to_dict(rd: RaceSimulateData, include_frames: str = "sampled") -> 
 
     # Frames
     if include_frames != "none" and rd.frames:
-        step = 1 if include_frames == "all" else 15
-        sampled = rd.frames[::step]
-        # Always include the last frame
-        if rd.frames[-1] not in sampled:
-            sampled.append(rd.frames[-1])
+        sampled = rd.frames
         d["frames"] = [_frame_to_dict(f) for f in sampled]
-        d["frames_sampled"] = include_frames == "sampled"
 
     # Horse results
     d["horse_results"] = [_horse_result_to_dict(hr) for hr in rd.horse_results]

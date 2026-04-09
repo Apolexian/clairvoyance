@@ -297,14 +297,45 @@ def _summarize_horse(rd: RaceSimulateData, idx: int) -> dict | None:
 # ── Main API ───────────────────────────────────────────────────────────
 
 
-def try_process_race(record: dict, include_frames: str = "sampled") -> dict | None:
+def _extract_race_metadata(decoded: dict) -> dict:
+    """Extract race-level metadata: program_id, weather, ground_condition, etc.
+
+    These live at various levels depending on the API endpoint.
+    """
+    meta: dict = {}
+    data = decoded.get("data", decoded)
+
+    # race_start_info often contains the race details
+    rsi = _find_key_recursive(data, "race_start_info")
+    if isinstance(rsi, dict):
+        for key in ("program_id", "race_instance_id", "weather", "ground_condition"):
+            if rsi.get(key) is not None:
+                meta[key] = rsi[key]
+
+    # Top-level or data-level fields
+    for key in (
+        "program_id",
+        "race_instance_id",
+        "weather",
+        "ground_condition",
+        "race_id",
+    ):
+        if key not in meta:
+            val = _find_key_recursive(data, key, max_depth=3)
+            if val is not None and not isinstance(val, (dict, list)):
+                meta[key] = val
+
+    return meta
+
+
+def try_process_race(record: dict, include_frames: str = "all") -> dict | None:
     """
     Attempt to extract and process race simulation data from a network record.
 
     Args:
         record: A network event record dict (must have "msgpack_decoded" or
                 similar decoded data).
-        include_frames: "all", "sampled", or "none" for frame data verbosity.
+        include_frames: "all" or "none" for frame data verbosity.
 
     Returns:
         A structured race data dict, or None if no race data found.
@@ -350,6 +381,11 @@ def try_process_race(record: dict, include_frames: str = "sampled") -> dict | No
         "api": api_name,
     }
 
+    # Extract race-level metadata (program_id, weather, ground_condition, etc.)
+    race_meta = _extract_race_metadata(decoded)
+    if race_meta:
+        race_record["race_metadata"] = race_meta
+
     # Extract horse info
     horse_info = _extract_horse_info(decoded)
     if horse_info:
@@ -382,6 +418,13 @@ def try_process_race(record: dict, include_frames: str = "sampled") -> dict | No
             for i, h in enumerate(horse_info)
         ]
 
+    # Build a lookup: frame_order -> horse info (chara_id, card_id)
+    horse_lookup: dict[int, dict] = {}
+    for h in race_record.get("horses", []):
+        fo = h.get("frame_order")
+        if fo is not None:
+            horse_lookup[fo] = h
+
     # Parse simulation binary
     if sim_data:
         try:
@@ -396,11 +439,16 @@ def try_process_race(record: dict, include_frames: str = "sampled") -> dict | No
             }
             race_record["phases"] = _detect_phases(rd)
 
-            # Per-horse summaries
+            # Per-horse summaries — enrich with chara_id / card_id from horse info
             summaries = []
             for i in range(rd.horse_num):
                 s = _summarize_horse(rd, i)
                 if s:
+                    # frame_order is 1-based, horse_index is 0-based
+                    h_info = horse_lookup.get(i + 1)
+                    if h_info:
+                        s["chara_id"] = h_info.get("chara_id")
+                        s["card_id"] = h_info.get("card_id")
                     summaries.append(s)
             race_record["horse_summaries"] = summaries
 

@@ -360,7 +360,7 @@ def on_message(message, data):
                 has_decoded = "msgpack_decoded" in record
                 if has_decoded:
                     try:
-                        race_record = try_process_race(record)
+                        race_record = try_process_race(record, include_frames="all")
                         if race_record and session_data:
                             session_data.write("race", race_record)
                             log.info(
