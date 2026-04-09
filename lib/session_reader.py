@@ -323,7 +323,8 @@ def get_race_replay_data(session_name: str, race_idx: int) -> dict | None:
         sampled = target.get("sampled_frames", [])
         num_horses = target.get("num_horses", 0)
         for sf in sampled:
-            frame = {"idx": sf.get("frame_index", 0), "time": sf.get("frame_index", 0)}
+            fi = sf.get("frame_index", 0)
+            frame = {"idx": fi, "time": fi / 15.0}  # simulation runs at ~15fps
             for hi in range(num_horses):
                 hdata = sf.get(f"horse_{hi}", {})
                 frame[str(hi)] = {

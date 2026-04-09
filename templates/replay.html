@@ -21,11 +21,33 @@
   .controls .btn { min-width: 36px; text-align: center; font-size: 1rem; }
   .scrubber { flex: 1; -webkit-appearance: none; appearance: none;
     height: 6px; border-radius: 3px; background: var(--border);
-    outline: none; cursor: pointer;
+    outline: none; cursor: pointer; transition: background 0.15s;
   }
+  .scrubber:hover { background: #484f58; }
   .scrubber::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 14px; height: 14px;
+    -webkit-appearance: none; width: 16px; height: 16px;
     border-radius: 50%; background: var(--accent); cursor: pointer;
+    border: 2px solid var(--bg); box-shadow: 0 0 0 2px var(--accent-dim);
+    transition: box-shadow 0.15s, transform 0.1s;
+  }
+  .scrubber::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 4px rgba(88,166,255,0.25);
+    transform: scale(1.15);
+  }
+  .scrubber:active::-webkit-slider-thumb {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 5px rgba(88,166,255,0.35);
+  }
+  /* Firefox */
+  .scrubber::-moz-range-track {
+    height: 6px; border-radius: 3px; background: var(--border); border: none;
+  }
+  .scrubber::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    border: 2px solid var(--bg); box-shadow: 0 0 0 2px var(--accent-dim); cursor: pointer;
+  }
+  .scrubber::-moz-range-thumb:hover {
+    box-shadow: 0 0 0 4px rgba(88,166,255,0.25);
   }
   .speed-label { color: var(--text-muted); font-size: 0.8rem; min-width: 32px; text-align: center; }
   .frame-label { color: var(--text-muted); font-size: 0.8rem; font-family: monospace; min-width: 120px; }
@@ -118,8 +140,10 @@ let playing   = false;
 let speed     = 1;          // 1×, 2×, 4×, 0.5×, 0.25×
 let animId    = null;
 let lastTime  = 0;
-let accumulator = 0;
-const FRAME_MS = 50;        // base ms per frame at 1×
+let simTime   = 0;          // current simulation time in seconds
+
+// Precompute simulation end time
+const SIM_END = FRAMES.length > 0 ? (FRAMES[FRAMES.length - 1].time || 0) : 0;
 
 // ── Canvas ────────────────────────────────────────────────────────────
 const canvas = document.getElementById('track');
@@ -435,8 +459,10 @@ scrubber.max = Math.max(0, FRAMES.length - 1);
 
 function setFrame(idx) {
   frameIdx = Math.max(0, Math.min(idx, FRAMES.length - 1));
+  simTime = FRAMES[frameIdx] ? (FRAMES[frameIdx].time || 0) : 0;
   scrubber.value = frameIdx;
-  frameLabel.textContent = `${frameIdx} / ${FRAMES.length - 1}`;
+  const t = simTime.toFixed(1);
+  frameLabel.textContent = `${frameIdx} / ${FRAMES.length - 1}  (${t}s)`;
   draw();
   updateInfoPanel();
 }
@@ -446,32 +472,54 @@ function togglePlay() {
   btnPlay.textContent = playing ? '⏸' : '▶';
   if (playing) {
     lastTime = performance.now();
-    accumulator = 0;
     animate();
   } else {
     cancelAnimationFrame(animId);
   }
 }
 
+// Binary search: find the last frame whose time <= target
+function findFrameForTime(t) {
+  let lo = 0, hi = FRAMES.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if ((FRAMES[mid].time || 0) <= t) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
+}
+
 function animate(now) {
   if (!playing) return;
   if (!now) now = performance.now();
-  const dt = now - lastTime;
+  const dtMs = now - lastTime;
   lastTime = now;
-  accumulator += dt * speed;
 
-  while (accumulator >= FRAME_MS && frameIdx < FRAMES.length - 1) {
-    frameIdx++;
-    accumulator -= FRAME_MS;
-  }
+  // Advance simulation time by real elapsed time × playback speed
+  simTime += (dtMs / 1000) * speed;
 
-  if (frameIdx >= FRAMES.length - 1) {
+  if (simTime >= SIM_END) {
+    simTime = SIM_END;
     playing = false;
     btnPlay.textContent = '▶';
   }
 
-  setFrame(frameIdx);
+  const newIdx = findFrameForTime(simTime);
+  if (newIdx !== frameIdx) {
+    frameIdx = newIdx;
+  }
+
+  setFrameFromSim();
   if (playing) animId = requestAnimationFrame(animate);
+}
+
+// Like setFrame but doesn't overwrite simTime (used by animate loop)
+function setFrameFromSim() {
+  scrubber.value = frameIdx;
+  const t = simTime.toFixed(1);
+  frameLabel.textContent = `${frameIdx} / ${FRAMES.length - 1}  (${t}s)`;
+  draw();
+  updateInfoPanel();
 }
 
 function stepFrame(delta) {
