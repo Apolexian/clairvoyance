@@ -59,9 +59,9 @@ def run(cmd: list[str], label: str) -> None:
     )
     print(result.stdout)  # print PyInstaller output live
     if result.returncode != 0:
-        print(f"\n  ✗ {label} failed (exit {result.returncode})")
+        print(f"\n  FAILED: {label} (exit {result.returncode})")
         sys.exit(1)
-    print(f"  ✓ {label} done.")
+    print(f"  OK: {label} done.")
 
 
 def build_gui():
@@ -128,10 +128,10 @@ def post_build():
         gui_exe = gui_subdir / "Clairvoyance.exe"
         gui_internal = gui_subdir / "_internal"
         if gui_exe.exists():
-            print(f"  Moving {gui_exe} → {DIST / 'Clairvoyance.exe'}")
+            print(f"  Moving {gui_exe} -> {DIST / 'Clairvoyance.exe'}")
             shutil.move(str(gui_exe), str(DIST / "Clairvoyance.exe"))
         if gui_internal.is_dir():
-            print(f"  Moving {gui_internal} → {DIST / '_internal'}")
+            print(f"  Moving {gui_internal} -> {DIST / '_internal'}")
             shutil.move(str(gui_internal), str(DIST / "_internal"))
         shutil.rmtree(str(gui_subdir), ignore_errors=True)
 
@@ -142,7 +142,7 @@ def post_build():
             exe = tool_dir / f"{tool}.exe"
             if exe.exists():
                 dest = DIST / f"{tool}.exe"
-                print(f"  Moving {exe} → {dest}")
+                print(f"  Moving {exe} -> {dest}")
                 shutil.move(str(exe), str(dest))
             # Merge any unique files from tool's _internal into main _internal
             tool_internal = tool_dir / "_internal"
@@ -166,24 +166,24 @@ def post_build():
     expected = ["Clairvoyance.exe", "collect.exe", "discover.exe", "analyse.exe", "_internal"]
     missing = [name for name in expected if not (DIST / name).exists()]
     if missing:
-        print(f"\n  ⚠ WARNING: Missing in output: {missing}")
+        print(f"\n  WARNING: Missing in output: {missing}")
     else:
         print(f"\n  All executables verified in {DIST}")
 
     print(f"\n{'=' * 60}")
-    print("  ✓ Build complete!")
+    print("  Build complete!")
     print(f"  Output: {DIST}")
     print("  Ship as: Clairvoyance.zip")
     print(f"{'=' * 60}")
 
 
 def generate_icon():
-    """Convert main_small_icon.png → multi-size .ico for the Windows executable."""
+    """Convert main_small_icon.png to multi-size .ico for the Windows executable."""
     BUILD.mkdir(parents=True, exist_ok=True)
     img = Image.open(ICON_PNG).convert("RGBA")
     sizes = [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
     img.save(str(ICON_ICO), format="ICO", sizes=sizes)
-    print(f"  ✓ Generated icon: {ICON_ICO}")
+    print(f"  Generated icon: {ICON_ICO}")
 
 
 def main():

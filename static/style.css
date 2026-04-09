@@ -243,6 +243,9 @@ a:hover { text-decoration: underline; }
   flex: 1;
   overflow-y: auto;
   margin: 0;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
 }
 
 /* ── Container ───────────────────────────────────────── */

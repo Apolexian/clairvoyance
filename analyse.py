@@ -226,7 +226,7 @@ def main():
     # ── Write interesting.json ─────────────────────────────────────────
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(interesting, f, indent=2, ensure_ascii=False)
-    print(f"  {len(interesting)} interesting classes → {OUTPUT_JSON}")
+    print(f"  {len(interesting)} interesting classes -> {OUTPUT_JSON}")
 
     # ── Write analysis.md ──────────────────────────────────────────────
     lines = []
@@ -300,7 +300,7 @@ def main():
 
     md_text = "\n".join(lines)
     OUTPUT_MD.write_text(md_text, encoding="utf-8")
-    print(f"  Analysis report → {OUTPUT_MD}")
+    print(f"  Analysis report -> {OUTPUT_MD}")
 
     # ── Print top 30 to console ────────────────────────────────────────
     print()

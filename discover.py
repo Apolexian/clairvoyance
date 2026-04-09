@@ -15,7 +15,7 @@ With --trace, hooks key entry-point methods and logs call frequency
 during gameplay so you know exactly what to target in Phase 2.
 
 Usage:
-  uv run discover.py                   # broad class scan → JSON dump
+  uv run discover.py                   # broad class scan -> JSON dump
   uv run discover.py --trace           # live-trace during gameplay
   uv run discover.py --keywords extra  # add extra keywords to scan
 """
@@ -48,6 +48,9 @@ JS_LOG_FILE = os.path.join(SCRIPT_DIR, "discover_js.log")
 log = logging.getLogger("clairvoyance")
 log.setLevel(logging.DEBUG)
 
+# Force UTF-8 on stdout so Unicode doesn't crash on Windows cp1252
+if sys.stdout:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 _console = logging.StreamHandler(sys.stdout)
 _console.setLevel(logging.INFO)
 _console.setFormatter(logging.Formatter("%(message)s"))
@@ -340,7 +343,7 @@ def on_message(message, data):
                 js_log.error("  %s", line)
 
     elif msg_type == "log":
-        # Verbose JS console output → file only, not console
+        # Verbose JS console output -> file only, not console
         js_log.info("%s", message.get("payload", ""))
 
 
@@ -446,7 +449,7 @@ def main():
     log.info("    Main:    %s", LOG_FILE)
     log.info("    JS:      %s", JS_LOG_FILE)
     if has_error:
-        log.info("  ⚠ Errors occurred — check logs above.")
+        log.info("  WARNING: Errors occurred — check logs above.")
     log.info("=" * 60)
 
 

@@ -93,7 +93,7 @@ log.setLevel(logging.DEBUG)
 # File handler — always active, captures everything (persists across runs)
 _fh = logging.FileHandler(str(LOG_FILE), mode="a", encoding="utf-8")
 _fh.setLevel(logging.DEBUG)
-_fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s — %(message)s"))
+_fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s - %(message)s"))
 log.addHandler(_fh)
 
 # Console handler — useful in dev mode (uv run gui.py)
@@ -102,7 +102,7 @@ _ch.setLevel(logging.INFO)
 _ch.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
 log.addHandler(_ch)
 
-log.info("Clairvoyance GUI starting — log file: %s", LOG_FILE)
+log.info("Clairvoyance GUI starting - log file: %s", LOG_FILE)
 
 
 @app.errorhandler(Exception)
@@ -332,10 +332,14 @@ def api_setup_run():
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             cwd=str(SCRIPT_DIR),
         )
         if os.name == "nt":
-            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+            kwargs["creationflags"] = (
+                subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+            )
         proc = subprocess.Popen(cmd, **kwargs)
         with _setup_lock:
             _setup_process = proc
@@ -368,10 +372,14 @@ def _run_setup_pipeline(proc: subprocess.Popen, skip_discover: bool) -> None:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 cwd=str(SCRIPT_DIR),
             )
             if os.name == "nt":
-                kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+                kwargs["creationflags"] = (
+                    subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+                )
             analyse_proc = subprocess.Popen(analyse_cmd, **kwargs)
             with _setup_lock:
                 _setup_process = analyse_proc
@@ -423,11 +431,15 @@ def api_recorder_start():
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             cwd=str(SCRIPT_DIR),
         )
-        # On Windows, create in a new process group so we can send CTRL_BREAK
+        # On Windows, hide console window + create new process group for CTRL_BREAK
         if os.name == "nt":
-            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+            kwargs["creationflags"] = (
+                subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
+            )
         proc = subprocess.Popen(cmd, **kwargs)
         with _recorder_lock:
             _recorder_process = proc

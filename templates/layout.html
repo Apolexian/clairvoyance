@@ -35,11 +35,8 @@
             ⚠ Run setup before recording.
           </div>
           <div class="form-row" id="setup-btns">
-            <button id="btn-setup-full" class="btn btn-primary" onclick="runSetup(false)">
+            <button id="btn-setup-full" class="btn btn-primary" onclick="runSetup()">
               Scan Game Binary
-            </button>
-            <button id="btn-setup-analyse" class="btn" onclick="runSetup(true)" title="Re-analyse existing class_dump.json">
-              Re-analyse Only
             </button>
           </div>
         </div>
@@ -51,11 +48,11 @@
           <div class="section-label">2. Record — Capture Game Data</div>
           <div class="form-row">
             <label>Label:</label>
-            <input type="text" id="rec-label" value="gui" class="input-sm">
+            <input type="text" id="rec-label" class="input-sm">
           </div>
-          <div class="form-row">
-            <button id="btn-rec-start" class="btn btn-primary" onclick="startRecording()" disabled>▶ Start Recording</button>
-            <button id="btn-rec-stop" class="btn btn-danger" onclick="stopRecording()" disabled>⏹ Stop</button>
+          <div class="form-row" style="margin-top: 0.4rem;">
+            <button id="btn-rec-start" class="btn btn-primary" onclick="startRecording()" disabled>Start Recording</button>
+            <button id="btn-rec-stop" class="btn btn-danger" onclick="stopRecording()" disabled>Stop</button>
           </div>
           <div id="rec-not-ready" class="setup-missing" style="display:none; margin-top:0.3rem; font-size:0.8rem;">
             Run setup first — click Scan Game Binary above.
@@ -142,7 +139,6 @@
         // Setup buttons
         document.getElementById('btn-setup-full').disabled = d.running;
         document.getElementById('btn-setup-full').textContent = d.running ? 'Scanning...' : 'Scan Game Binary';
-        document.getElementById('btn-setup-analyse').disabled = d.running || !d.class_dump;
 
         // Record button gating
         const notReady = document.getElementById('rec-not-ready');
@@ -191,20 +187,18 @@
     }
 
     // ── Actions ─────────────────────────────────────────────
-    async function runSetup(skipDiscover) {
+    async function runSetup() {
       // Switch to setup log tab so user sees output
       showLogTab('setup');
 
       // Update log immediately so user knows something is happening
-      document.getElementById('setup-log').textContent = skipDiscover
-        ? '[gui] Starting analysis…'
-        : '[gui] Starting binary scan — this may take a minute…';
+      document.getElementById('setup-log').textContent = '[gui] Starting binary scan - this may take a minute...';
 
       try {
         const res = await fetch('/api/setup/run', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({skip_discover: skipDiscover}),
+          body: JSON.stringify({skip_discover: false}),
         });
         const data = await safeJSON(res);
         if (data.error) {
@@ -260,6 +254,9 @@
     // ── Polling loop ────────────────────────────────────────
     setInterval(pollAll, 2000);
     setTimeout(pollAll, 300);
+
+    // ── Default label = today's date ─────────────────────────
+    document.getElementById('rec-label').value = new Date().toISOString().slice(0, 10);
   </script>
   {% block scripts %}{% endblock %}
 </body>
