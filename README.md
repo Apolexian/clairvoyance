@@ -21,6 +21,7 @@ uv run run.py --skip-discover    # reuse existing class_dump.json
 uv run run.py --step discover    # only discovery
 uv run run.py --step analyse     # only analysis
 uv run run.py --step dump        # only dump collector
+uv run gui.py                    # launch native desktop app
 ```
 
 ## Workflow
@@ -87,12 +88,70 @@ sessions/<timestamp>_<label>/
 make fmt              # format Python (ruff) + JS (prettier)
 make lint             # lint Python
 make check            # CI check — fails if anything is unformatted
-make clean            # remove logs + sessions (keeps discovery/)
+make clean            # remove logs + sessions + build artifacts (keeps discovery/)
 make nuke             # remove everything including discovery/
 make analyse          # run analyse.py on discovery/class_dump.json
 make dump             # run collector with dump module
+make gui              # launch native desktop GUI
+make build-win        # build standalone Windows distribution
 make install-hooks    # install pre-commit git hooks
 ```
+
+## GUI (Native Desktop App)
+
+```bash
+uv run gui.py                    # launch native window
+uv run gui.py --browser          # fallback: open in browser instead
+```
+
+Opens a native OS window (WebKit on macOS, EdgeChromium on Windows) — no
+browser required, just double-click to launch.
+
+Features:
+- **Setup** — Scan game binary and analyse classes directly from the app
+- **Record** — Start/stop data collection sessions from the app
+- **Browse sessions** — See all saved sessions with record counts
+- **Session timeline** — View network events, filter by API name, see game state changes
+- **Race analysis** — Per-horse stats table, finish order, HP usage, pace-down segments
+- **Race charts** — Frame-by-frame distance, speed, and HP charts for all runners
+- **🏇 Race Replay** — Animated canvas visualization of the race:
+  - Horses run across the track in real time with color-coded dots
+  - Skill activations pop up above each horse as they fire
+  - HP bars under each horse, speed/distance stats in info panel
+  - Play/pause, frame step, scrub timeline, speed control (0.25×–8×)
+  - Phase boundary zones (opening/mid/final/spurt) shown as background bands
+  - Keyboard shortcuts: Space=play, ←→=step, ↑↓=speed, Home/End=jump
+
+## Standalone Windows Build
+
+Ship Clairvoyance as a standalone `.exe` that users can run without installing
+Python or uv. Built with PyInstaller.
+
+### Building (on Windows)
+
+```bash
+# Install build dependencies
+pip install pyinstaller
+
+# Run the build script
+python build_win.py
+```
+
+### Output
+
+```
+dist/Clairvoyance/
+  Clairvoyance.exe      ← double-click to launch
+  collect.exe            ← data collector (launched by GUI)
+  discover.exe           ← binary scanner (launched by GUI)
+  analyse.exe            ← class analyser (launched by GUI)
+  _internal/             ← shared runtime (Python + deps)
+  sessions/              ← created at runtime
+  discovery/             ← created at runtime
+```
+
+Zip the `dist/Clairvoyance/` folder and distribute. Users extract it,
+double-click `Clairvoyance.exe`, and they're running.
 
 ## How It Works
 

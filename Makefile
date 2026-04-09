@@ -1,7 +1,7 @@
 SHELL := /bin/zsh
 export PATH := $(HOME)/.local/bin:$(HOME)/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:$(PATH)
 
-.PHONY: fmt lint check clean nuke analyse dump install-hooks
+.PHONY: fmt lint check clean nuke analyse dump gui build-win install-hooks
 
 # Format everything
 fmt:
@@ -24,6 +24,7 @@ clean:
 	rm -f *.log
 	rm -rf sessions/
 	rm -rf __pycache__/ lib/__pycache__/
+	rm -rf build/ dist/
 
 # Remove EVERYTHING including discovery (full reset)
 nuke: clean
@@ -38,6 +39,14 @@ analyse:
 dump:
 	@test -f discovery/interesting.json || (echo "No interesting.json found. Run: make analyse" && exit 1)
 	uv run collect.py --modules dump --label dump
+
+# Launch the native GUI for exploring sessions
+gui:
+	uv run gui.py
+
+# Build standalone Windows distribution (run on Windows)
+build-win:
+	uv run --extra build build_win.py
 
 # Install pre-commit hooks into .git/hooks
 install-hooks:

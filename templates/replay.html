@@ -1,0 +1,511 @@
+{% extends "layout.html" %}
+{% block title %}Race Replay — {{ session.label or session.name }}{% endblock %}
+
+{% block head %}
+<style>
+  /* Replay-specific overrides */
+  .container { max-width: 100%; padding: 0.75rem 1rem; }
+  .replay-wrap { display: flex; flex-direction: column; height: calc(100vh - 80px); }
+  .track-wrap {
+    flex: 1; position: relative; background: #0a1628;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; min-height: 300px;
+  }
+  canvas { width: 100%; height: 100%; display: block; }
+
+  /* Controls bar */
+  .controls {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.5rem 0; flex-shrink: 0;
+  }
+  .controls .btn { min-width: 36px; text-align: center; font-size: 1rem; }
+  .scrubber { flex: 1; -webkit-appearance: none; appearance: none;
+    height: 6px; border-radius: 3px; background: var(--border);
+    outline: none; cursor: pointer;
+  }
+  .scrubber::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--accent); cursor: pointer;
+  }
+  .speed-label { color: var(--text-muted); font-size: 0.8rem; min-width: 32px; text-align: center; }
+  .frame-label { color: var(--text-muted); font-size: 0.8rem; font-family: monospace; min-width: 120px; }
+
+  /* Info panel below */
+  .info-panel {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; flex-shrink: 0;
+    padding: 0.4rem 0; max-height: 120px; overflow-y: auto;
+  }
+  .horse-chip {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.25rem 0.6rem; font-size: 0.78rem;
+    transition: border-color 0.15s; cursor: default;
+  }
+  .horse-chip .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .horse-chip .val { font-family: monospace; }
+  .horse-chip.active-skill { border-color: var(--gold); box-shadow: 0 0 6px rgba(249,199,79,0.4); }
+
+  /* Skill popup floating above the track */
+  .skill-popup {
+    position: absolute; padding: 2px 7px; border-radius: 4px;
+    font-size: 0.7rem; font-weight: 700; color: #fff;
+    background: rgba(249,199,79,0.9); pointer-events: none;
+    white-space: nowrap; transform: translate(-50%, -100%);
+    animation: skillPop 0.3s ease-out;
+  }
+  @keyframes skillPop {
+    from { opacity: 0; transform: translate(-50%, -80%); }
+    to   { opacity: 1; transform: translate(-50%, -100%); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/">Sessions</a> /
+  <a href="/session/{{ session.name }}">{{ session.label or session.name }}</a> /
+  <a href="/session/{{ session.name }}/race/{{ race_idx }}">Race {{ race_idx }}</a> /
+  <strong>Replay</strong>
+</div>
+
+<div class="replay-wrap">
+  <!-- Track canvas -->
+  <div class="track-wrap" id="track-wrap">
+    <canvas id="track"></canvas>
+  </div>
+
+  <!-- Playback controls -->
+  <div class="controls">
+    <button class="btn btn-sm" id="btn-play" onclick="togglePlay()">▶</button>
+    <button class="btn btn-sm" onclick="stepFrame(-1)">⏮</button>
+    <button class="btn btn-sm" onclick="stepFrame(1)">⏭</button>
+    <input type="range" class="scrubber" id="scrubber" min="0" max="1" step="1" value="0" oninput="scrubTo(+this.value)">
+    <span class="frame-label" id="frame-label">0 / 0</span>
+    <button class="btn btn-sm" onclick="changeSpeed(-1)">🐢</button>
+    <span class="speed-label" id="speed-label">1×</span>
+    <button class="btn btn-sm" onclick="changeSpeed(1)">🐇</button>
+  </div>
+
+  <!-- Horse info chips -->
+  <div class="info-panel" id="info-panel"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  Race Replay Engine
+// ═══════════════════════════════════════════════════════════════════════
+
+const DATA    = {{ replay | tojson }};
+const FRAMES  = DATA.frames;
+const SKILLS  = DATA.skills || [];
+const PHASES  = DATA.phases || {};
+const NUM_H   = DATA.num_horses;
+const TOTAL_D = DATA.total_distance || 1;
+const SUMMARIES = DATA.horse_summaries || [];
+
+const COLORS = [
+  '#f94144','#f3722c','#f8961e','#f9c74f','#90be6d',
+  '#43aa8b','#577590','#4cc9f0','#7209b7','#b5179e',
+  '#3a86ff','#ff006e','#fb5607','#8338ec','#06d6a0',
+  '#ef476f','#ffd166','#118ab2','#073b4c',
+];
+
+// ── State ─────────────────────────────────────────────────────────────
+let frameIdx  = 0;
+let playing   = false;
+let speed     = 1;          // 1×, 2×, 4×, 0.5×, 0.25×
+let animId    = null;
+let lastTime  = 0;
+let accumulator = 0;
+const FRAME_MS = 50;        // base ms per frame at 1×
+
+// ── Canvas ────────────────────────────────────────────────────────────
+const canvas = document.getElementById('track');
+const ctx    = canvas.getContext('2d');
+const wrap   = document.getElementById('track-wrap');
+
+function resize() {
+  canvas.width  = wrap.clientWidth  * devicePixelRatio;
+  canvas.height = wrap.clientHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  draw();
+}
+window.addEventListener('resize', resize);
+
+// ── Track geometry ────────────────────────────────────────────────────
+const MARGIN_L = 60;    // left gutter (for labels)
+const MARGIN_R = 40;
+const LANE_H   = 28;    // px per horse lane
+const HORSE_R  = 10;    // horse dot radius
+
+function trackWidth()  { return wrap.clientWidth - MARGIN_L - MARGIN_R; }
+function trackTop()    { return 50; }  // top padding for phase labels
+
+function distToX(d) {
+  // Camera follows the pack: show a window of track around the pack center
+  const f = FRAMES[frameIdx];
+  if (!f) return MARGIN_L;
+
+  // Find pack center distance
+  let minD = Infinity, maxD = -Infinity;
+  for (let i = 0; i < NUM_H; i++) {
+    const hd = f[i] ? f[i].d : 0;
+    if (hd < minD) minD = hd;
+    if (hd > maxD) maxD = hd;
+  }
+  const centerD = (minD + maxD) / 2;
+
+  // Visible window: show ~300m around the pack, or more for spread-out fields
+  const spread = maxD - minD;
+  const windowSize = Math.max(400, spread * 2.5);
+
+  const viewStart = centerD - windowSize / 2;
+  const tw = trackWidth();
+  return MARGIN_L + ((d - viewStart) / windowSize) * tw;
+}
+
+function horseLaneY(hi) {
+  return trackTop() + 30 + hi * LANE_H;
+}
+
+// ── Skill popup tracking ──────────────────────────────────────────────
+// Map: horse_index → [{skillId, startFrame, endFrame}]
+let activeSkills = [];  // popups currently visible
+
+function updateActiveSkills() {
+  const f = FRAMES[frameIdx];
+  if (!f) return;
+  const curTime = f.time;
+
+  activeSkills = [];
+  for (const sk of SKILLS) {
+    const ft = sk.frame_time;
+    if (ft === undefined) continue;
+    // Show skill popup for ~2 seconds of race-time after activation
+    if (curTime >= ft && curTime <= ft + 2.0) {
+      activeSkills.push(sk);
+    }
+  }
+}
+
+// ── Draw ──────────────────────────────────────────────────────────────
+function draw() {
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+  ctx.clearRect(0, 0, W, H);
+
+  if (FRAMES.length === 0) {
+    ctx.fillStyle = '#888';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No frame data available', W / 2, H / 2);
+    return;
+  }
+
+  const f = FRAMES[frameIdx];
+  const tw = trackWidth();
+
+  // ── Phase background bands ────────────────────────────
+  if (PHASES.total_distance) {
+    const phases = [
+      { end: PHASES.phase_1_end,     color: 'rgba(26,82,118,0.25)', label: 'Opening' },
+      { end: PHASES.phase_2_end,     color: 'rgba(30,132,73,0.20)', label: 'Mid' },
+      { end: PHASES.phase_3_end,     color: 'rgba(183,149,11,0.18)', label: 'Final' },
+      { end: PHASES.total_distance,  color: 'rgba(146,43,33,0.22)', label: 'Spurt' },
+    ];
+    let prev = 0;
+    for (const p of phases) {
+      const x1 = distToX(prev);
+      const x2 = distToX(p.end);
+      if (x2 > MARGIN_L && x1 < W - MARGIN_R) {
+        const rx = Math.max(x1, MARGIN_L);
+        const rw = Math.min(x2, W - MARGIN_R) - rx;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(rx, trackTop(), rw, NUM_H * LANE_H + 50);
+        // Phase label
+        const mid = (rx + rx + rw) / 2;
+        if (mid > MARGIN_L + 20 && mid < W - MARGIN_R - 20) {
+          ctx.fillStyle = '#ffffff55';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(p.label, mid, trackTop() + 16);
+        }
+      }
+      prev = p.end;
+    }
+  }
+
+  // ── Distance markers ──────────────────────────────────
+  ctx.strokeStyle = '#ffffff15';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#ffffff40';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'center';
+  const step = TOTAL_D > 2000 ? 500 : TOTAL_D > 1000 ? 200 : 100;
+  for (let dm = 0; dm <= TOTAL_D; dm += step) {
+    const x = distToX(dm);
+    if (x > MARGIN_L && x < W - MARGIN_R) {
+      ctx.beginPath();
+      ctx.moveTo(x, trackTop() + 20);
+      ctx.lineTo(x, trackTop() + NUM_H * LANE_H + 40);
+      ctx.stroke();
+      ctx.fillText(dm + 'm', x, trackTop() + NUM_H * LANE_H + 52);
+    }
+  }
+
+  // ── Finish line ───────────────────────────────────────
+  const finishX = distToX(TOTAL_D);
+  if (finishX > MARGIN_L && finishX < W - MARGIN_R) {
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(finishX, trackTop() + 20);
+    ctx.lineTo(finishX, trackTop() + NUM_H * LANE_H + 40);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('FINISH', finishX, trackTop() + 14);
+  }
+
+  // ── Lane lines ────────────────────────────────────────
+  ctx.strokeStyle = '#ffffff08';
+  ctx.lineWidth = 1;
+  for (let hi = 0; hi <= NUM_H; hi++) {
+    const y = horseLaneY(hi) - LANE_H / 2 + HORSE_R;
+    ctx.beginPath();
+    ctx.moveTo(MARGIN_L, y);
+    ctx.lineTo(W - MARGIN_R, y);
+    ctx.stroke();
+  }
+
+  // ── Horses ────────────────────────────────────────────
+  if (!f) return;
+  updateActiveSkills();
+
+  for (let hi = 0; hi < NUM_H; hi++) {
+    const hd = f[hi];
+    if (!hd) continue;
+    const x = distToX(hd.d);
+    const y = horseLaneY(hi) + HORSE_R;
+    const color = COLORS[hi % COLORS.length];
+
+    // Is this horse activating a skill right now?
+    const hasSkill = activeSkills.some(s => s.horse_index === hi);
+
+    // Horse dot (glow if skill active)
+    if (hasSkill) {
+      ctx.shadowColor = '#f9c74f';
+      ctx.shadowBlur = 12;
+    }
+    ctx.beginPath();
+    ctx.arc(x, y, HORSE_R, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Horse border
+    ctx.strokeStyle = hasSkill ? '#f9c74f' : '#00000080';
+    ctx.lineWidth = hasSkill ? 2 : 1;
+    ctx.stroke();
+
+    // Horse index label inside dot
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(hi, x, y);
+
+    // Left gutter label
+    ctx.fillStyle = color;
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`H${hi}`, MARGIN_L - 8, y);
+
+    // Skill popup above horse
+    if (hasSkill) {
+      const skillsForHorse = activeSkills.filter(s => s.horse_index === hi);
+      for (let si = 0; si < skillsForHorse.length; si++) {
+        const sk = skillsForHorse[si];
+        const popY = y - HORSE_R - 8 - si * 18;
+        // Popup background
+        const label = `⚡ ${sk.skill_id}`;
+        ctx.font = 'bold 10px sans-serif';
+        const tw2 = ctx.measureText(label).width + 8;
+        ctx.fillStyle = 'rgba(249,199,79,0.9)';
+        roundRect(ctx, x - tw2/2, popY - 12, tw2, 16, 4);
+        ctx.fill();
+        // Popup text
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, x, popY - 4);
+      }
+    }
+
+    // HP bar under horse
+    if (hd.hp !== undefined) {
+      const maxHp = getMaxHp(hi);
+      const hpPct = maxHp > 0 ? hd.hp / maxHp : 1;
+      const barW = 24, barH = 3;
+      ctx.fillStyle = '#333';
+      ctx.fillRect(x - barW/2, y + HORSE_R + 3, barW, barH);
+      ctx.fillStyle = hpPct > 0.5 ? '#3fb950' : hpPct > 0.2 ? '#d29922' : '#f85149';
+      ctx.fillRect(x - barW/2, y + HORSE_R + 3, barW * hpPct, barH);
+    }
+  }
+
+  // ── Top-left race time ────────────────────────────────
+  ctx.fillStyle = '#ffffffcc';
+  ctx.font = 'bold 13px monospace';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const timeStr = f.time !== undefined ? f.time.toFixed(1) + 's' : `F${frameIdx}`;
+  ctx.fillText(timeStr, 10, 10);
+
+  ctx.textBaseline = 'alphabetic';
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+// ── Max HP lookup (from first frame) ──────────────────────────────────
+const _maxHp = {};
+function getMaxHp(hi) {
+  if (_maxHp[hi] !== undefined) return _maxHp[hi];
+  if (FRAMES.length > 0 && FRAMES[0][hi]) {
+    _maxHp[hi] = FRAMES[0][hi].hp || 1;
+  } else {
+    _maxHp[hi] = 1;
+  }
+  return _maxHp[hi];
+}
+
+// ── Info panel (chips below track) ────────────────────────────────────
+function updateInfoPanel() {
+  const f = FRAMES[frameIdx];
+  if (!f) return;
+  const panel = document.getElementById('info-panel');
+  let html = '';
+  for (let hi = 0; hi < NUM_H; hi++) {
+    const hd = f[hi];
+    if (!hd) continue;
+    const color = COLORS[hi % COLORS.length];
+    const hasSkill = activeSkills.some(s => s.horse_index === hi);
+    const cls = hasSkill ? 'horse-chip active-skill' : 'horse-chip';
+    const maxHp = getMaxHp(hi);
+    const hpPct = maxHp > 0 ? Math.round(hd.hp / maxHp * 100) : 100;
+    const summary = SUMMARIES.find(s => s.horse_index === hi);
+    const styleTag = summary ? (summary.running_style || '') : '';
+    html += `<div class="${cls}">
+      <span class="dot" style="background:${color}"></span>
+      <b>H${hi}</b>
+      ${styleTag ? `<span style="color:var(--text-muted)">${styleTag}</span>` : ''}
+      <span class="val">${Math.round(hd.d)}m</span>
+      <span class="val" style="color:${hpPct > 50 ? 'var(--green)' : hpPct > 20 ? 'var(--orange)' : 'var(--red)'}">♥${hpPct}%</span>
+      <span class="val" style="color:var(--text-muted)">⚡${hd.s}</span>
+    </div>`;
+  }
+  panel.innerHTML = html;
+}
+
+// ── Playback ──────────────────────────────────────────────────────────
+const scrubber    = document.getElementById('scrubber');
+const frameLabel  = document.getElementById('frame-label');
+const speedLabel  = document.getElementById('speed-label');
+const btnPlay     = document.getElementById('btn-play');
+
+scrubber.max = Math.max(0, FRAMES.length - 1);
+
+function setFrame(idx) {
+  frameIdx = Math.max(0, Math.min(idx, FRAMES.length - 1));
+  scrubber.value = frameIdx;
+  frameLabel.textContent = `${frameIdx} / ${FRAMES.length - 1}`;
+  draw();
+  updateInfoPanel();
+}
+
+function togglePlay() {
+  playing = !playing;
+  btnPlay.textContent = playing ? '⏸' : '▶';
+  if (playing) {
+    lastTime = performance.now();
+    accumulator = 0;
+    animate();
+  } else {
+    cancelAnimationFrame(animId);
+  }
+}
+
+function animate(now) {
+  if (!playing) return;
+  if (!now) now = performance.now();
+  const dt = now - lastTime;
+  lastTime = now;
+  accumulator += dt * speed;
+
+  while (accumulator >= FRAME_MS && frameIdx < FRAMES.length - 1) {
+    frameIdx++;
+    accumulator -= FRAME_MS;
+  }
+
+  if (frameIdx >= FRAMES.length - 1) {
+    playing = false;
+    btnPlay.textContent = '▶';
+  }
+
+  setFrame(frameIdx);
+  if (playing) animId = requestAnimationFrame(animate);
+}
+
+function stepFrame(delta) {
+  if (playing) togglePlay();
+  setFrame(frameIdx + delta);
+}
+
+function scrubTo(val) {
+  if (playing) togglePlay();
+  setFrame(val);
+}
+
+const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
+let speedIdx = 2; // 1×
+function changeSpeed(dir) {
+  speedIdx = Math.max(0, Math.min(SPEEDS.length - 1, speedIdx + dir));
+  speed = SPEEDS[speedIdx];
+  speedLabel.textContent = speed + '×';
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space')      { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowRight') { e.preventDefault(); stepFrame(1); }
+  if (e.code === 'ArrowLeft')  { e.preventDefault(); stepFrame(-1); }
+  if (e.code === 'ArrowUp')    { e.preventDefault(); changeSpeed(1); }
+  if (e.code === 'ArrowDown')  { e.preventDefault(); changeSpeed(-1); }
+  if (e.code === 'Home')       { e.preventDefault(); setFrame(0); }
+  if (e.code === 'End')        { e.preventDefault(); setFrame(FRAMES.length - 1); }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────
+resize();
+setFrame(0);
+</script>
+{% endblock %}
+

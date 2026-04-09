@@ -665,8 +665,21 @@ def process_dump_race_frames(
                 "class": rec.get("class"),
                 "_ts": rec.get("_ts"),
             }
+            # Capture the new structured fields
+            for key in (
+                "source",
+                "skill_id",
+                "skill_id_arg2",
+                "horse_index",
+                "arg1_int",
+                "skillId",
+                "level",
+            ):
+                if key in rec:
+                    info[key] = rec[key]
+            # Capture arg1_ probed fields (int32_at_0x... patterns)
             for k, v in rec.items():
-                if k.startswith("field_"):
+                if k.startswith("arg1_") or k.startswith("field_"):
                     info[k] = v
             skill_info.append(info)
 

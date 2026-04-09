@@ -141,26 +141,94 @@
     }
 
     // ── Phase 3: Skill activation hooks ───────────────────────────────
-    // Look for methods that handle skill activation during races.
+    // Hook skill activation methods and extract actual skill IDs.
+    //
+    // Strategy:
+    //  a) Hook SkillDetail.Activate — the canonical "skill fires" event.
+    //     The `self` (args[0]) IS the SkillDetail with SkillId, Level, etc.
+    //  b) Hook SkillManager.AddSkill — args[1] is the skill object being
+    //     added; traverse its fields for the actual skill ID.
+    //  c) For other skill classes, read args[1] as potential skill objects.
 
-    var SKILL_METHOD_NAMES = [
-        "ActivateSkill",
-        "OnSkillActivate",
-        "AddSkill",
-        "FireSkill",
-        "TriggerSkill",
-        "UseSkill",
-        "OnActivate",
-        "Execute",
-    ];
+    // Helper: try to read a skill ID from an object pointer by scanning
+    // known field names that typically hold the skill id.
+    function tryReadSkillId(objPtr) {
+        if (!objPtr || objPtr.isNull()) return null;
+        // Common IL2CPP object layout: fields start at offset 0x10 (64-bit)
+        // or 0x08 (32-bit) after klass + monitor. For Int32 fields that
+        // are "Id"-like, try small offsets typical for SkillDetail.
+        var result = {};
+        try {
+            // Read a bunch of int32 fields at typical offsets (0x10..0x40)
+            // and look for plausible skill IDs (6-digit numbers like 200xxx, 900xxx)
+            var baseOff = ptrSize === 8 ? 0x10 : 0x08;
+            for (var off = baseOff; off < baseOff + 0x40; off += 4) {
+                try {
+                    var val = objPtr.add(off).readS32();
+                    // Skill IDs in Uma are typically 100000-999999 range
+                    if (val >= 100000 && val <= 999999) {
+                        result["int32_at_0x" + off.toString(16)] = val;
+                    }
+                    // Also capture small positive ints (level, rarity, etc.)
+                    if (val > 0 && val <= 10 && !result.possibleLevel) {
+                        result["small_int_at_0x" + off.toString(16)] = val;
+                    }
+                } catch (e) {}
+            }
+        } catch (e) {}
+        return Object.keys(result).length > 0 ? result : null;
+    }
+
+    // ── 3a: SkillDetail.Activate — the best source ─────────────────
+    // Find SkillDetail specifically and hook Activate with full field read
+    var skillDetailInfo = null;
+    for (var sdn in classInfos) {
+        if (sdn.indexOf("SkillDetail") !== -1) {
+            skillDetailInfo = classInfos[sdn];
+            break;
+        }
+    }
+    if (skillDetailInfo) {
+        // Use extractClassInfoWithParents to also get inherited fields
+        if (
+            hookMethod(skillDetailInfo, "Activate", -1, {
+                onEnter: (function (cInfo) {
+                    return function (args) {
+                        var self = args[0];
+                        var record = {
+                            event: "race_skill_activate",
+                            class: cInfo.fullName + ".Activate",
+                            source: "SkillDetail",
+                        };
+
+                        // Read ALL readable fields from the SkillDetail object
+                        var fields = readObjectFields(self, cInfo.fieldList);
+                        if (fields) {
+                            for (var k in fields) {
+                                record["field_" + k] = fields[k];
+                            }
+                        }
+
+                        send({ type: "collect", domain: "race", data: record });
+                        // Also send to skills domain for that log
+                        send({ type: "collect", domain: "skills", data: record });
+                    };
+                })(skillDetailInfo),
+            })
+        )
+            hookCount++;
+    }
+
+    // ── 3b: SkillManager methods — read the argument skill object ───
+    var SKILL_MANAGER_METHODS = ["ActivateSkill", "AddSkill", "FireSkill", "UseSkill"];
 
     for (var cn in classInfos) {
         var ci = classInfos[cn];
         var cnLower = cn.toLowerCase();
-        if (!cnLower.includes("skill")) continue;
+        if (!cnLower.includes("skillmanager")) continue;
 
-        for (var si = 0; si < SKILL_METHOD_NAMES.length; si++) {
-            var skillMeth = SKILL_METHOD_NAMES[si];
+        for (var si = 0; si < SKILL_MANAGER_METHODS.length; si++) {
+            var skillMeth = SKILL_MANAGER_METHODS[si];
             if (!ci.methods[skillMeth]) continue;
 
             var capturedSkill = cn + "." + skillMeth;
@@ -171,43 +239,110 @@
                             var record = {
                                 event: "race_skill_activate",
                                 class: capturedName,
+                                source: "SkillManager",
                             };
 
-                            // Read fields from self
-                            var self = args[0];
-                            for (var fi = 0; fi < cInfo.fieldList.length; fi++) {
-                                var f = cInfo.fieldList[fi];
-                                var lower = f.name.toLowerCase();
-                                if (
-                                    (lower.includes("skill") ||
-                                        lower.includes("id") ||
-                                        lower.includes("horse") ||
-                                        lower.includes("index") ||
-                                        lower.includes("time") ||
-                                        lower.includes("duration") ||
-                                        lower.includes("effect") ||
-                                        lower.includes("target")) &&
-                                    (f.type.includes("Int32") ||
-                                        f.type.includes("Single") ||
-                                        f.type.includes("UInt32"))
-                                ) {
+                            // args[0] = this (SkillManager)
+                            // args[1] = first method argument (likely skill object or skill id)
+                            // Try reading args[1] as an object with fields
+                            if (args.length > 1) {
+                                try {
+                                    var arg1 = args[1];
+                                    // First, try as a plain int32 (skill ID directly)
                                     try {
-                                        if (f.type.includes("Single")) {
-                                            record["field_" + f.name] = self
-                                                .add(f.offset)
-                                                .readFloat();
-                                        } else {
-                                            record["field_" + f.name] = self
-                                                .add(f.offset)
-                                                .readS32();
+                                        var asInt = arg1.toInt32();
+                                        if (asInt >= 100000 && asInt <= 999999) {
+                                            record.skill_id = asInt;
+                                        } else if (asInt > 0) {
+                                            record.arg1_int = asInt;
                                         }
                                     } catch (e) {}
-                                }
+
+                                    // Also try as an object pointer — scan for skill ID fields
+                                    if (!record.skill_id) {
+                                        var probed = tryReadSkillId(arg1);
+                                        if (probed) {
+                                            for (var pk in probed) {
+                                                record["arg1_" + pk] = probed[pk];
+                                            }
+                                        }
+                                    }
+                                } catch (e) {}
+                            }
+
+                            // Also try reading args[2] (could be horse index)
+                            if (args.length > 2) {
+                                try {
+                                    var arg2 = args[2].toInt32();
+                                    if (arg2 >= 0 && arg2 < 18) {
+                                        record.horse_index = arg2;
+                                    } else if (arg2 >= 100000 && arg2 <= 999999) {
+                                        record.skill_id_arg2 = arg2;
+                                    }
+                                } catch (e) {}
                             }
 
                             send({ type: "collect", domain: "race", data: record });
                         };
                     })(capturedSkill, ci),
+                })
+            )
+                hookCount++;
+        }
+    }
+
+    // ── 3c: Other skill-related classes (HorseSkill, etc.) ──────────
+    var OTHER_SKILL_METHODS = ["OnSkillActivate", "TriggerSkill", "OnActivate"];
+
+    for (var cn2 in classInfos) {
+        var ci2 = classInfos[cn2];
+        var cn2Lower = cn2.toLowerCase();
+        // Skip classes already hooked above
+        if (cn2Lower.includes("skillmanager") || cn2.indexOf("SkillDetail") !== -1) continue;
+        if (!cn2Lower.includes("skill")) continue;
+
+        for (var si2 = 0; si2 < OTHER_SKILL_METHODS.length; si2++) {
+            var skillMeth2 = OTHER_SKILL_METHODS[si2];
+            if (!ci2.methods[skillMeth2]) continue;
+
+            var capturedSkill2 = cn2 + "." + skillMeth2;
+            if (
+                hookMethod(ci2, skillMeth2, -1, {
+                    onEnter: (function (capturedName, cInfo) {
+                        return function (args) {
+                            var record = {
+                                event: "race_skill_activate",
+                                class: capturedName,
+                                source: "other",
+                            };
+
+                            // Read all fields from self
+                            var fields = readObjectFields(args[0], cInfo.fieldList);
+                            if (fields) {
+                                for (var k in fields) {
+                                    record["field_" + k] = fields[k];
+                                }
+                            }
+
+                            // Try args[1] as skill id or skill object
+                            if (args.length > 1) {
+                                try {
+                                    var asInt = args[1].toInt32();
+                                    if (asInt >= 100000 && asInt <= 999999) {
+                                        record.skill_id = asInt;
+                                    }
+                                } catch (e) {}
+                                var probed = tryReadSkillId(args[1]);
+                                if (probed) {
+                                    for (var pk2 in probed) {
+                                        record["arg1_" + pk2] = probed[pk2];
+                                    }
+                                }
+                            }
+
+                            send({ type: "collect", domain: "race", data: record });
+                        };
+                    })(capturedSkill2, ci2),
                 })
             )
                 hookCount++;

@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block title %}Session — {{ session.label or session.name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/">Sessions</a> / <strong>{{ session.label or session.name }}</strong>
+</div>
+
+<div class="session-header">
+  <h1>{{ session.label or 'Session' }}</h1>
+  <span class="session-meta">{{ session.created[:19] if session.created else session.name }}</span>
+</div>
+
+<!-- Stats overview -->
+<div class="stats-bar">
+  {% for domain, count in session.counts.items() %}
+  <div class="stat-card">
+    <div class="stat-value">{{ count }}</div>
+    <div class="stat-label">{{ domain }}</div>
+  </div>
+  {% endfor %}
+  <div class="stat-card accent">
+    <div class="stat-value">{{ races | length }}</div>
+    <div class="stat-label">races detected</div>
+  </div>
+</div>
+
+<!-- Races section -->
+{% if races %}
+<section class="section">
+  <h2>🏇 Races</h2>
+  <div class="race-list">
+    {% for race in races %}
+    <a href="/session/{{ session.name }}/race/{{ race._race_index }}" class="race-card">
+      <div class="race-card-header">
+        <span class="race-label">{{ race._race_label }}</span>
+        <span class="race-badge {{ race._source }}">{{ race._source }}</span>
+      </div>
+      <div class="race-card-body">
+        {% if race._source == 'dump' %}
+          <span>{{ race.num_horses }} horses · {{ race.total_frames }} frames · ~{{ race.estimated_total_distance }}m</span>
+        {% elif race.horse_summaries %}
+          <span>{{ race.horse_summaries | length }} horses
+            {% if race.phases and race.phases.total_distance %}
+              · {{ race.phases.total_distance }}m
+            {% endif %}
+            {% if race.skill_activations %}
+              · {{ race.skill_activations | length }} skills
+            {% endif %}
+          </span>
+        {% else %}
+          <span>{{ race.get('horse_count', '?') }} horses</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Network API Timeline -->
+{% if network %}
+<section class="section">
+  <h2>🌐 Network Events</h2>
+  <div class="timeline-filter">
+    <input type="text" id="filter-api" placeholder="Filter by API name..." oninput="filterTimeline()" class="input-sm">
+  </div>
+  <div class="timeline" id="network-timeline">
+    {% for ev in network %}
+    <div class="timeline-event {% if 'Race' in ev.api %}race-highlight{% endif %}" data-api="{{ ev.api }}">
+      <div class="timeline-time">{{ ev._ts[11:19] if ev._ts else '' }}</div>
+      <div class="timeline-content">
+        <span class="timeline-badge {{ ev.event }}">{{ ev.event }}</span>
+        <strong>{{ ev.api }}</strong>
+        {% if ev.chara_stats %}
+        <div class="chara-stats-inline">
+          SPD:{{ ev.chara_stats.speed }}
+          STA:{{ ev.chara_stats.stamina }}
+          POW:{{ ev.chara_stats.power }}
+          GUT:{{ ev.chara_stats.guts }}
+          WIZ:{{ ev.chara_stats.wiz }}
+          · T{{ ev.chara_stats.turn }} VIT:{{ ev.chara_stats.vital }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterTimeline() {
+  const q = document.getElementById('filter-api').value.toLowerCase();
+  document.querySelectorAll('#network-timeline .timeline-event').forEach(el => {
+    const api = el.dataset.api.toLowerCase();
+    el.style.display = api.includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}
+

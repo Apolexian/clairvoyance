@@ -1,0 +1,376 @@
+{% extends "layout.html" %}
+{% block title %}Race {{ race_idx }} — {{ session.label or session.name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/">Sessions</a> /
+  <a href="/session/{{ session.name }}">{{ session.label or session.name }}</a> /
+  <strong>Race {{ race_idx }}</strong>
+</div>
+
+<div style="display:flex; align-items:center; gap:1rem;">
+  <h1>🏇 {{ race._race_label }}</h1>
+  <a href="/session/{{ session.name }}/race/{{ race_idx }}/replay" class="btn btn-primary" style="margin-top:0.2rem;">
+    ▶ Watch Replay
+  </a>
+</div>
+
+{% set source = race._source %}
+
+<!-- Race overview -->
+<div class="stats-bar">
+  {% if source == 'dump' %}
+    <div class="stat-card"><div class="stat-value">{{ race.num_horses }}</div><div class="stat-label">horses</div></div>
+    <div class="stat-card"><div class="stat-value">{{ race.total_frames }}</div><div class="stat-label">frames</div></div>
+    <div class="stat-card"><div class="stat-value">{{ race.estimated_total_distance }}m</div><div class="stat-label">distance</div></div>
+    {% if race.skill_activations %}
+    <div class="stat-card"><div class="stat-value">{{ race.skill_activations | length }}</div><div class="stat-label">skills</div></div>
+    {% endif %}
+  {% elif race.phases %}
+    <div class="stat-card"><div class="stat-value">{{ race.horse_summaries | length if race.horse_summaries else '?' }}</div><div class="stat-label">horses</div></div>
+    <div class="stat-card"><div class="stat-value">{{ race.phases.total_distance }}m</div><div class="stat-label">distance</div></div>
+    {% if race.skill_activations %}
+    <div class="stat-card"><div class="stat-value">{{ race.skill_activations | length }}</div><div class="stat-label">skill activations</div></div>
+    {% endif %}
+    {% if race.compete_events %}
+    <div class="stat-card"><div class="stat-value">{{ race.compete_events | length }}</div><div class="stat-label">compete events</div></div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<!-- Phase boundaries -->
+{% if race.phases and race.phases.total_distance %}
+<section class="section">
+  <h2>📏 Race Phases</h2>
+  <div class="phase-bar">
+    {% set total = race.phases.total_distance %}
+    {% set p1 = race.phases.phase_1_end %}
+    {% set p2 = race.phases.phase_2_end %}
+    {% set p3 = race.phases.phase_3_end %}
+    <div class="phase phase-1" style="width:{{ (p1/total*100)|round(1) }}%">
+      Opening<br><small>0–{{ p1|int }}m</small>
+    </div>
+    <div class="phase phase-2" style="width:{{ ((p2-p1)/total*100)|round(1) }}%">
+      Mid<br><small>{{ p1|int }}–{{ p2|int }}m</small>
+    </div>
+    <div class="phase phase-3" style="width:{{ ((p3-p2)/total*100)|round(1) }}%">
+      Final<br><small>{{ p2|int }}–{{ p3|int }}m</small>
+    </div>
+    <div class="phase phase-4" style="width:{{ ((total-p3)/total*100)|round(1) }}%">
+      Spurt<br><small>{{ p3|int }}–{{ total|int }}m</small>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Horse selector tabs -->
+{% set summaries = race.horse_summaries or [] %}
+{% if summaries %}
+<section class="section">
+  <h2>🐎 Runners</h2>
+  <div class="horse-tabs">
+    <button class="horse-tab active" onclick="showHorse(-1, this)">All</button>
+    {% for h in summaries %}
+    <button class="horse-tab" onclick="showHorse({{ h.horse_index }}, this)">
+      Horse {{ h.horse_index }}
+      {% if h.finish_order is defined %}
+        <small>#{{ h.finish_order }}</small>
+      {% elif h.estimated_rank is defined %}
+        <small>~#{{ h.estimated_rank }}</small>
+      {% endif %}
+    </button>
+    {% endfor %}
+  </div>
+
+  <!-- All-horses results table -->
+  <div id="horse-all" class="horse-panel">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Horse</th>
+          {% if source == 'api' %}
+          <th>Finish</th><th>Time</th><th>Style</th><th>Skills</th>
+          <th>HP Start</th><th>HP End</th><th>Late Start</th>
+          {% else %}
+          <th>Rank</th><th>Max Dist</th><th>Avg Speed</th><th>Max Speed</th>
+          <th>HP Start</th><th>HP End</th><th>HP Used</th>
+          <th>Pace↓ Frames</th><th>Blocked</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in summaries %}
+        <tr>
+          <td><strong>Horse {{ h.horse_index }}</strong></td>
+          {% if source == 'api' %}
+          <td class="{% if h.finish_order == 1 %}gold{% elif h.finish_order == 2 %}silver{% elif h.finish_order == 3 %}bronze{% endif %}">#{{ h.finish_order }}</td>
+          <td>{{ h.finish_time }}s</td>
+          <td>{{ h.running_style }}</td>
+          <td>{{ h.skill_activation_count }}</td>
+          <td>{{ h.hp_start if h.hp_start is defined else '-' }}</td>
+          <td>{{ h.hp_end if h.hp_end is defined else '-' }}</td>
+          <td>{{ '⚠️ YES' if h.is_late_start else '✓' }}</td>
+          {% else %}
+          <td class="{% if h.estimated_rank == 1 %}gold{% elif h.estimated_rank == 2 %}silver{% elif h.estimated_rank == 3 %}bronze{% endif %}">~#{{ h.estimated_rank }}</td>
+          <td>{{ h.max_distance }}m</td>
+          <td>{{ h.avg_speed }}</td>
+          <td>{{ h.max_speed }}</td>
+          <td>{{ h.hp_start }}</td>
+          <td>{{ h.hp_end }}</td>
+          <td>{{ h.hp_consumed }}</td>
+          <td>{{ h.total_pace_down_frames }}</td>
+          <td>{{ h.blocked_frames }}</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Per-horse detail panels -->
+  {% for h in summaries %}
+  <div id="horse-{{ h.horse_index }}" class="horse-panel" style="display:none">
+    <div class="horse-detail-header">
+      <h3>Horse {{ h.horse_index }} —
+        {% if h.finish_order is defined %}
+          Finish #{{ h.finish_order }}
+        {% elif h.estimated_rank is defined %}
+          Estimated #{{ h.estimated_rank }}
+        {% endif %}
+      </h3>
+    </div>
+
+    <div class="stats-bar compact">
+      {% if source == 'api' %}
+        <div class="stat-card"><div class="stat-value">{{ h.running_style }}</div><div class="stat-label">style</div></div>
+        <div class="stat-card"><div class="stat-value">{{ h.finish_time }}s</div><div class="stat-label">finish time</div></div>
+        <div class="stat-card"><div class="stat-value">{{ h.skill_activation_count }}</div><div class="stat-label">skills</div></div>
+        <div class="stat-card"><div class="stat-value">{{ h.start_delay_time }}</div><div class="stat-label">start delay</div></div>
+        {% if h.last_spurt_start_distance %}
+        <div class="stat-card"><div class="stat-value">{{ h.last_spurt_start_distance }}m</div><div class="stat-label">spurt start</div></div>
+        {% endif %}
+      {% else %}
+        <div class="stat-card"><div class="stat-value">{{ h.avg_speed }}</div><div class="stat-label">avg speed</div></div>
+        <div class="stat-card"><div class="stat-value">{{ h.max_speed }}</div><div class="stat-label">max speed</div></div>
+        <div class="stat-card"><div class="stat-value">{{ h.min_speed }}</div><div class="stat-label">min speed</div></div>
+        <div class="stat-card"><div class="stat-value">{{ h.hp_consumed }}</div><div class="stat-label">HP used</div></div>
+        <div class="stat-card"><div class="stat-value">{{ h.total_pace_down_frames }}</div><div class="stat-label">pace↓ frames</div></div>
+      {% endif %}
+    </div>
+
+    {% if h.pace_down_segments %}
+    <div class="subsection">
+      <h4>⚠️ Pace Down Segments</h4>
+      <table class="data-table compact">
+        <thead>
+          <tr>
+            {% if source == 'api' %}
+            <th>Start Time</th><th>End Time</th><th>Duration</th><th>Distance</th><th>Mode</th>
+            {% else %}
+            <th>Start Frame</th><th>End Frame</th><th>Duration</th><th>Distance Range</th><th>Mode</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for seg in h.pace_down_segments %}
+          <tr>
+            {% if source == 'api' %}
+            <td>{{ seg.start_time }}s</td>
+            <td>{{ seg.end_time }}s</td>
+            <td>{{ seg.duration }}s</td>
+            <td>{{ seg.start_distance }}–{{ seg.end_distance }}m</td>
+            <td>{{ seg.mode }}</td>
+            {% else %}
+            <td>{{ seg.start_frame }}</td>
+            <td>{{ seg.end_frame }}</td>
+            <td>{{ seg.duration_frames }} frames</td>
+            <td>{{ seg.start_distance }}–{{ seg.end_distance }}m</td>
+            <td>{{ seg.mode }}</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if source == 'api' and h.skill_ids_activated %}
+    <div class="subsection">
+      <h4>✨ Skills Activated</h4>
+      <div class="skill-ids">
+        {% for sid in h.skill_ids_activated %}
+        <span class="skill-badge">{{ sid }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+<!-- Charts -->
+{% if race.sampled_frames %}
+<section class="section">
+  <h2>📊 Frame-by-Frame Charts</h2>
+  <div class="chart-grid">
+    <div class="chart-container">
+      <h3>Distance Progress</h3>
+      <canvas id="chart-distance"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3>Speed Over Time</h3>
+      <canvas id="chart-speed"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3>HP Over Time</h3>
+      <canvas id="chart-hp"></canvas>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Skill activations for API races -->
+{% if race.skill_activations and source == 'api' %}
+<section class="section">
+  <h2>✨ Skill Activation Timeline</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Time</th><th>Horse</th><th>Skill ID</th>
+        {% if race.skill_activations[0].duration_raw is defined %}<th>Duration</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for sk in race.skill_activations %}
+      <tr>
+        <td>{{ sk.frame_time }}s</td>
+        <td>Horse {{ sk.horse_index }}</td>
+        <td><span class="skill-badge">{{ sk.skill_id }}</span></td>
+        {% if sk.duration_raw is defined %}<td>{{ sk.duration_raw }}</td>{% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<!-- Skill activations for dump races -->
+{% if race.skill_activations and source == 'dump' %}
+<section class="section">
+  <h2>✨ Skill Events</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th>Time</th><th>Source</th><th>Skill ID</th><th>Horse</th></tr>
+    </thead>
+    <tbody>
+      {% for sk in race.skill_activations %}
+      <tr>
+        <td>{{ sk._ts[11:19] if sk._ts else '' }}</td>
+        <td>{{ sk.source or sk.get('class','') }}</td>
+        <td><span class="skill-badge">{{ sk.skill_id or sk.skillId or '?' }}</span></td>
+        <td>{{ sk.horse_index if sk.horse_index is defined else '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Horse tab switching ─────────────────────────────────
+function showHorse(idx, btn) {
+  document.querySelectorAll('.horse-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.horse-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (idx === -1) {
+    document.getElementById('horse-all').style.display = '';
+  } else {
+    document.getElementById('horse-' + idx).style.display = '';
+  }
+}
+
+// ── Charts from sampled frame data ──────────────────────
+{% if race.sampled_frames %}
+(function() {
+  const frames = {{ race.sampled_frames | tojson }};
+  if (!frames || frames.length === 0) return;
+
+  // Discover horse keys
+  const horseKeys = [];
+  const sample = frames[0];
+  for (const key of Object.keys(sample)) {
+    if (key.startsWith('horse_')) horseKeys.push(key);
+  }
+
+  const COLORS = [
+    '#f94144','#f3722c','#f8961e','#f9c74f','#90be6d',
+    '#43aa8b','#577590','#4cc9f0','#7209b7','#b5179e',
+    '#3a86ff','#ff006e','#fb5607','#8338ec','#06d6a0',
+    '#ef476f','#ffd166','#118ab2','#073b4c',
+  ];
+
+  const frameLabels = frames.map(f => f.frame_index);
+
+  function buildDatasets(field) {
+    return horseKeys.map((key, i) => ({
+      label: key.replace('_', ' '),
+      data: frames.map(f => f[key] ? f[key][field] : null),
+      borderColor: COLORS[i % COLORS.length],
+      backgroundColor: COLORS[i % COLORS.length] + '20',
+      borderWidth: 1.5,
+      pointRadius: 0,
+      tension: 0.3,
+    }));
+  }
+
+  const defaultOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, color: '#ccc' } },
+    },
+    scales: {
+      x: { title: { display: true, text: 'Frame', color: '#999' }, ticks: { color: '#888' }, grid: { color: '#333' } },
+      y: { ticks: { color: '#888' }, grid: { color: '#333' } },
+    },
+  };
+
+  // Distance chart
+  const distCtx = document.getElementById('chart-distance');
+  if (distCtx) {
+    new Chart(distCtx, {
+      type: 'line',
+      data: { labels: frameLabels, datasets: buildDatasets('distance') },
+      options: { ...defaultOpts, scales: { ...defaultOpts.scales, y: { ...defaultOpts.scales.y, title: { display: true, text: 'Distance (m)', color: '#999' } } } },
+    });
+  }
+
+  // Speed chart
+  const speedCtx = document.getElementById('chart-speed');
+  if (speedCtx) {
+    new Chart(speedCtx, {
+      type: 'line',
+      data: { labels: frameLabels, datasets: buildDatasets('speed') },
+      options: { ...defaultOpts, scales: { ...defaultOpts.scales, y: { ...defaultOpts.scales.y, title: { display: true, text: 'Speed', color: '#999' } } } },
+    });
+  }
+
+  // HP chart
+  const hpCtx = document.getElementById('chart-hp');
+  if (hpCtx) {
+    new Chart(hpCtx, {
+      type: 'line',
+      data: { labels: frameLabels, datasets: buildDatasets('hp') },
+      options: { ...defaultOpts, scales: { ...defaultOpts.scales, y: { ...defaultOpts.scales.y, title: { display: true, text: 'HP', color: '#999' } } } },
+    });
+  }
+})();
+{% endif %}
+</script>
+{% endblock %}
+
