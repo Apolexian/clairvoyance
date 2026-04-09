@@ -51,7 +51,8 @@ def run(cmd: list[str], label: str) -> None:
     print(f"  {label}")
     print(f"  > {' '.join(cmd)}")
     print(f"{'=' * 60}\n")
-    result = subprocess.run(cmd, cwd=str(HERE))
+    result = subprocess.run(cmd, cwd=str(HERE), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    print(result.stdout)  # print PyInstaller output live
     if result.returncode != 0:
         print(f"\n  ✗ {label} failed (exit {result.returncode})")
         sys.exit(1)
@@ -70,9 +71,9 @@ def build_gui():
             "--windowed",  # no console window
             "--icon=NONE",  # TODO: add icon later
             # Bundle data files
-            f"--add-data=templates{os.pathsep}templates",
-            f"--add-data=static{os.pathsep}static",
-            f"--add-data=js{os.pathsep}js",
+            f"--add-data={HERE / 'templates'};templates",
+            f"--add-data={HERE / 'static'};static",
+            f"--add-data={HERE / 'js'};js",
             # Hidden imports for pywebview
             "--hidden-import=webview",
             "--hidden-import=clr_loader",
@@ -84,14 +85,10 @@ def build_gui():
 
 
 def build_tool(script: str, name: str):
-    """Build a subprocess tool as a console app."""
     add_data = []
-    # collect.py needs the js/ directory for Frida scripts
-    if name == "collect":
-        add_data = [f"--add-data=js{os.pathsep}js"]
-    # discover.py needs the js/ directory too
-    if name == "discover":
-        add_data = [f"--add-data=js{os.pathsep}js"]
+    js_path = HERE / "js"
+    if name in ("collect", "discover"):
+        add_data = [f"--add-data={js_path};js"]
 
     run(
         [
@@ -100,7 +97,7 @@ def build_tool(script: str, name: str):
             "PyInstaller",
             *COMMON,
             f"--name={name}",
-            "--console",  # needs stdout for log streaming
+            "--console",
             *add_data,
             script,
         ],
