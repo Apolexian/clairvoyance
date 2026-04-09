@@ -20,15 +20,18 @@ Prerequisites:
 
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+from PIL import Image
+
 HERE = Path(__file__).resolve().parent
 DIST = HERE / "dist" / "Clairvoyance"
 BUILD = HERE / "build"
+ICON_PNG = HERE / "static" / "main_small_icon.png"
+ICON_ICO = BUILD / "clairvoyance.ico"
 
 # PyInstaller flags shared across all builds
 COMMON = [
@@ -51,7 +54,9 @@ def run(cmd: list[str], label: str) -> None:
     print(f"  {label}")
     print(f"  > {' '.join(cmd)}")
     print(f"{'=' * 60}\n")
-    result = subprocess.run(cmd, cwd=str(HERE), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    result = subprocess.run(
+        cmd, cwd=str(HERE), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
     print(result.stdout)  # print PyInstaller output live
     if result.returncode != 0:
         print(f"\n  ✗ {label} failed (exit {result.returncode})")
@@ -69,7 +74,7 @@ def build_gui():
             *COMMON,
             "--name=Clairvoyance",
             "--windowed",  # no console window
-            "--icon=NONE",  # TODO: add icon later
+            f"--icon={ICON_ICO}",
             # Bundle data files
             f"--add-data={HERE / 'templates'};templates",
             f"--add-data={HERE / 'static'};static",
@@ -151,7 +156,19 @@ def post_build():
     print(f"{'=' * 60}")
 
 
+def generate_icon():
+    """Convert main_small_icon.png → multi-size .ico for the Windows executable."""
+    BUILD.mkdir(parents=True, exist_ok=True)
+    img = Image.open(ICON_PNG).convert("RGBA")
+    sizes = [(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+    img.save(str(ICON_ICO), format="ICO", sizes=sizes)
+    print(f"  ✓ Generated icon: {ICON_ICO}")
+
+
 def main():
+    # Generate .ico from PNG
+    generate_icon()
+
     # Clean previous build
     if DIST.exists():
         print(f"Removing previous build: {DIST}")

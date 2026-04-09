@@ -81,9 +81,9 @@
     <button class="btn btn-sm" onclick="stepFrame(1)">⏭</button>
     <input type="range" class="scrubber" id="scrubber" min="0" max="1" step="1" value="0" oninput="scrubTo(+this.value)">
     <span class="frame-label" id="frame-label">0 / 0</span>
-    <button class="btn btn-sm" onclick="changeSpeed(-1)">🐢</button>
+    <button class="btn btn-sm" onclick="changeSpeed(-1)">−</button>
     <span class="speed-label" id="speed-label">1×</span>
-    <button class="btn btn-sm" onclick="changeSpeed(1)">🐇</button>
+    <button class="btn btn-sm" onclick="changeSpeed(1)">+</button>
   </div>
 
   <!-- Horse info chips -->
@@ -334,7 +334,7 @@ function draw() {
         const sk = skillsForHorse[si];
         const popY = y - HORSE_R - 8 - si * 18;
         // Popup background
-        const label = `⚡ ${sk.skill_id}`;
+        const label = `SKILL ${sk.skill_id}`;
         ctx.font = 'bold 10px sans-serif';
         const tw2 = ctx.measureText(label).width + 8;
         ctx.fillStyle = 'rgba(249,199,79,0.9)';
@@ -418,8 +418,8 @@ function updateInfoPanel() {
       <b>H${hi}</b>
       ${styleTag ? `<span style="color:var(--text-muted)">${styleTag}</span>` : ''}
       <span class="val">${Math.round(hd.d)}m</span>
-      <span class="val" style="color:${hpPct > 50 ? 'var(--green)' : hpPct > 20 ? 'var(--orange)' : 'var(--red)'}">♥${hpPct}%</span>
-      <span class="val" style="color:var(--text-muted)">⚡${hd.s}</span>
+      <span class="val" style="color:${hpPct > 50 ? 'var(--green)' : hpPct > 20 ? 'var(--orange)' : 'var(--red)'}">HP ${hpPct}%</span>
+      <span class="val" style="color:var(--text-muted)">SPD ${hd.s}</span>
     </div>`;
   }
   panel.innerHTML = html;

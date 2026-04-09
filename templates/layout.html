@@ -10,7 +10,9 @@
 </head>
 <body>
   <nav class="topbar">
-    <a href="/" class="brand">🔮 Clairvoyance</a>
+    <a href="/" class="brand">
+      <img src="{{ url_for('static', filename='main_small_icon.png') }}" alt="" class="brand-icon"> Clairvoyance
+    </a>
     <div class="nav-links">
       <a href="/">Sessions</a>
       <span id="setup-indicator" class="setup-indicator" title="Binary analysis status">
@@ -28,7 +30,7 @@
       <div class="recorder-controls">
         <!-- Setup section -->
         <div class="setup-section" id="setup-section">
-          <div class="section-label">① Setup — Binary Analysis</div>
+          <div class="section-label">1. Setup — Binary Analysis</div>
           <div id="setup-ready-msg" style="display:none" class="setup-ready">
             ✓ Ready — <code>interesting.json</code> found
           </div>
@@ -37,10 +39,10 @@
           </div>
           <div class="form-row" id="setup-btns">
             <button id="btn-setup-full" class="btn btn-primary" onclick="runSetup(false)">
-              🔍 Scan Game Binary
+              Scan Game Binary
             </button>
             <button id="btn-setup-analyse" class="btn" onclick="runSetup(true)" title="Re-analyse existing class_dump.json">
-              📊 Re-analyse Only
+              Re-analyse Only
             </button>
           </div>
         </div>
@@ -49,7 +51,7 @@
 
         <!-- Record section -->
         <div class="record-section">
-          <div class="section-label">② Record — Capture Game Data</div>
+          <div class="section-label">2. Record — Capture Game Data</div>
           <div class="form-row">
             <label>Label:</label>
             <input type="text" id="rec-label" value="gui" class="input-sm">
@@ -73,8 +75,8 @@
       </div>
       <div class="recorder-log">
         <div class="log-tabs">
-          <button class="log-tab active" onclick="showLogTab('rec', this)">Record Log</button>
-          <button class="log-tab" onclick="showLogTab('setup', this)">Setup Log</button>
+          <button id="tab-rec" class="log-tab active" onclick="showLogTab('rec')">Record Log</button>
+          <button id="tab-setup" class="log-tab" onclick="showLogTab('setup')">Setup Log</button>
         </div>
         <pre id="rec-log" class="log-pane">Recorder idle.</pre>
         <pre id="setup-log" class="log-pane" style="display:none">No setup run yet.</pre>
@@ -89,7 +91,6 @@
   <script>
     // ── State ───────────────────────────────────────────────
     let recorderVisible = false;
-    let pollingId = null;
     let setupReady = false;
 
     // ── Panel toggle ────────────────────────────────────────
@@ -100,9 +101,9 @@
     }
 
     // ── Log tabs ────────────────────────────────────────────
-    function showLogTab(which, btn) {
+    function showLogTab(which) {
       document.querySelectorAll('.log-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
+      document.getElementById('tab-' + which).classList.add('active');
       document.getElementById('rec-log').style.display = which === 'rec' ? '' : 'none';
       document.getElementById('setup-log').style.display = which === 'setup' ? '' : 'none';
     }
@@ -141,13 +142,11 @@
 
         // Setup buttons
         document.getElementById('btn-setup-full').disabled = d.running;
+        document.getElementById('btn-setup-full').textContent = d.running ? 'Scanning...' : 'Scan Game Binary';
         document.getElementById('btn-setup-analyse').disabled = d.running || !d.class_dump;
 
         // Record button gating
-        const recStart = document.getElementById('btn-rec-start');
         const notReady = document.getElementById('rec-not-ready');
-        // Allow recording modules that don't need dump (network, races, skills, events)
-        // But show warning if dump is selected and not ready
         const dumpChecked = document.querySelector('#recorder-panel input[value=dump]:checked');
         if (!d.ready && dumpChecked) {
           notReady.style.display = '';
@@ -157,9 +156,13 @@
 
         // Setup log
         const logEl = document.getElementById('setup-log');
-        logEl.textContent = d.log.join('\n') || 'No setup run yet.';
+        if (d.log && d.log.length > 0) {
+          logEl.textContent = d.log.join('\n');
+        }
         logEl.scrollTop = logEl.scrollHeight;
-      } catch (e) { }
+      } catch (e) {
+        console.error('pollSetupStatus error:', e);
+      }
     }
 
     // ── Recorder status ─────────────────────────────────────
@@ -184,21 +187,37 @@
           stopBtn.disabled = true;
           toggleBtn.classList.remove('recording');
         }
-      } catch (e) { }
+      } catch (e) {
+        console.error('pollRecorderStatus error:', e);
+      }
     }
 
     // ── Actions ─────────────────────────────────────────────
     async function runSetup(skipDiscover) {
-      // Switch to setup log tab
-      showLogTab('setup', document.querySelectorAll('.log-tab')[1]);
+      // Switch to setup log tab so user sees output
+      showLogTab('setup');
 
-      const res = await fetch('/api/setup/run', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({skip_discover: skipDiscover}),
-      });
-      const data = await res.json();
-      if (data.error) alert(data.error);
+      // Update log immediately so user knows something is happening
+      document.getElementById('setup-log').textContent = skipDiscover
+        ? '[gui] Starting analysis…'
+        : '[gui] Starting binary scan — this may take a minute…';
+
+      try {
+        const res = await fetch('/api/setup/run', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({skip_discover: skipDiscover}),
+        });
+        const data = await res.json();
+        if (data.error) {
+          document.getElementById('setup-log').textContent += '\n[gui] Error: ' + data.error;
+        }
+      } catch (e) {
+        document.getElementById('setup-log').textContent += '\n[gui] Request failed: ' + e;
+      }
+
+      // Start rapid polling so log updates quickly
+      pollAll();
     }
 
     async function startRecording() {
@@ -211,7 +230,6 @@
         if (!confirm('The dump module needs binary analysis (interesting.json) which hasn\'t been run yet.\n\nContinue without dump, or cancel to run setup first?')) {
           return;
         }
-        // Remove dump from modules
         const idx = modules.indexOf('dump');
         if (idx >= 0) modules.splice(idx, 1);
       }
@@ -221,26 +239,37 @@
         return;
       }
 
-      // Switch to record log tab
-      showLogTab('rec', document.querySelectorAll('.log-tab')[0]);
+      showLogTab('rec');
+      document.getElementById('rec-log').textContent = '[gui] Starting recorder…';
 
-      const res = await fetch('/api/recorder/start', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({label, modules}),
-      });
-      const data = await res.json();
-      if (data.error) alert(data.error);
+      try {
+        const res = await fetch('/api/recorder/start', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({label, modules}),
+        });
+        const data = await res.json();
+        if (data.error) {
+          document.getElementById('rec-log').textContent += '\n[gui] Error: ' + data.error;
+        }
+      } catch (e) {
+        document.getElementById('rec-log').textContent += '\n[gui] Request failed: ' + e;
+      }
+      pollAll();
     }
 
     async function stopRecording() {
-      const res = await fetch('/api/recorder/stop', {method: 'POST'});
-      const data = await res.json();
-      if (data.error) alert(data.error);
+      try {
+        const res = await fetch('/api/recorder/stop', {method: 'POST'});
+        const data = await res.json();
+        if (data.error) alert(data.error);
+      } catch (e) {
+        alert('Stop failed: ' + e);
+      }
     }
 
     // ── Polling loop ────────────────────────────────────────
-    setInterval(pollAll, 2500);
+    setInterval(pollAll, 2000);
     setTimeout(pollAll, 300);
   </script>
   {% block scripts %}{% endblock %}

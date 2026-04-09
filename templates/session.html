@@ -28,7 +28,7 @@
 <!-- Races section -->
 {% if races %}
 <section class="section">
-  <h2>🏇 Races</h2>
+  <h2>Races</h2>
   <div class="race-list">
     {% for race in races %}
     <a href="/session/{{ session.name }}/race/{{ race._race_index }}" class="race-card">
@@ -61,7 +61,7 @@
 <!-- Network API Timeline -->
 {% if network %}
 <section class="section">
-  <h2>🌐 Network Events</h2>
+  <h2>Network Events</h2>
   <div class="timeline-filter">
     <input type="text" id="filter-api" placeholder="Filter by API name..." oninput="filterTimeline()" class="input-sm">
   </div>
@@ -102,4 +102,3 @@ function filterTimeline() {
 }
 </script>
 {% endblock %}
-

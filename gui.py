@@ -456,6 +456,8 @@ def main():
 
         time.sleep(0.4)
 
+        _icon_path = str(_BUNDLE_DIR / "static" / "main_small_icon.png")
+
         webview.create_window(
             "Clairvoyance",
             url,
@@ -463,7 +465,7 @@ def main():
             height=860,
             min_size=(900, 600),
         )
-        webview.start()
+        webview.start(icon=_icon_path)
 
 
 if __name__ == "__main__":

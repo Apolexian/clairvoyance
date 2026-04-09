@@ -9,9 +9,9 @@
 </div>
 
 <div style="display:flex; align-items:center; gap:1rem;">
-  <h1>🏇 {{ race._race_label }}</h1>
+  <h1>{{ race._race_label }}</h1>
   <a href="/session/{{ session.name }}/race/{{ race_idx }}/replay" class="btn btn-primary" style="margin-top:0.2rem;">
-    ▶ Watch Replay
+    Watch Replay
   </a>
 </div>
 
@@ -41,7 +41,7 @@
 <!-- Phase boundaries -->
 {% if race.phases and race.phases.total_distance %}
 <section class="section">
-  <h2>📏 Race Phases</h2>
+  <h2>Race Phases</h2>
   <div class="phase-bar">
     {% set total = race.phases.total_distance %}
     {% set p1 = race.phases.phase_1_end %}
@@ -67,7 +67,7 @@
 {% set summaries = race.horse_summaries or [] %}
 {% if summaries %}
 <section class="section">
-  <h2>🐎 Runners</h2>
+  <h2>Runners</h2>
   <div class="horse-tabs">
     <button class="horse-tab active" onclick="showHorse(-1, this)">All</button>
     {% for h in summaries %}
@@ -109,7 +109,7 @@
           <td>{{ h.skill_activation_count }}</td>
           <td>{{ h.hp_start if h.hp_start is defined else '-' }}</td>
           <td>{{ h.hp_end if h.hp_end is defined else '-' }}</td>
-          <td>{{ '⚠️ YES' if h.is_late_start else '✓' }}</td>
+          <td>{{ 'YES' if h.is_late_start else '-' }}</td>
           {% else %}
           <td class="{% if h.estimated_rank == 1 %}gold{% elif h.estimated_rank == 2 %}silver{% elif h.estimated_rank == 3 %}bronze{% endif %}">~#{{ h.estimated_rank }}</td>
           <td>{{ h.max_distance }}m</td>
@@ -160,7 +160,7 @@
 
     {% if h.pace_down_segments %}
     <div class="subsection">
-      <h4>⚠️ Pace Down Segments</h4>
+      <h4>Pace Down Segments</h4>
       <table class="data-table compact">
         <thead>
           <tr>
@@ -196,7 +196,7 @@
 
     {% if source == 'api' and h.skill_ids_activated %}
     <div class="subsection">
-      <h4>✨ Skills Activated</h4>
+      <h4>Skills Activated</h4>
       <div class="skill-ids">
         {% for sid in h.skill_ids_activated %}
         <span class="skill-badge">{{ sid }}</span>
@@ -212,7 +212,7 @@
 <!-- Charts -->
 {% if race.sampled_frames %}
 <section class="section">
-  <h2>📊 Frame-by-Frame Charts</h2>
+  <h2>Frame-by-Frame Charts</h2>
   <div class="chart-grid">
     <div class="chart-container">
       <h3>Distance Progress</h3>
@@ -233,7 +233,7 @@
 <!-- Skill activations for API races -->
 {% if race.skill_activations and source == 'api' %}
 <section class="section">
-  <h2>✨ Skill Activation Timeline</h2>
+  <h2>Skill Activation Timeline</h2>
   <table class="data-table">
     <thead>
       <tr>
@@ -258,7 +258,7 @@
 <!-- Skill activations for dump races -->
 {% if race.skill_activations and source == 'dump' %}
 <section class="section">
-  <h2>✨ Skill Events</h2>
+  <h2>Skill Events</h2>
   <table class="data-table">
     <thead>
       <tr><th>Time</th><th>Source</th><th>Skill ID</th><th>Horse</th></tr>
