@@ -568,7 +568,46 @@ a:hover { text-decoration: underline; }
 }
 
 .horse-panel { margin-bottom: 1rem; }
-.horse-detail-header { margin-bottom: 0.75rem; }
+.horse-detail-header {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Uma Portraits ───────────────────────────────────── */
+
+.horse-tab-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 15%;
+  vertical-align: middle;
+  margin-right: 0.2rem;
+  border: 1px solid var(--border);
+}
+
+.horse-table-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 15%;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+  border: 1px solid var(--border);
+}
+
+.horse-detail-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 15%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
 
 /* ── Data Table ──────────────────────────────────────── */
 
@@ -810,6 +849,23 @@ a:hover { text-decoration: underline; }
   user-select: none;
 }
 
+/* Master DB annotation badges in JSON viewer */
+.jv-annotation {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-style: normal;
+  background: rgba(88, 166, 255, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(88, 166, 255, 0.25);
+  border-radius: 3px;
+  padding: 0 0.4rem;
+  margin-left: 0.4rem;
+  vertical-align: baseline;
+  user-select: text;
+  cursor: help;
+}
+
 /* ── Charts ──────────────────────────────────────────── */
 
 .chart-grid {
@@ -834,6 +890,41 @@ a:hover { text-decoration: underline; }
 .chart-container canvas {
   max-height: 250px;
 }
+
+/* ── Status & Badge Indicators ───────────────────────── */
+
+.status-good { color: var(--green); font-weight: 600; }
+.status-bad  { color: var(--red);   font-weight: 600; }
+
+.mini-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.badge-success {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--green);
+}
+.badge-danger {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--red);
+}
+.badge-warning {
+  background: rgba(210, 153, 34, 0.15);
+  color: var(--orange);
+}
+.badge-info {
+  background: rgba(88, 166, 255, 0.15);
+  color: var(--accent);
+}
+
+/* Compete event type badges */
+.compete-dueling  { color: #f87171; }
+.compete-struggle { color: #fbbf24; }
+.compete-spurt    { color: #a78bfa; }
 
 /* ── Empty State ─────────────────────────────────────── */
 

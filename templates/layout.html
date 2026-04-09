@@ -12,8 +12,12 @@
   <nav class="topbar">
     <div class="nav-links">
       <a href="/">Sessions</a>
+      <a href="/masterdata">Master Data</a>
       <span id="setup-indicator" class="setup-indicator" title="Binary analysis status">
         <span class="setup-dot"></span> <span id="setup-indicator-text">Checking…</span>
+      </span>
+      <span id="mdb-indicator" class="setup-indicator" title="Master DB — click Record panel to configure" style="cursor:help">
+        <span class="setup-dot"></span> <span id="mdb-indicator-text">DB</span>
       </span>
       <button id="btn-recorder-toggle" class="btn btn-sm btn-record" onclick="toggleRecorder()">
         <span class="rec-dot"></span> Record
@@ -56,6 +60,26 @@
           </div>
           <div id="rec-not-ready" class="setup-missing" style="display:none; margin-top:0.3rem; font-size:0.8rem;">
             Run setup first — click Scan Game Binary above.
+          </div>
+        </div>
+
+        <hr style="border-color: var(--border); margin: 0.5rem 0;">
+
+        <!-- Master DB section -->
+        <div class="setup-section">
+          <div class="section-label">3. Master DB — Game Data Lookup</div>
+          <div id="mdb-status" style="font-size:0.8rem; margin-bottom:0.3rem;">
+            <span id="mdb-status-text" style="color:var(--text-muted)">Checking…</span>
+          </div>
+          <div class="form-row" style="gap:0.4rem;">
+            <input type="text" id="mdb-path" class="input-sm" style="flex:1; min-width:200px;"
+                   placeholder="Path to master.mdb …">
+            <button class="btn btn-primary btn-sm" onclick="setMasterDb()">Set</button>
+            <button class="btn btn-sm" onclick="clearMasterDb()" title="Clear path">✕</button>
+          </div>
+          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.25rem;">
+            Point to your local <code>master.mdb</code> to resolve skill / character names.
+            Without it, raw IDs are shown instead.
           </div>
         </div>
       </div>
@@ -258,9 +282,70 @@
       }
     }
 
+    // ── Master DB settings ───────────────────────────────────
+    async function pollMasterDb() {
+      try {
+        const res = await fetch('/api/settings/master_db');
+        const d = await safeJSON(res);
+        const txt = document.getElementById('mdb-status-text');
+        const inp = document.getElementById('mdb-path');
+        const ind = document.getElementById('mdb-indicator');
+        const indText = document.getElementById('mdb-indicator-text');
+        ind.classList.remove('ready', 'missing');
+        if (d.available) {
+          txt.innerHTML = '<span style="color:var(--green)">✓ Connected</span>';
+          inp.value = d.path || '';
+          ind.classList.add('ready');
+          indText.textContent = 'DB ✓';
+        } else {
+          txt.innerHTML = '<span style="color:var(--text-muted)">Not configured</span>';
+          if (!inp.value) inp.value = d.path || '';
+          ind.classList.add('missing');
+          indText.textContent = 'DB';
+        }
+      } catch (e) {
+        document.getElementById('mdb-status-text').textContent = 'Error checking status';
+      }
+    }
+
+    async function setMasterDb() {
+      const path = document.getElementById('mdb-path').value.trim();
+      if (!path) return;
+      try {
+        const res = await fetch('/api/settings/master_db', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({path}),
+        });
+        const d = await safeJSON(res);
+        if (d.ok) {
+          await pollMasterDb();
+        } else {
+          alert(d.error || 'Invalid file');
+        }
+      } catch (e) {
+        alert('Failed: ' + e);
+      }
+    }
+
+    async function clearMasterDb() {
+      try {
+        await fetch('/api/settings/master_db', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({path: null}),
+        });
+        document.getElementById('mdb-path').value = '';
+        await pollMasterDb();
+      } catch (e) {
+        alert('Failed: ' + e);
+      }
+    }
+
     // ── Polling loop ────────────────────────────────────────
     setInterval(pollAll, 2000);
     setTimeout(pollAll, 300);
+    setTimeout(pollMasterDb, 300);
 
     // ── Default label = today's date ─────────────────────────
     document.getElementById('rec-label').value = new Date().toISOString().slice(0, 10);

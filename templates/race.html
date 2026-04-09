@@ -81,6 +81,75 @@
 </section>
 {% endif %}
 
+<!-- Course profile (from course_data.json) -->
+{% if race.course_profile %}
+{% set cp = race.course_profile %}
+<section class="section">
+  <h2>Course Profile
+    <small style="font-weight:normal; color:var(--text-muted); font-size:0.7rem; margin-left:0.5rem">
+      ID {{ cp.course_id }} · {{ cp.surface_name }} · {{ cp.distance_type_name }} · {{ cp.turn }} turn
+    </small>
+  </h2>
+
+  {% if cp.has_slopes %}
+  <!-- Slope elevation bar -->
+  <div style="margin-bottom:0.75rem">
+    <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:4px">Elevation Profile</div>
+    <div style="position:relative; height:28px; background:var(--bg-card); border:1px solid var(--border); border-radius:4px; overflow:hidden">
+      {% for s in cp.slopes %}
+      {% set left_pct = (s.start / cp.distance * 100)|round(2) %}
+      {% set width_pct = (s.length / cp.distance * 100)|round(2) %}
+      <div style="position:absolute; left:{{ left_pct }}%; width:{{ width_pct }}%; height:100%;
+        background:{% if s.direction == 'uphill' %}rgba(248,81,73,0.3){% else %}rgba(63,185,80,0.3){% endif %};
+        border-left:2px solid {% if s.direction == 'uphill' %}var(--red){% else %}var(--green){% endif %};
+        display:flex; align-items:center; justify-content:center;
+        font-size:0.65rem; font-weight:600; color:{% if s.direction == 'uphill' %}var(--red){% else %}var(--green){% endif %};"
+        title="{{ s.direction }} {{ s.grade_pct }}% from {{ s.start }}m to {{ s.end }}m">
+        {{ s.label }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Track layout: corners & straights -->
+  <div style="margin-bottom:0.5rem">
+    <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:4px">Track Layout</div>
+    <div style="position:relative; height:22px; background:var(--bg-card); border:1px solid var(--border); border-radius:4px; overflow:hidden">
+      {% for sec in cp.sections %}
+      {% set left_pct = (sec.start / cp.distance * 100)|round(2) %}
+      {% set width_pct = (sec.length / cp.distance * 100)|round(2) %}
+      {% if sec.type == 'corner' %}
+      <div style="position:absolute; left:{{ left_pct }}%; width:{{ width_pct }}%; height:100%;
+        background:rgba(188,140,255,0.25); border-left:1px solid var(--purple);
+        display:flex; align-items:center; justify-content:center;
+        font-size:0.6rem; color:var(--purple);"
+        title="Corner {{ sec.start }}m–{{ sec.end }}m">↻</div>
+      {% elif sec.type == 'straight' %}
+      <div style="position:absolute; left:{{ left_pct }}%; width:{{ width_pct }}%; height:100%;
+        background:{% if sec.subtype == 'home' %}rgba(88,166,255,0.15){% else %}rgba(139,148,158,0.1){% endif %};
+        display:flex; align-items:center; justify-content:center;
+        font-size:0.6rem; color:{% if sec.subtype == 'home' %}var(--accent){% else %}var(--text-muted){% endif %};"
+        title="{{ sec.subtype|title }} straight {{ sec.start }}m–{{ sec.end }}m">{{ '🏠' if sec.subtype == 'home' else '→' }}</div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if cp.slopes %}
+  <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.25rem">
+    {% for s in cp.slopes %}
+    <span style="font-size:0.75rem; padding:2px 8px; border-radius:4px;
+      background:{% if s.direction == 'uphill' %}rgba(248,81,73,0.12){% else %}rgba(63,185,80,0.12){% endif %};
+      color:{% if s.direction == 'uphill' %}var(--red){% else %}var(--green){% endif %}">
+      {{ s.label }} {{ s.start }}–{{ s.end }}m ({{ s.length }}m)
+    </span>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+
 <!-- Horse selector tabs -->
 {% set summaries = race.horse_summaries or [] %}
 {% if summaries %}
@@ -90,7 +159,9 @@
     <button class="horse-tab active" onclick="showHorse(-1, this)">All</button>
     {% for h in summaries %}
     <button class="horse-tab" onclick="showHorse({{ h.horse_index }}, this)">
-      {% if h.chara_id %}chara:{{ h.chara_id }}{% else %}Horse {{ h.horse_index }}{% endif %}
+      {% set img = uma_image(h.chara_id, h.card_id) %}
+      {% if img %}<img src="{{ img }}" class="horse-tab-img" alt="">{% endif %}
+      {% if h.chara_id %}{{ h.chara_id | chara_name }}{% else %}Horse {{ h.horse_index }}{% endif %}
       {% if h.finish_order is defined %}
         <small>#{{ h.finish_order }}</small>
       {% elif h.estimated_rank is defined %}
@@ -107,27 +178,58 @@
         <tr>
           <th>Horse</th>
           {% if source == 'api' %}
-          <th>Finish</th><th>Time</th><th>Style</th><th>Skills</th>
-          <th>HP Start</th><th>HP End</th><th>Late Start</th>
+          <th>Finish</th><th>Time</th><th>Style</th>
+          <th>Start Delay</th><th>Last Spurt</th>
+          <th>HP Result</th><th>Skills</th>
+          <th>Duel</th><th>Rushed</th><th>Pace↓</th>
           {% else %}
           <th>Rank</th><th>Max Dist</th><th>Avg Speed</th><th>Max Speed</th>
           <th>HP Start</th><th>HP End</th><th>HP Used</th>
-          <th>Pace↓ Frames</th><th>Blocked</th>
+          <th>Rushed Frames</th><th>Blocked</th>
           {% endif %}
         </tr>
       </thead>
       <tbody>
         {% for h in summaries %}
         <tr>
-          <td><strong>{% if h.chara_id %}chara:{{ h.chara_id }}{% else %}Horse {{ h.horse_index }}{% endif %}</strong></td>
+          <td>
+            {% set img = uma_image(h.chara_id, h.card_id) %}
+            {% if img %}<img src="{{ img }}" class="horse-table-img" alt="">{% endif %}
+            <strong>{% if h.chara_id %}{{ h.chara_id | chara_name }}{% else %}Horse {{ h.horse_index }}{% endif %}</strong>
+          </td>
           {% if source == 'api' %}
           <td class="{% if h.finish_order == 1 %}gold{% elif h.finish_order == 2 %}silver{% elif h.finish_order == 3 %}bronze{% endif %}">#{{ h.finish_order }}</td>
           <td>{{ h.finish_time }}s</td>
           <td>{{ h.running_style }}</td>
+          <td>
+            <span style="font-family:monospace">{{ h.start_delay_ms }}ms</span><br>
+            <span class="mini-badge {% if h.is_late_start %}badge-danger{% else %}badge-success{% endif %}">
+              {{ 'Late' if h.is_late_start else 'Normal' }}
+            </span>
+          </td>
+          <td>
+            {% if not h.has_spurt %}
+              <span class="status-bad">No spurt</span>
+            {% elif h.spurt_delay_m is not none %}
+              <span style="color:{% if h.spurt_delay_m <= 3 %}var(--green){% elif h.spurt_delay_m <= 10 %}var(--orange){% else %}var(--red){% endif %}">
+                {{ h.spurt_delay_m }}m
+              </span>
+            {% else %}-{% endif %}
+          </td>
+          <td>
+            {% if h.hp_outcome %}
+              {% if h.hp_outcome.type == 'died' %}
+                <span class="status-bad">Died (−{{ h.hp_outcome.remaining_distance }}m)</span>
+              {% else %}
+                <span class="status-good">{{ h.hp_outcome.hp_remaining }} HP</span>
+                <small style="color:var(--text-muted)">({{ h.hp_outcome.hp_pct }}%)</small>
+              {% endif %}
+            {% else %}-{% endif %}
+          </td>
           <td>{{ h.skill_activation_count }}</td>
-          <td>{{ h.hp_start if h.hp_start is defined else '-' }}</td>
-          <td>{{ h.hp_end if h.hp_end is defined else '-' }}</td>
-          <td>{{ 'YES' if h.is_late_start else '-' }}</td>
+          <td>{% if h.dueling_time > 0 %}{{ h.dueling_time }}s{% else %}-{% endif %}</td>
+          <td>{% if h.rushed_total_time > 0 %}{{ h.rushed_total_time }}s{% else %}-{% endif %}</td>
+          <td>{% if h.pace_down_total_time > 0 %}{{ h.pace_down_total_time }}s{% else %}-{% endif %}</td>
           {% else %}
           <td class="{% if h.estimated_rank == 1 %}gold{% elif h.estimated_rank == 2 %}silver{% elif h.estimated_rank == 3 %}bronze{% endif %}">~#{{ h.estimated_rank }}</td>
           <td>{{ h.max_distance }}m</td>
@@ -136,7 +238,7 @@
           <td>{{ h.hp_start }}</td>
           <td>{{ h.hp_end }}</td>
           <td>{{ h.hp_consumed }}</td>
-          <td>{{ h.total_pace_down_frames }}</td>
+          <td>{{ h.total_rushed_frames }}</td>
           <td>{{ h.blocked_frames }}</td>
           {% endif %}
         </tr>
@@ -149,12 +251,15 @@
   {% for h in summaries %}
   <div id="horse-{{ h.horse_index }}" class="horse-panel" style="display:none">
     <div class="horse-detail-header">
-      <h3>{% if h.chara_id %}chara:{{ h.chara_id }}{% else %}Horse {{ h.horse_index }}{% endif %} —
+      {% set img = uma_image(h.chara_id, h.card_id) %}
+      {% if img %}<img src="{{ img }}" class="horse-detail-img" alt="">{% endif %}
+      <h3>{% if h.chara_id %}{{ h.chara_id | chara_name }}{% else %}Horse {{ h.horse_index }}{% endif %} —
         {% if h.finish_order is defined %}
           Finish #{{ h.finish_order }}
         {% elif h.estimated_rank is defined %}
           Estimated #{{ h.estimated_rank }}
         {% endif %}
+        {% if h.is_oonige %}<span class="mini-badge badge-warning" style="margin-left:6px">大逃げ Oonige</span>{% endif %}
       </h3>
     </div>
 
@@ -162,23 +267,77 @@
       {% if source == 'api' %}
         <div class="stat-card"><div class="stat-value">{{ h.running_style }}</div><div class="stat-label">style</div></div>
         <div class="stat-card"><div class="stat-value">{{ h.finish_time }}s</div><div class="stat-label">finish time</div></div>
-        <div class="stat-card"><div class="stat-value">{{ h.skill_activation_count }}</div><div class="stat-label">skills</div></div>
-        <div class="stat-card"><div class="stat-value">{{ h.start_delay_time }}</div><div class="stat-label">start delay</div></div>
+        <div class="stat-card">
+          <div class="stat-value">
+            {{ h.start_delay_ms }}ms
+            <span class="mini-badge {% if h.is_late_start %}badge-danger{% else %}badge-success{% endif %}" style="font-size:0.65rem; margin-left:4px">
+              {{ 'Late' if h.is_late_start else 'OK' }}
+            </span>
+          </div>
+          <div class="stat-label">start delay</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">
+            {% if not h.has_spurt %}<span class="status-bad">None</span>
+            {% elif h.spurt_delay_m is not none %}
+              <span style="color:{% if h.spurt_delay_m <= 3 %}var(--green){% elif h.spurt_delay_m <= 10 %}var(--orange){% else %}var(--red){% endif %}">{{ h.spurt_delay_m }}m</span>
+            {% else %}-{% endif %}
+          </div>
+          <div class="stat-label">spurt delay</div>
+        </div>
         {% if h.last_spurt_start_distance %}
         <div class="stat-card"><div class="stat-value">{{ h.last_spurt_start_distance }}m</div><div class="stat-label">spurt start</div></div>
+        {% endif %}
+        <div class="stat-card"><div class="stat-value">{{ h.skill_activation_count }}</div><div class="stat-label">skills</div></div>
+        <div class="stat-card">
+          <div class="stat-value">
+            {% if h.hp_outcome %}
+              {% if h.hp_outcome.type == 'died' %}
+                <span class="status-bad">Died</span>
+              {% else %}
+                <span class="status-good">{{ h.hp_outcome.hp_remaining }}</span>
+                <small>({{ h.hp_outcome.hp_pct }}%)</small>
+              {% endif %}
+            {% else %}-{% endif %}
+          </div>
+          <div class="stat-label">HP result</div>
+        </div>
+        {% if h.dueling_time > 0 %}
+        <div class="stat-card"><div class="stat-value">{{ h.dueling_time }}s</div><div class="stat-label">dueling</div></div>
+        {% endif %}
+        {% if h.spot_struggle_time > 0 %}
+        <div class="stat-card">
+          <div class="stat-value">{{ h.spot_struggle_time }}s</div>
+          <div class="stat-label">spot struggle{% if h.spot_struggle_hp_mult %} <small style="color:var(--orange)">HP {{ h.spot_struggle_hp_mult }}</small>{% endif %}</div>
+        </div>
+        {% endif %}
+        {% if h.rushed_total_time > 0 %}
+        <div class="stat-card"><div class="stat-value" style="color:var(--orange)">{{ h.rushed_total_time }}s</div><div class="stat-label">rushed (掛かり)</div></div>
+        {% endif %}
+        {% if h.rushed_boost_segments %}
+        <div class="stat-card"><div class="stat-value" style="color:var(--orange)">{{ h.rushed_boost_segments|length }}×</div><div class="stat-label">rushed BOOST</div></div>
+        {% endif %}
+        {% if h.pace_down_total_time > 0 %}
+        <div class="stat-card"><div class="stat-value" style="color:var(--accent)">{{ h.pace_down_total_time }}s</div><div class="stat-label">pace down</div></div>
         {% endif %}
       {% else %}
         <div class="stat-card"><div class="stat-value">{{ h.avg_speed }}</div><div class="stat-label">avg speed</div></div>
         <div class="stat-card"><div class="stat-value">{{ h.max_speed }}</div><div class="stat-label">max speed</div></div>
         <div class="stat-card"><div class="stat-value">{{ h.min_speed }}</div><div class="stat-label">min speed</div></div>
         <div class="stat-card"><div class="stat-value">{{ h.hp_consumed }}</div><div class="stat-label">HP used</div></div>
-        <div class="stat-card"><div class="stat-value">{{ h.total_pace_down_frames }}</div><div class="stat-label">pace↓ frames</div></div>
+        <div class="stat-card"><div class="stat-value">{{ h.total_rushed_frames }}</div><div class="stat-label">rushed frames</div></div>
       {% endif %}
     </div>
 
-    {% if h.pace_down_segments %}
+    {% if h.rushed_segments %}
     <div class="subsection">
-      <h4>Pace Down Segments</h4>
+      <h4>Rushed Segments (掛かり)</h4>
+      <p style="color:var(--text-muted); font-size:0.78rem; margin-bottom:0.4rem">
+        <strong>Rushed / 掛かり</strong> (HP 1.6×): Wisdom-based random event (rolled pre-race).
+        Forces position keep strategy change and succeeds all position keep wisdom rolls.
+        Front Runners → speed up (BOOST), Stalkers → Nige, Betweeners → 75% Nige / 25% Senko,
+        Chasers → 70% Nige / 20% Senko / 10% Sashi.
+      </p>
       <table class="data-table compact">
         <thead>
           <tr>
@@ -190,14 +349,20 @@
           </tr>
         </thead>
         <tbody>
-          {% for seg in h.pace_down_segments %}
+          {% for seg in h.rushed_segments %}
           <tr>
             {% if source == 'api' %}
             <td>{{ seg.start_time }}s</td>
             <td>{{ seg.end_time }}s</td>
             <td>{{ seg.duration }}s</td>
             <td>{{ seg.start_distance }}–{{ seg.end_distance }}m</td>
-            <td>{{ seg.mode }}</td>
+            <td>
+              {% if seg.mode == 'BOOST' %}
+                <span style="color:var(--orange); font-weight:600">{{ seg.mode }} (speed rush)</span>
+              {% else %}
+                <span style="color:var(--orange)">{{ seg.mode }} (forced pos.)</span>
+              {% endif %}
+            </td>
             {% else %}
             <td>{{ seg.start_frame }}</td>
             <td>{{ seg.end_frame }}</td>
@@ -212,12 +377,40 @@
     </div>
     {% endif %}
 
+    {% if source == 'api' and h.pace_down_segments %}
+    <div class="subsection">
+      <h4>Pace Down Segments</h4>
+      <p style="color:var(--text-muted); font-size:0.78rem; margin-bottom:0.4rem">
+        <strong>Pace Down</strong> (0.915× target speed): Position-keep mechanic.
+        When a non-front-runner is too close to the leader during PK phase,
+        their target speed is reduced. Detected heuristically from speed data.
+      </p>
+      <table class="data-table compact">
+        <thead>
+          <tr>
+            <th>Start Time</th><th>End Time</th><th>Duration</th><th>Distance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for seg in h.pace_down_segments %}
+          <tr>
+            <td>{{ seg.start_time }}s</td>
+            <td>{{ seg.end_time }}s</td>
+            <td>{{ seg.duration }}s</td>
+            <td>{{ seg.start_distance }}–{{ seg.end_distance }}m</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
     {% if source == 'api' and h.skill_ids_activated %}
     <div class="subsection">
       <h4>Skills Activated</h4>
       <div class="skill-ids">
         {% for sid in h.skill_ids_activated %}
-        <span class="skill-badge">{{ sid }}</span>
+        <span class="skill-badge" title="ID: {{ sid }}">{{ sid | skill_name }}</span>
         {% endfor %}
       </div>
     </div>
@@ -237,12 +430,16 @@
       <canvas id="chart-distance"></canvas>
     </div>
     <div class="chart-container">
-      <h3>Speed Over Time</h3>
+      <h3>Current Speed Over Time</h3>
       <canvas id="chart-speed"></canvas>
     </div>
     <div class="chart-container">
       <h3>HP Over Time</h3>
       <canvas id="chart-hp"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3>Acceleration Over Time</h3>
+      <canvas id="chart-accel"></canvas>
     </div>
   </div>
 </section>
@@ -255,17 +452,34 @@
   <table class="data-table">
     <thead>
       <tr>
-        <th>Time</th><th>Horse</th><th>Skill ID</th>
-        <th>Duration</th>
+        <th>Time</th><th>Horse</th><th>Skill</th>
+        <th>Duration</th><th>Distance</th>
       </tr>
     </thead>
     <tbody>
       {% for sk in race.skill_activations %}
       <tr>
         <td>{{ "%.1f"|format(sk.frame_time) }}s</td>
-        <td>Horse {{ sk.horse_index }}</td>
-        <td><span class="skill-badge">{{ sk.skill_id }}</span></td>
-        <td>{% if sk.duration_raw is defined and sk.duration_raw > 0 %}{{ "%.1f"|format(sk.duration_raw / 1000) }}s{% elif sk.duration_raw is defined and sk.duration_raw == 0 %}instant{% else %}passive{% endif %}</td>
+        <td>
+          {% set hi = sk.horse_index %}
+          {% set match = summaries | selectattr('horse_index', 'equalto', hi) | first %}
+          {% if match and match.chara_id %}{{ match.chara_id | chara_name }}{% else %}Horse {{ hi }}{% endif %}
+        </td>
+        <td><span class="skill-badge" title="ID: {{ sk.skill_id }}">{{ sk.skill_id | skill_name }}</span></td>
+        <td>
+          {% if sk.duration_secs is defined and sk.duration_secs > 0 %}
+            {{ sk.duration_secs }}s
+          {% elif sk.duration_raw is defined and sk.duration_raw == 0 %}
+            <span style="color:var(--text-muted)">instant</span>
+          {% else %}
+            <span style="color:var(--text-muted)">passive</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if sk.start_distance is defined and sk.end_distance is defined and sk.duration_secs > 0 %}
+            {{ sk.start_distance|int }}–{{ sk.end_distance|int }}m
+          {% else %}-{% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -279,15 +493,78 @@
   <h2>Skill Events</h2>
   <table class="data-table">
     <thead>
-      <tr><th>Time</th><th>Source</th><th>Skill ID</th><th>Horse</th></tr>
+      <tr><th>Time</th><th>Source</th><th>Skill</th><th>Horse</th></tr>
     </thead>
     <tbody>
       {% for sk in race.skill_activations %}
       <tr>
         <td>{{ sk._ts[11:19] if sk._ts else '' }}</td>
         <td>{{ sk.source or sk.get('class','') }}</td>
-        <td><span class="skill-badge">{{ sk.skill_id or sk.skillId or '?' }}</span></td>
+        <td><span class="skill-badge" title="ID: {{ sk.skill_id or sk.skillId or '?' }}">{{ (sk.skill_id or sk.skillId) | skill_name }}</span></td>
         <td>{{ sk.horse_index if sk.horse_index is defined else '-' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<!-- Compete events (Dueling / Spot Struggle / Before Spurt) -->
+{% if race.compete_events and source == 'api' %}
+<section class="section">
+  <h2>Compete Events</h2>
+  <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:0.5rem;">
+    <strong>Spot Struggle</strong>: Lead competition between front runners / oonige.
+    Speed +<code>(500×guts)<sup>0.6</sup>×0.0001</code> m/s.
+    HP cost: FR 1.4×, Oonige 3.5× (doubled+ if rushed).
+    Ends at 9/24 distance.
+    &nbsp;|&nbsp;
+    <strong>Dueling</strong>: Speed competition, ends when HP &lt; 5% of start.
+  </p>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Time</th><th>Horse</th><th>Type</th>
+        <th>Duration</th><th>Distance</th><th>Detail</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ce in race.compete_events %}
+      <tr>
+        <td>{{ "%.1f"|format(ce.frame_time) }}s</td>
+        <td>
+          {% set hi = ce.horse_index %}
+          {% set match = summaries | selectattr('horse_index', 'equalto', hi) | first %}
+          {% if match and match.chara_id %}{{ match.chara_id | chara_name }}{% else %}Horse {{ hi }}{% endif %}
+          {% if match and match.is_oonige %}<small style="color:var(--orange)">(oonige)</small>{% endif %}
+        </td>
+        <td>
+          {% if ce.type_id is defined and ce.type_id == 5 %}
+            <span class="compete-dueling">⚔ {{ ce.label or 'Dueling' }}</span>
+          {% elif ce.type_id is defined and ce.type_id == 4 %}
+            <span class="compete-struggle">🏃 {{ ce.label or 'Spot Struggle' }}</span>
+          {% elif ce.type_id is defined and ce.type_id == 8 %}
+            <span class="compete-spurt">⚡ {{ ce.label or 'Before Spurt' }}</span>
+          {% else %}
+            {{ ce.label or ce.type }}
+          {% endif %}
+        </td>
+        <td>
+          {% if ce.duration is defined and ce.duration > 0 %}
+            {{ "%.1f"|format(ce.duration) }}s
+          {% else %}-{% endif %}
+        </td>
+        <td>
+          {% if ce.start_distance is defined and ce.end_distance is defined %}
+            {{ ce.start_distance|int }}–{{ ce.end_distance|int }}m
+          {% else %}-{% endif %}
+        </td>
+        <td style="font-size:0.8rem; color:var(--text-muted)">
+          {% if ce.speed_bonus is defined %}
+            +{{ ce.speed_bonus }} m/s
+            {% if ce.guts_stat is defined %}(guts={{ ce.guts_stat }}){% endif %}
+          {% else %}-{% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -369,12 +646,18 @@ function showHorse(idx, btn) {
   }
 
   // Speed chart
+  // NOTE: The speed in each frame is the horse's CURRENT (actual) speed, not the target speed.
+  // The binary serialises speed as uint16 = actual_speed_m_s * 100; we normalise to m/s in
+  // session_reader._normalize_api_race_frames (API path: /100) or use raw float (dump path).
+  // Target speed (which the horse accelerates/decelerates toward) is computed from base speed,
+  // strategy phase coefficients, skill modifiers, slope, position keep, etc. — it is NOT stored
+  // in the frame data.
   const speedCtx = document.getElementById('chart-speed');
   if (speedCtx) {
     new Chart(speedCtx, {
       type: 'line',
       data: { labels: frameLabels, datasets: buildDatasets('speed') },
-      options: { ...defaultOpts, scales: { ...defaultOpts.scales, y: { ...defaultOpts.scales.y, title: { display: true, text: 'Speed', color: '#999' } } } },
+      options: { ...defaultOpts, scales: { ...defaultOpts.scales, y: { ...defaultOpts.scales.y, title: { display: true, text: 'Current Speed (m/s)', color: '#999' } } } },
     });
   }
 
@@ -385,6 +668,38 @@ function showHorse(idx, btn) {
       type: 'line',
       data: { labels: frameLabels, datasets: buildDatasets('hp') },
       options: { ...defaultOpts, scales: { ...defaultOpts.scales, y: { ...defaultOpts.scales.y, title: { display: true, text: 'HP', color: '#999' } } } },
+    });
+  }
+
+  // Acceleration chart (derived from speed delta between consecutive frames)
+  const accelCtx = document.getElementById('chart-accel');
+  if (accelCtx) {
+    const accelDatasets = horseKeys.map((key, i) => {
+      const data = frames.map((f, fi) => {
+        if (fi >= frames.length - 1) return null;
+        const cur = f[key];
+        const nxt = frames[fi + 1][key];
+        if (!cur || !nxt) return null;
+        const dt = (frames[fi + 1].time != null && f.time != null)
+          ? frames[fi + 1].time - f.time
+          : 1;  // fallback for dump frames (frame index delta)
+        if (dt <= 0) return null;
+        return +((nxt.speed - cur.speed) / dt).toFixed(4);
+      });
+      return {
+        label: key.replace('_', ' '),
+        data: data,
+        borderColor: COLORS[i % COLORS.length],
+        backgroundColor: COLORS[i % COLORS.length] + '20',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.3,
+      };
+    });
+    new Chart(accelCtx, {
+      type: 'line',
+      data: { labels: frameLabels, datasets: accelDatasets },
+      options: { ...defaultOpts, scales: { ...defaultOpts.scales, y: { ...defaultOpts.scales.y, title: { display: true, text: 'Acceleration (m/s²)', color: '#999' } } } },
     });
   }
 })();

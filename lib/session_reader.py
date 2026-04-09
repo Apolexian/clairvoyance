@@ -114,7 +114,7 @@ def _normalize_api_race_frames(race: dict) -> None:
     Convert API race simulation frames into the sampled_frames format
     used by dump races, so charts render uniformly for both sources.
 
-    Also enriches horse_summaries with pace_down_segments from the
+    Also enriches horse_summaries with rushed_segments from the
     race-level dict (API races store them separately).
 
     The binary sim stores speed as uint16 (x100) and lane_position as
@@ -145,9 +145,17 @@ def _normalize_api_race_frames(race: dict) -> None:
                 sampled.append(entry)
             race["sampled_frames"] = sampled
 
-    # ── Attach pace_down_segments to each horse summary ────────────
-    pd_segments = race.get("pace_down_segments", {})
+    # ── Attach rushed_segments to each horse summary ───────────────
+    rs_segments = race.get("rushed_segments", {})
     summaries = race.get("horse_summaries", [])
+    if rs_segments and summaries:
+        for h in summaries:
+            idx = str(h.get("horse_index", ""))
+            if idx in rs_segments and not h.get("rushed_segments"):
+                h["rushed_segments"] = rs_segments[idx]
+
+    # ── Attach pace_down_segments to each horse summary ──────────
+    pd_segments = race.get("pace_down_segments", {})
     if pd_segments and summaries:
         for h in summaries:
             idx = str(h.get("horse_index", ""))
@@ -287,10 +295,24 @@ def get_race_replay_data(session_name: str, race_idx: int) -> dict | None:
         "source": "api" if event == "race_simulation" else "dump",
         "frames": [],
         "skills": [],
+        "compete_events": target.get("compete_events", []),
+        "rushed_segments": target.get("rushed_segments", {}),
+        "pace_down_segments": target.get("pace_down_segments", {}),
         "phases": target.get("phases", {}),
         "horse_summaries": target.get("horse_summaries", []),
+        "horses": target.get("horses", []),
+        "race_metadata": target.get("race_metadata", {}),
         "total_distance": 0,
         "num_horses": 0,
+    }
+
+    # ── Temptation mode id mapping (string → int) ──────────────────
+    _TEMPT_STR_TO_ID = {
+        "NULL": 0,
+        "POSITION_SASHI": 1,
+        "POSITION_SENKO": 2,
+        "POSITION_NIGE": 3,
+        "BOOST": 4,
     }
 
     if event == "race_simulation":
@@ -302,12 +324,18 @@ def get_race_replay_data(session_name: str, race_idx: int) -> dict | None:
                 horses = f.get("horses", [])
                 frame: dict = {"idx": i, "time": f.get("time", 0)}
                 for hi, h in enumerate(horses):
+                    t_str = h.get("temptation_mode", "NULL")
+                    t_id = (
+                        _TEMPT_STR_TO_ID.get(t_str, 0) if isinstance(t_str, str) else (t_str or 0)
+                    )
                     frame[str(hi)] = {
                         "d": round(h.get("distance", 0), 2),
                         "s": round(h.get("speed", 0) / 100, 2),
                         "hp": h.get("hp", 0),
-                        "t": h.get("temptation_mode", "NULL"),
+                        "t": t_str,
+                        "t_id": t_id,
                         "lane": round(h.get("lane_position", 0) / 10000, 4),
+                        "blk": h.get("block_front_horse_index", -1),
                     }
                 replay["frames"].append(frame)
             replay["num_horses"] = len(raw_frames[0].get("horses", [])) if raw_frames else 0
@@ -327,12 +355,16 @@ def get_race_replay_data(session_name: str, race_idx: int) -> dict | None:
             frame = {"idx": fi, "time": fi / 15.0}  # simulation runs at ~15fps
             for hi in range(num_horses):
                 hdata = sf.get(f"horse_{hi}", {})
+                t_val = hdata.get("temptation", "NULL")
+                t_id = _TEMPT_STR_TO_ID.get(t_val, 0) if isinstance(t_val, str) else (t_val or 0)
                 frame[str(hi)] = {
                     "d": hdata.get("distance", 0),
                     "s": hdata.get("speed", 0),
                     "hp": hdata.get("hp", 0),
-                    "t": hdata.get("temptation", "NULL"),
+                    "t": t_val,
+                    "t_id": t_id,
                     "lane": 0,
+                    "blk": -1,
                 }
             replay["frames"].append(frame)
         replay["num_horses"] = num_horses
@@ -416,7 +448,8 @@ def get_network_event_detail(session_name: str, idx: int) -> dict | None:
     Return the full cleaned data for a single network event (0-based index).
 
     Strips PII/device fields and binary blobs so the user sees only
-    game-relevant data.
+    game-relevant data.  Also includes `_annotations` from master DB
+    lookups for known ID fields (story_id, chara_id, skill_id, etc.).
     """
     records = read_domain(session_name, "network")
     if idx < 0 or idx >= len(records):
@@ -433,6 +466,17 @@ def get_network_event_detail(session_name: str, idx: int) -> dict | None:
     # Strip PII recursively from the decoded payload
     if "msgpack_decoded" in cleaned:
         cleaned["msgpack_decoded"] = _strip_pii(cleaned["msgpack_decoded"])
+
+    # Annotate known ID fields from master DB
+    try:
+        from . import master_db
+
+        payload = cleaned.get("msgpack_decoded", cleaned)
+        annotations = master_db.annotate_ids(payload)
+        if annotations:
+            cleaned["_annotations"] = annotations
+    except Exception:
+        pass  # master DB not available or error — no annotations
 
     return cleaned
 

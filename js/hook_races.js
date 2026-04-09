@@ -349,8 +349,8 @@
         }
     }
 
-    // ── Phase 4: Temptation / Pace mode hooks ─────────────────────────
-    // HorseTemptationCalculator handles pace down / rush modes
+    // ── Phase 4: Temptation / Rushed (掛かり) mode hooks ────────────────
+    // HorseTemptationCalculator handles rushed (掛かり / kakari) state
 
     var TEMPTATION_METHODS = [
         "UpdateTemptation",

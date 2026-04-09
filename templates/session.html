@@ -131,9 +131,14 @@ async function toggleDetail(summaryEl, sessionName, idx) {
     if (data.error) {
       detailEl.innerHTML = `<div class="detail-error">${data.error}</div>`;
     } else {
+      // Extract annotations (master DB lookups) before building viewer
+      const annotations = data._annotations || data.msgpack_decoded?._annotations || {};
       const obj = data.msgpack_decoded || data;
+      // Remove _annotations from display object so it doesn't show in the tree
+      delete obj._annotations;
+      if (data.msgpack_decoded) delete data._annotations;
       detailEl.innerHTML = '';
-      detailEl.appendChild(buildJsonViewer(obj));
+      detailEl.appendChild(buildJsonViewer(obj, annotations));
     }
     detailEl.dataset.loaded = '1';
   } catch (e) {
@@ -143,7 +148,7 @@ async function toggleDetail(summaryEl, sessionName, idx) {
 
 /* ── Interactive JSON Viewer ─────────────────────────── */
 
-function buildJsonViewer(data) {
+function buildJsonViewer(data, annotations) {
   const wrapper = document.createElement('div');
   wrapper.className = 'json-viewer';
 
@@ -161,7 +166,7 @@ function buildJsonViewer(data) {
   const pre = document.createElement('pre');
   pre.className = 'detail-json jv-tree';
   pre.dataset.raw = JSON.stringify(data, null, 2);
-  pre.appendChild(renderNode(data, '', 0, true));
+  pre.appendChild(renderNode(data, '', 0, true, annotations || {}, ''));
   wrapper.appendChild(pre);
 
   return wrapper;
@@ -171,10 +176,16 @@ function esc(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function renderNode(value, key, depth, isLast) {
+function renderNode(value, key, depth, isLast, annotations, parentPath) {
   const indent = '  '.repeat(depth);
   const comma = isLast ? '' : ',';
   const keyStr = key !== '' ? `<span class="json-key">"${esc(key)}"</span>: ` : '';
+
+  // Build the full JSON path for this node (for annotation lookup)
+  const currentPath = key !== '' ? (parentPath ? parentPath + '.' + key : key) : parentPath;
+  // Check if there's an annotation for this path
+  const annotation = currentPath && annotations[currentPath];
+  const annotBadge = annotation ? ` <span class="jv-annotation" title="${esc(currentPath)}">${esc(annotation)}</span>` : '';
 
   if (value === null) {
     return textFrag(`${indent}${keyStr}<span class="json-null">null</span>${comma}\n`);
@@ -183,10 +194,10 @@ function renderNode(value, key, depth, isLast) {
     return textFrag(`${indent}${keyStr}<span class="json-boolean">${value}</span>${comma}\n`);
   }
   if (typeof value === 'number') {
-    return textFrag(`${indent}${keyStr}<span class="json-number">${value}</span>${comma}\n`);
+    return textFrag(`${indent}${keyStr}<span class="json-number">${value}</span>${annotBadge}${comma}\n`);
   }
   if (typeof value === 'string') {
-    return textFrag(`${indent}${keyStr}<span class="json-string">"${esc(value)}"</span>${comma}\n`);
+    return textFrag(`${indent}${keyStr}<span class="json-string">"${esc(value)}"</span>${annotBadge}${comma}\n`);
   }
 
   // Object or Array
@@ -213,8 +224,8 @@ function renderNode(value, key, depth, isLast) {
   const body = document.createElement('span');
   body.className = 'jv-body';
   entries.forEach(([k, v], i) => {
-    const childKey = isArray ? '' : String(k);
-    body.appendChild(renderNode(v, childKey, depth + 1, i === count - 1));
+    const childKey = isArray ? String(k) : String(k);
+    body.appendChild(renderNode(v, isArray ? String(k) : String(k), depth + 1, i === count - 1, annotations, currentPath));
   });
 
   const closeLine = textFrag(`${indent}${close}${comma}\n`);

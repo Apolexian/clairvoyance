@@ -66,6 +66,18 @@
   .horse-chip .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .horse-chip .val { font-family: monospace; }
   .horse-chip.active-skill { border-color: var(--gold); box-shadow: 0 0 6px rgba(249,199,79,0.4); }
+  .horse-chip.active-duel { border-color: #f87171; box-shadow: 0 0 6px rgba(248,113,113,0.4); }
+  .horse-chip.active-struggle { border-color: #fbbf24; box-shadow: 0 0 6px rgba(251,191,36,0.4); }
+  .state-tag {
+    font-size: 0.65rem; font-weight: 700; padding: 1px 4px;
+    border-radius: 3px; background: rgba(255,255,255,0.08);
+  }
+  .state-tag.duel { color: #f87171; }
+  .state-tag.struggle { color: #fbbf24; }
+  .chip-portrait {
+    width: 22px; height: 22px; border-radius: 50%; object-fit: cover;
+    object-position: center 15%; flex-shrink: 0; border: 1px solid var(--border);
+  }
 
   /* Skill popup floating above the track */
   .skill-popup {
@@ -126,6 +138,10 @@ const PHASES  = DATA.phases || {};
 const NUM_H   = DATA.num_horses;
 const TOTAL_D = DATA.total_distance || 1;
 const SUMMARIES = DATA.horse_summaries || [];
+const COMPETE_EVENTS = DATA.compete_events || [];
+const PACE_DOWN_SEGMENTS = DATA.pace_down_segments || {};
+// Note: rushed state uses per-frame t_id (temptation_mode) directly, no need for pre-computed segments here.
+const COURSE = DATA.course_profile || null;
 
 const COLORS = [
   '#f94144','#f3722c','#f8961e','#f9c74f','#90be6d',
@@ -133,6 +149,27 @@ const COLORS = [
   '#3a86ff','#ff006e','#fb5607','#8338ec','#06d6a0',
   '#ef476f','#ffd166','#118ab2','#073b4c',
 ];
+
+// ── Horse portrait preload ────────────────────────────────────────────
+// Build map: horse_index → {img: Image, url: string, name: string}
+const HORSE_INFO = {};
+for (const s of SUMMARIES) {
+  const hi = s.horse_index;
+  const url = s._image_url || '';
+  const name = s._name || `H${hi}`;
+  const info = { url, name, img: null, loaded: false };
+  if (url) {
+    const img = new Image();
+    img.src = url;
+    img.onload = () => { info.loaded = true; draw(); };
+    info.img = img;
+  }
+  HORSE_INFO[hi] = info;
+}
+
+function horseLabel(hi) {
+  return HORSE_INFO[hi] ? HORSE_INFO[hi].name : `H${hi}`;
+}
 
 // ── State ─────────────────────────────────────────────────────────────
 let frameIdx  = 0;
@@ -159,7 +196,7 @@ function resize() {
 window.addEventListener('resize', resize);
 
 // ── Track geometry ────────────────────────────────────────────────────
-const MARGIN_L = 60;    // left gutter (for labels)
+const MARGIN_L = 90;    // left gutter (for name labels)
 const MARGIN_R = 40;
 const LANE_H   = 28;    // px per horse lane
 const HORSE_R  = 10;    // horse dot radius
@@ -197,6 +234,7 @@ function horseLaneY(hi) {
 // ── Skill popup tracking ──────────────────────────────────────────────
 // Map: horse_index → [{skillId, startFrame, endFrame}]
 let activeSkills = [];  // popups currently visible
+let activeCompetes = []; // active compete events per horse
 
 function updateActiveSkills() {
   const f = FRAMES[frameIdx];
@@ -207,9 +245,20 @@ function updateActiveSkills() {
   for (const sk of SKILLS) {
     const ft = sk.frame_time;
     if (ft === undefined) continue;
-    // Show skill popup for ~2 seconds of race-time after activation
-    if (curTime >= ft && curTime <= ft + 2.0) {
+    // Use computed duration_secs if available, else 2s default
+    const dur = sk.duration_secs || 2.0;
+    if (curTime >= ft && curTime <= ft + dur) {
       activeSkills.push(sk);
+    }
+  }
+
+  // Check compete events (dueling / spot struggle)
+  activeCompetes = [];
+  for (const ce of COMPETE_EVENTS) {
+    const ft = ce.frame_time;
+    const dur = ce.duration || 0;
+    if (dur > 0 && curTime >= ft && curTime < ft + dur) {
+      activeCompetes.push(ce);
     }
   }
 }
@@ -258,6 +307,47 @@ function draw() {
         }
       }
       prev = p.end;
+    }
+  }
+
+  // ── Course profile overlays (slopes & corners) ─────────
+  if (COURSE) {
+    const trackH = NUM_H * LANE_H + 50;
+    const tTop = trackTop();
+    // Slope bands (top strip)
+    if (COURSE.slopes) {
+      for (const s of COURSE.slopes) {
+        const x1 = distToX(s.start);
+        const x2 = distToX(s.end);
+        if (x2 > MARGIN_L && x1 < W - MARGIN_R) {
+          const rx = Math.max(x1, MARGIN_L);
+          const rw = Math.min(x2, W - MARGIN_R) - rx;
+          const isUp = s.direction === 'uphill';
+          ctx.fillStyle = isUp ? 'rgba(248,81,73,0.12)' : 'rgba(63,185,80,0.12)';
+          ctx.fillRect(rx, tTop, rw, trackH);
+          // Slope label at top
+          const mid = (rx + rx + rw) / 2;
+          if (rw > 30 && mid > MARGIN_L + 10 && mid < W - MARGIN_R - 10) {
+            ctx.fillStyle = isUp ? 'rgba(248,81,73,0.7)' : 'rgba(63,185,80,0.7)';
+            ctx.font = 'bold 8px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(s.label, mid, tTop + 28);
+          }
+        }
+      }
+    }
+    // Corner bands (subtle purple at bottom)
+    if (COURSE.corners) {
+      for (const c of COURSE.corners) {
+        const x1 = distToX(c.start);
+        const x2 = distToX(c.start + c.length);
+        if (x2 > MARGIN_L && x1 < W - MARGIN_R) {
+          const rx = Math.max(x1, MARGIN_L);
+          const rw = Math.min(x2, W - MARGIN_R) - rx;
+          ctx.fillStyle = 'rgba(188,140,255,0.08)';
+          ctx.fillRect(rx, tTop + trackH - 6, rw, 6);
+        }
+      }
     }
   }
 
@@ -320,36 +410,111 @@ function draw() {
 
     // Is this horse activating a skill right now?
     const hasSkill = activeSkills.some(s => s.horse_index === hi);
+    const hInfo = HORSE_INFO[hi];
 
-    // Horse dot (glow if skill active)
+    // Check rushed state (掛かり / kakari / temptation mode)
+    const temptId = hd.t_id || 0;
+    const isTempted = temptId > 0;
+    const isRushedBoost = temptId === 4;
+
+    // Check pace down state (heuristic, from pre-computed segments)
+    const pdSegs = PACE_DOWN_SEGMENTS[String(hi)] || [];
+    const curTime = f.time || 0;
+    const isPaceDown = pdSegs.some(s => curTime >= s.start_time && curTime <= s.end_time);
+
+    // Check compete events
+    const isDueling = activeCompetes.some(c => c.horse_index === hi && (c.type_id === 5));
+    const isSpotStruggle = activeCompetes.some(c => c.horse_index === hi && (c.type_id === 4));
+
+    // Outer ring for rushed / compete / pace down states
+    if (isDueling) {
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R + 4, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(248, 113, 113, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else if (isSpotStruggle) {
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R + 4, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else if (isRushedBoost) {
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R + 4, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(210, 153, 34, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else if (isTempted) {
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R + 4, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(139, 148, 158, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (isPaceDown) {
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R + 4, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(88, 166, 255, 0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 2]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Horse dot / portrait
     if (hasSkill) {
       ctx.shadowColor = '#f9c74f';
       ctx.shadowBlur = 12;
+    } else if (isDueling) {
+      ctx.shadowColor = '#f87171';
+      ctx.shadowBlur = 10;
+    } else if (isSpotStruggle) {
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 10;
     }
-    ctx.beginPath();
-    ctx.arc(x, y, HORSE_R, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
+
+    if (hInfo && hInfo.loaded && hInfo.img) {
+      // Draw circular clipped portrait
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R, 0, Math.PI * 2);
+      ctx.clip();
+      // Draw image centered, covering the circle (crop to face area)
+      const imgSize = HORSE_R * 2.5;
+      ctx.drawImage(hInfo.img, x - HORSE_R, y - HORSE_R * 1.3, imgSize, imgSize);
+      ctx.restore();
+      // Border
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R, 0, Math.PI * 2);
+      ctx.strokeStyle = hasSkill ? '#f9c74f' : color;
+      ctx.lineWidth = hasSkill ? 2.5 : 1.5;
+      ctx.stroke();
+    } else {
+      // Fallback: colored dot
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = hasSkill ? '#f9c74f' : '#00000080';
+      ctx.lineWidth = hasSkill ? 2 : 1;
+      ctx.stroke();
+      // Index label inside dot
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(hi, x, y);
+    }
     ctx.shadowBlur = 0;
-
-    // Horse border
-    ctx.strokeStyle = hasSkill ? '#f9c74f' : '#00000080';
-    ctx.lineWidth = hasSkill ? 2 : 1;
-    ctx.stroke();
-
-    // Horse index label inside dot
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 9px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(hi, x, y);
 
     // Left gutter label
     ctx.fillStyle = color;
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`H${hi}`, MARGIN_L - 8, y);
+    ctx.fillText(horseLabel(hi), MARGIN_L - 8, y);
 
     // Skill popup above horse
     if (hasSkill) {
@@ -358,7 +523,7 @@ function draw() {
         const sk = skillsForHorse[si];
         const popY = y - HORSE_R - 8 - si * 18;
         // Popup background
-        const label = `SKILL ${sk.skill_id}`;
+        const label = sk.skill_label || `SKILL ${sk.skill_id}`;
         ctx.font = 'bold 10px sans-serif';
         const tw2 = ctx.measureText(label).width + 8;
         ctx.fillStyle = 'rgba(249,199,79,0.9)';
@@ -432,18 +597,67 @@ function updateInfoPanel() {
     if (!hd) continue;
     const color = COLORS[hi % COLORS.length];
     const hasSkill = activeSkills.some(s => s.horse_index === hi);
-    const cls = hasSkill ? 'horse-chip active-skill' : 'horse-chip';
+    const isDueling = activeCompetes.some(c => c.horse_index === hi && c.type_id === 5);
+    const isSpotStruggle = activeCompetes.some(c => c.horse_index === hi && c.type_id === 4);
+    const temptId = hd.t_id || 0;
+    const isTempted = temptId > 0;
+
+    // Check pace down from pre-computed segments
+    const pdSegs = PACE_DOWN_SEGMENTS[String(hi)] || [];
+    const curTime = f.time || 0;
+    const isPaceDown = pdSegs.some(s => curTime >= s.start_time && curTime <= s.end_time);
+
+    let cls = 'horse-chip';
+    if (hasSkill) cls += ' active-skill';
+    if (isDueling) cls += ' active-duel';
+    if (isSpotStruggle) cls += ' active-struggle';
+
     const maxHp = getMaxHp(hi);
     const hpPct = maxHp > 0 ? Math.round(hd.hp / maxHp * 100) : 100;
     const summary = SUMMARIES.find(s => s.horse_index === hi);
     const styleTag = summary ? (summary.running_style || '') : '';
+    const hInfo = HORSE_INFO[hi];
+    const portraitHtml = hInfo && hInfo.url
+      ? `<img src="${hInfo.url}" class="chip-portrait" alt="">`
+      : `<span class="dot" style="background:${color}"></span>`;
+    const label = hInfo ? hInfo.name : `H${hi}`;
+
+    // State indicator tags
+    let stateHtml = '';
+    if (isDueling) stateHtml += '<span class="state-tag duel">⚔ Duel</span>';
+    if (isSpotStruggle) stateHtml += '<span class="state-tag struggle">🏃 Struggle</span>';
+    if (isTempted) {
+      const temptNames = {1: 'Rushed (Sashi)', 2: 'Rushed (Senko)', 3: 'Rushed (Nige)', 4: 'Rushed (Boost)'};
+      const tname = temptNames[temptId] || `Rushed ${temptId}`;
+      const tcolor = temptId === 4 ? 'var(--orange)' : 'var(--red)';
+      stateHtml += `<span class="state-tag" style="color:${tcolor}">掛 ${tname}</span>`;
+    }
+    if (isPaceDown) {
+      stateHtml += '<span class="state-tag" style="color:var(--accent)">⏬ Pace Down</span>';
+    }
+
+    // Compute acceleration from next frame
+    let accelStr = '';
+    const nextF = FRAMES[frameIdx + 1];
+    if (nextF && nextF[hi]) {
+      const dt = (nextF.time || 0) - (f.time || 0);
+      if (dt > 0) {
+        const accel = (nextF[hi].s - hd.s) / dt;
+        const sign = accel >= 0 ? '+' : '';
+        const accelColor = accel > 0.1 ? 'var(--green)' : accel < -0.1 ? 'var(--red)' : 'var(--text-muted)';
+        accelStr = `<span class="val" style="color:${accelColor}">ACC ${sign}${accel.toFixed(2)}</span>`;
+      }
+    }
+
     html += `<div class="${cls}">
-      <span class="dot" style="background:${color}"></span>
-      <b>H${hi}</b>
+      ${portraitHtml}
+      <b>${label}</b>
       ${styleTag ? `<span style="color:var(--text-muted)">${styleTag}</span>` : ''}
       <span class="val">${Math.round(hd.d)}m</span>
       <span class="val" style="color:${hpPct > 50 ? 'var(--green)' : hpPct > 20 ? 'var(--orange)' : 'var(--red)'}">HP ${hpPct}%</span>
       <span class="val" style="color:var(--text-muted)">SPD ${hd.s}</span>
+      ${accelStr}
+      ${stateHtml}
     </div>`;
   }
   panel.innerHTML = html;

@@ -30,6 +30,23 @@ from pathlib import Path
 from flask import Flask, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
 
+from lib.master_db import (
+    chara_name,
+    execute_query,
+    get_db_path,
+    get_table_schema,
+    item_name,
+    race_instance_name,
+    set_db_path,
+    skill_name,
+    story_name,
+)
+from lib.master_db import (
+    is_available as master_db_available,
+)
+from lib.master_db import (
+    list_tables as master_list_tables,
+)
 from lib.session_reader import (
     get_network_event_detail,
     get_network_events,
@@ -85,6 +102,64 @@ app = Flask(
     static_folder=str(_BUNDLE_DIR / "static"),
 )
 app.config["JSON_SORT_KEYS"] = False
+
+# ── Master DB template filters ─────────────────────────────────────────
+app.jinja_env.filters["skill_name"] = skill_name
+app.jinja_env.filters["chara_name"] = chara_name
+app.jinja_env.filters["race_name"] = race_instance_name
+app.jinja_env.filters["story_name"] = story_name
+app.jinja_env.filters["item_name"] = item_name
+
+# ── Uma portrait lookup ────────────────────────────────────────────────
+# Scan static/uma/ once and build a {charaId: {cardId: filename}} map
+_UMA_IMAGES: dict[int, dict[int, str]] = {}
+
+
+def _scan_uma_images():
+    uma_dir = Path(app.static_folder) / "uma"
+    if not uma_dir.is_dir():
+        return
+    for f in uma_dir.iterdir():
+        if f.suffix != ".webp":
+            continue
+        # chara_stand_{charaId}_{cardId}.webp
+        parts = f.stem.split("_")
+        if len(parts) >= 4 and parts[0] == "chara" and parts[1] == "stand":
+            try:
+                cid = int(parts[2])
+                card = int(parts[3])
+                _UMA_IMAGES.setdefault(cid, {})[card] = f.name
+            except ValueError:
+                continue
+
+
+_scan_uma_images()
+
+
+def uma_image_url(chara_id, card_id=None):
+    """Return the URL for an uma portrait, or empty string if not found."""
+    try:
+        cid = int(chara_id) if chara_id else None
+    except (ValueError, TypeError):
+        return ""
+    if cid is None or cid not in _UMA_IMAGES:
+        return ""
+    cards = _UMA_IMAGES[cid]
+    # Prefer exact card_id match, then fall back to any card for this chara
+    if card_id:
+        try:
+            card_id = int(card_id)
+        except (ValueError, TypeError):
+            card_id = None
+    if card_id and card_id in cards:
+        return f"/static/uma/{cards[card_id]}"
+    # Fallback: first available
+    first = next(iter(cards.values()))
+    return f"/static/uma/{first}"
+
+
+app.jinja_env.filters["uma_image"] = uma_image_url
+app.jinja_env.globals["uma_image"] = uma_image_url
 
 LOG_FILE = SCRIPT_DIR / "gui.log"
 
@@ -157,6 +232,11 @@ def home():
     return render_template("home.html", sessions=list_sessions())
 
 
+@app.route("/masterdata")
+def masterdata():
+    return render_template("masterdata.html", db_available=master_db_available())
+
+
 @app.route("/session/<name>")
 def session_detail(name: str):
     session = get_session(name)
@@ -190,6 +270,32 @@ def race_replay(name: str, race_idx: int):
     replay = get_race_replay_data(name, race_idx)
     if not replay:
         return "Race not found", 404
+    # Enrich skill activations with resolved names from master DB
+    for sk in replay.get("skills", []):
+        sid = sk.get("skill_id")
+        if sid:
+            sk["skill_label"] = skill_name(sid)
+    # Enrich horse summaries with image URLs and names for the replay canvas
+    for hs in replay.get("horse_summaries", []):
+        cid = hs.get("chara_id")
+        card = hs.get("card_id")
+        if cid:
+            hs["_image_url"] = uma_image_url(cid, card)
+            hs["_name"] = chara_name(cid)
+    # Attach course profile for slope/corner visualization
+    from lib.course_data import build_course_profile, guess_course_id
+
+    meta = replay.get("race_metadata", {})
+    total_d = replay.get("total_distance", 0)
+    cid = guess_course_id(
+        race_distance=int(total_d),
+        program_id=meta.get("program_id"),
+        race_instance_id=meta.get("race_instance_id"),
+    )
+    if cid:
+        profile = build_course_profile(cid)
+        if profile:
+            replay["course_profile"] = profile
     return render_template("replay.html", session=session, replay=replay, race_idx=race_idx)
 
 
@@ -256,6 +362,67 @@ def api_network(name: str):
 def api_network_detail(name: str, idx: int):
     detail = get_network_event_detail(name, idx)
     return jsonify(detail) if detail else (jsonify({"error": "Event not found"}), 404)
+
+
+# ── Routes: Settings ───────────────────────────────────────────────────
+
+
+@app.route("/api/settings/master_db")
+def api_master_db_status():
+    """Return current master DB path and availability."""
+    return jsonify(
+        {
+            "available": master_db_available(),
+            "path": get_db_path(),
+        }
+    )
+
+
+@app.route("/api/settings/master_db", methods=["POST"])
+def api_master_db_set():
+    """Set or clear the master DB path."""
+    data = request.get_json(silent=True) or {}
+    path = data.get("path")
+
+    if path is None or path == "":
+        set_db_path(None)
+        return jsonify({"ok": True, "available": False, "path": None})
+
+    ok = set_db_path(path)
+    if not ok:
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Invalid file — not a valid master.mdb (must be SQLite with a text_data table)",
+            }
+        ), 400
+
+    return jsonify({"ok": True, "available": True, "path": get_db_path()})
+
+
+# ── Routes: Master Data Browser ────────────────────────────────────────
+
+
+@app.route("/api/masterdata/tables")
+def api_masterdata_tables():
+    """List all tables and their column schemas."""
+    tables = master_list_tables()
+    result = []
+    for t in tables:
+        schema = get_table_schema(t)
+        result.append({"name": t, "columns": schema})
+    return jsonify(result)
+
+
+@app.route("/api/masterdata/query", methods=["POST"])
+def api_masterdata_query():
+    """Execute a read-only SQL query."""
+    data = request.get_json(silent=True) or {}
+    sql = data.get("sql", "").strip()
+    if not sql:
+        return jsonify({"error": "No SQL provided"}), 400
+    limit = min(int(data.get("limit", 1000)), 5000)
+    return jsonify(execute_query(sql, limit=limit))
 
 
 # ── Routes: Setup (discover + analyse) ─────────────────────────────────

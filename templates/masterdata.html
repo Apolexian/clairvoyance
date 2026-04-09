@@ -1,0 +1,391 @@
+{% extends "layout.html" %}
+{% block title %}Master Data Browser{% endblock %}
+
+{% block head %}
+<style>
+  .mdb-wrap {
+    display: flex;
+    gap: 1rem;
+    height: calc(100vh - 80px);
+    min-height: 400px;
+  }
+
+  /* ── Sidebar ── */
+  .mdb-sidebar {
+    width: 240px;
+    min-width: 180px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    overflow: hidden;
+  }
+  .mdb-sidebar-header {
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .mdb-sidebar-header input {
+    flex: 1;
+    font-size: 0.78rem;
+  }
+  .mdb-table-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.25rem 0;
+  }
+  .mdb-table-item {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.8rem;
+    font-family: monospace;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.1s;
+  }
+  .mdb-table-item:hover {
+    background: var(--bg-hover);
+    color: var(--accent);
+  }
+  .mdb-table-item .col-count {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .mdb-table-item.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  /* ── Main area ── */
+  .mdb-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .mdb-editor-wrap {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .mdb-editor {
+    width: 100%;
+    min-height: 80px;
+    max-height: 200px;
+    resize: vertical;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    outline: none;
+    tab-size: 2;
+  }
+  .mdb-editor:focus {
+    border-color: var(--accent);
+  }
+
+  .mdb-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .mdb-toolbar .meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  /* ── Results ── */
+  .mdb-results-wrap {
+    flex: 1;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+  }
+  .mdb-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    font-family: monospace;
+  }
+  .mdb-results-table th {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    border-bottom: 2px solid var(--border);
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  .mdb-results-table th:hover {
+    color: var(--text);
+  }
+  .mdb-results-table td {
+    padding: 0.3rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mdb-results-table tr:hover td {
+    background: var(--bg-hover);
+  }
+  .mdb-results-table td.null-val {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+  .mdb-results-table td.num-val {
+    color: var(--orange);
+  }
+
+  .mdb-empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+  }
+  .mdb-error {
+    padding: 1rem;
+    color: var(--red);
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+  }
+
+  @media (max-width: 768px) {
+    .mdb-wrap { flex-direction: column; height: auto; }
+    .mdb-sidebar { width: 100%; max-height: 200px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom:0.75rem;">Master Data Browser</h1>
+
+{% if not db_available %}
+<div class="mdb-empty">
+  <p>Master DB not configured.</p>
+  <p style="margin-top:0.5rem; font-size:0.85rem;">
+    Open the <strong>Record</strong> panel and set the path to your local <code>master.mdb</code>.
+  </p>
+</div>
+{% else %}
+<div class="mdb-wrap">
+  <!-- Sidebar: table list -->
+  <div class="mdb-sidebar">
+    <div class="mdb-sidebar-header">
+      <input type="text" id="table-filter" class="input-sm" placeholder="Filter tables…" oninput="filterTables()">
+    </div>
+    <div class="mdb-table-list" id="table-list">
+      <div class="mdb-empty" style="padding:1rem; font-size:0.8rem;">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Main: editor + results -->
+  <div class="mdb-main">
+    <div class="mdb-editor-wrap">
+      <textarea class="mdb-editor" id="sql-editor" placeholder="SELECT * FROM skill_data LIMIT 100"
+                spellcheck="false"></textarea>
+      <div class="mdb-toolbar">
+        <button class="btn btn-primary btn-sm" onclick="runQuery()">▶ Run Query</button>
+        <button class="btn btn-sm" onclick="exportCsv()">Export CSV</button>
+        <span class="meta" id="result-meta"></span>
+      </div>
+    </div>
+    <div class="mdb-results-wrap" id="results-wrap">
+      <div class="mdb-empty">Run a query or click a table to get started.</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if db_available %}
+<script>
+// ── State ──────────────────────────────────────────────────────
+let tables = [];
+let lastResult = null;
+
+// ── Load tables ────────────────────────────────────────────────
+async function loadTables() {
+  try {
+    const res = await fetch('/api/masterdata/tables');
+    tables = await res.json();
+    renderTableList();
+  } catch (e) {
+    document.getElementById('table-list').innerHTML =
+      '<div class="mdb-error">Failed to load tables</div>';
+  }
+}
+
+function renderTableList() {
+  const q = (document.getElementById('table-filter').value || '').toLowerCase();
+  const list = document.getElementById('table-list');
+  const filtered = q ? tables.filter(t => t.name.toLowerCase().includes(q)) : tables;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="mdb-empty" style="padding:1rem; font-size:0.8rem;">No tables found</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(t =>
+    `<div class="mdb-table-item" onclick="selectTable('${t.name}')" title="${t.columns.map(c => c.name + ' (' + c.type + ')').join(', ')}">
+      <span>${t.name}</span>
+      <span class="col-count">${t.columns.length} cols</span>
+    </div>`
+  ).join('');
+}
+
+function filterTables() { renderTableList(); }
+
+function selectTable(name) {
+  // Highlight
+  document.querySelectorAll('.mdb-table-item').forEach(el =>
+    el.classList.toggle('active', el.textContent.trim().startsWith(name))
+  );
+  // Set query and run
+  const editor = document.getElementById('sql-editor');
+  editor.value = `SELECT * FROM "${name}" LIMIT 200`;
+  runQuery();
+}
+
+// ── Run query ──────────────────────────────────────────────────
+async function runQuery() {
+  const sql = document.getElementById('sql-editor').value.trim();
+  if (!sql) return;
+
+  const wrap = document.getElementById('results-wrap');
+  const meta = document.getElementById('result-meta');
+  wrap.innerHTML = '<div class="mdb-empty">Running…</div>';
+  meta.textContent = '';
+
+  try {
+    const t0 = performance.now();
+    const res = await fetch('/api/masterdata/query', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({sql}),
+    });
+    const data = await res.json();
+    const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
+
+    if (data.error) {
+      wrap.innerHTML = `<div class="mdb-error">${escHtml(data.error)}</div>`;
+      meta.textContent = '';
+      lastResult = null;
+      return;
+    }
+
+    lastResult = data;
+
+    if (data.columns.length === 0) {
+      wrap.innerHTML = '<div class="mdb-empty">Query returned no columns.</div>';
+      meta.textContent = `${elapsed}s`;
+      return;
+    }
+
+    // Build table
+    let html = '<table class="mdb-results-table"><thead><tr>';
+    for (const col of data.columns) {
+      html += `<th>${escHtml(col)}</th>`;
+    }
+    html += '</tr></thead><tbody>';
+
+    for (const row of data.rows) {
+      html += '<tr>';
+      for (const val of row) {
+        if (val === null) {
+          html += '<td class="null-val">NULL</td>';
+        } else if (typeof val === 'number') {
+          html += `<td class="num-val">${val}</td>`;
+        } else {
+          html += `<td>${escHtml(String(val))}</td>`;
+        }
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+
+    let info = `${data.row_count} row${data.row_count !== 1 ? 's' : ''} · ${elapsed}s`;
+    if (data.truncated) info += ' (truncated)';
+    meta.textContent = info;
+
+  } catch (e) {
+    wrap.innerHTML = `<div class="mdb-error">Request failed: ${escHtml(String(e))}</div>`;
+    lastResult = null;
+  }
+}
+
+// ── Export CSV ──────────────────────────────────────────────────
+function exportCsv() {
+  if (!lastResult || !lastResult.columns.length) return;
+  const esc = v => {
+    if (v === null) return '';
+    const s = String(v);
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? '"' + s.replace(/"/g, '""') + '"'
+      : s;
+  };
+  const lines = [lastResult.columns.map(esc).join(',')];
+  for (const row of lastResult.rows) {
+    lines.push(row.map(esc).join(','));
+  }
+  const blob = new Blob([lines.join('\n')], {type: 'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'masterdata_export.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────────
+document.getElementById('sql-editor').addEventListener('keydown', e => {
+  // Ctrl+Enter / Cmd+Enter → run query
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    runQuery();
+  }
+  // Tab → insert 2 spaces
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = e.target;
+    const start = ta.selectionStart;
+    ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(ta.selectionEnd);
+    ta.selectionStart = ta.selectionEnd = start + 2;
+  }
+});
+
+// ── Init ───────────────────────────────────────────────────────
+loadTables();
+</script>
+{% endif %}
+{% endblock %}
+
