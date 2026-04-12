@@ -227,14 +227,14 @@
   <div class="wizard-step locked" id="step-3">
     <div class="step-header">
       <span class="step-number">3</span>
-      <span class="step-title">Extract event choice text</span>
-      <span style="font-size:0.7rem; color:var(--text-muted); margin-left:auto;">optional</span>
-    </div>
-    <div class="step-body">
-      <p>
-        Extract choice option labels from the game's story asset bundles.
-        This shows what each event choice says, not just "Option 1 of 3".
-      </p>
+  <span class="step-title">Extract game data &amp; images</span>
+  <span style="font-size:0.7rem; color:var(--text-muted); margin-left:auto;">optional</span>
+</div>
+<div class="step-body">
+  <p>
+    Extract choice option labels, character icons, and support card images
+    from the game's asset bundles.
+  </p>
       <div id="step3-auto" style="display:none">
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" id="extract-progress"></div>
@@ -520,6 +520,9 @@
 
       if (d.status === 'reading meta database') {
         statusEl.textContent = 'Reading meta database…';
+      } else if (d.status === 'extracting assets') {
+        statusEl.textContent = 'Extracting character icons & support card images…';
+        document.getElementById('extract-progress').style.width = '100%';
       } else if (d.total > 0) {
         const pct = Math.round(d.processed / d.total * 100);
         document.getElementById('extract-progress').style.width = pct + '%';
@@ -535,7 +538,7 @@
           document.getElementById('step3-auto').style.display = 'none';
           document.getElementById('step3-skip').style.display = 'none';
           document.getElementById('step3-result').innerHTML =
-            `<div class="step-success">✓ Extracted choice text for ${d.found} events</div>`;
+            `<div class="step-success">✓ Extracted choice text for ${d.found} events + game images</div>`;
           advanceTo(4);
         } else if (d.error) {
           document.getElementById('step3-error').style.display = '';
@@ -607,8 +610,10 @@
         '<div class="step-success">✓ Binary scan complete</div>';
 
       if (storyDone) {
+        let msg = '✓ Story choices loaded';
+        if (d.assets_extracted) msg += ' + game images extracted';
         document.getElementById('step3-result').innerHTML =
-          '<div class="step-success">✓ Story choices loaded</div>';
+          `<div class="step-success">${msg}</div>`;
         document.getElementById('step3-skip').style.display = 'none';
         advanceTo(4);
       } else {

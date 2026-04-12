@@ -58,7 +58,8 @@ from lib.master_db import (
     list_tables as master_list_tables,
 )
 from lib.session_reader import (
-    build_session_summary,
+    _chara_matches,
+    build_session_summaries,
     get_network_event_detail,
     get_network_events,
     get_race_replay_data,
@@ -126,18 +127,28 @@ app.jinja_env.filters["support_card_name"] = support_card_name
 app.jinja_env.filters["race_track_name"] = race_track_name
 
 # ── Uma portrait lookup ────────────────────────────────────────────────
-# Scan static/uma/ once and build a {charaId: {cardId: filename}} map
+# Scan static/uma/ once and build lookup maps:
+#   _UMA_ICONS:  {charaId: filename}  — chr_icon_XXXX.webp (preferred)
+#   _UMA_IMAGES: {charaId: {cardId: filename}} — chara_stand_X_Y.webp (fallback)
+_UMA_ICONS: dict[int, str] = {}
 _UMA_IMAGES: dict[int, dict[int, str]] = {}
 
 
 def _scan_uma_images():
+    _UMA_ICONS.clear()
+    _UMA_IMAGES.clear()
     uma_dir = Path(app.static_folder) / "uma"
     if not uma_dir.is_dir():
         return
     for f in uma_dir.iterdir():
-        if f.suffix != ".webp":
+        if f.suffix not in (".webp", ".png"):
             continue
-        # chara_stand_{charaId}_{cardId}.webp
+        # chr_icon_{charaId}.webp or .png  (from UmamusumeExplorer pattern)
+        m = re.match(r"chr_icon_(\d{4})\.(?:webp|png)$", f.name)
+        if m:
+            _UMA_ICONS[int(m.group(1))] = f.name
+            continue
+        # chara_stand_{charaId}_{cardId}.webp  (legacy full-body art)
         parts = f.stem.split("_")
         if len(parts) >= 4 and parts[0] == "chara" and parts[1] == "stand":
             try:
@@ -157,10 +168,15 @@ def uma_image_url(chara_id, card_id=None):
         cid = int(chara_id) if chara_id else None
     except (ValueError, TypeError):
         return ""
-    if cid is None or cid not in _UMA_IMAGES:
+    if cid is None:
+        return ""
+    # Prefer chr_icon (extracted from game assets via UmamusumeExplorer pattern)
+    if cid in _UMA_ICONS:
+        return f"/static/uma/{_UMA_ICONS[cid]}"
+    # Fallback: legacy chara_stand images
+    if cid not in _UMA_IMAGES:
         return ""
     cards = _UMA_IMAGES[cid]
-    # Prefer exact card_id match, then fall back to any card for this chara
     if card_id:
         try:
             card_id = int(card_id)
@@ -168,13 +184,94 @@ def uma_image_url(chara_id, card_id=None):
             card_id = None
     if card_id and card_id in cards:
         return f"/static/uma/{cards[card_id]}"
-    # Fallback: first available
     first = next(iter(cards.values()))
     return f"/static/uma/{first}"
 
 
 app.jinja_env.filters["uma_image"] = uma_image_url
 app.jinja_env.globals["uma_image"] = uma_image_url
+
+
+def horse_image_url(horse):
+    """Return image URL for a horse dict, trying chara_id then mob_id."""
+    if not isinstance(horse, dict):
+        return ""
+    img = uma_image_url(horse.get("chara_id"), horse.get("card_id"))
+    if not img and horse.get("mob_id"):
+        img = uma_image_url(horse["mob_id"])
+    return img
+
+
+def horse_display_name(horse):
+    """Return display name for a horse dict, trying chara → mob → trainer → fallback."""
+    if not isinstance(horse, dict):
+        return "?"
+    cid = horse.get("chara_id")
+    if cid:
+        name = chara_name(cid)
+        if not name.startswith("Character #"):
+            return name
+    mid = horse.get("mob_id")
+    if mid:
+        from lib.master_db import mob_name
+
+        mname = mob_name(mid)
+        if mname:
+            return mname
+    tname = horse.get("trainer_name")
+    if tname:
+        return tname
+    return f"Horse {horse.get('horse_index', '?')}"
+
+
+app.jinja_env.globals["horse_image"] = horse_image_url
+app.jinja_env.globals["horse_name"] = horse_display_name
+
+# ── Support card image lookup ──────────────────────────────────────────
+# Scan static/cards/ for extracted support card images (webp or png)
+_SC_IMAGES: dict[int, str] = {}
+
+
+def _scan_support_card_images():
+    _SC_IMAGES.clear()
+    cards_dir = Path(app.static_folder) / "cards"
+    if not cards_dir.is_dir():
+        return
+    for f in cards_dir.iterdir():
+        if f.suffix not in (".webp", ".png"):
+            continue
+        # support_thumb_{id}.webp/png  (UmamusumeExplorer pattern — preferred)
+        m = re.match(r"support_thumb_(\d+)\.(webp|png)$", f.name)
+        if m:
+            sid = int(m.group(1))
+            # Prefer webp over png if both exist
+            if sid not in _SC_IMAGES or f.suffix == ".webp":
+                _SC_IMAGES[sid] = f.name
+            continue
+        # support_card_{id}.webp/png  (legacy)
+        m = re.match(r"support_card_(\d+)\.(webp|png)$", f.name)
+        if m:
+            sid = int(m.group(1))
+            if sid not in _SC_IMAGES:  # don't overwrite thumb with legacy
+                _SC_IMAGES[sid] = f.name
+
+
+_scan_support_card_images()
+
+
+def support_card_image_url(sc_id) -> str:
+    """Return the URL for a support card image, or empty string if not found."""
+    try:
+        sid = int(sc_id) if sc_id else None
+    except (ValueError, TypeError):
+        return ""
+    if sid and sid in _SC_IMAGES:
+        return f"/static/cards/{_SC_IMAGES[sid]}"
+    return ""
+
+
+app.jinja_env.filters["support_card_image"] = support_card_image_url
+app.jinja_env.globals["support_card_image"] = support_card_image_url
 
 LOG_FILE = SCRIPT_DIR / "gui.log"
 
@@ -261,42 +358,76 @@ def masterdata():
     return render_template("masterdata.html", db_available=master_db_available())
 
 
-@app.route("/session/<name>")
-def session_detail(name: str):
-    session = get_session(name)
-    if not session:
-        return "Session not found", 404
-
-    summary = build_session_summary(name)
-
-    # Resolve IDs to human-readable names via master DB
+def _enrich_career_summary(summary: dict) -> None:
+    """Resolve IDs to human-readable names and images in a career summary (in-place)."""
+    # ── Character info ──
     if summary.get("chara_id") not in (None, 0, ""):
         summary["chara_name"] = chara_name(summary["chara_id"])
         summary["chara_image"] = uma_image_url(summary["chara_id"], summary.get("card_id"))
     if summary.get("card_id") not in (None, 0, ""):
         full_card = card_name(summary["card_id"])
-        # card_name returns "[Outfit Title] CharaName" — split into parts
         m = re.match(r"^\[(.+?)\]\s*(.+)$", full_card)
         if m:
             summary["outfit_title"] = m.group(1)
-            # Use as fallback when chara_name lookup missed
             if not summary.get("chara_name") or summary["chara_name"].startswith("Character #"):
                 summary["chara_name"] = m.group(2)
         else:
-            # No bracket format — use the whole string as fallback name
             if not summary.get("chara_name") or summary["chara_name"].startswith("Character #"):
                 summary["chara_name"] = full_card
     if summary.get("scenario_id") not in (None, 0, ""):
         summary["scenario_name"] = scenario_name(summary["scenario_id"])
+
+    # ── Support cards ──
     for sc_id in summary.get("support_card_ids", []):
         summary.setdefault("support_card_names", []).append(
             {
                 "id": sc_id,
                 "name": support_card_name(sc_id),
+                "image": support_card_image_url(sc_id),
             }
         )
     if summary.get("friend_support_card_id"):
         summary["friend_support_card_name"] = support_card_name(summary["friend_support_card_id"])
+        summary["friend_support_card_image"] = support_card_image_url(
+            summary["friend_support_card_id"]
+        )
+
+    # ── Training partner distribution ──
+    _CMD_LABELS = {"101": "Speed", "102": "Stamina", "103": "Power", "105": "Guts", "106": "Wiz"}
+    raw_dist = summary.get("training_partner_dist", {})
+    if raw_dist:
+        enriched_dist = []
+        for sc_id_str, cmd_counts in raw_dist.items():
+            sc_id = int(sc_id_str)
+            sc_nm = support_card_name(sc_id)
+            total = sum(cmd_counts.values())
+            breakdown = {}
+            for cmd_id_str, count in cmd_counts.items():
+                label = _CMD_LABELS.get(cmd_id_str, f"Cmd {cmd_id_str}")
+                breakdown[label] = count
+            is_friend = sc_id == summary.get("friend_support_card_id")
+            enriched_dist.append(
+                {
+                    "id": sc_id,
+                    "name": sc_nm,
+                    "image": support_card_image_url(sc_id),
+                    "total": total,
+                    "breakdown": breakdown,
+                    "is_friend": is_friend,
+                }
+            )
+        enriched_dist.sort(key=lambda x: x["total"], reverse=True)
+        summary["training_partner_dist_enriched"] = enriched_dist
+        summary["training_partner_turns_seen"] = len(summary.get("stats_history", []))
+
+    # ── Training actions ──
+    _CMD_LABELS_INT = {101: "Speed", 102: "Stamina", 103: "Power", 105: "Guts", 106: "Wiz"}
+    for ta in summary.get("training_actions", []):
+        cid = ta.get("command_id")
+        if cid:
+            ta["command_name"] = _CMD_LABELS_INT.get(cid, f"Cmd {cid}")
+
+    # ── Skills & races ──
     for sk in summary.get("skills_acquired", []):
         sk["name"] = skill_name(sk["skill_id"])
     for sk in summary.get("skill_tips", []):
@@ -305,7 +436,7 @@ def session_detail(name: str):
         if rr.get("race_instance_id"):
             rr["race_name"] = race_instance_name(rr["race_instance_id"])
 
-    # Enrich events with master DB lookups
+    # ── Events ──
     for ev in summary.get("events_seen", []):
         sid = ev.get("story_id")
         if sid:
@@ -317,20 +448,23 @@ def session_detail(name: str):
                 ev["source_chara"] = ei["source_chara"]
                 ev["has_choice"] = ei["has_choice"]
                 ev["num_branches"] = ei["num_branches"]
-                ev["choice_texts"] = ei.get("choice_texts")
+                # Only populate choice_texts if the API says this event
+                # actually has multiple choices.  The API's choice_count
+                # is authoritative; story_choices.json can contain choices
+                # from unrelated events that share the same story_id.
+                api_cc = ev.get("choice_count", -1)
+                if api_cc < 0 or api_cc > 1:
+                    ev["choice_texts"] = ei.get("choice_texts")
             else:
                 ev["name"] = story_name(sid)
 
     for ec in summary.get("event_choices", []):
         sid = ec.get("story_id")
         eid = ec.get("event_id")
-
-        # If story_id is missing but event_id is present, resolve it
         if not sid and eid:
             sid = event_id_to_story_id(eid)
             if sid:
                 ec["story_id"] = sid
-
         if sid:
             ei = event_info(sid)
             if ei:
@@ -343,15 +477,170 @@ def session_detail(name: str):
             else:
                 ec["name"] = story_name(sid)
         elif eid:
-            # Last resort: annotate with event_id-derived name
             ec["name"] = event_name_by_event_id(eid)
 
+    # ── Merge events_seen + event_choices ──
+    # Use event_id as primary key for matching (story_id is NOT unique —
+    # the same story_id can appear for different event instances).
+    _choices_by_eid: dict[int, dict] = {}
+    _choices_by_sid: dict[int, dict] = {}
+    for ec in summary.get("event_choices", []):
+        eid = ec.get("event_id")
+        sid = ec.get("story_id")
+        if eid:
+            _choices_by_eid[eid] = ec
+        if sid:
+            _choices_by_sid[sid] = ec
+
+    merged: list[dict] = []
+    _seen_sids: set[int] = set()
+    _seen_eids: set[int] = set()
+    for ev in summary.get("events_seen", []):
+        sid = ev.get("story_id")
+        eid = ev.get("event_id")
+        entry = dict(ev)
+
+        # The API's choice_count is authoritative: it tells us how many
+        # choices this specific event instance actually has.
+        api_choice_count = entry.get("choice_count", -1)
+
+        # Only attach choice_texts if the API says this event actually
+        # has multiple choices (choice_count > 1).  Events with 0 or 1
+        # options in choice_array are auto-advance and should not show
+        # choices from story_choices.json.
+        if api_choice_count >= 0 and api_choice_count <= 1:
+            entry.pop("choice_texts", None)
+
+        # Match by event_id first (unique), fallback to story_id
+        ch = None
+        if eid and eid in _choices_by_eid:
+            ch = _choices_by_eid[eid]
+        elif sid and sid in _choices_by_sid:
+            ch = _choices_by_sid[sid]
+
+        if ch is not None:
+            entry["choice_number"] = ch.get("choice_number")
+            entry["stat_deltas"] = ch.get("stat_deltas")
+            if ch.get("choice_texts") and api_choice_count != 0 and api_choice_count != 1:
+                entry["choice_texts"] = ch["choice_texts"]
+
+        if sid:
+            _seen_sids.add(sid)
+        if eid:
+            _seen_eids.add(eid)
+        merged.append(entry)
+
+    for ec in summary.get("event_choices", []):
+        sid = ec.get("story_id")
+        eid = ec.get("event_id")
+        if eid and eid not in _seen_eids:
+            merged.append(ec)
+            if sid:
+                _seen_sids.add(sid)
+            _seen_eids.add(eid)
+        elif sid and sid not in _seen_sids and (not eid or eid not in _seen_eids):
+            merged.append(ec)
+            _seen_sids.add(sid)
+
+    summary["events_merged"] = merged
+
+    # Filtered view: hide pure auto-advance VN narration that has no player
+    # interaction AND no gameplay effect.  Keep events that have choices,
+    # stat deltas, or any other meaningful outcome.
+    summary["events_with_choices"] = [
+        e
+        for e in merged
+        if e.get("choice_number")  # player made a choice
+        or e.get("choice_texts")  # has choice text options
+        or e.get("stat_deltas")  # gave stats / mood / SP etc.
+        or (e.get("has_choice") and (e.get("num_branches") or 0) > 1)  # DB says multi-branch
+    ]
+
+    # ── Compute a compact header label for multi-career display ──
+    stats = summary.get("latest_stats", {})
+    if stats:
+        total = (
+            stats.get("speed", 0)
+            + stats.get("stamina", 0)
+            + stats.get("power", 0)
+            + stats.get("guts", 0)
+            + stats.get("wiz", 0)
+        )
+        summary["_stats_total"] = total
+        summary["_turn_range"] = f"T1-T{stats.get('turn', '?')}"
+    else:
+        summary["_stats_total"] = 0
+        summary["_turn_range"] = ""
+
+
+@app.route("/session/<name>")
+def session_detail(name: str):
+    session = get_session(name)
+    if not session:
+        return "Session not found", 404
+
+    careers, other_races = build_session_summaries(name)
+    for career in careers:
+        _enrich_career_summary(career)
+
     net = get_network_events(name)
+    races = get_races(name)
+
+    # Backfill race_results from detected races for single-career sessions
+    # (multi-career: each career already has its own race_results from the parser)
+    if len(careers) == 1 and not careers[0].get("race_results") and races:
+        summary = careers[0]
+        player_cid = summary.get("chara_id")
+        player_card = summary.get("card_id")
+        for race in races:
+            meta = race.get("race_metadata", {})
+            rid = meta.get("race_instance_id")
+
+            result_order = None
+            entry_count = None
+            horse_list = race.get("horse_summaries", [])
+            if horse_list:
+                entry_count = len(horse_list)
+                # Match by chara_id / card_id (robust across outfit variants)
+                player = None
+                if player_cid or player_card:
+                    player = next(
+                        (h for h in horse_list if _chara_matches(h, player_cid, player_card)),
+                        None,
+                    )
+                if player is None:
+                    # Last resort: horse_index 0 (usually the player in career)
+                    player = next(
+                        (h for h in horse_list if h.get("horse_index") == 0),
+                        horse_list[0] if horse_list else None,
+                    )
+                if player:
+                    fo = player.get("finish_order")
+                    result_order = fo if fo is not None else player.get("estimated_rank")
+
+            rr = {
+                "race_instance_id": rid,
+                "program_id": meta.get("program_id"),
+                "result_order": result_order,
+                "entry_count": entry_count,
+                "turn": 0,
+                "api": race.get("api", ""),
+            }
+            if rid:
+                rr["race_name"] = race_instance_name(rid)
+            else:
+                rr["race_name"] = race.get("_race_label", f"Race {race.get('_race_index', '?')}")
+            summary["race_results"].append(rr)
+
+    # Primary summary = last career (for backward compat with parts of the template)
+    summary = careers[-1] if careers else {}
 
     return render_template(
         "session.html",
         session=session,
-        races=get_races(name),
+        careers=careers,
+        other_races=other_races,
+        races=races,
         network=net["events"],
         network_stats=net["stats"],
         summary=summary,
@@ -387,9 +676,26 @@ def race_replay(name: str, race_idx: int):
     for hs in replay.get("horse_summaries", []):
         cid = hs.get("chara_id")
         card = hs.get("card_id")
+        mid = hs.get("mob_id")
+        # Try chara_id first, fall back to mob_id for NPC icons
+        img = ""
+        name = ""
         if cid:
-            hs["_image_url"] = uma_image_url(cid, card)
-            hs["_name"] = chara_name(cid)
+            img = uma_image_url(cid, card)
+            name = chara_name(cid)
+        if not img and mid:
+            img = uma_image_url(mid)
+        if not name or name.startswith("Character #"):
+            if mid:
+                from lib.master_db import mob_name
+
+                mname = mob_name(mid)
+                if mname:
+                    name = mname
+            if (not name or name.startswith("Character #")) and hs.get("trainer_name"):
+                name = hs["trainer_name"]
+        hs["_image_url"] = img
+        hs["_name"] = name or f"Horse {hs.get('horse_index', '?')}"
     # Attach course profile for slope/corner visualization
     from lib.course_data import build_course_profile, guess_course_id
 
@@ -799,11 +1105,22 @@ def api_wizard_status():
     interesting = DISCOVERY_DIR / "interesting.json"
     scan_ready = interesting.exists()
 
+    # Asset extraction status — check if we have any extracted images
+    uma_dir = Path(app.static_folder) / "uma"
+    cards_dir = Path(app.static_folder) / "cards"
+    has_uma_icons = any(uma_dir.glob("chr_icon_*.webp")) if uma_dir.is_dir() else False
+    has_sc_thumbs = (
+        (any(cards_dir.glob("support_thumb_*.webp")) or any(cards_dir.glob("support_card_*.webp")))
+        if cards_dir.is_dir()
+        else False
+    )
+
     return jsonify(
         {
             "master_db_configured": master_db_available(),
             "master_db_path": db_path,
             "story_choices_exist": story_choices_loaded,
+            "assets_extracted": has_uma_icons or has_sc_thumbs,
             "game_data_dir": game_data_dir,
             "extraction_running": _extraction_running,
             "scan_ready": scan_ready,
@@ -1070,7 +1387,13 @@ def _run_extraction(game_dir: Path) -> None:
     """Background thread for story text extraction."""
     global _extraction_running
     try:
-        from extract_story_text import extract_choices_from_bundle, read_meta_entries
+        import UnityPy
+
+        from extract_story_text import (
+            decrypt_bundle,
+            extract_choices_from_bundle,
+            read_meta_entries,
+        )
 
         # Ensure extract_story_text logger output goes to gui.log too
         est_logger = logging.getLogger("extract_story_text")
@@ -1145,8 +1468,9 @@ def _run_extraction(game_dir: Path) -> None:
         found = 0
         skipped = 0
         missing_samples: list[str] = []  # first few missing paths for diagnostics
+        first_bundle_logged = False
 
-        for entry in entries:
+        for i, entry in enumerate(entries):
             h = entry["hash"]
             file_path = dat_dir / h[:2] / h
             if not file_path.is_file():
@@ -1158,6 +1482,57 @@ def _run_extraction(game_dir: Path) -> None:
                     _extraction_progress["processed"] = processed
                     _extraction_progress["skipped"] = skipped
                 continue
+
+            # Deep diagnostic on the first loadable bundle so we can
+            # see exactly what UnityPy finds inside.
+            if not first_bundle_logged:
+                first_bundle_logged = True
+                try:
+                    _diag_data = (
+                        decrypt_bundle(file_path, entry["key"])
+                        if entry["key"] != 0
+                        else file_path.read_bytes()
+                    )
+                    _diag_env = UnityPy.load(
+                        _diag_data if isinstance(_diag_data, (bytes, bytearray)) else str(file_path)
+                    )
+                    obj_types: dict[str, int] = {}
+                    _has_blocklist = 0
+                    _has_choicelist = 0
+                    _choice_sample: str | None = None
+                    for _obj in _diag_env.objects:
+                        tname = _obj.type.name
+                        obj_types[tname] = obj_types.get(tname, 0) + 1
+                        if tname == "MonoBehaviour":
+                            try:
+                                _tree = _obj.read_typetree()
+                                if isinstance(_tree, dict):
+                                    if "BlockList" in _tree:
+                                        _has_blocklist += 1
+                                    if "ChoiceDataList" in _tree:
+                                        _has_choicelist += 1
+                                        cl = _tree["ChoiceDataList"]
+                                        if isinstance(cl, list) and cl and not _choice_sample:
+                                            _choice_sample = repr(cl[:2])[:300]
+                            except Exception:
+                                pass
+                    log.info(
+                        "First bundle diagnostic: %s\n"
+                        "  file_size=%d entry_name=%s key=%s\n"
+                        "  object_types=%s\n"
+                        "  MonoBehaviours with BlockList=%d, with ChoiceDataList=%d\n"
+                        "  ChoiceDataList sample: %s",
+                        file_path.name,
+                        file_path.stat().st_size,
+                        entry["name"],
+                        entry["key"],
+                        obj_types,
+                        _has_blocklist,
+                        _has_choicelist,
+                        _choice_sample or "(none with items)",
+                    )
+                except Exception as _de:
+                    log.warning("First bundle diagnostic failed: %s", _de)
 
             bundle_choices = extract_choices_from_bundle(file_path, entry["key"])
             processed += 1
@@ -1171,6 +1546,15 @@ def _run_extraction(game_dir: Path) -> None:
                 _extraction_progress["processed"] = processed
                 _extraction_progress["found"] = found
                 _extraction_progress["skipped"] = skipped
+
+            if (i + 1) % 500 == 0:
+                log.info(
+                    "  Progress: %d/%d entries (%d with choices, %d missing)",
+                    i + 1,
+                    len(entries),
+                    found,
+                    skipped,
+                )
 
         log.info(
             "Story extraction complete: %d entries, %d processed, %d skipped (file missing), %d with choices",
@@ -1226,6 +1610,36 @@ def _run_extraction(game_dir: Path) -> None:
             _load_story_choices.cache_clear()
         except Exception:
             pass
+
+        # ── Chain asset image extraction (icons + support cards) ───────
+        # Uses the same game_dir, runs in this same background thread.
+        with _extraction_lock:
+            _extraction_progress["status"] = "extracting assets"
+        try:
+            from extract_assets import extract_chara_icons, extract_support_card_images
+
+            ea_logger = logging.getLogger("extract_assets")
+            if not ea_logger.handlers:
+                ea_logger.setLevel(logging.DEBUG)
+            for h in log.handlers:
+                if h not in ea_logger.handlers:
+                    ea_logger.addHandler(h)
+
+            # Character icons
+            uma_dir = Path(app.static_folder) / "uma"
+            icon_results = extract_chara_icons(game_dir, uma_dir)
+            log.info("Setup: extracted %d character icons", len(icon_results))
+            _scan_uma_images()
+
+            # Support card thumbnails
+            cards_dir = Path(app.static_folder) / "cards"
+            sc_results = extract_support_card_images(game_dir, cards_dir)
+            log.info("Setup: extracted %d support card images", len(sc_results))
+            _scan_support_card_images()
+        except ImportError:
+            log.info("Skipping asset extraction — UnityPy not available")
+        except Exception as ae:
+            log.warning("Asset extraction failed (non-fatal): %s", ae)
 
     except ImportError:
         log.error("UnityPy not installed — cannot extract story text")
@@ -1335,6 +1749,167 @@ def api_recorder_stop():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     return jsonify({"status": "stopping"})
+
+
+# ── Routes: Asset extraction ───────────────────────────────────────────
+
+_asset_extraction_running: bool = False
+_asset_extraction_progress: dict = {
+    "processed": 0,
+    "total": 0,
+    "found": 0,
+    "error": None,
+    "status": "idle",
+    "phase": "",
+}
+_asset_extraction_lock = threading.Lock()
+
+
+@app.route("/api/setup/extract_assets", methods=["POST"])
+def api_extract_assets():
+    """Run support-card + character portrait image extraction in background."""
+    global _asset_extraction_running
+
+    with _asset_extraction_lock:
+        if _asset_extraction_running:
+            return jsonify({"error": "Asset extraction already running"}), 400
+
+    # Resolve game data directory (same logic as story extraction)
+    db_path = get_db_path()
+    game_dir = None
+    if db_path:
+        gdd = _find_game_data_dir(db_path)
+        if gdd:
+            game_dir = Path(gdd)
+    if not game_dir:
+        cfg_file = _APP_DIR / "config.json"
+        if cfg_file.is_file():
+            with contextlib.suppress(Exception):
+                cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
+                gdd = cfg.get("game_data_dir")
+                if gdd and (Path(gdd) / "dat").is_dir():
+                    game_dir = Path(gdd)
+    if not game_dir:
+        return jsonify(
+            {"error": "Game data directory not found. Set master.mdb or game dir first."}
+        ), 400
+    if not (game_dir / "meta").is_file():
+        return jsonify({"error": f"meta database not found in {game_dir}"}), 400
+
+    # Optional: restrict to specific types
+    data = request.get_json(silent=True) or {}
+    extract_type = data.get("type", "all")  # "support", "icons", "portraits", or "all"
+
+    with _asset_extraction_lock:
+        _asset_extraction_running = True
+        _asset_extraction_progress.update(
+            {
+                "processed": 0,
+                "total": 0,
+                "found": 0,
+                "error": None,
+                "status": "starting",
+                "phase": "",
+            }
+        )
+
+    threading.Thread(
+        target=_run_asset_extraction, args=(game_dir, extract_type), daemon=True
+    ).start()
+    return jsonify({"status": "started", "game_dir": str(game_dir), "type": extract_type})
+
+
+def _run_asset_extraction(game_dir: Path, extract_type: str) -> None:
+    """Background thread for asset image extraction."""
+    global _asset_extraction_running
+    try:
+        from extract_assets import (
+            extract_chara_icons,
+            extract_chara_portraits,
+            extract_support_card_images,
+        )
+
+        # Wire extract_assets logger into gui.log
+        ea_logger = logging.getLogger("extract_assets")
+        if not ea_logger.handlers:
+            ea_logger.setLevel(logging.DEBUG)
+        for h in log.handlers:
+            if h not in ea_logger.handlers:
+                ea_logger.addHandler(h)
+
+        total_found = 0
+
+        def _progress(processed, total, found):
+            with _asset_extraction_lock:
+                _asset_extraction_progress["processed"] = processed
+                _asset_extraction_progress["total"] = total
+                _asset_extraction_progress["found"] = found
+
+        if extract_type in ("support", "all"):
+            with _asset_extraction_lock:
+                _asset_extraction_progress["phase"] = "support cards"
+                _asset_extraction_progress["status"] = "extracting"
+            cards_dir = Path(app.static_folder) / "cards"
+            results = extract_support_card_images(game_dir, cards_dir, progress_callback=_progress)
+            total_found += len(results)
+            log.info("Asset extraction: %d support card images", len(results))
+            # Refresh the in-memory support card image index
+            _SC_IMAGES.clear()
+            _scan_support_card_images()
+
+        if extract_type in ("icons", "all"):
+            with _asset_extraction_lock:
+                _asset_extraction_progress["phase"] = "character icons"
+                _asset_extraction_progress["processed"] = 0
+                _asset_extraction_progress["total"] = 0
+                _asset_extraction_progress["found"] = 0
+            uma_dir = Path(app.static_folder) / "uma"
+            results = extract_chara_icons(game_dir, uma_dir, progress_callback=_progress)
+            total_found += len(results)
+            log.info("Asset extraction: %d character icons", len(results))
+            _scan_uma_images()
+
+        if extract_type in ("portraits", "all"):
+            with _asset_extraction_lock:
+                _asset_extraction_progress["phase"] = "character portraits"
+                _asset_extraction_progress["processed"] = 0
+                _asset_extraction_progress["total"] = 0
+                _asset_extraction_progress["found"] = 0
+            uma_dir = Path(app.static_folder) / "uma"
+            results = extract_chara_portraits(game_dir, uma_dir, progress_callback=_progress)
+            total_found += len(results)
+            log.info("Asset extraction: %d character portraits", len(results))
+            _scan_uma_images()
+
+        with _asset_extraction_lock:
+            _asset_extraction_progress["status"] = "done"
+            _asset_extraction_progress["found"] = total_found
+
+    except ImportError:
+        log.error("UnityPy not installed — cannot extract assets")
+        with _asset_extraction_lock:
+            _asset_extraction_progress["error"] = (
+                "UnityPy is not installed. Install it with: pip install UnityPy"
+            )
+    except Exception as e:
+        log.exception("Asset extraction failed")
+        with _asset_extraction_lock:
+            _asset_extraction_progress["error"] = str(e)
+    finally:
+        with _asset_extraction_lock:
+            _asset_extraction_running = False
+
+
+@app.route("/api/setup/extract_assets_status")
+def api_extract_assets_status():
+    """Poll asset extraction progress."""
+    with _asset_extraction_lock:
+        return jsonify(
+            {
+                "running": _asset_extraction_running,
+                **_asset_extraction_progress,
+            }
+        )
 
 
 # ── Main ───────────────────────────────────────────────────────────────

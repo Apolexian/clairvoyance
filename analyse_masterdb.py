@@ -259,6 +259,139 @@ if unmapped:
         print(f"    cat {cat:>4d}  ({count:>6,} rows)  samples: {sample_str}")
 
 
+# ═══════════════════════════════════════════════════════════════════════
+#  6. Investigate choice-related categories from UmamusumeExplorer
+#     TextCategory.cs:
+#       267 = SingleModeGainSelectChoiceLabel
+#       394 = MasterSingleModeEventChoiceRewardTitle
+#       181 = SingleModeStoryTitle  (already used)
+#     Can we get choice text straight from text_data instead of parsing
+#     asset bundles?
+# ═══════════════════════════════════════════════════════════════════════
+
+print(f"\n{'═' * 80}")
+print("  SECTION 6: CHOICE-TEXT CATEGORIES (267, 394) vs STORY DATA")
+print(f"{'═' * 80}\n")
+
+CHOICE_CATS = {
+    267: "SingleModeGainSelectChoiceLabel",
+    394: "MasterSingleModeEventChoiceRewardTitle",
+    181: "SingleModeStoryTitle (existing)",
+}
+
+for cat_id, label in sorted(CHOICE_CATS.items()):
+    rows = conn.execute("SELECT COUNT(*) FROM text_data WHERE category = ?", (cat_id,)).fetchall()
+    count = rows[0][0] if rows else 0
+    print(f"  Category {cat_id} ({label}): {count:,} rows")
+    if count > 0:
+        samples = conn.execute(
+            'SELECT "index", text FROM text_data WHERE category = ? ORDER BY "index" LIMIT 10',
+            (cat_id,),
+        ).fetchall()
+        for s in samples:
+            display = s["text"][:80] + "…" if len(s["text"]) > 80 else s["text"]
+            print(f"    index={s['index']:>12d}  │ {display}")
+    print()
+
+# ── Check if cat 267 indices match story_ids in single_mode_story_data ──
+print(f"  {HR}")
+print("  Cross-referencing category 267 indices against single_mode_story_data...")
+
+has_smsd = "single_mode_story_data" in tables
+has_smcs = "single_mode_conclusion_set" in tables
+
+if has_smsd:
+    smsd_cols = [c["name"] for c in table_info.get("single_mode_story_data", [])]
+    print(f"  single_mode_story_data columns: {smsd_cols}")
+    smsd_count = table_counts.get("single_mode_story_data", 0)
+    print(f"  single_mode_story_data rows: {smsd_count:,}")
+
+    # Get all story_ids from the table
+    smsd_story_ids = {
+        r[0]
+        for r in conn.execute("SELECT DISTINCT story_id FROM single_mode_story_data").fetchall()
+    }
+    smsd_ids = {
+        r[0] for r in conn.execute("SELECT DISTINCT id FROM single_mode_story_data").fetchall()
+    }
+
+    cat267_indices = {
+        r[0]
+        for r in conn.execute(
+            'SELECT DISTINCT "index" FROM text_data WHERE category = 267'
+        ).fetchall()
+    }
+
+    if cat267_indices:
+        overlap_story = len(cat267_indices & smsd_story_ids)
+        overlap_id = len(cat267_indices & smsd_ids)
+        print(f"\n  Category 267 has {len(cat267_indices):,} distinct indices")
+        print(f"  Overlap with single_mode_story_data.story_id: {overlap_story:,}")
+        print(f"  Overlap with single_mode_story_data.id:       {overlap_id:,}")
+
+        # Check if indices look like story_ids (typically 8-9 digits starting with 2-8)
+        sample_indices = sorted(cat267_indices)[:10]
+        print(f"  Sample cat 267 indices: {sample_indices}")
+        sample_story_ids = sorted(smsd_story_ids)[:10]
+        print(f"  Sample story_ids:       {sample_story_ids}")
+    else:
+        print("  Category 267 is empty — no choice labels in text_data")
+else:
+    print("  ❌ single_mode_story_data table NOT FOUND")
+
+# ── Check conclusion_set to understand branch counts ──────────────────
+print(f"\n  {HR}")
+if has_smcs:
+    smcs_cols = [c["name"] for c in table_info.get("single_mode_conclusion_set", [])]
+    print(f"  single_mode_conclusion_set columns: {smcs_cols}")
+    smcs_count = table_counts.get("single_mode_conclusion_set", 0)
+    print(f"  single_mode_conclusion_set rows: {smcs_count:,}")
+
+    # How many story_ids have >1 conclusion (i.e. actual choices)?
+    multi = conn.execute(
+        "SELECT story_id, COUNT(DISTINCT conclusion_id) as n "
+        "FROM single_mode_conclusion_set "
+        "GROUP BY story_id HAVING n > 1 "
+        "ORDER BY n DESC"
+    ).fetchall()
+    print(f"  Stories with >1 branch (actual choices): {len(multi):,}")
+    if multi:
+        print(f"  Max branches: {multi[0]['n']} (story_id={multi[0]['story_id']})")
+        # Show a few
+        for r in multi[:5]:
+            sid, n = r["story_id"], r["n"]
+            # Check if this story_id has text in cat 267
+            t267 = conn.execute(
+                'SELECT text FROM text_data WHERE category = 267 AND "index" = ?',
+                (sid,),
+            ).fetchall()
+            # Also check cat 181
+            t181 = conn.execute(
+                'SELECT text FROM text_data WHERE category = 181 AND "index" = ?',
+                (sid,),
+            ).fetchall()
+            txt267 = t267[0]["text"][:50] if t267 else "(none)"
+            txt181 = t181[0]["text"][:50] if t181 else "(none)"
+            print(f"    story_id={sid}  branches={n}  cat267='{txt267}'  cat181='{txt181}'")
+else:
+    print("  ❌ single_mode_conclusion_set table NOT FOUND")
+
+# ── Look for any other choice/event related tables ────────────────────
+print(f"\n  {HR}")
+print("  Tables with 'choice' or 'event' or 'conclusion' in name:")
+for t in tables:
+    tl = t.lower()
+    if "choice" in tl or "conclusion" in tl or ("event" in tl and "single" in tl):
+        cols = [c["name"] for c in table_info.get(t, [])]
+        cnt = table_counts.get(t, 0)
+        print(f"    {t:55s} ({cnt:>6,} rows)  [{', '.join(cols)}]")
+        # Show a few sample rows
+        if cnt > 0:
+            sample_rows = conn.execute(f'SELECT * FROM "{t}" LIMIT 3').fetchall()
+            for sr in sample_rows:
+                print(f"      → {dict(sr)}")
+
+
 conn.close()
 print(f"\n{'═' * 80}")
 print("  Done.")

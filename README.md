@@ -107,6 +107,13 @@ uv run gui.py --browser          # fallback: open in browser instead
 Opens a native OS window (WebKit on macOS, EdgeChromium on Windows) — no
 browser required, just double-click to launch.
 
+> **Windows requirement:** The native window uses .NET Framework via
+> [pythonnet](https://github.com/pythonnet/pythonnet). .NET Framework 4.x is
+> pre-installed on Windows 10/11, so most users need nothing extra.
+> If the GUI fails to open, install the
+> [.NET Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+> (free, from Microsoft).
+
 Features:
 - **Setup** — Scan game binary and analyse classes directly from the app
 - **Record** — Start/stop data collection sessions from the app
@@ -139,6 +146,25 @@ python build_win.py
 
 ### Output
 
+- **`discovery/analysis.md`** — human-readable report, top classes per domain
+- **`discovery/interesting.json`** — filtered/scored JSON for the dump module
+
+### 3. Collect — capture data while playing
+
+```bash
+# Targeted hooks (skills, events, races, network)
+uv run collect.py
+
+# Data-driven dump — reads field layouts from interesting.json,
+# hooks top-scored classes, dumps all field values at runtime
+uv run collect.py --modules dump --label my-session
+uv run collect.py --modules dump --dump-min-score 40 --dump-max-classes 50
+
+# Combine modules
+uv run collect.py --modules dump network skills
+
+# Network capture only
+uv run collect.py --modules network
 ```
 dist/Clairvoyance/
   Clairvoyance.exe      ← double-click to launch
@@ -152,6 +178,10 @@ dist/Clairvoyance/
 
 Zip the `dist/Clairvoyance/` folder and distribute. Users extract it,
 double-click `Clairvoyance.exe`, and they're running.
+
+**End-user requirements:** Windows 10/11 with .NET Framework 4.x (pre-installed
+on all modern Windows). If the GUI window doesn't appear, the user should
+install the [.NET Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 ## How It Works
 

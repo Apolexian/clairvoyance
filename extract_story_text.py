@@ -109,7 +109,7 @@ def detect_game_dir(explicit_path: str | None = None) -> Path | None:
 
 # ── Meta database decryption keys (from UmaViewer Config.cs) ───────────
 
-# DB encryption key (XOR'd with DBBaseKey to produce the final key)
+# DB encryption key — JP (XOR'd with DBBaseKey to produce the final key)
 DB_KEY = bytes(
     [
         0x6D,
@@ -147,6 +147,24 @@ DB_KEY = bytes(
     ]
 )
 
+# DB encryption key — Global (from UmaViewer Config.cs GlobalDBKey)
+GLOBAL_DB_KEY = bytes(
+    [
+        0x56,
+        0x63,
+        0x6B,
+        0x63,
+        0x42,
+        0x72,
+        0x37,
+        0x76,
+        0x65,
+        0x70,
+        0x41,
+        0x62,
+    ]
+)
+
 DB_BASE_KEY = bytes(
     [
         0xF1,
@@ -169,9 +187,9 @@ DB_BASE_KEY = bytes(
 )
 
 
-def _derive_db_key() -> bytes:
-    """Derive the final decryption key: DBKey XOR DBBaseKey (cycling 13 bytes)."""
-    key = bytearray(DB_KEY)
+def _derive_db_key(db_key: bytes = DB_KEY) -> bytes:
+    """Derive the final decryption key: db_key XOR DBBaseKey (cycling 13 bytes)."""
+    key = bytearray(db_key)
     for i in range(len(key)):
         key[i] ^= DB_BASE_KEY[i % 13]
     return bytes(key)
@@ -181,54 +199,62 @@ def _try_open_encrypted_meta(meta_path: Path) -> sqlite3.Connection | None:
     """
     Try to open an encrypted meta database.
 
-    Strategy:
-      1. Try pysqlcipher3 (if installed) — pure Python SQLCipher binding
-      2. Try decrypting via sqlite3mc DLL on Windows (same as UmaViewer)
-      3. Return None if we can't decrypt
+    Tries the Global key first (most users), then JP key as fallback.
+    For each key, attempts:
+      1. pysqlcipher3 (if installed) — pure Python SQLCipher binding
+      2. sqlcipher3 (alternative package name)
+      3. sqlite3mc DLL via ctypes on Windows (same as UmaViewer)
 
     On success, returns a sqlite3.Connection to a decrypted in-memory or temp copy.
     """
-    key = _derive_db_key()
-    key_hex = key.hex()
+    keys_to_try = [
+        ("Global", _derive_db_key(GLOBAL_DB_KEY)),
+        ("JP", _derive_db_key(DB_KEY)),
+    ]
 
-    # ── Strategy 1: try pysqlcipher3 ──────────────────────────
-    try:
-        from pysqlcipher3 import dbapi2 as sqlcipher  # type: ignore
+    for region, key in keys_to_try:
+        key_hex = key.hex()
+        log.debug("Trying %s key for meta decryption...", region)
 
-        conn = sqlcipher.connect(str(meta_path))
-        conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
-        conn.execute("PRAGMA cipher_compatibility = 3")
-        # Test if it works
-        conn.execute("SELECT name FROM sqlite_master LIMIT 1")
-        conn.row_factory = sqlite3.Row
-        log.info("Opened encrypted meta via pysqlcipher3")
-        return conn
-    except ImportError:
-        log.debug("pysqlcipher3 not available")
-    except Exception as e:
-        log.debug("pysqlcipher3 failed: %s", e)
+        # ── Strategy 1: try pysqlcipher3 ──────────────────────────
+        try:
+            from pysqlcipher3 import dbapi2 as sqlcipher  # type: ignore
 
-    # ── Strategy 2: try sqlcipher3 (alternative package name) ─
-    try:
-        import sqlcipher3  # type: ignore
-
-        conn = sqlcipher3.connect(str(meta_path))
-        conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
-        conn.execute("PRAGMA cipher_compatibility = 3")
-        conn.execute("SELECT name FROM sqlite_master LIMIT 1")
-        conn.row_factory = sqlite3.Row
-        log.info("Opened encrypted meta via sqlcipher3")
-        return conn
-    except ImportError:
-        log.debug("sqlcipher3 not available")
-    except Exception as e:
-        log.debug("sqlcipher3 failed: %s", e)
-
-    # ── Strategy 3: try sqlite3mc via ctypes (Windows) ────────
-    if sys.platform == "win32":
-        conn = _try_decrypt_via_sqlite3mc(meta_path, key)
-        if conn:
+            conn = sqlcipher.connect(str(meta_path))
+            conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
+            conn.execute("PRAGMA cipher_compatibility = 3")
+            # Test if it works
+            conn.execute("SELECT name FROM sqlite_master LIMIT 1")
+            conn.row_factory = sqlite3.Row
+            log.info("Opened encrypted meta via pysqlcipher3 (%s key)", region)
             return conn
+        except ImportError:
+            log.debug("pysqlcipher3 not available")
+        except Exception as e:
+            log.debug("pysqlcipher3 failed with %s key: %s", region, e)
+
+        # ── Strategy 2: try sqlcipher3 (alternative package name) ─
+        try:
+            import sqlcipher3  # type: ignore
+
+            conn = sqlcipher3.connect(str(meta_path))
+            conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
+            conn.execute("PRAGMA cipher_compatibility = 3")
+            conn.execute("SELECT name FROM sqlite_master LIMIT 1")
+            conn.row_factory = sqlite3.Row
+            log.info("Opened encrypted meta via sqlcipher3 (%s key)", region)
+            return conn
+        except ImportError:
+            log.debug("sqlcipher3 not available")
+        except Exception as e:
+            log.debug("sqlcipher3 failed with %s key: %s", region, e)
+
+        # ── Strategy 3: try sqlite3mc via ctypes (Windows) ────────
+        if sys.platform == "win32":
+            conn = _try_decrypt_via_sqlite3mc(meta_path, key)
+            if conn:
+                log.info("Decrypted meta via sqlite3mc (%s key)", region)
+                return conn
 
     return None
 
@@ -328,49 +354,82 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             msg = dll.sqlite3_errmsg(db)
             return msg.decode("utf-8", errors="replace") if msg else "(null)"
 
-        # ── Open encrypted DB ────────────────────────────────────────
+        # ── Open encrypted DB and try cipher IDs ────────────────────
+        # sqlite3mc cipher IDs (from sqlite3mc documentation):
+        #   1 = AES-128 (wxSQLite3)
+        #   2 = AES-256 (wxSQLite3)
+        #   3 = ChaCha20 (sqleet) — also used by sqlite3mc for RC4
+        #   4 = SQLCipher AES-256
+        #   5 = RC4 (System.Data.SQLite) in newer sqlite3mc builds
+        # UmaViewer uses cipher index 3 (see UmaDatabaseController.cs L91).
+        # Try 3 first, then 5 and 4 as fallbacks.
         SQLITE_OPEN_READWRITE = 0x00000002
         SQLITE_OPEN_CREATE = 0x00000004
-        db_ptr = ctypes.c_void_p()
-        rc = dll.sqlite3_open_v2(
-            str(meta_path).encode("utf-8"),
-            ctypes.byref(db_ptr),
-            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
-            None,
-        )
-        if rc != 0:
-            log.error("sqlite3mc open failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
-            return None
-        log.debug("sqlite3_open_v2 OK, db_ptr=%s", db_ptr.value)
+        _CIPHER_IDS = [3, 5, 4]
 
-        # Set cipher (before any DB access, matching UmaViewer)
-        rc = dll.sqlite3mc_config(db_ptr, b"cipher", 3)
-        log.debug("sqlite3mc_config('cipher', 3) rc=%d", rc)
+        # sqlite3_key: set key as raw bytes (matching UmaViewer Sqlite3MC.Key_SetBytes)
+        dll.sqlite3_key.argtypes = [_vp, ctypes.c_char_p, _ci]
+        dll.sqlite3_key.restype = _ci
 
-        # Set key via PRAGMA with hex encoding — the x'...' format tells
-        # sqlite3mc this is a raw key (no KDF/passphrase derivation).
-        # Passing raw binary via sqlite3_key makes some ciphers apply KDF,
-        # producing the wrong decryption key.
-        key_hex = key.hex()
-        pragma_key = f"PRAGMA key = \"x'{key_hex}'\";".encode()
-        log.debug("Setting key via PRAGMA (hex, %d bytes)", len(key))
-        err_ptr = ctypes.c_void_p()
-        rc = dll.sqlite3_exec(db_ptr, pragma_key, None, None, ctypes.byref(err_ptr))
-        if rc != 0:
-            log.error("PRAGMA key failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
-            dll.sqlite3_close(db_ptr)
-            return None
+        validated_db_ptr = None
+        for cipher_id in _CIPHER_IDS:
+            db_ptr = ctypes.c_void_p()
+            rc = dll.sqlite3_open_v2(
+                str(meta_path).encode("utf-8"),
+                ctypes.byref(db_ptr),
+                SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+                None,
+            )
+            if rc != 0:
+                log.error("sqlite3mc open failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
+                continue
+            log.debug("sqlite3_open_v2 OK, db_ptr=%s", db_ptr.value)
 
-        # Validate: try a read to confirm key works (matching UmaViewer)
-        err_ptr = ctypes.c_void_p()
-        rc = dll.sqlite3_exec(
-            db_ptr, b"SELECT name FROM sqlite_master LIMIT 1;", None, None, ctypes.byref(err_ptr)
-        )
-        if rc != 0:
-            log.error("sqlite3mc validation failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
-            dll.sqlite3_close(db_ptr)
+            # Set cipher (before any DB access, matching UmaViewer)
+            rc = dll.sqlite3mc_config(db_ptr, b"cipher", cipher_id)
+            log.debug("sqlite3mc_config('cipher', %d) rc=%d", cipher_id, rc)
+
+            # Set key as raw bytes via sqlite3_key (matches UmaViewer's
+            # Sqlite3MC.Key_SetBytes which calls sqlite3_key(db, pKey, nKey)).
+            rc = dll.sqlite3_key(db_ptr, key, len(key))
+            log.debug("sqlite3_key(raw %d bytes) rc=%d", len(key), rc)
+            if rc != 0:
+                log.debug(
+                    "sqlite3_key failed for cipher %d rc=%d errmsg=%s",
+                    cipher_id,
+                    rc,
+                    _errmsg(db_ptr),
+                )
+                dll.sqlite3_close(db_ptr)
+                continue
+
+            # Validate: try a read to confirm key+cipher works
+            err_ptr = ctypes.c_void_p()
+            rc = dll.sqlite3_exec(
+                db_ptr,
+                b"SELECT name FROM sqlite_master LIMIT 1;",
+                None,
+                None,
+                ctypes.byref(err_ptr),
+            )
+            if rc != 0:
+                log.debug(
+                    "sqlite3mc validation failed for cipher %d rc=%d errmsg=%s",
+                    cipher_id,
+                    rc,
+                    _errmsg(db_ptr),
+                )
+                dll.sqlite3_close(db_ptr)
+                continue
+
+            log.info("Validation OK — cipher=%d key=%d bytes", cipher_id, len(key))
+            validated_db_ptr = db_ptr
+            break
+
+        if validated_db_ptr is None:
+            log.error("sqlite3mc: no cipher ID worked (tried %s)", _CIPHER_IDS)
             return None
-        log.debug("Validation SELECT OK — key is correct")
+        db_ptr = validated_db_ptr
 
         # ── Create plaintext copy via backup API ─────────────────────
         decrypted_path = meta_path.parent / "meta_decrypted"
@@ -494,11 +553,33 @@ def read_meta_entries(game_dir: Path) -> list[dict]:
         total_rows = conn.execute("SELECT COUNT(*) FROM a").fetchone()[0]
         log.info("Table 'a' has %d total rows", total_rows)
 
+        # Query for actual story timeline bundles.
+        # Exclude 'resourcelist' entries — those are dependency manifests,
+        # not the actual story data bundles with TextAsset JSON.
         if has_key:
-            sql = "SELECT n, h, e FROM a WHERE n LIKE 'story/data/%storytimeline%'"
+            sql = (
+                "SELECT n, h, e FROM a "
+                "WHERE n LIKE 'story/data/%storytimeline%' "
+                "AND n NOT LIKE '%resourcelist%'"
+            )
+            sql_reslist = (
+                "SELECT COUNT(*) FROM a "
+                "WHERE n LIKE 'story/data/%storytimeline%' "
+                "AND n LIKE '%resourcelist%'"
+            )
         else:
-            sql = "SELECT n, h FROM a WHERE n LIKE 'story/data/%storytimeline%'"
+            sql = (
+                "SELECT n, h FROM a "
+                "WHERE n LIKE 'story/data/%storytimeline%' "
+                "AND n NOT LIKE '%resourcelist%'"
+            )
+            sql_reslist = (
+                "SELECT COUNT(*) FROM a "
+                "WHERE n LIKE 'story/data/%storytimeline%' "
+                "AND n LIKE '%resourcelist%'"
+            )
 
+        reslist_count = conn.execute(sql_reslist).fetchone()[0]
         rows = conn.execute(sql).fetchall()
         for r in rows:
             entries.append(
@@ -508,7 +589,11 @@ def read_meta_entries(game_dir: Path) -> list[dict]:
                     "key": r["e"] if has_key else 0,
                 }
             )
-        log.info("Found %d story timeline entries", len(entries))
+        log.info(
+            "Found %d story timeline data entries (%d resourcelist entries excluded)",
+            len(entries),
+            reslist_count,
+        )
 
         if entries:
             sample = entries[0]
@@ -574,6 +659,110 @@ def extract_story_id_from_name(asset_name: str) -> int | None:
     return None
 
 
+_block_keys_logged = False
+
+
+def _get_ci(d: dict, *candidates: str):
+    """Case-insensitive dict lookup.  Try exact candidates first, then lowercase match."""
+    for k in candidates:
+        if k in d:
+            return d[k]
+    lower_map = {k2.lower(): k2 for k2 in d}
+    for k in candidates:
+        real = lower_map.get(k.lower())
+        if real is not None:
+            return d[real]
+    return None
+
+
+def _extract_choices_from_dict(data: dict) -> list[str]:
+    """
+    Extract choice text labels from a story data dict.
+
+    Works on both parsed JSON and MonoBehaviour typetree dicts.
+    The dict has a BlockList array. Blocks with ChoiceDataList
+    contain the player's choice options.
+
+    Handles both PascalCase (API JSON) and whatever casing the Unity
+    typetree uses, via case-insensitive key lookup.
+    """
+    global _block_keys_logged
+    choices: list[str] = []
+    block_list = data.get("BlockList", [])
+    if not isinstance(block_list, list):
+        return choices
+
+    # One-shot diagnostic: log the first block's keys so we can see the real field names.
+    if not _block_keys_logged and block_list:
+        _block_keys_logged = True
+        b0 = block_list[0]
+        if isinstance(b0, dict):
+            log.info(
+                "DIAGNOSTIC: first block keys = %s",
+                list(b0.keys()),
+            )
+            # Also log any key whose name contains "choice" or "select" (case-insensitive)
+            for k, v in b0.items():
+                kl = k.lower()
+                if "choice" in kl or "select" in kl or "option" in kl:
+                    sample = repr(v)[:300] if not isinstance(v, list) else f"list[{len(v)}]"
+                    log.info("DIAGNOSTIC: block[0]['%s'] = %s", k, sample)
+            # Log keys of all blocks that have any choice-like list with items
+            for bi, blk in enumerate(block_list):
+                if not isinstance(blk, dict):
+                    continue
+                for k, v in blk.items():
+                    if isinstance(v, list) and len(v) > 0:
+                        kl = k.lower()
+                        if "choice" in kl or "select" in kl or "option" in kl:
+                            item0 = v[0]
+                            item_info = (
+                                list(item0.keys()) if isinstance(item0, dict) else repr(item0)[:200]
+                            )
+                            log.info(
+                                "DIAGNOSTIC: block[%d]['%s'] has %d items, first item keys=%s",
+                                bi,
+                                k,
+                                len(v),
+                                item_info,
+                            )
+                            break  # one example is enough
+        else:
+            log.info("DIAGNOSTIC: first block is type %s, not dict", type(b0).__name__)
+
+    for block in block_list:
+        if not isinstance(block, dict):
+            continue
+        # Case-insensitive lookup for the choice list
+        choice_data_list = _get_ci(
+            block,
+            "ChoiceDataList",
+            "choiceDataList",
+            "ChoiceDatalist",
+            "SelectDataList",
+            "selectDataList",
+        )
+        if not choice_data_list or not isinstance(choice_data_list, list):
+            continue
+        for choice in choice_data_list:
+            if isinstance(choice, str):
+                # Maybe the list directly contains strings
+                t = choice.strip()
+                if t:
+                    choices.append(t)
+                continue
+            if not isinstance(choice, dict):
+                continue
+            text = _get_ci(choice, "Text", "text", "Name", "name", "Label", "label")
+            if isinstance(text, str):
+                text = text.strip()
+                if text:
+                    choices.append(text)
+    # Deduplicate while preserving order — multiple blocks may carry
+    # the same ChoiceDataList entries.
+    return list(dict.fromkeys(choices))
+
+
 def parse_story_choices(json_text: str) -> list[str]:
     """
     Parse a StoryData JSON and extract choice text labels.
@@ -581,29 +770,31 @@ def parse_story_choices(json_text: str) -> list[str]:
     The StoryData has a BlockList array. Blocks with ChoiceDataList
     contain the player's choice options.
     """
-    choices: list[str] = []
     try:
         data = json.loads(json_text)
     except (json.JSONDecodeError, ValueError):
-        return choices
-
-    block_list = data.get("BlockList", [])
-    for block in block_list:
-        choice_data_list = block.get("ChoiceDataList")
-        if choice_data_list and isinstance(choice_data_list, list):
-            for choice in choice_data_list:
-                text = choice.get("Text", "").strip()
-                if text:
-                    choices.append(text)
-    return choices
+        return []
+    if not isinstance(data, dict):
+        return []
+    return _extract_choices_from_dict(data)
 
 
 def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int, list[str]]:
     """
-    Load an asset bundle and extract story choice text from TextAsset objects.
+    Load an asset bundle and extract story choice text.
+
+    The game's story timeline bundles contain multiple MonoBehaviour objects:
+    - One StoryTimelineData object with BlockList (gives us StoryId)
+    - Many StoryTimelineTextClipData objects (ScriptableObject-derived clips),
+      some of which have a non-empty ChoiceDataList with the player's choice text.
+
+    ChoiceDataList is NOT nested inside BlockList blocks -- clips are stored as
+    separate serialized objects (Unity PPtr references from block→track→clip).
+    So we scan ALL MonoBehaviours and collect choices from clip objects.
 
     Returns {story_id: [choice_texts]} for all stories found in the bundle.
     """
+    global _block_keys_logged
     results: dict[int, list[str]] = {}
 
     try:
@@ -616,45 +807,95 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
         log.debug("Failed to load bundle %s: %s", file_path.name, e)
         return results
 
+    mono_count = 0
+    story_id: int | None = None
+    all_choices: list[str] = []
+
     for obj in env.objects:
+        if obj.type.name != "MonoBehaviour":
+            continue
+        mono_count += 1
         try:
-            if obj.type.name == "TextAsset":
-                text_asset = obj.read()
-                # The asset name often encodes the story ID
-                asset_name = getattr(text_asset, "m_Name", "") or ""
-
-                # Try to get the text content
-                text_content = None
-                if hasattr(text_asset, "m_Script"):
-                    raw = text_asset.m_Script
-                    if isinstance(raw, bytes):
-                        text_content = raw.decode("utf-8", errors="replace")
-                    else:
-                        text_content = str(raw)
-                elif hasattr(text_asset, "text"):
-                    text_content = text_asset.text
-
-                if not text_content:
-                    continue
-
-                # Only parse JSON-like content that looks like story data
-                text_content = text_content.strip()
-                if not text_content.startswith("{"):
-                    continue
-
-                choices = parse_story_choices(text_content)
-                if choices:
-                    # Try to get story_id from the asset name
-                    story_id = None
-                    m = re.search(r"storytimeline_?(\d+)", asset_name)
-                    if m:
-                        story_id = int(m.group(1))
-
-                    if story_id:
-                        results[story_id] = choices
+            tree = obj.read_typetree()
         except Exception:
             continue
+        if not isinstance(tree, dict):
+            continue
 
+        # ── Look for StoryTimelineData (has BlockList) → get StoryId ──
+        if "BlockList" in tree:
+            if not story_id:
+                raw_sid = tree.get("StoryId")
+                if isinstance(raw_sid, int) and raw_sid > 0:
+                    story_id = raw_sid
+                if not story_id:
+                    m_name = tree.get("m_Name", "")
+                    if isinstance(m_name, str):
+                        m = re.search(r"storytimeline_?(\d+)", m_name)
+                        if m:
+                            story_id = int(m.group(1))
+                if not story_id:
+                    title = tree.get("Title", "")
+                    if isinstance(title, str):
+                        m = re.search(r"(\d{6,})", title)
+                        if m:
+                            story_id = int(m.group(1))
+
+            # One-shot: log the first block's keys for diagnostic
+            if not _block_keys_logged:
+                _block_keys_logged = True
+                bl = tree["BlockList"]
+                if isinstance(bl, list) and bl:
+                    b0 = bl[0]
+                    if isinstance(b0, dict):
+                        log.info("DIAG block[0] keys: %s", list(b0.keys()))
+                        # Show TextTrack.ClipList if present (should be PPtrs)
+                        tt = b0.get("TextTrack")
+                        if isinstance(tt, dict):
+                            log.info("DIAG block[0].TextTrack keys: %s", list(tt.keys()))
+                            cl = tt.get("ClipList")
+                            if isinstance(cl, list) and cl:
+                                log.info("DIAG block[0].TextTrack.ClipList[0]: %s", cl[0])
+
+        # ── Look for StoryTimelineTextClipData (has ChoiceDataList) ──
+        choice_list = _get_ci(
+            tree,
+            "ChoiceDataList",
+            "choiceDataList",
+        )
+        if choice_list and isinstance(choice_list, list):
+            for choice in choice_list:
+                if isinstance(choice, str):
+                    t = choice.strip()
+                    if t:
+                        all_choices.append(t)
+                elif isinstance(choice, dict):
+                    text = _get_ci(choice, "Text", "text", "Name", "name")
+                    if isinstance(text, str):
+                        t = text.strip()
+                        if t:
+                            all_choices.append(t)
+
+    # Also try to get story_id from the meta entry name (fallback)
+    if not story_id:
+        sid = extract_story_id_from_name(str(file_path))
+        if sid:
+            story_id = sid
+
+    if story_id and all_choices:
+        # Deduplicate while preserving order — multiple clip objects in
+        # the same bundle often repeat the same ChoiceDataList entries.
+        results[story_id] = list(dict.fromkeys(all_choices))
+
+    if mono_count > 0 and log.isEnabledFor(logging.DEBUG):
+        log.debug(
+            "  bundle %s: %d MonoBehaviour, story_id=%s, %d choices (%d unique)",
+            file_path.name[:16],
+            mono_count,
+            story_id,
+            len(all_choices),
+            len(results.get(story_id, [])),
+        )
     return results
 
 
