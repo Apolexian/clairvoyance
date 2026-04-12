@@ -1,0 +1,39 @@
+2026-04-12 09:42:54,322 [INFO] ============================================================
+2026-04-12 09:42:54,322 [INFO]   Clairvoyance — Collector
+2026-04-12 09:42:54,322 [INFO] ============================================================
+2026-04-12 09:42:54,322 [INFO] 
+2026-04-12 09:42:54,322 [INFO]   Modules: network, races, dump, skills, events
+2026-04-12 09:42:54,322 [INFO]   Label: 1
+2026-04-12 09:42:54,322 [INFO] 
+2026-04-12 09:42:54,322 [INFO] Session directory: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\sessions\2026-04-12T08-42-54_1
+2026-04-12 09:42:54,446 [INFO] Attached to UmamusumePrettyDerby.exe
+2026-04-12 09:42:54,587 [INFO]   [dump] Loaded 100 target classes (score >= 30, max 100) from interesting.json
+2026-04-12 09:42:54,636 [INFO] [*] Loading hooks...
+2026-04-12 09:42:55,202 [INFO]   [network] 905 hooks installed
+2026-04-12 09:42:55,441 [INFO]   [races] 8 hooks installed
+2026-04-12 09:42:55,618 [INFO]   [dump] 8 hooks installed
+2026-04-12 09:42:55,766 [INFO]   [skills] 4 hooks installed
+2026-04-12 09:42:55,950 [INFO]   [events] 1 hooks installed
+2026-04-12 09:42:56,459 [INFO] 
+2026-04-12 09:42:56,459 [INFO]   926 total hooks active across 5 modules.
+2026-04-12 09:42:56,459 [INFO]   Session: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\sessions\2026-04-12T08-42-54_1
+2026-04-12 09:42:56,459 [INFO] 
+2026-04-12 09:42:56,459 [INFO]   Collecting data — play the game!
+2026-04-12 09:42:56,459 [INFO]   Ctrl+C to stop.
+2026-04-12 09:42:56,459 [INFO] 
+2026-04-12 09:43:06,462 [INFO]   [10s] Collected - network: 2
+2026-04-12 09:43:16,464 [INFO]   [20s] Collected - network: 10
+2026-04-12 09:43:26,468 [INFO]   [30s] Collected - network: 20
+2026-04-12 09:43:32,470 [INFO] 
+[*] Stopping collector...
+2026-04-12 09:43:32,470 [INFO]   [race-dump] Accumulated: 0 frame records, 0 lifecycle, 0 skill
+2026-04-12 09:43:32,470 [INFO] 
+2026-04-12 09:43:32,470 [INFO]   Session saved: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\sessions\2026-04-12T08-42-54_1
+2026-04-12 09:43:32,470 [INFO]     network: 24 records
+2026-04-12 09:43:32,470 [INFO] 
+2026-04-12 09:43:32,470 [INFO] ============================================================
+2026-04-12 09:43:32,470 [INFO]   Done.
+2026-04-12 09:43:32,470 [INFO]   Log files:
+2026-04-12 09:43:32,470 [INFO]     Main:    C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\collect.log
+2026-04-12 09:43:32,470 [INFO]     JS:      C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\collect_js.log
+2026-04-12 09:43:32,470 [INFO] ============================================================
