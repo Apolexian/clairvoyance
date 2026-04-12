@@ -230,11 +230,9 @@ def extract_support_card_images(
     """
     Extract support card icon images from game asset bundles.
 
-    Args:
-        game_dir:    Game root (parent of dat/ and meta).
-        output_dir:  Where to save .webp images.
-        card_ids:    If given, only extract these IDs. Otherwise extract all.
-        progress_callback:  fn(processed, total, found) called periodically.
+    Uses the ``support_thumb_{id:05d}`` asset name pattern from
+    UmamusumeExplorer (GameAssets.GetSupportCardIcon), falling back to
+    the full-texture ``tex_support_card_{id}`` if thumbnails aren't found.
 
     Returns {support_card_id: filename} for successfully extracted images.
     """
@@ -245,23 +243,39 @@ def extract_support_card_images(
     output_dir.mkdir(parents=True, exist_ok=True)
     dat_dir = game_dir / "dat"
 
-    # Query meta for support card texture entries
-    entries = read_meta_entries_for_pattern(game_dir, "supportcard/%tex_support_card_%")
+    # ── Try thumbnail entries first (smaller, always downloaded) ────────
+    # UmamusumeExplorer: "support_thumb_{id:d5}"
+    # Meta name e.g. "supportcard/supportcardthumbnail/support_thumb_30001"
+    entries = read_meta_entries_for_pattern(game_dir, "%support_thumb_%")
+    id_pattern = re.compile(r"support_thumb_(\d+)")
+    thumb_mode = True
+
     if not entries:
-        # Try alternate pattern
+        # Fallback: full card textures
         entries = read_meta_entries_for_pattern(game_dir, "%tex_support_card_%")
+        if not entries:
+            entries = read_meta_entries_for_pattern(game_dir, "supportcard/%tex_support_card_%")
+        id_pattern = re.compile(r"tex_support_card_(\d+)")
+        thumb_mode = False
 
-    log.info("Found %d support card texture entries in meta", len(entries))
+    log.info(
+        "Found %d support card %s entries in meta",
+        len(entries),
+        "thumbnail" if thumb_mode else "texture",
+    )
 
-    # Parse support card ID from asset name
-    # e.g. "supportcard/supportcardtexture/tex_support_card_30001"
-    id_pattern = re.compile(r"tex_support_card_(\d+)")
+    # Exclude resourcelist manifests
+    entries = [e for e in entries if "resourcelist" not in e["name"]]
+
     entry_map: dict[int, dict] = {}
     for e in entries:
         m = id_pattern.search(e["name"])
         if m:
             sc_id = int(m.group(1))
-            if card_ids is None or sc_id in card_ids:
+            if (card_ids is None or sc_id in card_ids) and (
+                # Prefer the shortest name (base asset, not a variant)
+                sc_id not in entry_map or len(e["name"]) < len(entry_map[sc_id]["name"])
+            ):
                 entry_map[sc_id] = e
 
     log.info("Matched %d support card IDs to extract", len(entry_map))
@@ -273,11 +287,110 @@ def extract_support_card_images(
     for sc_id, entry in entry_map.items():
         h = entry["hash"]
         file_path = dat_dir / h[:2] / h
+        out_name = f"support_thumb_{sc_id}.webp"
+        out_file = output_dir / out_name
 
-        # Skip if already extracted
-        out_file = output_dir / f"support_card_{sc_id}.webp"
-        if out_file.exists():
+        # Also accept the old naming convention
+        old_file = output_dir / f"support_card_{sc_id}.webp"
+        if out_file.exists() or old_file.exists():
+            results[sc_id] = out_file.name if out_file.exists() else old_file.name
+            processed += 1
+            if progress_callback:
+                progress_callback(processed, total, len(results))
+            continue
+
+        if not file_path.is_file():
+            processed += 1
+            if progress_callback:
+                progress_callback(processed, total, len(results))
+            continue
+
+        # target_name: match the texture's m_Name inside the bundle
+        tex_target = f"support_thumb_{sc_id:05d}" if thumb_mode else f"tex_support_card_{sc_id}"
+        ok = extract_texture_from_bundle(file_path, entry["key"], out_file, target_name=tex_target)
+        if not ok:
+            # Try without target_name filter (grab first texture)
+            ok = extract_texture_from_bundle(file_path, entry["key"], out_file)
+        if ok:
             results[sc_id] = out_file.name
+
+        processed += 1
+        if progress_callback and processed % 10 == 0:
+            progress_callback(processed, total, len(results))
+
+    if progress_callback:
+        progress_callback(total, total, len(results))
+
+    log.info("Extracted %d / %d support card images", len(results), total)
+    return results
+
+
+def extract_chara_icons(
+    game_dir: Path,
+    output_dir: Path,
+    progress_callback=None,
+) -> dict[int, str]:
+    """
+    Extract character icon images (small portraits) from game bundles.
+
+    Uses the ``chr_icon_{charaId:04d}`` asset pattern from UmamusumeExplorer
+    (GameAssets.GetCharaIcon).  These are the compact square/round icons used
+    everywhere in the game UI.
+
+    Returns {chara_id: filename} for extracted images.
+    """
+    if UnityPy is None:
+        log.error("UnityPy not installed — cannot extract assets")
+        return {}
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    dat_dir = game_dir / "dat"
+
+    entries = read_meta_entries_for_pattern(game_dir, "%chr_icon_%")
+    entries = [e for e in entries if "resourcelist" not in e["name"]]
+    log.info("Found %d character icon entries in meta", len(entries))
+
+    # Parse chara_id from entry name.
+    # Base icons:   "chara/chrXXXX_YY/chr_icon_1001"  → chara_id 1001
+    # Outfit icons: "chara/chrXXXX_YY/chr_icon_1001_100101_01" → skip (prefer base)
+    base_pattern = re.compile(r"chr_icon_(\d{4})(?:[^_\d]|$)")
+    outfit_pattern = re.compile(r"chr_icon_(\d{4})_(\d{6})_(\d{2})")
+
+    # Collect: prefer base icon per chara_id, fall back to any outfit variant
+    base_map: dict[int, dict] = {}
+    outfit_map: dict[int, dict] = {}
+    for e in entries:
+        m_base = base_pattern.search(e["name"])
+        m_outfit = outfit_pattern.search(e["name"])
+        if m_base and not m_outfit:
+            cid = int(m_base.group(1))
+            if cid not in base_map or len(e["name"]) < len(base_map[cid]["name"]):
+                base_map[cid] = e
+        elif m_outfit:
+            cid = int(m_outfit.group(1))
+            if cid not in outfit_map:
+                outfit_map[cid] = e
+
+    # Merge: base takes priority
+    entry_map: dict[int, dict] = {}
+    for cid, e in outfit_map.items():
+        entry_map[cid] = e
+    for cid, e in base_map.items():
+        entry_map[cid] = e  # overwrite outfit with base
+
+    log.info("Matched %d unique character IDs for icon extraction", len(entry_map))
+
+    results: dict[int, str] = {}
+    total = len(entry_map)
+    processed = 0
+
+    for cid, entry in entry_map.items():
+        h = entry["hash"]
+        file_path = dat_dir / h[:2] / h
+        out_file = output_dir / f"chr_icon_{cid:04d}.webp"
+
+        if out_file.exists():
+            results[cid] = out_file.name
             processed += 1
             if progress_callback:
                 progress_callback(processed, total, len(results))
@@ -290,22 +403,22 @@ def extract_support_card_images(
             continue
 
         ok = extract_texture_from_bundle(
-            file_path,
-            entry["key"],
-            out_file,
-            target_name=f"tex_support_card_{sc_id}",
+            file_path, entry["key"], out_file, target_name=f"chr_icon_{cid:04d}"
         )
+        if not ok:
+            # Try without target filter (grab first texture in bundle)
+            ok = extract_texture_from_bundle(file_path, entry["key"], out_file)
         if ok:
-            results[sc_id] = out_file.name
+            results[cid] = out_file.name
 
         processed += 1
-        if progress_callback and processed % 10 == 0:
+        if progress_callback and processed % 20 == 0:
             progress_callback(processed, total, len(results))
 
     if progress_callback:
         progress_callback(total, total, len(results))
 
-    log.info("Extracted %d / %d support card images", len(results), total)
+    log.info("Extracted %d / %d character icons", len(results), total)
     return results
 
 
@@ -381,7 +494,7 @@ def main():
     parser.add_argument("game_dir", nargs="?", help="Path to game root (contains dat/ and meta)")
     parser.add_argument(
         "--type",
-        choices=["support", "portraits", "all"],
+        choices=["support", "icons", "portraits", "all"],
         default="all",
         help="What to extract (default: all)",
     )
@@ -428,6 +541,12 @@ def main():
             game_dir, out, card_ids=args.ids, progress_callback=_progress
         )
         print(f"\n  Done: {len(results)} support card images")
+
+    if args.type in ("icons", "all"):
+        out = Path(args.output) if args.output else APP_DIR / "static" / "uma"
+        print(f"Extracting character icons → {out}")
+        results = extract_chara_icons(game_dir, out, progress_callback=_progress)
+        print(f"\n  Done: {len(results)} character icons")
 
     if args.type in ("portraits", "all"):
         out = Path(args.output) if args.output else APP_DIR / "static" / "uma"

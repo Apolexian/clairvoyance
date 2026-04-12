@@ -127,18 +127,28 @@ app.jinja_env.filters["support_card_name"] = support_card_name
 app.jinja_env.filters["race_track_name"] = race_track_name
 
 # ── Uma portrait lookup ────────────────────────────────────────────────
-# Scan static/uma/ once and build a {charaId: {cardId: filename}} map
+# Scan static/uma/ once and build lookup maps:
+#   _UMA_ICONS:  {charaId: filename}  — chr_icon_XXXX.webp (preferred)
+#   _UMA_IMAGES: {charaId: {cardId: filename}} — chara_stand_X_Y.webp (fallback)
+_UMA_ICONS: dict[int, str] = {}
 _UMA_IMAGES: dict[int, dict[int, str]] = {}
 
 
 def _scan_uma_images():
+    _UMA_ICONS.clear()
+    _UMA_IMAGES.clear()
     uma_dir = Path(app.static_folder) / "uma"
     if not uma_dir.is_dir():
         return
     for f in uma_dir.iterdir():
         if f.suffix != ".webp":
             continue
-        # chara_stand_{charaId}_{cardId}.webp
+        # chr_icon_{charaId}.webp  (from UmamusumeExplorer pattern)
+        m = re.match(r"chr_icon_(\d{4})\.webp$", f.name)
+        if m:
+            _UMA_ICONS[int(m.group(1))] = f.name
+            continue
+        # chara_stand_{charaId}_{cardId}.webp  (legacy full-body art)
         parts = f.stem.split("_")
         if len(parts) >= 4 and parts[0] == "chara" and parts[1] == "stand":
             try:
@@ -158,10 +168,15 @@ def uma_image_url(chara_id, card_id=None):
         cid = int(chara_id) if chara_id else None
     except (ValueError, TypeError):
         return ""
-    if cid is None or cid not in _UMA_IMAGES:
+    if cid is None:
+        return ""
+    # Prefer chr_icon (extracted from game assets via UmamusumeExplorer pattern)
+    if cid in _UMA_ICONS:
+        return f"/static/uma/{_UMA_ICONS[cid]}"
+    # Fallback: legacy chara_stand images
+    if cid not in _UMA_IMAGES:
         return ""
     cards = _UMA_IMAGES[cid]
-    # Prefer exact card_id match, then fall back to any card for this chara
     if card_id:
         try:
             card_id = int(card_id)
@@ -169,7 +184,6 @@ def uma_image_url(chara_id, card_id=None):
             card_id = None
     if card_id and card_id in cards:
         return f"/static/uma/{cards[card_id]}"
-    # Fallback: first available
     first = next(iter(cards.values()))
     return f"/static/uma/{first}"
 
@@ -183,16 +197,24 @@ _SC_IMAGES: dict[int, str] = {}
 
 
 def _scan_support_card_images():
+    _SC_IMAGES.clear()
     cards_dir = Path(app.static_folder) / "cards"
     if not cards_dir.is_dir():
         return
     for f in cards_dir.iterdir():
         if f.suffix != ".webp":
             continue
-        # support_card_{id}.webp
-        m = re.match(r"support_card_(\d+)\.webp$", f.name)
+        # support_thumb_{id}.webp  (UmamusumeExplorer pattern — preferred)
+        m = re.match(r"support_thumb_(\d+)\.webp$", f.name)
         if m:
             _SC_IMAGES[int(m.group(1))] = f.name
+            continue
+        # support_card_{id}.webp  (legacy)
+        m = re.match(r"support_card_(\d+)\.webp$", f.name)
+        if m:
+            sid = int(m.group(1))
+            if sid not in _SC_IMAGES:  # don't overwrite thumb with legacy
+                _SC_IMAGES[sid] = f.name
 
 
 _scan_support_card_images()
@@ -974,11 +996,22 @@ def api_wizard_status():
     interesting = DISCOVERY_DIR / "interesting.json"
     scan_ready = interesting.exists()
 
+    # Asset extraction status — check if we have any extracted images
+    uma_dir = Path(app.static_folder) / "uma"
+    cards_dir = Path(app.static_folder) / "cards"
+    has_uma_icons = any(uma_dir.glob("chr_icon_*.webp")) if uma_dir.is_dir() else False
+    has_sc_thumbs = (
+        (any(cards_dir.glob("support_thumb_*.webp")) or any(cards_dir.glob("support_card_*.webp")))
+        if cards_dir.is_dir()
+        else False
+    )
+
     return jsonify(
         {
             "master_db_configured": master_db_available(),
             "master_db_path": db_path,
             "story_choices_exist": story_choices_loaded,
+            "assets_extracted": has_uma_icons or has_sc_thumbs,
             "game_data_dir": game_data_dir,
             "extraction_running": _extraction_running,
             "scan_ready": scan_ready,
@@ -1469,6 +1502,36 @@ def _run_extraction(game_dir: Path) -> None:
         except Exception:
             pass
 
+        # ── Chain asset image extraction (icons + support cards) ───────
+        # Uses the same game_dir, runs in this same background thread.
+        with _extraction_lock:
+            _extraction_progress["status"] = "extracting assets"
+        try:
+            from extract_assets import extract_chara_icons, extract_support_card_images
+
+            ea_logger = logging.getLogger("extract_assets")
+            if not ea_logger.handlers:
+                ea_logger.setLevel(logging.DEBUG)
+            for h in log.handlers:
+                if h not in ea_logger.handlers:
+                    ea_logger.addHandler(h)
+
+            # Character icons
+            uma_dir = Path(app.static_folder) / "uma"
+            icon_results = extract_chara_icons(game_dir, uma_dir)
+            log.info("Setup: extracted %d character icons", len(icon_results))
+            _scan_uma_images()
+
+            # Support card thumbnails
+            cards_dir = Path(app.static_folder) / "cards"
+            sc_results = extract_support_card_images(game_dir, cards_dir)
+            log.info("Setup: extracted %d support card images", len(sc_results))
+            _scan_support_card_images()
+        except ImportError:
+            log.info("Skipping asset extraction — UnityPy not available")
+        except Exception as ae:
+            log.warning("Asset extraction failed (non-fatal): %s", ae)
+
     except ImportError:
         log.error("UnityPy not installed — cannot extract story text")
         with _extraction_lock:
@@ -1626,7 +1689,7 @@ def api_extract_assets():
 
     # Optional: restrict to specific types
     data = request.get_json(silent=True) or {}
-    extract_type = data.get("type", "all")  # "support", "portraits", or "all"
+    extract_type = data.get("type", "all")  # "support", "icons", "portraits", or "all"
 
     with _asset_extraction_lock:
         _asset_extraction_running = True
@@ -1651,7 +1714,11 @@ def _run_asset_extraction(game_dir: Path, extract_type: str) -> None:
     """Background thread for asset image extraction."""
     global _asset_extraction_running
     try:
-        from extract_assets import extract_chara_portraits, extract_support_card_images
+        from extract_assets import (
+            extract_chara_icons,
+            extract_chara_portraits,
+            extract_support_card_images,
+        )
 
         # Wire extract_assets logger into gui.log
         ea_logger = logging.getLogger("extract_assets")
@@ -1681,6 +1748,18 @@ def _run_asset_extraction(game_dir: Path, extract_type: str) -> None:
             _SC_IMAGES.clear()
             _scan_support_card_images()
 
+        if extract_type in ("icons", "all"):
+            with _asset_extraction_lock:
+                _asset_extraction_progress["phase"] = "character icons"
+                _asset_extraction_progress["processed"] = 0
+                _asset_extraction_progress["total"] = 0
+                _asset_extraction_progress["found"] = 0
+            uma_dir = Path(app.static_folder) / "uma"
+            results = extract_chara_icons(game_dir, uma_dir, progress_callback=_progress)
+            total_found += len(results)
+            log.info("Asset extraction: %d character icons", len(results))
+            _scan_uma_images()
+
         if extract_type in ("portraits", "all"):
             with _asset_extraction_lock:
                 _asset_extraction_progress["phase"] = "character portraits"
@@ -1691,8 +1770,6 @@ def _run_asset_extraction(game_dir: Path, extract_type: str) -> None:
             results = extract_chara_portraits(game_dir, uma_dir, progress_callback=_progress)
             total_found += len(results)
             log.info("Asset extraction: %d character portraits", len(results))
-            # Refresh the in-memory uma image index
-            _UMA_IMAGES.clear()
             _scan_uma_images()
 
         with _asset_extraction_lock:

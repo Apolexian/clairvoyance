@@ -758,7 +758,9 @@ def _extract_choices_from_dict(data: dict) -> list[str]:
                 text = text.strip()
                 if text:
                     choices.append(text)
-    return choices
+    # Deduplicate while preserving order — multiple blocks may carry
+    # the same ChoiceDataList entries.
+    return list(dict.fromkeys(choices))
 
 
 def parse_story_choices(json_text: str) -> list[str]:
@@ -881,15 +883,18 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
             story_id = sid
 
     if story_id and all_choices:
-        results[story_id] = all_choices
+        # Deduplicate while preserving order — multiple clip objects in
+        # the same bundle often repeat the same ChoiceDataList entries.
+        results[story_id] = list(dict.fromkeys(all_choices))
 
     if mono_count > 0 and log.isEnabledFor(logging.DEBUG):
         log.debug(
-            "  bundle %s: %d MonoBehaviour, story_id=%s, %d choices",
+            "  bundle %s: %d MonoBehaviour, story_id=%s, %d choices (%d unique)",
             file_path.name[:16],
             mono_count,
             story_id,
             len(all_choices),
+            len(results.get(story_id, [])),
         )
     return results
 
