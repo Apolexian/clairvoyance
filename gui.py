@@ -491,8 +491,7 @@ def session_detail(name: str):
                 player = None
                 if player_cid or player_card:
                     player = next(
-                        (h for h in horse_list
-                         if _chara_matches(h, player_cid, player_card)),
+                        (h for h in horse_list if _chara_matches(h, player_cid, player_card)),
                         None,
                     )
                 if player is None:

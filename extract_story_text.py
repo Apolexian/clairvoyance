@@ -355,17 +355,24 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             return msg.decode("utf-8", errors="replace") if msg else "(null)"
 
         # ── Open encrypted DB and try cipher IDs ────────────────────
-        # sqlite3mc cipher IDs vary by version:
-        #   RC4 (System.Data.SQLite) = 5 in recent builds, 4 in older ones
-        #   ChaCha20 (sqleet)        = 3
-        #   SQLCipher AES-256        = 4 in recent builds
-        # Uma Musume uses RC4, so try 5 first, then 4.
+        # sqlite3mc cipher IDs (from sqlite3mc documentation):
+        #   1 = AES-128 (wxSQLite3)
+        #   2 = AES-256 (wxSQLite3)
+        #   3 = ChaCha20 (sqleet) — also used by sqlite3mc for RC4
+        #   4 = SQLCipher AES-256
+        #   5 = RC4 (System.Data.SQLite) in newer sqlite3mc builds
+        # UmaViewer uses cipher index 3 (see UmaDatabaseController.cs L91).
+        # Try 3 first, then 5 and 4 as fallbacks.
         SQLITE_OPEN_READWRITE = 0x00000002
         SQLITE_OPEN_CREATE = 0x00000004
-        _RC4_CIPHER_IDS = [5, 4]
+        _CIPHER_IDS = [3, 5, 4]
+
+        # sqlite3_key: set key as raw bytes (matching UmaViewer Sqlite3MC.Key_SetBytes)
+        dll.sqlite3_key.argtypes = [_vp, ctypes.c_char_p, _ci]
+        dll.sqlite3_key.restype = _ci
 
         validated_db_ptr = None
-        for cipher_id in _RC4_CIPHER_IDS:
+        for cipher_id in _CIPHER_IDS:
             db_ptr = ctypes.c_void_p()
             rc = dll.sqlite3_open_v2(
                 str(meta_path).encode("utf-8"),
@@ -382,16 +389,13 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             rc = dll.sqlite3mc_config(db_ptr, b"cipher", cipher_id)
             log.debug("sqlite3mc_config('cipher', %d) rc=%d", cipher_id, rc)
 
-            # Set key via PRAGMA with hex encoding — the x'...' format tells
-            # sqlite3mc this is a raw key (no KDF/passphrase derivation).
-            key_hex = key.hex()
-            pragma_key = f"PRAGMA key = \"x'{key_hex}'\";".encode()
-            log.debug("Setting key via PRAGMA (hex, %d bytes)", len(key))
-            err_ptr = ctypes.c_void_p()
-            rc = dll.sqlite3_exec(db_ptr, pragma_key, None, None, ctypes.byref(err_ptr))
+            # Set key as raw bytes via sqlite3_key (matches UmaViewer's
+            # Sqlite3MC.Key_SetBytes which calls sqlite3_key(db, pKey, nKey)).
+            rc = dll.sqlite3_key(db_ptr, key, len(key))
+            log.debug("sqlite3_key(raw %d bytes) rc=%d", len(key), rc)
             if rc != 0:
                 log.debug(
-                    "PRAGMA key failed for cipher %d rc=%d errmsg=%s",
+                    "sqlite3_key failed for cipher %d rc=%d errmsg=%s",
                     cipher_id,
                     rc,
                     _errmsg(db_ptr),
@@ -423,7 +427,7 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             break
 
         if validated_db_ptr is None:
-            log.error("sqlite3mc: no cipher ID worked (tried %s)", _RC4_CIPHER_IDS)
+            log.error("sqlite3mc: no cipher ID worked (tried %s)", _CIPHER_IDS)
             return None
         db_ptr = validated_db_ptr
 
