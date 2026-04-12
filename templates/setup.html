@@ -204,6 +204,16 @@
         </div>
         <div class="progress-text" id="extract-status">Preparing…</div>
       </div>
+      <div id="step2-gamedir" style="display:none; margin-top:0.5rem;">
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.4rem;">
+          Could not auto-detect the game data directory. Paste the path to the folder containing <code>dat/</code> and <code>meta</code>:
+          <br><small>e.g. <code>…/AppData/LocalLow/Cygames/umamusume</code></small>
+        </p>
+        <div class="browse-fallback">
+          <input type="text" id="manual-game-dir" class="input-sm" placeholder="Paste path to game data folder…">
+          <button class="btn btn-primary btn-sm" onclick="setGameDir()">Set</button>
+        </div>
+      </div>
       <div id="step2-result"></div>
       <div id="step2-error" class="step-error" style="display:none"></div>
       <div class="step-skip" id="step2-skip">
@@ -321,10 +331,34 @@
     if (gameDataDir) {
       startExtraction();
     } else {
-      document.getElementById('step2-error').textContent =
-        'Game data directory not found — story text extraction requires the full game install. You can skip this step.';
-      document.getElementById('step2-error').style.display = '';
+      // Show manual game dir input + skip option
+      document.getElementById('step2-gamedir').style.display = '';
       document.getElementById('step2-skip').style.display = '';
+    }
+  }
+
+  async function setGameDir() {
+    const path = document.getElementById('manual-game-dir').value.trim();
+    if (!path) return;
+    try {
+      const res = await fetch('/api/setup/set_game_dir', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({path}),
+      });
+      const d = await res.json();
+      if (d.ok) {
+        gameDataDir = d.path;
+        document.getElementById('step2-gamedir').style.display = 'none';
+        document.getElementById('step2-error').style.display = 'none';
+        startExtraction();
+      } else {
+        document.getElementById('step2-error').textContent = d.error || 'Invalid directory';
+        document.getElementById('step2-error').style.display = '';
+      }
+    } catch (e) {
+      document.getElementById('step2-error').textContent = 'Request failed: ' + e;
+      document.getElementById('step2-error').style.display = '';
     }
   }
 
@@ -415,8 +449,18 @@
             `<div class="step-success">✓ Story choices already extracted</div>`;
           advanceTo(3);
         } else {
+          // Story choices not loaded — show step 2 with options
           advanceTo(2);
-          if (gameDataDir) startExtraction();
+          if (gameDataDir) {
+            // Show manual trigger + skip (don't auto-start on revisit)
+            document.getElementById('step2-skip').style.display = '';
+            document.getElementById('step2-result').innerHTML =
+              '<button class="btn btn-primary btn-sm" onclick="startExtraction()" style="margin-top:0.5rem;">Extract Story Text</button>';
+          } else {
+            // No game dir — show manual input + skip
+            document.getElementById('step2-gamedir').style.display = '';
+            document.getElementById('step2-skip').style.display = '';
+          }
         }
       }
     } catch (e) {}

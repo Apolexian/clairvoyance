@@ -29,7 +29,7 @@ import sys
 import threading
 from pathlib import Path
 
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import Flask, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
 
 from lib.master_db import (
@@ -244,9 +244,11 @@ def _stream_recorder_output(proc: subprocess.Popen) -> None:
 
 @app.route("/")
 def home():
-    if not master_db_available():
-        return redirect(url_for("setup_page"))
-    return render_template("home.html", sessions=list_sessions())
+    return render_template(
+        "home.html",
+        sessions=list_sessions(),
+        master_db_ok=master_db_available(),
+    )
 
 
 @app.route("/setup")
@@ -764,17 +766,33 @@ def api_wizard_status():
     db_path = get_db_path()
     game_data_dir = None
 
+    # Check story_choices has actual content (not just an empty file / empty dict)
+    story_choices_loaded = False
+    if story_choices_file.is_file():
+        try:
+            raw = json.loads(story_choices_file.read_text(encoding="utf-8"))
+            story_choices_loaded = isinstance(raw, dict) and len(raw) > 0
+        except Exception:
+            story_choices_loaded = False
+
     if db_path:
-        # Derive game_data_dir from master.mdb path (go up 2 levels)
-        candidate = Path(db_path).resolve().parent.parent
-        if (candidate / "meta").is_file() or (candidate / "meta_umaviewer").is_file():
-            game_data_dir = str(candidate)
+        game_data_dir = _find_game_data_dir(db_path)
+
+    # Fallback: check config directly (user may have set game_data_dir manually)
+    if not game_data_dir:
+        cfg_file = _APP_DIR / "config.json"
+        if cfg_file.is_file():
+            with contextlib.suppress(Exception):
+                cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
+                gdd = cfg.get("game_data_dir")
+                if gdd and (Path(gdd) / "dat").is_dir():
+                    game_data_dir = gdd
 
     return jsonify(
         {
             "master_db_configured": master_db_available(),
             "master_db_path": db_path,
-            "story_choices_exist": story_choices_file.is_file(),
+            "story_choices_exist": story_choices_loaded,
             "game_data_dir": game_data_dir,
             "extraction_running": _extraction_running,
         }
@@ -822,14 +840,55 @@ def api_pick_mdb():
         return jsonify({"ok": False, "error": str(e)})
 
 
+def _find_game_data_dir(mdb_path: str) -> str | None:
+    """
+    Try multiple heuristics to find the game data directory (containing dat/ and meta).
+
+    The master.mdb can be at various locations:
+      - {game_root}/master/master.mdb         → parent.parent
+      - {game_root}/master.mdb                → parent
+      - Somewhere else entirely (user copied it)
+
+    Also search common Windows game data paths via LocalLow.
+    """
+    p = Path(mdb_path).resolve()
+
+    # Try walking up from the mdb file (up to 4 levels)
+    candidate = p.parent
+    for _ in range(4):
+        if (candidate / "dat").is_dir():
+            return str(candidate)
+        candidate = candidate.parent
+
+    # Check config for an explicit game_data_dir
+    cfg_file = _APP_DIR / "config.json"
+    if cfg_file.is_file():
+        with contextlib.suppress(Exception):
+            cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
+            gdd = cfg.get("game_data_dir")
+            if gdd and (Path(gdd) / "dat").is_dir():
+                return gdd
+
+    # Try common Windows LocalLow paths (works even if mdb was copied elsewhere)
+    import platform
+
+    if platform.system() == "Windows":
+        localappdata = os.environ.get("LOCALAPPDATA", "")
+        if localappdata:
+            locallow = Path(localappdata).parent / "LocalLow" / "Cygames" / "umamusume"
+            if (locallow / "dat").is_dir():
+                return str(locallow)
+
+    return None
+
+
 def _mdb_success_response(path: str):
     """Build the success JSON after setting master DB path."""
     resolved = get_db_path() or path
-    game_data_dir = None
-    candidate = Path(resolved).resolve().parent.parent
-    if (candidate / "dat").is_dir():
-        game_data_dir = str(candidate)
-        # Also save game_data_dir to config
+    game_data_dir = _find_game_data_dir(resolved)
+
+    if game_data_dir:
+        # Save game_data_dir to config
         cfg = {}
         cfg_file = _APP_DIR / "config.json"
         if cfg_file.is_file():
@@ -842,6 +901,39 @@ def _mdb_success_response(path: str):
             log.warning("Failed to save game_data_dir to config: %s", e)
 
     return jsonify({"ok": True, "path": resolved, "game_data_dir": game_data_dir})
+
+
+@app.route("/api/setup/set_game_dir", methods=["POST"])
+def api_set_game_dir():
+    """Manually set the game data directory (containing dat/ and meta)."""
+    data = request.get_json(silent=True) or {}
+    path = data.get("path", "").strip()
+    if not path:
+        return jsonify({"ok": False, "error": "No path provided"}), 400
+
+    p = Path(path)
+    if not p.is_dir():
+        return jsonify({"ok": False, "error": f"Not a directory: {path}"}), 400
+
+    if not (p / "dat").is_dir():
+        return jsonify({"ok": False, "error": f"No dat/ subdirectory found in: {path}"}), 400
+
+    # Save to config
+    cfg = {}
+    cfg_file = _APP_DIR / "config.json"
+    if cfg_file.is_file():
+        with contextlib.suppress(Exception):
+            cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
+    cfg["game_data_dir"] = str(p)
+    try:
+        cfg_file.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+    except Exception as e:
+        log.warning("Failed to save game_data_dir to config: %s", e)
+        return jsonify({"ok": False, "error": f"Failed to save config: {e}"}), 500
+
+    has_meta = (p / "meta").is_file() or (p / "meta_umaviewer").is_file()
+    log.info("Game data dir set to: %s (meta=%s)", p, has_meta)
+    return jsonify({"ok": True, "path": str(p), "has_meta": has_meta})
 
 
 @app.route("/api/setup/extract_stories", methods=["POST"])
@@ -857,9 +949,19 @@ def api_extract_stories():
     db_path = get_db_path()
     game_dir = None
     if db_path:
-        candidate = Path(db_path).resolve().parent.parent
-        if (candidate / "dat").is_dir():
-            game_dir = candidate
+        gdd = _find_game_data_dir(db_path)
+        if gdd:
+            game_dir = Path(gdd)
+
+    # Fallback: check config directly (user may have set game_data_dir manually)
+    if not game_dir:
+        cfg_file = _APP_DIR / "config.json"
+        if cfg_file.is_file():
+            with contextlib.suppress(Exception):
+                cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
+                gdd = cfg.get("game_data_dir")
+                if gdd and (Path(gdd) / "dat").is_dir():
+                    game_dir = Path(gdd)
 
     if not game_dir:
         return jsonify(
@@ -920,6 +1022,16 @@ def _run_extraction(game_dir: Path) -> None:
                 _extraction_progress["processed"] = processed
                 _extraction_progress["found"] = found
 
+        log.info("Story extraction complete: %d stories with choices", found)
+        with _extraction_lock:
+            _extraction_progress["found"] = found
+
+        # Only write to file if we actually found something —
+        # an empty file would falsely show "already loaded" in the wizard.
+        if not all_choices:
+            log.info("No story choices found — not writing story_choices.json")
+            return
+
         # Write output
         output_file = _APP_DIR / "story_choices.json"
         # Merge with existing
@@ -944,10 +1056,6 @@ def _run_extraction(game_dir: Path) -> None:
             _load_story_choices.cache_clear()
         except Exception:
             pass
-
-        log.info("Story extraction complete: %d stories with choices", found)
-        with _extraction_lock:
-            _extraction_progress["found"] = found
 
     except ImportError:
         log.error("UnityPy not installed — cannot extract story text")
