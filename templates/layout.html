@@ -13,6 +13,7 @@
     <div class="nav-links">
       <a href="/">Sessions</a>
       <a href="/masterdata">Master Data</a>
+      <a href="/setup" class="nav-setup-link">Setup</a>
       <span id="setup-indicator" class="setup-indicator" title="Binary analysis status">
         <span class="setup-dot"></span> <span id="setup-indicator-text">Checking…</span>
       </span>
@@ -74,6 +75,7 @@
           <div class="form-row" style="gap:0.4rem;">
             <input type="text" id="mdb-path" class="input-sm" style="flex:1; min-width:200px;"
                    placeholder="Path to master.mdb …">
+            <button class="btn btn-sm" onclick="browseMasterDb()" title="Browse for file">📁</button>
             <button class="btn btn-primary btn-sm" onclick="setMasterDb()">Set</button>
             <button class="btn btn-sm" onclick="clearMasterDb()" title="Clear path">✕</button>
           </div>
@@ -283,6 +285,22 @@
     }
 
     // ── Master DB settings ───────────────────────────────────
+    async function browseMasterDb() {
+      try {
+        const res = await fetch('/api/setup/pick_mdb', { method: 'POST' });
+        const d = await res.json();
+        if (d.ok) {
+          document.getElementById('mdb-path').value = d.path;
+          await pollMasterDb();
+        } else if (d.fallback) {
+          // Browser mode — just focus the text input
+          document.getElementById('mdb-path').focus();
+        }
+      } catch (e) {
+        console.error('browseMasterDb error:', e);
+      }
+    }
+
     async function pollMasterDb() {
       try {
         const res = await fetch('/api/settings/master_db');

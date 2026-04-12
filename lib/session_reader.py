@@ -431,7 +431,19 @@ def get_network_events(session_name: str) -> dict:
         event_type = rec.get("event", "")
         type_counts[event_type] = type_counts.get(event_type, 0) + 1
 
+        # Compute byte size from whichever field is available:
+        #  - "bytes" / "captured": low-level hooks (ssl_read, libnative_*, schannel_*)
+        #  - "postDataBytes": api_send (Task.Send hook)
+        #  - "raw_bytes_len": set by collect.py when msgpack decode fails
+        #  - raw_b64: base64-encoded binary payload (actual wire bytes)
         raw_bytes = rec.get("bytes") or rec.get("raw_bytes_len") or 0
+        if not raw_bytes:
+            raw_bytes = rec.get("postDataBytes") or 0
+        if not raw_bytes:
+            b64 = rec.get("raw_b64")
+            if b64 and isinstance(b64, str):
+                # base64 encodes 3 bytes → 4 chars; approximate original size
+                raw_bytes = len(b64) * 3 // 4
         total_bytes += raw_bytes
 
         has_decoded = "msgpack_decoded" in rec
@@ -452,7 +464,7 @@ def get_network_events(session_name: str) -> dict:
             "httpUrl": rec.get("httpUrl", ""),
             "httpMethod": rec.get("httpMethod", ""),
             "bytes": raw_bytes,
-            "captured": rec.get("captured", 0),
+            "captured": rec.get("captured") or raw_bytes,
             "truncated": rec.get("truncated", False),
             "has_decoded": has_decoded,
             "raw_bytes_len": rec.get("raw_bytes_len", 0),
@@ -628,6 +640,36 @@ def get_timeline(session_name: str) -> list[dict]:
     return timeline
 
 
+def _extract_int(decoded: dict, data: dict, rec: dict, key: str):
+    """Extract an integer field from decoded msgpack, data, responseFields, or fields.
+
+    Checks multiple locations where the game protocol may place request/response
+    fields.  Returns the value as int, or None if not found.
+    """
+    # Top-level decoded (request payloads have no 'data' wrapper)
+    val = decoded.get(key) if isinstance(decoded, dict) else None
+    if val is not None:
+        return int(val)
+    # Nested under 'data' (response payloads)
+    if isinstance(data, dict):
+        val = data.get(key)
+        if val is not None:
+            return int(val)
+    # responseFields (read from typed Response object in JS hook)
+    rf = rec.get("responseFields")
+    if isinstance(rf, dict):
+        val = rf.get(key)
+        if val is not None:
+            return int(val)
+    # fields (read from MsgPack formatter hooks)
+    f = rec.get("fields")
+    if isinstance(f, dict):
+        val = f.get(key)
+        if val is not None:
+            return int(val)
+    return None
+
+
 def build_session_summary(session_name: str) -> dict:
     """
     Build a structured summary of a session by parsing network event payloads.
@@ -647,6 +689,7 @@ def build_session_summary(session_name: str) -> dict:
         "card_id": None,
         "scenario_id": None,
         "support_card_ids": [],
+        "friend_support_card_id": None,
         "latest_stats": {},
         "stats_history": [],  # [{turn, speed, stamina, power, guts, wiz, vital, fans}]
         "skills_acquired": [],  # [{skill_id, turn}]
@@ -671,7 +714,19 @@ def build_session_summary(session_name: str) -> dict:
     _pending_choice: dict | None = None
 
     for rec in records:
-        api = rec.get("api", "")
+        raw_api = rec.get("api", "")
+        # Derive API-like label from formatter when api is missing
+        # (msgpack_serialize / msgpack_deserialize events use formatter)
+        api = raw_api
+        if not api:
+            fmt = rec.get("formatter", "")
+            if fmt:
+                short = fmt.replace("Gallop_", "").replace("Gallop.", "")
+                for suffix in ("Request", "Response"):
+                    if short.endswith(suffix):
+                        short = short[: -len(suffix)]
+                        break
+                api = short
         ts = rec.get("_ts", "")
 
         # Track first/last timestamps
@@ -680,9 +735,9 @@ def build_session_summary(session_name: str) -> dict:
                 summary["first_ts"] = ts
             summary["last_ts"] = ts
 
-        # Count API calls
-        if api:
-            summary["api_breakdown"][api] = summary["api_breakdown"].get(api, 0) + 1
+        # Count API calls (only real api field, not formatter-derived)
+        if raw_api:
+            summary["api_breakdown"][raw_api] = summary["api_breakdown"].get(raw_api, 0) + 1
 
         decoded = rec.get("msgpack_decoded", {})
         if not isinstance(decoded, dict):
@@ -762,6 +817,7 @@ def build_session_summary(session_name: str) -> dict:
             summary["scenario_id"] = data["single_mode_scenario_id"]
 
         # ── Support cards ───────────────────────────────────────
+        # Method 1: support_card_array / support_card_deck_array (array of objects)
         support_array = data.get("support_card_array") or data.get("support_card_deck_array", [])
         if isinstance(support_array, list):
             for sc in support_array:
@@ -770,6 +826,21 @@ def build_session_summary(session_name: str) -> dict:
                     if scid and scid not in seen_support:
                         seen_support.add(scid)
                         summary["support_card_ids"].append(scid)
+
+        # Method 2: support_card_ids (plain array of ints, e.g. SingleModeFreeStart)
+        sc_ids = data.get("support_card_ids")
+        if isinstance(sc_ids, list):
+            for scid in sc_ids:
+                if isinstance(scid, int) and scid and scid not in seen_support:
+                    seen_support.add(scid)
+                    summary["support_card_ids"].append(scid)
+
+        # Friend (borrowed) support card
+        friend_sc = data.get("friend_support_card_info")
+        if isinstance(friend_sc, dict) and not summary["friend_support_card_id"]:
+            fid = friend_sc.get("support_card_id")
+            if fid:
+                summary["friend_support_card_id"] = fid
 
         # ── Race results ────────────────────────────────────────
         race_result = data.get("race_result_info") or data.get("race_scenario", {})
@@ -844,57 +915,58 @@ def build_session_summary(session_name: str) -> dict:
 
         # ── Event choice tracking ──────────────────────────────
         # When the player picks a choice, the game sends a
-        # *GetChoiceReward or *ChoiceReward API.  The request
-        # payload contains choice_number (1-based).  The RESPONSE
-        # comes back with updated chara_info — we compute stat
-        # deltas by comparing with the previous snapshot.
-        is_choice_api = any(
-            p in api for p in ("ChoiceReward", "GetChoiceReward", "FreeChoiceReward")
+        # *CheckEvent, *ChoiceReward, or *GetChoiceReward API.
+        # The REQUEST payload contains choice_number (1-based)
+        # and event_id.  The RESPONSE comes back with updated
+        # chara_info — we compute stat deltas vs the previous snapshot.
+        _CHOICE_API_PATTERNS = (
+            "CheckEvent",  # SingleModeFreeCheckEvent, SingleModeCheckEvent, SingleModeTeamCheckEvent
+            "ChoiceReward",  # SingleModeFreeChoiceReward
+            "GetChoiceReward",  # SingleModeGetChoiceReward, SingleModeTeamGetChoiceReward
         )
+        is_choice_api = any(p in api for p in _CHOICE_API_PATTERNS)
         if is_choice_api:
             event_type = rec.get("event", "")
+            is_request = event_type in ("api_send", "msgpack_serialize")
+            is_response = event_type in ("api_response", "msgpack_deserialize")
 
-            if event_type == "api_send":
-                # Request side — extract choice_number from decoded MsgPack
-                choice_num = None
-                if isinstance(decoded, dict):
-                    # Sometimes it's at top level, sometimes nested in data
-                    choice_num = decoded.get("choice_number") or (
-                        data.get("choice_number") if isinstance(data, dict) else None
-                    )
-                    # Also check responseFields / flat int fields
-                    if choice_num is None:
-                        resp_fields = rec.get("responseFields", {})
-                        if isinstance(resp_fields, dict):
-                            choice_num = resp_fields.get("choice_number")
+            if is_request:
+                # Request side — extract choice_number from decoded MsgPack.
+                # Request payloads have fields at top-level (no "data" wrapper).
+                choice_num = _extract_int(decoded, data, rec, "choice_number")
 
-                if choice_num is not None:
-                    # Find the most recent story_id from events_seen
+                # choice_number is 1-based; 0 means "no choice" (single-option event)
+                if choice_num is not None and choice_num > 0:
+                    # Use event_id from the request to match the correct story_id
+                    event_id = _extract_int(decoded, data, rec, "event_id")
                     recent_story_id = None
-                    if summary["events_seen"]:
+                    if event_id and summary["events_seen"]:
+                        for ev in reversed(summary["events_seen"]):
+                            if ev.get("event_id") == event_id:
+                                recent_story_id = ev.get("story_id")
+                                break
+                    # Fallback: most recent event
+                    if recent_story_id is None and summary["events_seen"]:
                         recent_story_id = summary["events_seen"][-1].get("story_id")
 
                     _pending_choice = {
                         "story_id": recent_story_id,
                         "choice_number": int(choice_num),
+                        "event_id": event_id,
                         "api": api,
                         "_ts": ts,
                         "turn": 0,
                         "stat_deltas": {},
                     }
 
-            elif event_type == "api_response" and _pending_choice is not None:
+            elif is_response and _pending_choice is not None:
                 # Response side — if we have chara_info, deltas will be
                 # computed in the chara_info block above on the next
                 # iteration.  But if decoded has choice_number we missed
                 # from the send, grab it now.
                 if _pending_choice.get("choice_number") is None:
-                    choice_num = None
-                    if isinstance(decoded, dict):
-                        choice_num = decoded.get("choice_number") or (
-                            data.get("choice_number") if isinstance(data, dict) else None
-                        )
-                    if choice_num is not None:
+                    choice_num = _extract_int(decoded, data, rec, "choice_number")
+                    if choice_num is not None and choice_num > 0:
                         _pending_choice["choice_number"] = int(choice_num)
 
     # Flush any pending choice that never got a stat delta (end of session)

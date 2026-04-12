@@ -67,6 +67,7 @@
   }
   .chara-info .chara-name { font-size: 1.1rem; font-weight: 700; color: var(--text); }
   .chara-info .chara-card { font-size: 0.82rem; color: var(--text-muted); }
+  .chara-info .chara-scenario { font-size: 0.72rem; color: var(--accent); margin-top: 0.2rem; opacity: 0.85; }
 
   .stats-grid {
     display: grid;
@@ -92,6 +93,11 @@
   }
   .support-list li:last-child { border-bottom: none; }
   .support-id { font-size: 0.72rem; color: var(--text-muted); margin-left: 0.4rem; }
+  .friend-badge {
+    font-size: 0.65rem; color: var(--accent); background: rgba(88,166,255,0.12);
+    padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.5rem;
+    font-weight: 600; letter-spacing: 0.02em;
+  }
 
   .skill-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
   .skill-list li {
@@ -158,6 +164,31 @@
     border-radius: 4px;
     font-weight: 600;
     white-space: nowrap;
+  }
+  .event-choice-badge.chosen {
+    background: rgba(63,185,80,0.18);
+    color: #3fb950;
+  }
+  .event-choice-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+  }
+  .choice-pill {
+    font-size: 0.72rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    background: var(--surface, rgba(255,255,255,0.04));
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .choice-pill.chosen {
+    background: rgba(63,185,80,0.12);
+    color: #3fb950;
+    border-color: rgba(63,185,80,0.35);
+    font-weight: 600;
   }
   .event-deltas {
     display: flex;
@@ -273,8 +304,8 @@
   .net-ev-meta {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    margin-left: 0.4rem;
+    gap: 0.25rem;
+    margin-left: 0.3rem;
     font-size: 0.72rem;
     color: var(--text-muted);
   }
@@ -282,15 +313,6 @@
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
   }
-  .net-ev-meta .ne-decode-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  .ne-decode-dot.decoded { background: var(--green); }
-  .ne-decode-dot.raw { background: var(--orange); }
-  .ne-decode-dot.none { background: var(--border); }
 
   .net-ev-label {
     font-size: 0.78rem;
@@ -306,14 +328,14 @@
   }
 
   .pair-link-btn {
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     color: var(--accent);
     background: none;
     border: 1px solid var(--accent-dim);
     border-radius: 4px;
-    padding: 0.05rem 0.3rem;
+    padding: 0 0.25rem;
     cursor: pointer;
-    margin-left: 0.3rem;
+    line-height: 1.3;
     transition: background 0.15s;
   }
   .pair-link-btn:hover { background: var(--accent-dim); }
@@ -381,8 +403,11 @@
         {% endif %}
         <div class="chara-info">
           <div class="chara-name">{{ summary.chara_name or 'Unknown Character' }}</div>
-          {% if summary.card_name %}
-          <div class="chara-card">{{ summary.card_name }}</div>
+          {% if summary.outfit_title %}
+          <div class="chara-card">{{ summary.outfit_title }}</div>
+          {% endif %}
+          {% if summary.scenario_name %}
+          <div class="chara-scenario">{{ summary.scenario_name }}</div>
           {% endif %}
         </div>
       </div>
@@ -401,7 +426,7 @@
         <span>Fans <strong>{{ "{:,}".format(summary.latest_stats.fans) }}</strong></span>
         <span>SP <strong>{{ summary.latest_stats.skill_point }}</strong></span>
         {% set motiv = summary.latest_stats.motivation %}
-        <span>Mood <strong>{% if motiv == 5 %}🔥{% elif motiv == 4 %}😊{% elif motiv == 3 %}😐{% elif motiv == 2 %}😟{% else %}😢{% endif %}</strong></span>
+        <span>Mood <strong>{% if motiv == 5 %}Great{% elif motiv == 4 %}Good{% elif motiv == 3 %}Normal{% elif motiv == 2 %}Bad{% else %}Awful{% endif %}</strong></span>
       </div>
 
       {% if summary.stats_history | length > 2 %}
@@ -412,11 +437,14 @@
     <!-- Support Cards -->
     <div class="summary-card">
       <h3>Support Cards</h3>
-      {% if summary.support_card_names %}
+      {% if summary.support_card_names or summary.friend_support_card_id %}
       <ul class="support-list">
         {% for sc in summary.support_card_names %}
         <li>{{ sc.name }}<span class="support-id">#{{ sc.id }}</span></li>
         {% endfor %}
+        {% if summary.friend_support_card_id %}
+        <li class="friend-card">{{ summary.friend_support_card_name or summary.friend_support_card_id }}<span class="support-id">#{{ summary.friend_support_card_id }}</span><span class="friend-badge">Friend</span></li>
+        {% endif %}
       </ul>
       {% else %}
       <div class="summary-empty">No support card data captured</div>
@@ -492,9 +520,20 @@
               <span class="event-source scenario">📋 Scenario</span>
             {% endif %}
             {% if ec.choice_number %}
-              <span class="event-choice-badge">Chose option {{ ec.choice_number }}{% if ec.num_branches %} of {{ ec.num_branches }}{% endif %}</span>
+              {% if ec.choice_texts and ec.choice_number <= ec.choice_texts|length %}
+                <span class="event-choice-badge chosen" title="Chose option {{ ec.choice_number }} of {{ ec.num_branches or ec.choice_texts|length }}">✓ {{ ec.choice_texts[ec.choice_number - 1] }}</span>
+              {% else %}
+                <span class="event-choice-badge">Chose option {{ ec.choice_number }}{% if ec.num_branches %} of {{ ec.num_branches }}{% endif %}</span>
+              {% endif %}
             {% endif %}
           </div>
+          {% if ec.choice_texts and ec.choice_texts|length > 1 %}
+          <div class="event-choice-options">
+            {% for ct in ec.choice_texts %}
+              <span class="choice-pill {% if ec.choice_number == loop.index %}chosen{% endif %}">{{ loop.index }}. {{ ct }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
           {% if ec.stat_deltas %}
           <div class="event-deltas">
             {% for stat, delta in ec.stat_deltas.items() %}
@@ -649,8 +688,9 @@
       <input type="text" id="filter-api" placeholder="Filter by API / formatter / URL…" oninput="filterNetwork()" class="input-sm">
       <div class="net-filter-pills" id="net-type-pills">
         {% if network_stats and network_stats.type_counts %}
+        {% set default_active = ['api_send', 'api_response', 'api_error'] %}
         {% for etype, cnt in network_stats.type_counts.items() %}
-        <button class="net-type-pill active" data-type="{{ etype }}" onclick="toggleTypePill(this)">
+        <button class="net-type-pill{% if etype in default_active %} active{% endif %}" data-type="{{ etype }}" onclick="toggleTypePill(this)">
           {{ etype | replace('_', ' ') }}
           <span class="pill-count">{{ cnt }}</span>
         </button>
@@ -679,29 +719,29 @@
           <div class="timeline-summary" onclick="toggleDetail(this, '{{ session.name }}', {{ ev._idx }})">
             {# ── Direction + Event Type Badge ── #}
             {% if ev.event == 'api_send' %}
-              <span class="timeline-badge api_send dir-out">→ Request</span>
+              <span class="timeline-badge api_send dir-out">→ Req</span>
             {% elif ev.event == 'api_response' %}
-              <span class="timeline-badge api_response dir-in">← Response</span>
+              <span class="timeline-badge api_response dir-in">← Res</span>
             {% elif ev.event == 'api_error' %}
-              <span class="timeline-badge api_error">✕ Error</span>
+              <span class="timeline-badge api_error">✕ Err</span>
             {% elif ev.event == 'ssl_read' %}
-              <span class="timeline-badge ssl_read">↓ SSL Read</span>
+              <span class="timeline-badge ssl_read">↓ SSL</span>
             {% elif ev.event == 'ssl_write' %}
-              <span class="timeline-badge ssl_write">↑ SSL Write</span>
+              <span class="timeline-badge ssl_write">↑ SSL</span>
             {% elif ev.event == 'schannel_decrypt' %}
-              <span class="timeline-badge schannel_decrypt">↓ SChannel</span>
+              <span class="timeline-badge schannel_decrypt">↓ SCh</span>
             {% elif ev.event == 'schannel_encrypt' %}
-              <span class="timeline-badge schannel_encrypt">↑ SChannel</span>
+              <span class="timeline-badge schannel_encrypt">↑ SCh</span>
             {% elif ev.event == 'libnative_decrypt' %}
-              <span class="timeline-badge libnative_decrypt">🔓 Decrypt</span>
+              <span class="timeline-badge libnative_decrypt">🔓</span>
             {% elif ev.event == 'libnative_encrypt' %}
-              <span class="timeline-badge libnative_encrypt">🔒 Encrypt</span>
+              <span class="timeline-badge libnative_encrypt">🔒</span>
             {% elif ev.event == 'crypto_salt_found' %}
-              <span class="timeline-badge crypto_salt_found">🔑 Salt</span>
+              <span class="timeline-badge crypto_salt_found">🔑</span>
             {% elif ev.event == 'msgpack_serialize' %}
-              <span class="timeline-badge msgpack_serialize">⊞ Serialize</span>
+              <span class="timeline-badge msgpack_serialize">⊞</span>
             {% elif ev.event == 'msgpack_deserialize' %}
-              <span class="timeline-badge msgpack_deserialize">⊟ Deserialize</span>
+              <span class="timeline-badge msgpack_deserialize">⊟</span>
             {% else %}
               <span class="timeline-badge">{{ ev.event }}</span>
             {% endif %}
@@ -717,26 +757,18 @@
               <span class="net-ev-url">{{ ev.httpMethod or '' }} {{ ev.httpUrl }}</span>
             {% endif %}
 
-            {# ── Metadata: bytes, decode status, pair link ── #}
+            {# ── Metadata: bytes + pair link (compact) ── #}
             <span class="net-ev-meta">
-              {% if ev.bytes %}
+              {% if ev.bytes and ev.bytes > 0 %}
                 <span class="ne-bytes" title="{{ ev.bytes }} bytes{% if ev.truncated %} (truncated){% endif %}">
                   {% if ev.bytes >= 1048576 %}{{ (ev.bytes / 1048576) | round(1) }}MB
                   {% elif ev.bytes >= 1024 %}{{ (ev.bytes / 1024) | round(1) }}KB
-                  {% else %}{{ ev.bytes }}B{% endif %}
-                  {% if ev.truncated %}✂{% endif %}
+                  {% else %}{{ ev.bytes }}B{% endif %}{% if ev.truncated %}✂{% endif %}
                 </span>
-              {% endif %}
-              {% if ev.has_decoded %}
-                <span class="ne-decode-dot decoded" title="MsgPack decoded"></span>
-              {% elif ev.bytes and ev.bytes > 0 %}
-                <span class="ne-decode-dot raw" title="Raw bytes (not decoded)"></span>
-              {% else %}
-                <span class="ne-decode-dot none" title="No payload"></span>
               {% endif %}
               {% if ev._pair_idx is not none %}
                 <button class="pair-link-btn" onclick="event.stopPropagation(); jumpToPair({{ ev._pair_idx }})" title="Jump to paired {% if ev.event == 'api_send' %}response{% else %}request{% endif %}">
-                  {% if ev.event == 'api_send' %}⇣ resp{% else %}⇡ req{% endif %}
+                  {% if ev.event == 'api_send' %}⇣{% else %}⇡{% endif %}
                 </button>
               {% endif %}
             </span>
@@ -745,12 +777,8 @@
 
             {% if ev.chara_stats %}
             <div class="chara-stats-inline">
-              SPD:{{ ev.chara_stats.speed }}
-              STA:{{ ev.chara_stats.stamina }}
-              POW:{{ ev.chara_stats.power }}
-              GUT:{{ ev.chara_stats.guts }}
-              WIZ:{{ ev.chara_stats.wiz }}
-              · T{{ ev.chara_stats.turn }} VIT:{{ ev.chara_stats.vital }}
+              {{ ev.chara_stats.speed }}/{{ ev.chara_stats.stamina }}/{{ ev.chara_stats.power }}/{{ ev.chara_stats.guts }}/{{ ev.chara_stats.wiz }}
+              T{{ ev.chara_stats.turn }}
             </div>
             {% endif %}
           </div>
@@ -781,7 +809,7 @@ function switchView(view, btn) {
 let _activeTypes = new Set();
 let _activeDir = 'all';
 
-// Initialise: all type pills start active
+// Initialise: only API-level pills start active
 document.querySelectorAll('.net-type-pill.active').forEach(p => _activeTypes.add(p.dataset.type));
 
 function filterNetwork() {
@@ -817,6 +845,9 @@ function setDirFilter(btn, dir) {
   btn.classList.add('active');
   filterNetwork();
 }
+
+// Apply initial filter so only default-active types are visible
+filterNetwork();
 
 function jumpToPair(pairIdx) {
   const target = document.getElementById('net-ev-' + pairIdx);

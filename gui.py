@@ -20,20 +20,24 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import threading
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 from werkzeug.exceptions import HTTPException
 
 from lib.master_db import (
     card_name,
     chara_name,
+    event_id_to_story_id,
     event_info,
+    event_name_by_event_id,
     execute_query,
     get_db_path,
     get_table_schema,
@@ -41,6 +45,7 @@ from lib.master_db import (
     race_instance_name,
     race_name,
     race_track_name,
+    scenario_name,
     set_db_path,
     skill_name,
     story_name,
@@ -239,7 +244,14 @@ def _stream_recorder_output(proc: subprocess.Popen) -> None:
 
 @app.route("/")
 def home():
+    if not master_db_available():
+        return redirect(url_for("setup_page"))
     return render_template("home.html", sessions=list_sessions())
+
+
+@app.route("/setup")
+def setup_page():
+    return render_template("setup.html")
 
 
 @app.route("/masterdata")
@@ -260,7 +272,20 @@ def session_detail(name: str):
         summary["chara_name"] = chara_name(summary["chara_id"])
         summary["chara_image"] = uma_image_url(summary["chara_id"], summary.get("card_id"))
     if summary.get("card_id") not in (None, 0, ""):
-        summary["card_name"] = card_name(summary["card_id"])
+        full_card = card_name(summary["card_id"])
+        # card_name returns "[Outfit Title] CharaName" — split into parts
+        m = re.match(r"^\[(.+?)\]\s*(.+)$", full_card)
+        if m:
+            summary["outfit_title"] = m.group(1)
+            # Use as fallback when chara_name lookup missed
+            if not summary.get("chara_name") or summary["chara_name"].startswith("Character #"):
+                summary["chara_name"] = m.group(2)
+        else:
+            # No bracket format — use the whole string as fallback name
+            if not summary.get("chara_name") or summary["chara_name"].startswith("Character #"):
+                summary["chara_name"] = full_card
+    if summary.get("scenario_id") not in (None, 0, ""):
+        summary["scenario_name"] = scenario_name(summary["scenario_id"])
     for sc_id in summary.get("support_card_ids", []):
         summary.setdefault("support_card_names", []).append(
             {
@@ -268,6 +293,8 @@ def session_detail(name: str):
                 "name": support_card_name(sc_id),
             }
         )
+    if summary.get("friend_support_card_id"):
+        summary["friend_support_card_name"] = support_card_name(summary["friend_support_card_id"])
     for sk in summary.get("skills_acquired", []):
         sk["name"] = skill_name(sk["skill_id"])
     for sk in summary.get("skill_tips", []):
@@ -288,11 +315,20 @@ def session_detail(name: str):
                 ev["source_chara"] = ei["source_chara"]
                 ev["has_choice"] = ei["has_choice"]
                 ev["num_branches"] = ei["num_branches"]
+                ev["choice_texts"] = ei.get("choice_texts")
             else:
                 ev["name"] = story_name(sid)
 
     for ec in summary.get("event_choices", []):
         sid = ec.get("story_id")
+        eid = ec.get("event_id")
+
+        # If story_id is missing but event_id is present, resolve it
+        if not sid and eid:
+            sid = event_id_to_story_id(eid)
+            if sid:
+                ec["story_id"] = sid
+
         if sid:
             ei = event_info(sid)
             if ei:
@@ -301,8 +337,12 @@ def session_detail(name: str):
                 ec["source_name"] = ei["source_name"]
                 ec["source_chara"] = ei["source_chara"]
                 ec["num_branches"] = ei["num_branches"]
+                ec["choice_texts"] = ei.get("choice_texts")
             else:
                 ec["name"] = story_name(sid)
+        elif eid:
+            # Last resort: annotate with event_id-derived name
+            ec["name"] = event_name_by_event_id(eid)
 
     net = get_network_events(name)
 
@@ -706,6 +746,236 @@ def _run_setup_pipeline(proc: subprocess.Popen, skip_discover: bool) -> None:
             _setup_process = None
 
 
+# ── Routes: Setup Wizard (guided first-run flow) ──────────────────────
+
+# pywebview window reference — set in main() when running in native mode
+_webview_window = None
+
+# Story extraction state
+_extraction_running: bool = False
+_extraction_progress: dict = {"processed": 0, "total": 0, "found": 0, "error": None}
+_extraction_lock = threading.Lock()
+
+
+@app.route("/api/setup/wizard_status")
+def api_wizard_status():
+    """Return current wizard state: is master DB configured? Do story choices exist?"""
+    story_choices_file = _APP_DIR / "story_choices.json"
+    db_path = get_db_path()
+    game_data_dir = None
+
+    if db_path:
+        # Derive game_data_dir from master.mdb path (go up 2 levels)
+        candidate = Path(db_path).resolve().parent.parent
+        if (candidate / "meta").is_file() or (candidate / "meta_umaviewer").is_file():
+            game_data_dir = str(candidate)
+
+    return jsonify(
+        {
+            "master_db_configured": master_db_available(),
+            "master_db_path": db_path,
+            "story_choices_exist": story_choices_file.is_file(),
+            "game_data_dir": game_data_dir,
+            "extraction_running": _extraction_running,
+        }
+    )
+
+
+@app.route("/api/setup/pick_mdb", methods=["POST"])
+def api_pick_mdb():
+    """
+    Open a native file picker to select master.mdb, validate it, and save to config.
+
+    In browser mode (no pywebview), accepts a JSON body with {path: "..."}.
+    """
+    # Check if a manual path was provided (browser mode or fallback)
+    data = request.get_json(silent=True) or {}
+    manual_path = data.get("path")
+
+    if manual_path:
+        ok = set_db_path(manual_path)
+        if not ok:
+            return jsonify({"ok": False, "error": "Invalid file — not a valid master.mdb"})
+        return _mdb_success_response(manual_path)
+
+    # Native mode: use pywebview file dialog
+    if _webview_window is None:
+        return jsonify({"fallback": True, "message": "No native window — use manual path input"})
+
+    try:
+        import webview  # type: ignore[import-untyped]
+
+        result = _webview_window.create_file_dialog(
+            webview.OPEN_DIALOG,
+            file_types=("MDB Files (*.mdb)", "All Files (*.*)"),
+        )
+        if not result:
+            return jsonify({"cancelled": True})
+
+        chosen = result[0] if isinstance(result, (list, tuple)) else str(result)
+        ok = set_db_path(chosen)
+        if not ok:
+            return jsonify({"ok": False, "error": f"Invalid file: {chosen}"})
+        return _mdb_success_response(chosen)
+    except Exception as e:
+        log.exception("File dialog failed")
+        return jsonify({"ok": False, "error": str(e)})
+
+
+def _mdb_success_response(path: str):
+    """Build the success JSON after setting master DB path."""
+    resolved = get_db_path() or path
+    game_data_dir = None
+    candidate = Path(resolved).resolve().parent.parent
+    if (candidate / "dat").is_dir():
+        game_data_dir = str(candidate)
+        # Also save game_data_dir to config
+        cfg = {}
+        cfg_file = _APP_DIR / "config.json"
+        if cfg_file.is_file():
+            with contextlib.suppress(Exception):
+                cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
+        cfg["game_data_dir"] = game_data_dir
+        try:
+            cfg_file.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+        except Exception as e:
+            log.warning("Failed to save game_data_dir to config: %s", e)
+
+    return jsonify({"ok": True, "path": resolved, "game_data_dir": game_data_dir})
+
+
+@app.route("/api/setup/extract_stories", methods=["POST"])
+def api_extract_stories():
+    """Run story text extraction in the background."""
+    global _extraction_running
+
+    with _extraction_lock:
+        if _extraction_running:
+            return jsonify({"error": "Extraction already running"}), 400
+
+    # Check if game data dir is available
+    db_path = get_db_path()
+    game_dir = None
+    if db_path:
+        candidate = Path(db_path).resolve().parent.parent
+        if (candidate / "dat").is_dir():
+            game_dir = candidate
+
+    if not game_dir:
+        return jsonify(
+            {
+                "error": "Game data directory not found. Story extraction requires the full game install with dat/ and meta files."
+            }
+        ), 400
+
+    # Check meta database
+    meta_exists = (game_dir / "meta").is_file() or (game_dir / "meta_umaviewer").is_file()
+    if not meta_exists:
+        return jsonify({"error": f"meta database not found in {game_dir}"}), 400
+
+    with _extraction_lock:
+        _extraction_running = True
+        _extraction_progress.update({"processed": 0, "total": 0, "found": 0, "error": None})
+
+    threading.Thread(target=_run_extraction, args=(game_dir,), daemon=True).start()
+    return jsonify({"status": "started"})
+
+
+def _run_extraction(game_dir: Path) -> None:
+    """Background thread for story text extraction."""
+    global _extraction_running
+    try:
+        from extract_story_text import extract_choices_from_bundle, read_meta_entries
+
+        dat_dir = game_dir / "dat"
+        entries = read_meta_entries(game_dir)
+
+        with _extraction_lock:
+            _extraction_progress["total"] = len(entries)
+
+        all_choices: dict[str, list[str]] = {}
+        processed = 0
+        found = 0
+        skipped = 0
+
+        for entry in entries:
+            h = entry["hash"]
+            file_path = dat_dir / h[:2] / h
+            if not file_path.is_file():
+                skipped += 1
+                processed += 1
+                with _extraction_lock:
+                    _extraction_progress["processed"] = processed
+                continue
+
+            bundle_choices = extract_choices_from_bundle(file_path, entry["key"])
+            processed += 1
+
+            if bundle_choices:
+                for sid, choices in bundle_choices.items():
+                    all_choices[str(sid)] = choices
+                    found += 1
+
+            with _extraction_lock:
+                _extraction_progress["processed"] = processed
+                _extraction_progress["found"] = found
+
+        # Write output
+        output_file = _APP_DIR / "story_choices.json"
+        # Merge with existing
+        if output_file.is_file():
+            try:
+                existing = json.loads(output_file.read_text(encoding="utf-8"))
+                if isinstance(existing, dict):
+                    existing.update(all_choices)
+                    all_choices = existing
+            except Exception:
+                pass
+
+        output_file.write_text(
+            json.dumps(all_choices, indent=2, ensure_ascii=False, sort_keys=True),
+            encoding="utf-8",
+        )
+
+        # Clear the master_db story choices cache so it reloads
+        try:
+            from lib.master_db import _load_story_choices
+
+            _load_story_choices.cache_clear()
+        except Exception:
+            pass
+
+        log.info("Story extraction complete: %d stories with choices", found)
+        with _extraction_lock:
+            _extraction_progress["found"] = found
+
+    except ImportError:
+        log.error("UnityPy not installed — cannot extract story text")
+        with _extraction_lock:
+            _extraction_progress["error"] = (
+                "UnityPy is not installed. Install it with: pip install UnityPy"
+            )
+    except Exception as e:
+        log.exception("Story extraction failed")
+        with _extraction_lock:
+            _extraction_progress["error"] = str(e)
+    finally:
+        with _extraction_lock:
+            _extraction_running = False
+
+
+@app.route("/api/setup/extract_status")
+def api_extract_status():
+    """Poll extraction progress."""
+    with _extraction_lock:
+        return jsonify(
+            {
+                "running": _extraction_running,
+                **_extraction_progress,
+            }
+        )
+
+
 # ── Routes: Recorder ───────────────────────────────────────────────────
 
 
@@ -836,13 +1106,18 @@ def main():
 
         _icon_path = str(_BUNDLE_DIR / "static" / "main_small_icon.png")
 
-        webview.create_window(
+        window = webview.create_window(
             "Clairvoyance",
             url,
             width=1280,
             height=860,
             min_size=(900, 600),
         )
+
+        # Store window reference so Flask routes can open file dialogs
+        global _webview_window
+        _webview_window = window
+
         webview.start(icon=_icon_path)
 
 

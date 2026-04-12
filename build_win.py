@@ -16,6 +16,7 @@ Produces:
 
 Prerequisites:
   pip install pyinstaller flask pywebview frida frida-tools msgpack
+  pip install UnityPy          # optional — enables event choice text extraction
 """
 
 from __future__ import annotations
@@ -66,6 +67,24 @@ def run(cmd: list[str], label: str) -> None:
 
 def build_gui():
     """Build the main Clairvoyance GUI as a windowed app."""
+    extra_imports = [
+        # extract_story_text is imported at runtime inside a try/except,
+        # so PyInstaller's static analysis won't find it automatically.
+        "--hidden-import=extract_story_text",
+    ]
+
+    # If UnityPy is installed, bundle it so story extraction works in the frozen build
+    try:
+        import UnityPy  # noqa: F401
+
+        extra_imports += [
+            "--collect-all=UnityPy",
+            "--hidden-import=UnityPy",
+        ]
+        print("  UnityPy detected — will be bundled for story extraction")
+    except ImportError:
+        print("  UnityPy not installed — story extraction will not be available in build")
+
     run(
         [
             sys.executable,
@@ -83,6 +102,9 @@ def build_gui():
             "--hidden-import=webview",
             "--hidden-import=clr_loader",
             "--hidden-import=pythonnet",
+            # Ensure local modules are discoverable
+            f"--paths={HERE}",
+            *extra_imports,
             "gui.py",
         ],
         "Building Clairvoyance.exe (GUI)",
