@@ -98,11 +98,28 @@ def build_gui():
         extra_imports += [
             "--collect-all=UnityPy",
             "--hidden-import=UnityPy",
-            # UnityPy's native dependencies — their DLLs must be collected
-            # explicitly or they won't be found in the frozen build.
-            "--collect-all=fmod_toolkit",
-            "--collect-all=texture2ddecoder",
         ]
+
+        # UnityPy's transitive dependencies that ship native DLLs or data
+        # files which PyInstaller won't discover automatically.  We try each
+        # one and silently skip any that aren't installed.
+        _unitypy_deps = [
+            "fmod_toolkit",
+            "texture2ddecoder",
+            "archspec",
+            "etcpak",
+            "astc_encoder",
+            "fsb5",
+            "lz4",
+            "brotli",
+        ]
+        for _dep in _unitypy_deps:
+            try:
+                __import__(_dep)
+                extra_imports.append(f"--collect-all={_dep}")
+            except ImportError:
+                pass
+
         print("  UnityPy detected — will be bundled for story extraction")
     except ImportError:
         print("  UnityPy not installed — story extraction will not be available in build")
