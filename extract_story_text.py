@@ -109,7 +109,7 @@ def detect_game_dir(explicit_path: str | None = None) -> Path | None:
 
 # ── Meta database decryption keys (from UmaViewer Config.cs) ───────────
 
-# DB encryption key (XOR'd with DBBaseKey to produce the final key)
+# DB encryption key — JP (XOR'd with DBBaseKey to produce the final key)
 DB_KEY = bytes(
     [
         0x6D,
@@ -147,6 +147,24 @@ DB_KEY = bytes(
     ]
 )
 
+# DB encryption key — Global (from UmaViewer Config.cs GlobalDBKey)
+GLOBAL_DB_KEY = bytes(
+    [
+        0x56,
+        0x63,
+        0x6B,
+        0x63,
+        0x42,
+        0x72,
+        0x37,
+        0x76,
+        0x65,
+        0x70,
+        0x41,
+        0x62,
+    ]
+)
+
 DB_BASE_KEY = bytes(
     [
         0xF1,
@@ -169,9 +187,9 @@ DB_BASE_KEY = bytes(
 )
 
 
-def _derive_db_key() -> bytes:
-    """Derive the final decryption key: DBKey XOR DBBaseKey (cycling 13 bytes)."""
-    key = bytearray(DB_KEY)
+def _derive_db_key(db_key: bytes = DB_KEY) -> bytes:
+    """Derive the final decryption key: db_key XOR DBBaseKey (cycling 13 bytes)."""
+    key = bytearray(db_key)
     for i in range(len(key)):
         key[i] ^= DB_BASE_KEY[i % 13]
     return bytes(key)
@@ -181,54 +199,62 @@ def _try_open_encrypted_meta(meta_path: Path) -> sqlite3.Connection | None:
     """
     Try to open an encrypted meta database.
 
-    Strategy:
-      1. Try pysqlcipher3 (if installed) — pure Python SQLCipher binding
-      2. Try decrypting via sqlite3mc DLL on Windows (same as UmaViewer)
-      3. Return None if we can't decrypt
+    Tries the Global key first (most users), then JP key as fallback.
+    For each key, attempts:
+      1. pysqlcipher3 (if installed) — pure Python SQLCipher binding
+      2. sqlcipher3 (alternative package name)
+      3. sqlite3mc DLL via ctypes on Windows (same as UmaViewer)
 
     On success, returns a sqlite3.Connection to a decrypted in-memory or temp copy.
     """
-    key = _derive_db_key()
-    key_hex = key.hex()
+    keys_to_try = [
+        ("Global", _derive_db_key(GLOBAL_DB_KEY)),
+        ("JP", _derive_db_key(DB_KEY)),
+    ]
 
-    # ── Strategy 1: try pysqlcipher3 ──────────────────────────
-    try:
-        from pysqlcipher3 import dbapi2 as sqlcipher  # type: ignore
+    for region, key in keys_to_try:
+        key_hex = key.hex()
+        log.debug("Trying %s key for meta decryption...", region)
 
-        conn = sqlcipher.connect(str(meta_path))
-        conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
-        conn.execute("PRAGMA cipher_compatibility = 3")
-        # Test if it works
-        conn.execute("SELECT name FROM sqlite_master LIMIT 1")
-        conn.row_factory = sqlite3.Row
-        log.info("Opened encrypted meta via pysqlcipher3")
-        return conn
-    except ImportError:
-        log.debug("pysqlcipher3 not available")
-    except Exception as e:
-        log.debug("pysqlcipher3 failed: %s", e)
+        # ── Strategy 1: try pysqlcipher3 ──────────────────────────
+        try:
+            from pysqlcipher3 import dbapi2 as sqlcipher  # type: ignore
 
-    # ── Strategy 2: try sqlcipher3 (alternative package name) ─
-    try:
-        import sqlcipher3  # type: ignore
-
-        conn = sqlcipher3.connect(str(meta_path))
-        conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
-        conn.execute("PRAGMA cipher_compatibility = 3")
-        conn.execute("SELECT name FROM sqlite_master LIMIT 1")
-        conn.row_factory = sqlite3.Row
-        log.info("Opened encrypted meta via sqlcipher3")
-        return conn
-    except ImportError:
-        log.debug("sqlcipher3 not available")
-    except Exception as e:
-        log.debug("sqlcipher3 failed: %s", e)
-
-    # ── Strategy 3: try sqlite3mc via ctypes (Windows) ────────
-    if sys.platform == "win32":
-        conn = _try_decrypt_via_sqlite3mc(meta_path, key)
-        if conn:
+            conn = sqlcipher.connect(str(meta_path))
+            conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
+            conn.execute("PRAGMA cipher_compatibility = 3")
+            # Test if it works
+            conn.execute("SELECT name FROM sqlite_master LIMIT 1")
+            conn.row_factory = sqlite3.Row
+            log.info("Opened encrypted meta via pysqlcipher3 (%s key)", region)
             return conn
+        except ImportError:
+            log.debug("pysqlcipher3 not available")
+        except Exception as e:
+            log.debug("pysqlcipher3 failed with %s key: %s", region, e)
+
+        # ── Strategy 2: try sqlcipher3 (alternative package name) ─
+        try:
+            import sqlcipher3  # type: ignore
+
+            conn = sqlcipher3.connect(str(meta_path))
+            conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
+            conn.execute("PRAGMA cipher_compatibility = 3")
+            conn.execute("SELECT name FROM sqlite_master LIMIT 1")
+            conn.row_factory = sqlite3.Row
+            log.info("Opened encrypted meta via sqlcipher3 (%s key)", region)
+            return conn
+        except ImportError:
+            log.debug("sqlcipher3 not available")
+        except Exception as e:
+            log.debug("sqlcipher3 failed with %s key: %s", region, e)
+
+        # ── Strategy 3: try sqlite3mc via ctypes (Windows) ────────
+        if sys.platform == "win32":
+            conn = _try_decrypt_via_sqlite3mc(meta_path, key)
+            if conn:
+                log.info("Decrypted meta via sqlite3mc (%s key)", region)
+                return conn
 
     return None
 

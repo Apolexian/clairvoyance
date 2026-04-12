@@ -670,9 +670,38 @@ def _extract_int(decoded: dict, data: dict, rec: dict, key: str):
     return None
 
 
-def build_session_summary(session_name: str) -> dict:
+# ── Non-career context detection ───────────────────────────────────────
+# APIs that belong to PvP / event modes, NOT to Single Mode career runs.
+# Records matching these are skipped for career-specific extraction
+# (support cards, training, stats) to avoid polluting the career summary.
+_NON_CAREER_KEYWORDS = (
+    "ChampionsRace",
+    "RoomRace",
+    "TeamStadiumRace",
+    "LegendRace",
+    "PracticeRace",
+    "champions_race",
+    "room_race",
+    "team_stadium_race",
+    "legend_race",
+    "practice_race",
+)
+
+
+def _is_non_career_context(api: str) -> bool:
+    """Return True if the API belongs to a non-career context (CM, PvP, etc.)."""
+    if not api:
+        return False
+    # SingleMode APIs are always career context, even if they contain a
+    # substring that looks non-career (e.g. SingleModeTeamRace...)
+    if "SingleMode" in api or "single_mode" in api:
+        return False
+    return any(kw in api for kw in _NON_CAREER_KEYWORDS)
+
+
+def _build_summary_from_records(records: list[dict]) -> dict:
     """
-    Build a structured summary of a session by parsing network event payloads.
+    Build a structured summary from a list of network event records.
 
     Extracts:
       - character info (name, card, latest stats, motivation, fans, turn)
@@ -682,7 +711,6 @@ def build_session_summary(session_name: str) -> dict:
       - training actions taken
       - stats progression over turns
     """
-    records = read_domain(session_name, "network")
 
     summary: dict = {
         "chara_id": None,
@@ -698,6 +726,7 @@ def build_session_summary(session_name: str) -> dict:
         "training_actions": [],  # [{turn, command_id, api}]
         "events_seen": [],  # [{story_id, turn, api}]
         "event_choices": [],  # [{story_id, turn, choice_number, stat_deltas, _ts}]
+        "training_partner_dist": {},  # {support_card_id: {command_id: count}}
         "total_api_calls": len(records),
         "api_breakdown": {},  # {api_name: count}
         "first_ts": None,
@@ -706,6 +735,11 @@ def build_session_summary(session_name: str) -> dict:
 
     seen_skills: set[int] = set()
     seen_support: set[int] = set()
+
+    # Mapping: partner/target_id → support_card_id (built from evaluation_info_array)
+    _partner_to_sc: dict[int, int] = {}
+    # Track which turns we already counted (avoid double-counting from multiple APIs per turn)
+    _dist_seen_turns: set[int] = set()
 
     # For computing stat deltas around choice events: track the last stats snapshot
     _STAT_KEYS = ("speed", "stamina", "power", "guts", "wiz", "vital", "skill_point", "motivation")
@@ -744,6 +778,27 @@ def build_session_summary(session_name: str) -> dict:
             continue
         data = decoded.get("data", {})
         if not isinstance(data, dict):
+            continue
+
+        # ── Skip non-career records for career-specific fields ─────
+        # PvP / Champions Meeting / Room Match / Team Stadium / Legend Race
+        # records may appear mid-career.  We capture their race results
+        # into a separate list so they can be displayed at the session
+        # level rather than polluting a career summary.
+        if _is_non_career_context(api):
+            race_result = data.get("race_result_info") or data.get("race_scenario", {})
+            if isinstance(race_result, dict) and race_result.get("result_order"):
+                summary.setdefault("_non_career_races", []).append(
+                    {
+                        "turn": 0,
+                        "race_instance_id": race_result.get("race_instance_id"),
+                        "program_id": race_result.get("program_id"),
+                        "result_order": race_result.get("result_order"),
+                        "entry_count": race_result.get("entry_count") or race_result.get("num"),
+                        "api": api,
+                        "_ts": ts,
+                    }
+                )
             continue
 
         # ── Character info ──────────────────────────────────────
@@ -818,6 +873,7 @@ def build_session_summary(session_name: str) -> dict:
 
         # ── Support cards ───────────────────────────────────────
         # Method 1: support_card_array / support_card_deck_array (array of objects)
+        #   Present in start-of-career APIs (SingleModeStart, SingleModeFreeStart, etc.)
         support_array = data.get("support_card_array") or data.get("support_card_deck_array", [])
         if isinstance(support_array, list):
             for sc in support_array:
@@ -835,12 +891,133 @@ def build_session_summary(session_name: str) -> dict:
                     seen_support.add(scid)
                     summary["support_card_ids"].append(scid)
 
+        # Method 3: chara_info.support_card_array (inside the character data)
+        #   When continuing a career, the deck is often nested in chara_info.
+        if isinstance(chara, dict):
+            chara_sc_array = chara.get("support_card_array") or chara.get("support_card_list", [])
+            if isinstance(chara_sc_array, list):
+                for sc in chara_sc_array:
+                    if isinstance(sc, dict):
+                        scid = sc.get("support_card_id")
+                        if scid and scid not in seen_support:
+                            seen_support.add(scid)
+                            summary["support_card_ids"].append(scid)
+
+        # Method 4: evaluation_info_array — training partners map to support cards
+        #   Can appear at data level or nested under team_data_set (Aoharu).
+        eval_sources = [data.get("evaluation_info_array", [])]
+        tds = data.get("team_data_set")
+        if isinstance(tds, dict):
+            eval_sources.append(tds.get("evaluation_info_array", []))
+        for eval_array in eval_sources:
+            if not isinstance(eval_array, list):
+                continue
+            for ei in eval_array:
+                if isinstance(ei, dict):
+                    scid = ei.get("support_card_id")
+                    target = ei.get("target_id")
+                    # Build partner→support_card mapping for distribution tracking
+                    if target and scid:
+                        _partner_to_sc[target] = scid
+                    if scid and scid not in seen_support:
+                        seen_support.add(scid)
+                        summary["support_card_ids"].append(scid)
+
+        # Method 5: home_info may contain support card data
+        home_info = data.get("home_info", {})
+        if isinstance(home_info, dict):
+            home_sc = home_info.get("support_card_array") or home_info.get(
+                "support_card_deck_array", []
+            )
+            if isinstance(home_sc, list):
+                for sc in home_sc:
+                    if isinstance(sc, dict):
+                        scid = sc.get("support_card_id")
+                        if scid and scid not in seen_support:
+                            seen_support.add(scid)
+                            summary["support_card_ids"].append(scid)
+
+        # Method 6: trained_chara_info (race/evaluation contexts)
+        trained_chara = data.get("trained_chara_info", {})
+        if isinstance(trained_chara, dict):
+            tc_sc = trained_chara.get("support_card_array") or trained_chara.get(
+                "support_card_list", []
+            )
+            if isinstance(tc_sc, list):
+                for sc in tc_sc:
+                    if isinstance(sc, dict):
+                        scid = sc.get("support_card_id")
+                        if scid and scid not in seen_support:
+                            seen_support.add(scid)
+                            summary["support_card_ids"].append(scid)
+
+        # Method 7: trained_chara_array (multi-chara contexts like Champions Meeting)
+        trained_array = data.get("trained_chara_array", [])
+        if isinstance(trained_array, list):
+            for tc in trained_array:
+                if isinstance(tc, dict):
+                    tc_sc = tc.get("support_card_list") or tc.get("support_card_array", [])
+                    if isinstance(tc_sc, list):
+                        for sc in tc_sc:
+                            if isinstance(sc, dict):
+                                scid = sc.get("support_card_id")
+                                if scid and scid not in seen_support:
+                                    seen_support.add(scid)
+                                    summary["support_card_ids"].append(scid)
+
         # Friend (borrowed) support card
         friend_sc = data.get("friend_support_card_info")
         if isinstance(friend_sc, dict) and not summary["friend_support_card_id"]:
             fid = friend_sc.get("support_card_id")
             if fid:
                 summary["friend_support_card_id"] = fid
+        # Also check for friend card in top-level decoded (some API formats)
+        if not summary["friend_support_card_id"]:
+            friend_sc2 = decoded.get("friend_support_card_info")
+            if isinstance(friend_sc2, dict):
+                fid = friend_sc2.get("support_card_id")
+                if fid:
+                    summary["friend_support_card_id"] = fid
+
+        # ── Training partner distribution ──────────────────────────
+        # command_info_array lists each training type and which partners
+        # are present.  Combined with the partner→support_card mapping from
+        # evaluation_info_array, we build {sc_id: {command_id: count}}.
+        # command_id: 101=Speed, 102=Stamina, 103=Power, 105=Guts, 106=Wiz
+        cmd_array = data.get("command_info_array", [])
+        if isinstance(cmd_array, list) and _partner_to_sc:
+            turn = chara.get("turn", 0) if isinstance(chara, dict) else 0
+            if turn and turn not in _dist_seen_turns:
+                _dist_seen_turns.add(turn)
+                dist = summary["training_partner_dist"]
+                for cmd in cmd_array:
+                    if not isinstance(cmd, dict):
+                        continue
+                    cid = cmd.get("command_id")
+                    if not cid:
+                        continue
+                    # Partners present at this training — try multiple known field names
+                    partners = (
+                        cmd.get("tips_event_partner_array")
+                        or cmd.get("training_partner_array")
+                        or []
+                    )
+                    if not isinstance(partners, list):
+                        continue
+                    for p in partners:
+                        pid = (
+                            p
+                            if isinstance(p, int)
+                            else (p.get("partner_id") if isinstance(p, dict) else None)
+                        )
+                        if pid is None:
+                            continue
+                        scid = _partner_to_sc.get(pid)
+                        if scid:
+                            sc_key = str(scid)
+                            cmd_key = str(cid)
+                            dist.setdefault(sc_key, {})
+                            dist[sc_key][cmd_key] = dist[sc_key].get(cmd_key, 0) + 1
 
         # ── Race results ────────────────────────────────────────
         race_result = data.get("race_result_info") or data.get("race_scenario", {})
@@ -974,3 +1151,124 @@ def build_session_summary(session_name: str) -> dict:
         summary["event_choices"].append(_pending_choice)
 
     return summary
+
+
+# ── Multi-career detection ─────────────────────────────────────────────
+
+# APIs that signal the start of a brand-new career run
+_CAREER_START_API_KEYWORDS = (
+    "SingleModeStart",
+    "SingleModeFreeStart",
+    "SingleModeTeamStart",
+    "single_mode/start",
+    "single_mode_free/start",
+    "single_mode_team/start",
+)
+
+
+def _is_career_start_api(api: str) -> bool:
+    """Check whether an API name signals the start of a new career run."""
+    if not api:
+        return False
+    return any(keyword in api for keyword in _CAREER_START_API_KEYWORDS)
+
+
+def _detect_career_boundaries(records: list[dict]) -> list[int]:
+    """
+    Scan network records and return indices where new career runs begin.
+
+    Detection heuristics (in priority order):
+      1. Explicit career-start API (SingleModeStart, etc.)
+      2. (chara_id, card_id) pair changes to a different combo
+      3. Turn counter resets to ≤1 after reaching >5  (same character replayed)
+    """
+    if not records:
+        return []
+
+    boundaries: list[int] = [0]
+    prev_chara_card: tuple[int, int] | None = None
+    prev_max_turn = 0
+
+    for i, rec in enumerate(records):
+        raw_api = rec.get("api", "")
+
+        # Heuristic 1: explicit start API
+        if _is_career_start_api(raw_api):
+            if i > 0 and (not boundaries or boundaries[-1] != i):
+                boundaries.append(i)
+                prev_max_turn = 0
+                prev_chara_card = None
+            continue
+
+        # Look for chara_info to detect character / turn changes
+        decoded = rec.get("msgpack_decoded", {})
+        if not isinstance(decoded, dict):
+            continue
+        data = decoded.get("data", {})
+        if not isinstance(data, dict):
+            continue
+
+        chara = data.get("chara_info", {})
+        if not isinstance(chara, dict) or not chara.get("speed"):
+            continue
+
+        cid = chara.get("chara_id")
+        card = chara.get("card_id")
+        turn = chara.get("turn", 0)
+
+        cc = (cid, card) if cid and card else None
+
+        # Heuristic 2: different character + card combo or turn reset
+        if (
+            (cc and prev_chara_card and cc != prev_chara_card) or (prev_max_turn > 5 and turn <= 1)
+        ) and (not boundaries or boundaries[-1] != i):
+            boundaries.append(i)
+            prev_max_turn = 0
+
+        if cc:
+            prev_chara_card = cc
+        prev_max_turn = max(prev_max_turn, turn)
+
+    return sorted(set(boundaries))
+
+
+def build_session_summaries(session_name: str) -> tuple[list[dict], list[dict]]:
+    """
+    Build one summary per career run detected in a session.
+
+    Returns ``(careers, other_races)`` where *careers* is one summary dict
+    per career run and *other_races* is a flat list of race-result dicts
+    from non-career contexts (Champions Meeting, Room Match, etc.).
+
+    Single-career sessions return a list with one element.
+    """
+    records = read_domain(session_name, "network")
+    if not records:
+        return [_build_summary_from_records([])], []
+
+    boundaries = _detect_career_boundaries(records)
+
+    summaries: list[dict] = []
+    other_races: list[dict] = []
+    for idx, start in enumerate(boundaries):
+        end = boundaries[idx + 1] if idx + 1 < len(boundaries) else len(records)
+        s = _build_summary_from_records(records[start:end])
+        s["_career_index"] = idx
+        # Pull non-career races out of the career dict → session level
+        other_races.extend(s.pop("_non_career_races", []))
+        summaries.append(s)
+
+    if not summaries:
+        return [_build_summary_from_records([])], other_races
+    return summaries, other_races
+
+
+def build_session_summary(session_name: str) -> dict:
+    """
+    Build a single flat summary for a session (backward-compatible API).
+
+    When multiple careers are detected, returns the **last** one (most recent).
+    Prefer :func:`build_session_summaries` for full multi-career support.
+    """
+    summaries, _other = build_session_summaries(session_name)
+    return summaries[-1] if summaries else _build_summary_from_records([])

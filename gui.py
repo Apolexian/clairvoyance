@@ -58,7 +58,7 @@ from lib.master_db import (
     list_tables as master_list_tables,
 )
 from lib.session_reader import (
-    build_session_summary,
+    build_session_summaries,
     get_network_event_detail,
     get_network_events,
     get_race_replay_data,
@@ -176,6 +176,41 @@ def uma_image_url(chara_id, card_id=None):
 app.jinja_env.filters["uma_image"] = uma_image_url
 app.jinja_env.globals["uma_image"] = uma_image_url
 
+# ── Support card image lookup ──────────────────────────────────────────
+# Scan static/cards/ for extracted support card webp images
+_SC_IMAGES: dict[int, str] = {}
+
+
+def _scan_support_card_images():
+    cards_dir = Path(app.static_folder) / "cards"
+    if not cards_dir.is_dir():
+        return
+    for f in cards_dir.iterdir():
+        if f.suffix != ".webp":
+            continue
+        # support_card_{id}.webp
+        m = re.match(r"support_card_(\d+)\.webp$", f.name)
+        if m:
+            _SC_IMAGES[int(m.group(1))] = f.name
+
+
+_scan_support_card_images()
+
+
+def support_card_image_url(sc_id) -> str:
+    """Return the URL for a support card image, or empty string if not found."""
+    try:
+        sid = int(sc_id) if sc_id else None
+    except (ValueError, TypeError):
+        return ""
+    if sid and sid in _SC_IMAGES:
+        return f"/static/cards/{_SC_IMAGES[sid]}"
+    return ""
+
+
+app.jinja_env.filters["support_card_image"] = support_card_image_url
+app.jinja_env.globals["support_card_image"] = support_card_image_url
+
 LOG_FILE = SCRIPT_DIR / "gui.log"
 
 log = logging.getLogger("clairvoyance.gui")
@@ -261,42 +296,76 @@ def masterdata():
     return render_template("masterdata.html", db_available=master_db_available())
 
 
-@app.route("/session/<name>")
-def session_detail(name: str):
-    session = get_session(name)
-    if not session:
-        return "Session not found", 404
-
-    summary = build_session_summary(name)
-
-    # Resolve IDs to human-readable names via master DB
+def _enrich_career_summary(summary: dict) -> None:
+    """Resolve IDs to human-readable names and images in a career summary (in-place)."""
+    # ── Character info ──
     if summary.get("chara_id") not in (None, 0, ""):
         summary["chara_name"] = chara_name(summary["chara_id"])
         summary["chara_image"] = uma_image_url(summary["chara_id"], summary.get("card_id"))
     if summary.get("card_id") not in (None, 0, ""):
         full_card = card_name(summary["card_id"])
-        # card_name returns "[Outfit Title] CharaName" — split into parts
         m = re.match(r"^\[(.+?)\]\s*(.+)$", full_card)
         if m:
             summary["outfit_title"] = m.group(1)
-            # Use as fallback when chara_name lookup missed
             if not summary.get("chara_name") or summary["chara_name"].startswith("Character #"):
                 summary["chara_name"] = m.group(2)
         else:
-            # No bracket format — use the whole string as fallback name
             if not summary.get("chara_name") or summary["chara_name"].startswith("Character #"):
                 summary["chara_name"] = full_card
     if summary.get("scenario_id") not in (None, 0, ""):
         summary["scenario_name"] = scenario_name(summary["scenario_id"])
+
+    # ── Support cards ──
     for sc_id in summary.get("support_card_ids", []):
         summary.setdefault("support_card_names", []).append(
             {
                 "id": sc_id,
                 "name": support_card_name(sc_id),
+                "image": support_card_image_url(sc_id),
             }
         )
     if summary.get("friend_support_card_id"):
         summary["friend_support_card_name"] = support_card_name(summary["friend_support_card_id"])
+        summary["friend_support_card_image"] = support_card_image_url(
+            summary["friend_support_card_id"]
+        )
+
+    # ── Training partner distribution ──
+    _CMD_LABELS = {"101": "Speed", "102": "Stamina", "103": "Power", "105": "Guts", "106": "Wiz"}
+    raw_dist = summary.get("training_partner_dist", {})
+    if raw_dist:
+        enriched_dist = []
+        for sc_id_str, cmd_counts in raw_dist.items():
+            sc_id = int(sc_id_str)
+            sc_nm = support_card_name(sc_id)
+            total = sum(cmd_counts.values())
+            breakdown = {}
+            for cmd_id_str, count in cmd_counts.items():
+                label = _CMD_LABELS.get(cmd_id_str, f"Cmd {cmd_id_str}")
+                breakdown[label] = count
+            is_friend = sc_id == summary.get("friend_support_card_id")
+            enriched_dist.append(
+                {
+                    "id": sc_id,
+                    "name": sc_nm,
+                    "image": support_card_image_url(sc_id),
+                    "total": total,
+                    "breakdown": breakdown,
+                    "is_friend": is_friend,
+                }
+            )
+        enriched_dist.sort(key=lambda x: x["total"], reverse=True)
+        summary["training_partner_dist_enriched"] = enriched_dist
+        summary["training_partner_turns_seen"] = len(summary.get("stats_history", []))
+
+    # ── Training actions ──
+    _CMD_LABELS_INT = {101: "Speed", 102: "Stamina", 103: "Power", 105: "Guts", 106: "Wiz"}
+    for ta in summary.get("training_actions", []):
+        cid = ta.get("command_id")
+        if cid:
+            ta["command_name"] = _CMD_LABELS_INT.get(cid, f"Cmd {cid}")
+
+    # ── Skills & races ──
     for sk in summary.get("skills_acquired", []):
         sk["name"] = skill_name(sk["skill_id"])
     for sk in summary.get("skill_tips", []):
@@ -305,7 +374,7 @@ def session_detail(name: str):
         if rr.get("race_instance_id"):
             rr["race_name"] = race_instance_name(rr["race_instance_id"])
 
-    # Enrich events with master DB lookups
+    # ── Events ──
     for ev in summary.get("events_seen", []):
         sid = ev.get("story_id")
         if sid:
@@ -324,13 +393,10 @@ def session_detail(name: str):
     for ec in summary.get("event_choices", []):
         sid = ec.get("story_id")
         eid = ec.get("event_id")
-
-        # If story_id is missing but event_id is present, resolve it
         if not sid and eid:
             sid = event_id_to_story_id(eid)
             if sid:
                 ec["story_id"] = sid
-
         if sid:
             ei = event_info(sid)
             if ei:
@@ -343,15 +409,116 @@ def session_detail(name: str):
             else:
                 ec["name"] = story_name(sid)
         elif eid:
-            # Last resort: annotate with event_id-derived name
             ec["name"] = event_name_by_event_id(eid)
 
+    # ── Merge events_seen + event_choices ──
+    _choices_by_sid: dict[int, dict] = {}
+    for ec in summary.get("event_choices", []):
+        sid = ec.get("story_id")
+        if sid:
+            _choices_by_sid[sid] = ec
+
+    merged: list[dict] = []
+    _seen_sids: set[int] = set()
+    for ev in summary.get("events_seen", []):
+        sid = ev.get("story_id")
+        entry = dict(ev)
+        if sid and sid in _choices_by_sid:
+            ch = _choices_by_sid[sid]
+            entry["choice_number"] = ch.get("choice_number")
+            entry["stat_deltas"] = ch.get("stat_deltas")
+            if ch.get("choice_texts"):
+                entry["choice_texts"] = ch["choice_texts"]
+        if sid:
+            _seen_sids.add(sid)
+        merged.append(entry)
+
+    for ec in summary.get("event_choices", []):
+        sid = ec.get("story_id")
+        if sid and sid not in _seen_sids:
+            merged.append(ec)
+            _seen_sids.add(sid)
+
+    summary["events_merged"] = merged
+
+    # ── Compute a compact header label for multi-career display ──
+    stats = summary.get("latest_stats", {})
+    if stats:
+        total = (
+            stats.get("speed", 0)
+            + stats.get("stamina", 0)
+            + stats.get("power", 0)
+            + stats.get("guts", 0)
+            + stats.get("wiz", 0)
+        )
+        summary["_stats_total"] = total
+        summary["_turn_range"] = f"T1-T{stats.get('turn', '?')}"
+    else:
+        summary["_stats_total"] = 0
+        summary["_turn_range"] = ""
+
+
+@app.route("/session/<name>")
+def session_detail(name: str):
+    session = get_session(name)
+    if not session:
+        return "Session not found", 404
+
+    careers, other_races = build_session_summaries(name)
+    for career in careers:
+        _enrich_career_summary(career)
+
+    # Enrich non-career race results (CM, PvP, etc.) with names
+    for rr in other_races:
+        if rr.get("race_instance_id"):
+            rr["race_name"] = race_instance_name(rr["race_instance_id"])
+
     net = get_network_events(name)
+    races = get_races(name)
+
+    # Backfill race_results from detected races for single-career sessions
+    # (multi-career: each career already has its own race_results from the parser)
+    if len(careers) == 1 and not careers[0].get("race_results") and races:
+        summary = careers[0]
+        for race in races:
+            meta = race.get("race_metadata", {})
+            rid = meta.get("race_instance_id")
+
+            result_order = None
+            entry_count = None
+            summaries = race.get("horse_summaries", [])
+            if summaries:
+                entry_count = len(summaries)
+                player = next(
+                    (h for h in summaries if h.get("horse_index") == 0),
+                    summaries[0] if summaries else None,
+                )
+                if player:
+                    result_order = player.get("finish_order") or player.get("estimated_rank")
+
+            rr = {
+                "race_instance_id": rid,
+                "program_id": meta.get("program_id"),
+                "result_order": result_order,
+                "entry_count": entry_count,
+                "turn": 0,
+                "api": race.get("api", ""),
+            }
+            if rid:
+                rr["race_name"] = race_instance_name(rid)
+            else:
+                rr["race_name"] = race.get("_race_label", f"Race {race.get('_race_index', '?')}")
+            summary["race_results"].append(rr)
+
+    # Primary summary = last career (for backward compat with parts of the template)
+    summary = careers[-1] if careers else {}
 
     return render_template(
         "session.html",
         session=session,
-        races=get_races(name),
+        careers=careers,
+        other_races=other_races,
+        races=races,
         network=net["events"],
         network_stats=net["stats"],
         summary=summary,
@@ -1335,6 +1502,153 @@ def api_recorder_stop():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     return jsonify({"status": "stopping"})
+
+
+# ── Routes: Asset extraction ───────────────────────────────────────────
+
+_asset_extraction_running: bool = False
+_asset_extraction_progress: dict = {
+    "processed": 0,
+    "total": 0,
+    "found": 0,
+    "error": None,
+    "status": "idle",
+    "phase": "",
+}
+_asset_extraction_lock = threading.Lock()
+
+
+@app.route("/api/setup/extract_assets", methods=["POST"])
+def api_extract_assets():
+    """Run support-card + character portrait image extraction in background."""
+    global _asset_extraction_running
+
+    with _asset_extraction_lock:
+        if _asset_extraction_running:
+            return jsonify({"error": "Asset extraction already running"}), 400
+
+    # Resolve game data directory (same logic as story extraction)
+    db_path = get_db_path()
+    game_dir = None
+    if db_path:
+        gdd = _find_game_data_dir(db_path)
+        if gdd:
+            game_dir = Path(gdd)
+    if not game_dir:
+        cfg_file = _APP_DIR / "config.json"
+        if cfg_file.is_file():
+            with contextlib.suppress(Exception):
+                cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
+                gdd = cfg.get("game_data_dir")
+                if gdd and (Path(gdd) / "dat").is_dir():
+                    game_dir = Path(gdd)
+    if not game_dir:
+        return jsonify(
+            {"error": "Game data directory not found. Set master.mdb or game dir first."}
+        ), 400
+    if not (game_dir / "meta").is_file():
+        return jsonify({"error": f"meta database not found in {game_dir}"}), 400
+
+    # Optional: restrict to specific types
+    data = request.get_json(silent=True) or {}
+    extract_type = data.get("type", "all")  # "support", "portraits", or "all"
+
+    with _asset_extraction_lock:
+        _asset_extraction_running = True
+        _asset_extraction_progress.update(
+            {
+                "processed": 0,
+                "total": 0,
+                "found": 0,
+                "error": None,
+                "status": "starting",
+                "phase": "",
+            }
+        )
+
+    threading.Thread(
+        target=_run_asset_extraction, args=(game_dir, extract_type), daemon=True
+    ).start()
+    return jsonify({"status": "started", "game_dir": str(game_dir), "type": extract_type})
+
+
+def _run_asset_extraction(game_dir: Path, extract_type: str) -> None:
+    """Background thread for asset image extraction."""
+    global _asset_extraction_running
+    try:
+        from extract_assets import extract_chara_portraits, extract_support_card_images
+
+        # Wire extract_assets logger into gui.log
+        ea_logger = logging.getLogger("extract_assets")
+        if not ea_logger.handlers:
+            ea_logger.setLevel(logging.DEBUG)
+        for h in log.handlers:
+            if h not in ea_logger.handlers:
+                ea_logger.addHandler(h)
+
+        total_found = 0
+
+        def _progress(processed, total, found):
+            with _asset_extraction_lock:
+                _asset_extraction_progress["processed"] = processed
+                _asset_extraction_progress["total"] = total
+                _asset_extraction_progress["found"] = found
+
+        if extract_type in ("support", "all"):
+            with _asset_extraction_lock:
+                _asset_extraction_progress["phase"] = "support cards"
+                _asset_extraction_progress["status"] = "extracting"
+            cards_dir = Path(app.static_folder) / "cards"
+            results = extract_support_card_images(game_dir, cards_dir, progress_callback=_progress)
+            total_found += len(results)
+            log.info("Asset extraction: %d support card images", len(results))
+            # Refresh the in-memory support card image index
+            _SC_IMAGES.clear()
+            _scan_support_card_images()
+
+        if extract_type in ("portraits", "all"):
+            with _asset_extraction_lock:
+                _asset_extraction_progress["phase"] = "character portraits"
+                _asset_extraction_progress["processed"] = 0
+                _asset_extraction_progress["total"] = 0
+                _asset_extraction_progress["found"] = 0
+            uma_dir = Path(app.static_folder) / "uma"
+            results = extract_chara_portraits(game_dir, uma_dir, progress_callback=_progress)
+            total_found += len(results)
+            log.info("Asset extraction: %d character portraits", len(results))
+            # Refresh the in-memory uma image index
+            _UMA_IMAGES.clear()
+            _scan_uma_images()
+
+        with _asset_extraction_lock:
+            _asset_extraction_progress["status"] = "done"
+            _asset_extraction_progress["found"] = total_found
+
+    except ImportError:
+        log.error("UnityPy not installed — cannot extract assets")
+        with _asset_extraction_lock:
+            _asset_extraction_progress["error"] = (
+                "UnityPy is not installed. Install it with: pip install UnityPy"
+            )
+    except Exception as e:
+        log.exception("Asset extraction failed")
+        with _asset_extraction_lock:
+            _asset_extraction_progress["error"] = str(e)
+    finally:
+        with _asset_extraction_lock:
+            _asset_extraction_running = False
+
+
+@app.route("/api/setup/extract_assets_status")
+def api_extract_assets_status():
+    """Poll asset extraction progress."""
+    with _asset_extraction_lock:
+        return jsonify(
+            {
+                "running": _asset_extraction_running,
+                **_asset_extraction_progress,
+            }
+        )
 
 
 # ── Main ───────────────────────────────────────────────────────────────

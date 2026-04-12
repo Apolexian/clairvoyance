@@ -86,18 +86,108 @@
   .stats-secondary span { white-space: nowrap; }
   .stats-secondary strong { color: var(--text); }
 
-  .support-list { list-style: none; padding: 0; }
-  .support-list li {
-    padding: 0.3rem 0; font-size: 0.82rem; color: var(--text);
-    border-bottom: 1px solid var(--border);
+  /* ── Deck Grid (3 × 2) ── */
+  .deck-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
   }
-  .support-list li:last-child { border-bottom: none; }
-  .support-id { font-size: 0.72rem; color: var(--text-muted); margin-left: 0.4rem; }
+  .deck-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.35rem 0.45rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    overflow: hidden;
+  }
+  .deck-tile:hover { border-color: var(--accent-dim); box-shadow: 0 0 6px rgba(88,166,255,0.1); }
+  .deck-tile.is-friend { border-color: var(--accent-dim); }
+
+  .deck-tile-img-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .deck-tile-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .deck-tile-placeholder {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    opacity: 0.35;
+    user-select: none;
+  }
+  .deck-tile-name {
+    margin-top: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .deck-tile-id {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+  }
   .friend-badge {
-    font-size: 0.65rem; color: var(--accent); background: rgba(88,166,255,0.12);
-    padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.5rem;
+    font-size: 0.6rem; color: var(--accent); background: rgba(88,166,255,0.12);
+    padding: 0.05rem 0.35rem; border-radius: 4px;
     font-weight: 600; letter-spacing: 0.02em;
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
   }
+
+  .support-id { font-size: 0.72rem; color: var(--text-muted); margin-left: 0.4rem; }
+
+  /* Small thumbnails in partner dist table */
+  .pd-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Partner Distribution Table ── */
+  .partner-dist-card { grid-column: 1 / -1; }
+  .partner-dist-table {
+    width: 100%; border-collapse: collapse; font-size: 0.82rem;
+  }
+  .partner-dist-table th {
+    text-align: left; font-weight: 600; color: var(--accent);
+    padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.75rem;
+  }
+  .partner-dist-table td {
+    padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text);
+  }
+  .pd-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; display: flex; align-items: center; }
+  .pd-name > span { overflow: hidden; text-overflow: ellipsis; }
+  .pd-num { text-align: center; min-width: 38px; font-variant-numeric: tabular-nums; }
+  .pd-num.pd-has-val { color: var(--text); font-weight: 600; }
+  .pd-num:not(.pd-has-val) { color: var(--text-muted); opacity: 0.5; }
+  .pd-total { font-weight: 700; color: var(--accent); }
 
   .skill-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
   .skill-list li {
@@ -117,11 +207,6 @@
   .result-2nd { color: var(--silver); }
   .result-3rd { color: var(--bronze); }
 
-  .api-breakdown { max-height: 300px; overflow-y: auto; }
-  .api-breakdown table { width: 100%; border-collapse: collapse; font-size: 0.78rem; font-family: monospace; }
-  .api-breakdown th { text-align: left; padding: 0.25rem 0.5rem; color: var(--accent); font-weight: 600; border-bottom: 1px solid var(--border); }
-  .api-breakdown td { padding: 0.25rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text); }
-  .api-breakdown td:last-child { text-align: right; color: var(--orange); }
 
   .summary-empty { color: var(--text-muted); font-size: 0.85rem; font-style: italic; padding: 0.5rem 0; }
   .stats-chart-wrap { margin-top: 0.75rem; height: 200px; }
@@ -205,7 +290,6 @@
   }
   .delta-badge.positive { background: rgba(63,185,80,0.15); color: #3fb950; }
   .delta-badge.negative { background: rgba(248,81,73,0.15); color: #f85149; }
-  .event-source-tag { font-size: 0.7rem; margin-left: 0.2rem; }
 
   /* ── Network Stats Bar ── */
   .net-stats-bar {
@@ -355,6 +439,87 @@
   .timeline-badge.msgpack_serialize { background: rgba(210,153,34,0.12); color: #d29922; }
   .timeline-badge.msgpack_deserialize { background: rgba(210,153,34,0.12); color: #d29922; }
   .timeline-badge.api_error { background: rgba(248,81,73,0.15); color: #f85149; }
+
+  /* ── Career Accordion (multi-career sessions) ── */
+  .career-panel {
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    overflow: hidden;
+  }
+  .career-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+    color: var(--text);
+    font-family: inherit;
+  }
+  .career-header:hover { background: var(--bg-hover); }
+
+  .career-header-portrait {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-dim);
+    flex-shrink: 0;
+  }
+  .career-number {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(88,166,255,0.12);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .career-header-info { flex: 1; min-width: 0; }
+  .career-header-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .career-header-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.1rem;
+  }
+  .career-header-stats {
+    display: flex;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .career-header-stats .ch-total {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .career-chevron {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .career-panel.expanded .career-chevron { transform: rotate(90deg); }
+
+  .career-body { padding: 0 1rem 1rem; }
 </style>
 {% endblock %}
 
@@ -368,19 +533,6 @@
   <span class="session-meta">{{ session.created[:19] if session.created else session.name }}</span>
 </div>
 
-<!-- Stats overview -->
-<div class="stats-bar">
-  {% for domain, count in session.counts.items() %}
-  <div class="stat-card">
-    <div class="stat-value">{{ count }}</div>
-    <div class="stat-label">{{ domain }}</div>
-  </div>
-  {% endfor %}
-  <div class="stat-card accent">
-    <div class="stat-value">{{ races | length }}</div>
-    <div class="stat-label">races detected</div>
-  </div>
-</div>
 
 <!-- View Tabs -->
 <div class="view-tabs">
@@ -392,6 +544,38 @@
 <!--  SUMMARY VIEW                                                  -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div id="view-summary" class="view-panel active">
+  {% set multi = careers|length > 1 if careers is defined else false %}
+
+  {% for summary in (careers if careers is defined else [summary]) %}
+  {# ── Multi-career: collapsible panel wrapper ── #}
+  {% if multi %}
+  <div class="career-panel {% if loop.last %}expanded{% endif %}" id="career-{{ loop.index0 }}">
+    <button class="career-header" onclick="toggleCareer({{ loop.index0 }})">
+      {% if summary.chara_image %}
+      <img src="{{ summary.chara_image }}" alt="" class="career-header-portrait">
+      {% endif %}
+      <span class="career-number">#{{ loop.index }}</span>
+      <div class="career-header-info">
+        <div class="career-header-name">{{ summary.chara_name or 'Unknown Character' }}</div>
+        <div class="career-header-meta">
+          {% if summary.outfit_title %}<span>{{ summary.outfit_title }}</span>{% endif %}
+          {% if summary.scenario_name %}<span>{{ summary.scenario_name }}</span>{% endif %}
+          {% if summary._turn_range %}<span>{{ summary._turn_range }}</span>{% endif %}
+        </div>
+      </div>
+      {% if summary._stats_total %}
+      <div class="career-header-stats">
+        {% set s = summary.latest_stats %}
+        <span>{{ s.speed }}/{{ s.stamina }}/{{ s.power }}/{{ s.guts }}/{{ s.wiz }}</span>
+        <span class="ch-total">= {{ summary._stats_total }}</span>
+      </div>
+      {% endif %}
+      <span class="career-chevron">▶</span>
+    </button>
+    <div class="career-body" id="career-body-{{ loop.index0 }}" {% if not loop.last %}style="display:none"{% endif %}>
+  {% endif %}
+
+  {# ── Career content ── #}
   {% if summary and summary.latest_stats %}
   <div class="summary-grid">
     <!-- Character & Stats -->
@@ -430,26 +614,83 @@
       </div>
 
       {% if summary.stats_history | length > 2 %}
-      <div class="stats-chart-wrap"><canvas id="statsChart"></canvas></div>
+      <div class="stats-chart-wrap"><canvas id="{% if multi %}statsChart-{{ loop.index0 }}{% else %}statsChart{% endif %}"></canvas></div>
       {% endif %}
     </div>
 
-    <!-- Support Cards -->
+    <!-- Support Deck (3 × 2 grid) -->
     <div class="summary-card">
-      <h3>Support Cards</h3>
+      <h3>Support Deck</h3>
       {% if summary.support_card_names or summary.friend_support_card_id %}
-      <ul class="support-list">
+      <div class="deck-grid">
         {% for sc in summary.support_card_names %}
-        <li>{{ sc.name }}<span class="support-id">#{{ sc.id }}</span></li>
+        <div class="deck-tile">
+          <div class="deck-tile-img-wrap">
+            {% if sc.image %}
+            <img src="{{ sc.image }}" alt="{{ sc.name }}" loading="lazy">
+            {% else %}
+            <span class="deck-tile-placeholder">🃏</span>
+            {% endif %}
+          </div>
+          <div class="deck-tile-name">{{ sc.name }}</div>
+          <div class="deck-tile-id">#{{ sc.id }}</div>
+        </div>
         {% endfor %}
         {% if summary.friend_support_card_id %}
-        <li class="friend-card">{{ summary.friend_support_card_name or summary.friend_support_card_id }}<span class="support-id">#{{ summary.friend_support_card_id }}</span><span class="friend-badge">Friend</span></li>
+        <div class="deck-tile is-friend">
+          <span class="friend-badge">Friend</span>
+          <div class="deck-tile-img-wrap">
+            {% if summary.friend_support_card_image %}
+            <img src="{{ summary.friend_support_card_image }}" alt="{{ summary.friend_support_card_name }}" loading="lazy">
+            {% else %}
+            <span class="deck-tile-placeholder">🤝</span>
+            {% endif %}
+          </div>
+          <div class="deck-tile-name">{{ summary.friend_support_card_name or summary.friend_support_card_id }}</div>
+          <div class="deck-tile-id">#{{ summary.friend_support_card_id }}</div>
+        </div>
         {% endif %}
-      </ul>
+      </div>
       {% else %}
       <div class="summary-empty">No support card data captured</div>
       {% endif %}
     </div>
+
+    <!-- Training Partner Distribution -->
+    {% if summary.training_partner_dist_enriched %}
+    <div class="summary-card partner-dist-card">
+      <h3>Training Partner Distribution</h3>
+      <table class="partner-dist-table">
+        <thead>
+          <tr>
+            <th>Support Card</th>
+            <th class="pd-num">Spd</th>
+            <th class="pd-num">Sta</th>
+            <th class="pd-num">Pow</th>
+            <th class="pd-num">Gut</th>
+            <th class="pd-num">Wiz</th>
+            <th class="pd-num">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sc in summary.training_partner_dist_enriched %}
+          <tr>
+            <td class="pd-name">
+              {% if sc.image %}<img src="{{ sc.image }}" alt="" class="pd-thumb" loading="lazy">{% endif %}
+              <span>{{ sc.name }}<span class="support-id">#{{ sc.id }}</span>
+              {% if sc.is_friend %}<span class="friend-badge" style="position:static;">Friend</span>{% endif %}</span>
+            </td>
+            {% for stat in ["Speed", "Stamina", "Power", "Guts", "Wiz"] %}
+            {% set cnt = sc.breakdown.get(stat, 0) %}
+            <td class="pd-num{% if cnt > 0 %} pd-has-val{% endif %}">{{ cnt or "–" }}</td>
+            {% endfor %}
+            <td class="pd-num pd-total">{{ sc.total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
 
     <!-- Race Results -->
     <div class="summary-card">
@@ -500,12 +741,12 @@
       {% endif %}
     </div>
 
-    <!-- Event Choices -->
+    <!-- Events -->
     <div class="summary-card">
-      <h3>Event Choices ({{ summary.event_choices | length }})</h3>
-      {% if summary.event_choices %}
+      <h3>Events ({{ summary.events_merged | length }})</h3>
+      {% if summary.events_merged %}
       <div class="event-choices-list">
-        {% for ec in summary.event_choices %}
+        {% for ec in summary.events_merged %}
         <div class="event-choice-item">
           <div class="event-choice-header">
             <span class="event-choice-name">{{ ec.name or ('story:' ~ ec.story_id) }}</span>
@@ -521,9 +762,9 @@
             {% endif %}
             {% if ec.choice_number %}
               {% if ec.choice_texts and ec.choice_number <= ec.choice_texts|length %}
-                <span class="event-choice-badge chosen" title="Chose option {{ ec.choice_number }} of {{ ec.num_branches or ec.choice_texts|length }}">✓ {{ ec.choice_texts[ec.choice_number - 1] }}</span>
+                <span class="event-choice-badge chosen" title="Chose option {{ ec.choice_number }} of {{ ec.choice_texts|length }}">✓ {{ ec.choice_texts[ec.choice_number - 1] }}</span>
               {% else %}
-                <span class="event-choice-badge">Chose option {{ ec.choice_number }}{% if ec.num_branches %} of {{ ec.num_branches }}{% endif %}</span>
+                <span class="event-choice-badge">Chose option {{ ec.choice_number }}{% if ec.num_branches and ec.num_branches > 1 and ec.choice_number <= ec.num_branches %} of {{ ec.num_branches }}{% endif %}</span>
               {% endif %}
             {% endif %}
           </div>
@@ -548,78 +789,70 @@
         {% endfor %}
       </div>
       {% else %}
-      <div class="summary-empty">No event choices captured</div>
-      {% endif %}
-    </div>
-
-    <!-- Events Seen -->
-    <div class="summary-card">
-      <h3>Events ({{ summary.events_seen | length }})</h3>
-      {% if summary.events_seen %}
-      <ul class="skill-list">
-        {% for ev in summary.events_seen %}
-        <li>
-          <span>
-            {{ ev.name or ('story:' ~ ev.story_id) }}
-            {% if ev.source_type == 'support' %}<span class="event-source-tag">🃏</span>{% endif %}
-            {% if ev.source_type == 'card' %}<span class="event-source-tag">🏇</span>{% endif %}
-            {% if ev.has_choice %}<span class="event-source-tag" title="{{ ev.num_branches }} branches">🔀</span>{% endif %}
-          </span>
-          <span class="skill-turn">T{{ ev.turn }}</span>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
       <div class="summary-empty">No events captured</div>
       {% endif %}
     </div>
 
-    <!-- API Call Breakdown -->
-    <div class="summary-card">
-      <h3>API Calls ({{ summary.total_api_calls }})</h3>
-      {% if summary.api_breakdown %}
-      <div class="api-breakdown">
-        <table>
-          <thead><tr><th>API</th><th>Count</th></tr></thead>
-          <tbody>
-            {% for api, count in summary.api_breakdown | dictsort(by='value', reverse=true) %}
-            <tr><td>{{ api }}</td><td>{{ count }}</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% endif %}
-      {% if summary.first_ts and summary.last_ts %}
-      <div style="margin-top:0.5rem; font-size:0.75rem; color:var(--text-muted);">
-        {{ summary.first_ts[:19] }} → {{ summary.last_ts[:19] }}
-      </div>
-      {% endif %}
-    </div>
-
-    <!-- Detected Races (links to detail pages) -->
-    {% if races %}
-    <div class="summary-card" style="grid-column: 1 / -1;">
-      <h3>Detected Races ({{ races | length }})</h3>
-      <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
-        {% for race in races %}
-        <a href="/session/{{ session.name }}/race/{{ race._race_index }}" style="text-decoration:none; padding:0.4rem 0.8rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.82rem; color:var(--text); transition:border-color 0.15s, background 0.15s; display:inline-block;">
-          <span style="color:var(--accent); font-weight:600;">{{ race._race_label }}</span>
-          <span style="color:var(--text-muted); font-size:0.72rem; margin-left:0.3rem;">
-            {{ race._source }}
-            {% if race.horse_summaries %}· {{ race.horse_summaries | length }} horses{% endif %}
-          </span>
-        </a>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
   </div>
   {% else %}
   <div class="summary-empty" style="text-align:center; padding:2rem;">
-    No career/training data found in this session.<br>
+    No career/training data found{% if multi %} in this career run{% endif %}.<br>
+    {% if not multi %}
     The summary view shows character stats, support cards, races, and skills
     extracted from Single Mode API responses.
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# ── Close multi-career panel wrapper ── #}
+  {% if multi %}
+    </div>{# .career-body #}
+  </div>{# .career-panel #}
+  {% endif %}
+  {% endfor %}
+
+  <!-- Detected Races (session-level, outside career loop) -->
+  {% if races %}
+  <div class="summary-card" style="margin-top: 1rem;">
+    <h3>Detected Races ({{ races | length }})</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+      {% for race in races %}
+      <a href="/session/{{ session.name }}/race/{{ race._race_index }}" style="text-decoration:none; padding:0.4rem 0.8rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.82rem; color:var(--text); transition:border-color 0.15s, background 0.15s; display:inline-block;">
+        <span style="color:var(--accent); font-weight:600;">{{ race._race_label }}</span>
+        <span style="color:var(--text-muted); font-size:0.72rem; margin-left:0.3rem;">
+          {{ race._source }}
+          {% if race.horse_summaries %}· {{ race.horse_summaries | length }} horses{% endif %}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Other Races: CM, PvP, Team Stadium, etc. (session-level) -->
+  {% if other_races is defined and other_races %}
+  <div class="summary-card" style="margin-top: 0.75rem;">
+    <h3>Other Races ({{ other_races | length }})</h3>
+    <p style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 0.5rem;">Champions Meeting, Room Match, Team Stadium, and other non-career races.</p>
+    <table class="race-results-table">
+      <thead><tr><th>Race</th><th>Result</th><th>Mode</th></tr></thead>
+      <tbody>
+        {% for rr in other_races %}
+        <tr>
+          <td>{{ rr.race_name or ('Race ' ~ loop.index) }}</td>
+          <td>
+            {% if rr.result_order == 1 %}<span class="result-1st">1st</span>
+            {% elif rr.result_order == 2 %}<span class="result-2nd">2nd</span>
+            {% elif rr.result_order == 3 %}<span class="result-3rd">3rd</span>
+            {% elif rr.result_order %}{{ rr.result_order }}th
+            {% else %}<span style="color:var(--text-muted)">—</span>{% endif %}
+            {% if rr.entry_count %}<span style="color:var(--text-muted); font-size:0.72rem">/{{ rr.entry_count }}</span>{% endif %}
+          </td>
+          <td style="font-size:0.75rem; color:var(--text-muted);">{{ rr.api | replace('RaceStart', '') | replace('RaceResult', '') | replace('Start', '') | replace('Result', '') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
   {% endif %}
 </div>
@@ -1007,11 +1240,23 @@ function jvCopy(btn) {
   });
 }
 
-/* ── Stats Chart ─────────────────────────────────────── */
-{% if summary and summary.stats_history | length > 2 %}
+/* ── Career Accordion ────────────────────────────────── */
+function toggleCareer(idx) {
+  const panel = document.getElementById('career-' + idx);
+  const body = document.getElementById('career-body-' + idx);
+  if (!panel || !body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : '';
+  panel.classList.toggle('expanded', !isOpen);
+}
+
+/* ── Stats Charts ────────────────────────────────────── */
+{% set multi = careers|length > 1 if careers is defined else false %}
+{% for career in (careers if careers is defined else [summary]) %}
+{% if career.stats_history | length > 2 %}
 (function() {
-  const history = {{ summary.stats_history | tojson }};
-  const ctx = document.getElementById('statsChart');
+  const history = {{ career.stats_history | tojson }};
+  const ctx = document.getElementById('{% if multi %}statsChart-{{ loop.index0 }}{% else %}statsChart{% endif %}');
   if (!ctx) return;
   new Chart(ctx, {
     type: 'line',
@@ -1037,5 +1282,6 @@ function jvCopy(btn) {
   });
 })();
 {% endif %}
+{% endfor %}
 </script>
 {% endblock %}
