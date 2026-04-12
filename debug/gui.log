@@ -1,17 +1,55 @@
-2026-04-12 10:01:17,136 [INFO] clairvoyance.gui - Clairvoyance GUI starting - log file: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\gui.log
-2026-04-12 10:01:28,372 [INFO] clairvoyance.gui - _find_game_data_dir: starting from mdb_path=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb (resolved=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb)
-2026-04-12 10:01:28,373 [DEBUG] clairvoyance.gui - _find_game_data_dir: no dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master
-2026-04-12 10:01:28,373 [INFO] clairvoyance.gui - _find_game_data_dir: FOUND dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume (level 1 up)
-2026-04-12 10:01:29,950 [DEBUG] clairvoyance.gui - Looking for tool: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discover.exe (APP_DIR=C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance)
-2026-04-12 10:01:30,026 [INFO] clairvoyance.gui - Setup started (pid=26332): C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discover.exe --all
-2026-04-12 10:01:35,846 [INFO] clairvoyance.gui - Process exited with code 0 (pid 26332)
-2026-04-12 10:01:35,847 [DEBUG] clairvoyance.gui - Looking for tool: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\analyse.exe (APP_DIR=C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance)
-2026-04-12 10:01:37,054 [INFO] clairvoyance.gui - Process exited with code 0 (pid 39004)
-2026-04-12 10:01:37,055 [INFO] clairvoyance.gui - Setup pipeline done - interesting.json confirmed at C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discovery\interesting.json
-2026-04-12 10:01:38,036 [INFO] clairvoyance.gui - _find_game_data_dir: starting from mdb_path=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb (resolved=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb)
-2026-04-12 10:01:38,037 [DEBUG] clairvoyance.gui - _find_game_data_dir: no dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master
-2026-04-12 10:01:38,037 [INFO] clairvoyance.gui - _find_game_data_dir: FOUND dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume (level 1 up)
-2026-04-12 10:01:38,787 [INFO] clairvoyance.gui - Story extraction: game_dir=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume, dat_dir=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\dat
-2026-04-12 10:01:38,803 [INFO] clairvoyance.gui - dat/ has 1024 subdirectories: ['22', '23', '24', '25', '26', '27', '2A', '2B', '2C', '2D', '2E', '2F', '2G', '2H', '2I', '2J', '2K', '2L', '2M', '2N']
-2026-04-12 10:01:38,804 [INFO] clairvoyance.gui - Meta returned 0 story timeline entries
-2026-04-12 10:01:38,805 [ERROR] clairvoyance.gui - meta database found at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\meta but returned 0 story entries. It may be encrypted or have a different schema. Try using an unencrypted copy named meta_umaviewer.
+2026-04-12 10:27:42,616 [INFO] clairvoyance.gui - Clairvoyance GUI starting - log file: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\gui.log
+2026-04-12 10:27:49,806 [INFO] clairvoyance.gui - _find_game_data_dir: starting from mdb_path=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb (resolved=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb)
+2026-04-12 10:27:49,806 [DEBUG] clairvoyance.gui - _find_game_data_dir: no dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master
+2026-04-12 10:27:49,806 [INFO] clairvoyance.gui - _find_game_data_dir: FOUND dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume (level 1 up)
+2026-04-12 10:27:51,112 [DEBUG] clairvoyance.gui - Looking for tool: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discover.exe (APP_DIR=C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance)
+2026-04-12 10:27:51,197 [INFO] clairvoyance.gui - Setup started (pid=7348): C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discover.exe --all
+2026-04-12 10:27:57,227 [INFO] clairvoyance.gui - Process exited with code 0 (pid 7348)
+2026-04-12 10:27:57,227 [DEBUG] clairvoyance.gui - Looking for tool: C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\analyse.exe (APP_DIR=C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance)
+2026-04-12 10:27:58,407 [INFO] clairvoyance.gui - Process exited with code 0 (pid 12920)
+2026-04-12 10:27:58,407 [INFO] clairvoyance.gui - Setup pipeline done - interesting.json confirmed at C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance\discovery\interesting.json
+2026-04-12 10:27:59,205 [INFO] clairvoyance.gui - _find_game_data_dir: starting from mdb_path=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb (resolved=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb)
+2026-04-12 10:27:59,206 [DEBUG] clairvoyance.gui - _find_game_data_dir: no dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master
+2026-04-12 10:27:59,206 [INFO] clairvoyance.gui - _find_game_data_dir: FOUND dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume (level 1 up)
+2026-04-12 10:27:59,942 [INFO] clairvoyance.gui - Story extraction: game_dir=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume, dat_dir=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\dat
+2026-04-12 10:27:59,959 [INFO] clairvoyance.gui - dat/ has 1024 subdirectories: ['22', '23', '24', '25', '26', '27', '2A', '2B', '2C', '2D', '2E', '2F', '2G', '2H', '2I', '2J', '2K', '2L', '2M', '2N']
+2026-04-12 10:27:59,960 [INFO] extract_story_text - meta plain open failed (file is not a database) — attempting decryption...
+2026-04-12 10:27:59,961 [DEBUG] extract_story_text - pysqlcipher3 not available
+2026-04-12 10:27:59,961 [DEBUG] extract_story_text - sqlcipher3 not available
+2026-04-12 10:27:59,961 [DEBUG] extract_story_text - sqlite3mc DLL search dirs: ['C:\\Users\\nikit\\Documents\\clairvoyance\\dist\\Clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\dist\\Clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\dist\\Clairvoyance\\_internal', 'C:\\Users\\nikit\\Documents\\clairvoyance\\dist\\Clairvoyance\\_internal']
+2026-04-12 10:27:59,998 [INFO] extract_story_text - Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance
+2026-04-12 10:27:59,999 [INFO] extract_story_text - Decrypting meta via sqlite3mc DLL...
+2026-04-12 10:28:00,022 [ERROR] extract_story_text - sqlite3mc decryption failed: exception: access violation reading 0x000000006E7D1C90
+2026-04-12 10:28:00,022 [ERROR] extract_story_text - Could not decrypt meta database at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\meta.
+The meta file is encrypted (sqlite3mc RC4 cipher).
+To fix this, either:
+  • Place sqlite3mc_x64.dll next to this program (Windows)
+  • Install pysqlcipher3: pip install pysqlcipher3
+2026-04-12 10:28:00,022 [INFO] clairvoyance.gui - Meta returned 0 story timeline entries
+2026-04-12 10:28:00,024 [ERROR] clairvoyance.gui - meta database at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\meta returned 0 story entries.
+It may be encrypted and decryption failed.
+Place sqlite3mc_x64.dll next to the program, or install pysqlcipher3.
+2026-04-12 10:28:17,340 [INFO] clairvoyance.gui - _find_game_data_dir: starting from mdb_path=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb (resolved=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb)
+2026-04-12 10:28:17,342 [DEBUG] clairvoyance.gui - _find_game_data_dir: no dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master
+2026-04-12 10:28:17,342 [INFO] clairvoyance.gui - _find_game_data_dir: FOUND dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume (level 1 up)
+2026-04-12 10:28:18,781 [INFO] clairvoyance.gui - _find_game_data_dir: starting from mdb_path=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb (resolved=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master\master.mdb)
+2026-04-12 10:28:18,781 [DEBUG] clairvoyance.gui - _find_game_data_dir: no dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\master
+2026-04-12 10:28:18,781 [INFO] clairvoyance.gui - _find_game_data_dir: FOUND dat/ at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume (level 1 up)
+2026-04-12 10:28:18,782 [INFO] clairvoyance.gui - Story extraction: game_dir=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume, dat_dir=C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\dat
+2026-04-12 10:28:18,797 [INFO] clairvoyance.gui - dat/ has 1024 subdirectories: ['22', '23', '24', '25', '26', '27', '2A', '2B', '2C', '2D', '2E', '2F', '2G', '2H', '2I', '2J', '2K', '2L', '2M', '2N']
+2026-04-12 10:28:18,798 [INFO] extract_story_text - meta plain open failed (file is not a database) — attempting decryption...
+2026-04-12 10:28:18,798 [DEBUG] extract_story_text - pysqlcipher3 not available
+2026-04-12 10:28:18,798 [DEBUG] extract_story_text - sqlcipher3 not available
+2026-04-12 10:28:18,799 [DEBUG] extract_story_text - sqlite3mc DLL search dirs: ['C:\\Users\\nikit\\Documents\\clairvoyance\\dist\\Clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\dist\\Clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\dist\\Clairvoyance\\_internal', 'C:\\Users\\nikit\\Documents\\clairvoyance\\dist\\Clairvoyance\\_internal']
+2026-04-12 10:28:18,799 [INFO] extract_story_text - Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance\dist\Clairvoyance
+2026-04-12 10:28:18,799 [INFO] extract_story_text - Decrypting meta via sqlite3mc DLL...
+2026-04-12 10:28:18,822 [ERROR] extract_story_text - sqlite3mc decryption failed: exception: access violation reading 0x000000006F0F8BC0
+2026-04-12 10:28:18,823 [ERROR] extract_story_text - Could not decrypt meta database at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\meta.
+The meta file is encrypted (sqlite3mc RC4 cipher).
+To fix this, either:
+  • Place sqlite3mc_x64.dll next to this program (Windows)
+  • Install pysqlcipher3: pip install pysqlcipher3
+2026-04-12 10:28:18,823 [INFO] clairvoyance.gui - Meta returned 0 story timeline entries
+2026-04-12 10:28:18,823 [ERROR] clairvoyance.gui - meta database at C:\Users\nikit\AppData\LocalLow\Cygames\Umamusume\meta returned 0 story entries.
+It may be encrypted and decryption failed.
+Place sqlite3mc_x64.dll next to the program, or install pysqlcipher3.
