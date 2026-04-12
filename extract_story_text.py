@@ -659,6 +659,22 @@ def extract_story_id_from_name(asset_name: str) -> int | None:
     return None
 
 
+_block_keys_logged = False
+
+
+def _get_ci(d: dict, *candidates: str):
+    """Case-insensitive dict lookup.  Try exact candidates first, then lowercase match."""
+    for k in candidates:
+        if k in d:
+            return d[k]
+    lower_map = {k2.lower(): k2 for k2 in d}
+    for k in candidates:
+        real = lower_map.get(k.lower())
+        if real is not None:
+            return d[real]
+    return None
+
+
 def _extract_choices_from_dict(data: dict) -> list[str]:
     """
     Extract choice text labels from a story data dict.
@@ -666,24 +682,82 @@ def _extract_choices_from_dict(data: dict) -> list[str]:
     Works on both parsed JSON and MonoBehaviour typetree dicts.
     The dict has a BlockList array. Blocks with ChoiceDataList
     contain the player's choice options.
+
+    Handles both PascalCase (API JSON) and whatever casing the Unity
+    typetree uses, via case-insensitive key lookup.
     """
+    global _block_keys_logged
     choices: list[str] = []
     block_list = data.get("BlockList", [])
     if not isinstance(block_list, list):
         return choices
+
+    # One-shot diagnostic: log the first block's keys so we can see the real field names.
+    if not _block_keys_logged and block_list:
+        _block_keys_logged = True
+        b0 = block_list[0]
+        if isinstance(b0, dict):
+            log.info(
+                "DIAGNOSTIC: first block keys = %s",
+                list(b0.keys()),
+            )
+            # Also log any key whose name contains "choice" or "select" (case-insensitive)
+            for k, v in b0.items():
+                kl = k.lower()
+                if "choice" in kl or "select" in kl or "option" in kl:
+                    sample = repr(v)[:300] if not isinstance(v, list) else f"list[{len(v)}]"
+                    log.info("DIAGNOSTIC: block[0]['%s'] = %s", k, sample)
+            # Log keys of all blocks that have any choice-like list with items
+            for bi, blk in enumerate(block_list):
+                if not isinstance(blk, dict):
+                    continue
+                for k, v in blk.items():
+                    if isinstance(v, list) and len(v) > 0:
+                        kl = k.lower()
+                        if "choice" in kl or "select" in kl or "option" in kl:
+                            item0 = v[0]
+                            item_info = (
+                                list(item0.keys()) if isinstance(item0, dict) else repr(item0)[:200]
+                            )
+                            log.info(
+                                "DIAGNOSTIC: block[%d]['%s'] has %d items, first item keys=%s",
+                                bi,
+                                k,
+                                len(v),
+                                item_info,
+                            )
+                            break  # one example is enough
+        else:
+            log.info("DIAGNOSTIC: first block is type %s, not dict", type(b0).__name__)
+
     for block in block_list:
         if not isinstance(block, dict):
             continue
-        choice_data_list = block.get("ChoiceDataList")
-        if choice_data_list and isinstance(choice_data_list, list):
-            for choice in choice_data_list:
-                if not isinstance(choice, dict):
-                    continue
-                text = choice.get("Text", "")
-                if isinstance(text, str):
-                    text = text.strip()
-                    if text:
-                        choices.append(text)
+        # Case-insensitive lookup for the choice list
+        choice_data_list = _get_ci(
+            block,
+            "ChoiceDataList",
+            "choiceDataList",
+            "ChoiceDatalist",
+            "SelectDataList",
+            "selectDataList",
+        )
+        if not choice_data_list or not isinstance(choice_data_list, list):
+            continue
+        for choice in choice_data_list:
+            if isinstance(choice, str):
+                # Maybe the list directly contains strings
+                t = choice.strip()
+                if t:
+                    choices.append(t)
+                continue
+            if not isinstance(choice, dict):
+                continue
+            text = _get_ci(choice, "Text", "text", "Name", "name", "Label", "label")
+            if isinstance(text, str):
+                text = text.strip()
+                if text:
+                    choices.append(text)
     return choices
 
 
@@ -707,12 +781,18 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
     """
     Load an asset bundle and extract story choice text.
 
-    Checks both TextAsset objects (JSON story data) and MonoBehaviour
-    objects (serialized StoryTimelineData with typetree) — the game
-    stores story timelines as MonoBehaviour, not TextAsset.
+    The game's story timeline bundles contain multiple MonoBehaviour objects:
+    - One StoryTimelineData object with BlockList (gives us StoryId)
+    - Many StoryTimelineTextClipData objects (ScriptableObject-derived clips),
+      some of which have a non-empty ChoiceDataList with the player's choice text.
+
+    ChoiceDataList is NOT nested inside BlockList blocks -- clips are stored as
+    separate serialized objects (Unity PPtr references from block→track→clip).
+    So we scan ALL MonoBehaviours and collect choices from clip objects.
 
     Returns {story_id: [choice_texts]} for all stories found in the bundle.
     """
+    global _block_keys_logged
     results: dict[int, list[str]] = {}
 
     try:
@@ -725,99 +805,91 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
         log.debug("Failed to load bundle %s: %s", file_path.name, e)
         return results
 
-    text_asset_count = 0
     mono_count = 0
-    json_count = 0
-    blocklist_count = 0
+    story_id: int | None = None
+    all_choices: list[str] = []
 
     for obj in env.objects:
+        if obj.type.name != "MonoBehaviour":
+            continue
+        mono_count += 1
         try:
-            # ── Strategy 1: MonoBehaviour → read_typetree() ──────────
-            # Story timeline data is serialized as MonoBehaviour objects.
-            # read_typetree() returns the full field dict including
-            # BlockList → ChoiceDataList → Text.
-            if obj.type.name == "MonoBehaviour":
-                mono_count += 1
-                try:
-                    tree = obj.read_typetree()
-                except Exception:
-                    continue
-                if not isinstance(tree, dict):
-                    continue
-                # Must have BlockList to be a story timeline
-                if "BlockList" not in tree:
-                    continue
-                json_count += 1
-                choices = _extract_choices_from_dict(tree)
-                if choices:
-                    blocklist_count += 1
-                    # Get story_id: try StoryId field, then m_Name
-                    story_id = None
-                    raw_sid = tree.get("StoryId")
-                    if raw_sid and isinstance(raw_sid, int) and raw_sid > 0:
-                        story_id = raw_sid
-                    if not story_id:
-                        m_name = tree.get("m_Name", "")
-                        if isinstance(m_name, str):
-                            m = re.search(r"storytimeline_?(\d+)", m_name)
-                            if m:
-                                story_id = int(m.group(1))
-                    # Last resort: try Title field numeric suffix
-                    if not story_id:
-                        title = tree.get("Title", "")
-                        if isinstance(title, str):
-                            m = re.search(r"(\d{6,})", title)
-                            if m:
-                                story_id = int(m.group(1))
-                    if story_id:
-                        results[story_id] = choices
-
-            # ── Strategy 2: TextAsset → parse JSON text ──────────────
-            # Kept as fallback in case some bundles use TextAsset.
-            elif obj.type.name == "TextAsset":
-                text_asset_count += 1
-                text_asset = obj.read()
-                asset_name = getattr(text_asset, "m_Name", "") or ""
-
-                text_content = None
-                if hasattr(text_asset, "m_Script"):
-                    raw = text_asset.m_Script
-                    if isinstance(raw, bytes):
-                        text_content = raw.decode("utf-8", errors="replace")
-                    else:
-                        text_content = str(raw)
-                elif hasattr(text_asset, "text"):
-                    text_content = text_asset.text
-
-                if not text_content:
-                    continue
-
-                text_content = text_content.strip()
-                if not text_content.startswith("{"):
-                    continue
-
-                json_count += 1
-                choices = parse_story_choices(text_content)
-                if choices:
-                    blocklist_count += 1
-                    story_id = None
-                    m = re.search(r"storytimeline_?(\d+)", asset_name)
-                    if m:
-                        story_id = int(m.group(1))
-                    if story_id:
-                        results[story_id] = choices
-        except Exception as e:
-            log.debug("  object read error in %s: %s", file_path.name, e)
+            tree = obj.read_typetree()
+        except Exception:
+            continue
+        if not isinstance(tree, dict):
             continue
 
-    if (text_asset_count > 0 or mono_count > 0) and log.isEnabledFor(logging.DEBUG):
+        # ── Look for StoryTimelineData (has BlockList) → get StoryId ──
+        if "BlockList" in tree:
+            if not story_id:
+                raw_sid = tree.get("StoryId")
+                if isinstance(raw_sid, int) and raw_sid > 0:
+                    story_id = raw_sid
+                if not story_id:
+                    m_name = tree.get("m_Name", "")
+                    if isinstance(m_name, str):
+                        m = re.search(r"storytimeline_?(\d+)", m_name)
+                        if m:
+                            story_id = int(m.group(1))
+                if not story_id:
+                    title = tree.get("Title", "")
+                    if isinstance(title, str):
+                        m = re.search(r"(\d{6,})", title)
+                        if m:
+                            story_id = int(m.group(1))
+
+            # One-shot: log the first block's keys for diagnostic
+            if not _block_keys_logged:
+                _block_keys_logged = True
+                bl = tree["BlockList"]
+                if isinstance(bl, list) and bl:
+                    b0 = bl[0]
+                    if isinstance(b0, dict):
+                        log.info("DIAG block[0] keys: %s", list(b0.keys()))
+                        # Show TextTrack.ClipList if present (should be PPtrs)
+                        tt = b0.get("TextTrack")
+                        if isinstance(tt, dict):
+                            log.info("DIAG block[0].TextTrack keys: %s", list(tt.keys()))
+                            cl = tt.get("ClipList")
+                            if isinstance(cl, list) and cl:
+                                log.info("DIAG block[0].TextTrack.ClipList[0]: %s", cl[0])
+
+        # ── Look for StoryTimelineTextClipData (has ChoiceDataList) ──
+        choice_list = _get_ci(
+            tree,
+            "ChoiceDataList",
+            "choiceDataList",
+        )
+        if choice_list and isinstance(choice_list, list):
+            for choice in choice_list:
+                if isinstance(choice, str):
+                    t = choice.strip()
+                    if t:
+                        all_choices.append(t)
+                elif isinstance(choice, dict):
+                    text = _get_ci(choice, "Text", "text", "Name", "name")
+                    if isinstance(text, str):
+                        t = text.strip()
+                        if t:
+                            all_choices.append(t)
+
+    # Also try to get story_id from the meta entry name (fallback)
+    if not story_id:
+        sid = extract_story_id_from_name(str(file_path))
+        if sid:
+            story_id = sid
+
+    if story_id and all_choices:
+        results[story_id] = all_choices
+
+    if mono_count > 0 and log.isEnabledFor(logging.DEBUG):
         log.debug(
-            "  bundle %s: %d MonoBehaviour, %d TextAsset, %d with BlockList, %d with choices",
+            "  bundle %s: %d MonoBehaviour, story_id=%s, %d choices",
             file_path.name[:16],
             mono_count,
-            text_asset_count,
-            json_count,
-            blocklist_count,
+            story_id,
+            len(all_choices),
         )
     return results
 

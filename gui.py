@@ -1355,52 +1355,39 @@ def _run_extraction(game_dir: Path) -> None:
                         _diag_data if isinstance(_diag_data, (bytes, bytearray)) else str(file_path)
                     )
                     obj_types: dict[str, int] = {}
-                    _diag_samples: list[str] = []
-                    _mono_samples: list[str] = []
+                    _has_blocklist = 0
+                    _has_choicelist = 0
+                    _choice_sample: str | None = None
                     for _obj in _diag_env.objects:
                         tname = _obj.type.name
                         obj_types[tname] = obj_types.get(tname, 0) + 1
-                        if tname == "TextAsset" and len(_diag_samples) < 3:
-                            try:
-                                _ta = _obj.read()
-                                _name = getattr(_ta, "m_Name", "?")
-                                _raw = getattr(_ta, "m_Script", None)
-                                if isinstance(_raw, bytes):
-                                    _preview = _raw[:200].decode("utf-8", errors="replace")
-                                elif _raw is not None:
-                                    _preview = str(_raw)[:200]
-                                else:
-                                    _preview = "(no m_Script)"
-                                _diag_samples.append(f"  name={_name} preview={_preview!r}")
-                            except Exception as _te:
-                                _diag_samples.append(f"  (read error: {_te})")
-                        if tname == "MonoBehaviour" and len(_mono_samples) < 3:
+                        if tname == "MonoBehaviour":
                             try:
                                 _tree = _obj.read_typetree()
-                                _top_keys = (
-                                    list(_tree.keys())[:10] if isinstance(_tree, dict) else []
-                                )
-                                _has_bl = "BlockList" in _tree if isinstance(_tree, dict) else False
-                                _bl_len = len(_tree.get("BlockList", [])) if _has_bl else 0
-                                _sid = _tree.get("StoryId", "?") if isinstance(_tree, dict) else "?"
-                                _mono_samples.append(
-                                    f"  StoryId={_sid} has_BlockList={_has_bl} blocks={_bl_len} top_keys={_top_keys}"
-                                )
-                            except Exception as _me:
-                                _mono_samples.append(f"  (typetree error: {_me})")
+                                if isinstance(_tree, dict):
+                                    if "BlockList" in _tree:
+                                        _has_blocklist += 1
+                                    if "ChoiceDataList" in _tree:
+                                        _has_choicelist += 1
+                                        cl = _tree["ChoiceDataList"]
+                                        if isinstance(cl, list) and cl and not _choice_sample:
+                                            _choice_sample = repr(cl[:2])[:300]
+                            except Exception:
+                                pass
                     log.info(
                         "First bundle diagnostic: %s\n"
                         "  file_size=%d entry_name=%s key=%s\n"
                         "  object_types=%s\n"
-                        "  TextAsset samples:\n%s\n"
-                        "  MonoBehaviour samples:\n%s",
+                        "  MonoBehaviours with BlockList=%d, with ChoiceDataList=%d\n"
+                        "  ChoiceDataList sample: %s",
                         file_path.name,
                         file_path.stat().st_size,
                         entry["name"],
                         entry["key"],
                         obj_types,
-                        "\n".join(_diag_samples) if _diag_samples else "  (none)",
-                        "\n".join(_mono_samples) if _mono_samples else "  (none)",
+                        _has_blocklist,
+                        _has_choicelist,
+                        _choice_sample or "(none with items)",
                     )
                 except Exception as _de:
                     log.warning("First bundle diagnostic failed: %s", _de)
