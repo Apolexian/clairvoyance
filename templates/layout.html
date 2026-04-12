@@ -13,44 +13,21 @@
     <div class="nav-links">
       <a href="/">Sessions</a>
       <a href="/masterdata">Master Data</a>
-      <a href="/setup" class="nav-setup-link">Setup</a>
-      <span id="setup-indicator" class="setup-indicator" title="Binary analysis status">
-        <span class="setup-dot"></span> <span id="setup-indicator-text">Checking…</span>
-      </span>
-      <span id="mdb-indicator" class="setup-indicator" title="Master DB — click Record panel to configure" style="cursor:help">
-        <span class="setup-dot"></span> <span id="mdb-indicator-text">DB</span>
-      </span>
+      <a href="/setup" class="nav-setup-link" id="setup-link">
+        <span class="setup-dot" id="setup-dot"></span> Setup
+      </a>
       <button id="btn-recorder-toggle" class="btn btn-sm btn-record" onclick="toggleRecorder()">
         <span class="rec-dot"></span> Record
       </button>
     </div>
   </nav>
 
-  <!-- Recorder / Setup Panel (slide-down) -->
+  <!-- Recorder Panel (slide-down) — recording only -->
   <div id="recorder-panel" class="recorder-panel hidden">
     <div class="recorder-inner">
       <div class="recorder-controls">
-        <!-- Setup section -->
-        <div class="setup-section" id="setup-section">
-          <div class="section-label">1. Setup — Binary Analysis</div>
-          <div id="setup-ready-msg" style="display:none" class="setup-ready">
-            ✓ Setup complete — ready to record
-          </div>
-          <div id="setup-missing-msg" style="display:none" class="setup-missing">
-            ⚠ Run setup before recording.
-          </div>
-          <div class="form-row" id="setup-btns">
-            <button id="btn-setup-full" class="btn btn-primary" onclick="runSetup()">
-              Scan Game Binary
-            </button>
-          </div>
-        </div>
-
-        <hr style="border-color: var(--border); margin: 0.5rem 0;">
-
-        <!-- Record section -->
         <div class="record-section">
-          <div class="section-label">2. Record — Capture Game Data</div>
+          <div class="section-label">Record — Capture Game Data</div>
           <div class="form-row">
             <label>Label:</label>
             <input type="text" id="rec-label" class="input-sm">
@@ -60,38 +37,12 @@
             <button id="btn-rec-stop" class="btn btn-danger" onclick="stopRecording()" disabled>Stop</button>
           </div>
           <div id="rec-not-ready" class="setup-missing" style="display:none; margin-top:0.3rem; font-size:0.8rem;">
-            Run setup first — click Scan Game Binary above.
-          </div>
-        </div>
-
-        <hr style="border-color: var(--border); margin: 0.5rem 0;">
-
-        <!-- Master DB section -->
-        <div class="setup-section">
-          <div class="section-label">3. Master DB — Game Data Lookup</div>
-          <div id="mdb-status" style="font-size:0.8rem; margin-bottom:0.3rem;">
-            <span id="mdb-status-text" style="color:var(--text-muted)">Checking…</span>
-          </div>
-          <div class="form-row" style="gap:0.4rem;">
-            <input type="text" id="mdb-path" class="input-sm" style="flex:1; min-width:200px;"
-                   placeholder="Path to master.mdb …">
-            <button class="btn btn-sm" onclick="browseMasterDb()" title="Browse for file">📁</button>
-            <button class="btn btn-primary btn-sm" onclick="setMasterDb()">Set</button>
-            <button class="btn btn-sm" onclick="clearMasterDb()" title="Clear path">✕</button>
-          </div>
-          <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.25rem;">
-            Point to your local <code>master.mdb</code> to resolve skill / character names.
-            Without it, raw IDs are shown instead.
+            <a href="/setup">Run setup</a> first — binary scan is required before recording.
           </div>
         </div>
       </div>
       <div class="recorder-log">
-        <div class="log-tabs">
-          <button id="tab-rec" class="log-tab active" onclick="showLogTab('rec')">Record Log</button>
-          <button id="tab-setup" class="log-tab" onclick="showLogTab('setup')">Setup Log</button>
-        </div>
         <pre id="rec-log" class="log-pane">Recorder idle.</pre>
-        <pre id="setup-log" class="log-pane" style="display:none">No setup run yet.</pre>
       </div>
     </div>
   </div>
@@ -104,12 +55,10 @@
     // ── State ───────────────────────────────────────────────
     let recorderVisible = false;
     let setupReady = false;
-    let wasRecording = false;  // track state transitions
+    let wasRecording = false;
 
     // ── Safe JSON parser ────────────────────────────────────
     async function safeJSON(res) {
-      // If the server returned a non-OK status or HTML instead of JSON,
-      // read the body as text and throw a clear error (not "unexpected token <").
       const ct = res.headers.get('content-type') || '';
       if (ct.includes('application/json')) return res.json();
       const text = (await res.text()).slice(0, 300);
@@ -123,66 +72,36 @@
       if (recorderVisible) pollAll();
     }
 
-    // ── Log tabs ────────────────────────────────────────────
-    function showLogTab(which) {
-      document.querySelectorAll('.log-tab').forEach(t => t.classList.remove('active'));
-      document.getElementById('tab-' + which).classList.add('active');
-      document.getElementById('rec-log').style.display = which === 'rec' ? '' : 'none';
-      document.getElementById('setup-log').style.display = which === 'setup' ? '' : 'none';
-    }
-
-    // ── Poll both status endpoints ──────────────────────────
+    // ── Poll ────────────────────────────────────────────────
     async function pollAll() {
-      await Promise.all([pollSetupStatus(), pollRecorderStatus()]);
+      await Promise.all([pollSetupDot(), pollRecorderStatus()]);
     }
 
-    // ── Setup status ────────────────────────────────────────
-    async function pollSetupStatus() {
+    // ── Setup dot — lightweight status for nav indicator ────
+    async function pollSetupDot() {
       try {
         const res = await fetch('/api/setup/status');
         const d = await safeJSON(res);
-
         setupReady = d.ready;
 
-        // Top-bar indicator
-        const ind = document.getElementById('setup-indicator');
-        const indText = document.getElementById('setup-indicator-text');
-        ind.classList.remove('ready', 'missing', 'running');
+        const dot = document.getElementById('setup-dot');
+        const link = document.getElementById('setup-link');
         if (d.running) {
-          ind.classList.add('running');
-          indText.textContent = 'Scanning…';
+          dot.className = 'setup-dot running';
+          link.title = 'Binary scan in progress…';
         } else if (d.ready) {
-          ind.classList.add('ready');
-          indText.textContent = 'Ready';
+          dot.className = 'setup-dot ready';
+          link.title = 'Setup complete';
         } else {
-          ind.classList.add('missing');
-          indText.textContent = 'Setup needed';
+          dot.className = 'setup-dot missing';
+          link.title = 'Setup needed — click to configure';
         }
 
-        // Panel messages
-        document.getElementById('setup-ready-msg').style.display = d.ready ? '' : 'none';
-        document.getElementById('setup-missing-msg').style.display = d.ready ? 'none' : (d.running ? 'none' : '');
-
-        // Setup buttons
-        document.getElementById('btn-setup-full').disabled = d.running;
-        document.getElementById('btn-setup-full').textContent = d.running ? 'Scanning...' : 'Scan Game Binary';
-
-        // Record button gating
+        // Gate record button on scan readiness
         const notReady = document.getElementById('rec-not-ready');
-        if (!d.ready && !d.running) {
-          notReady.style.display = '';
-        } else {
-          notReady.style.display = 'none';
-        }
-
-        // Setup log
-        const logEl = document.getElementById('setup-log');
-        if (d.log && d.log.length > 0) {
-          logEl.textContent = d.log.join('\n');
-        }
-        logEl.scrollTop = logEl.scrollHeight;
+        notReady.style.display = (!d.ready && !d.running) ? '' : 'none';
       } catch (e) {
-        console.error('pollSetupStatus error:', e);
+        console.error('pollSetupDot error:', e);
       }
     }
 
@@ -208,7 +127,6 @@
           startBtn.disabled = false;
           stopBtn.disabled = true;
           toggleBtn.classList.remove('recording');
-          // Recording just stopped — go to sessions page so the new session appears
           if (wasRecording) {
             wasRecording = false;
             window.location.href = '/';
@@ -220,42 +138,15 @@
     }
 
     // ── Actions ─────────────────────────────────────────────
-    async function runSetup() {
-      // Switch to setup log tab so user sees output
-      showLogTab('setup');
-
-      // Update log immediately so user knows something is happening
-      document.getElementById('setup-log').textContent = '[gui] Starting binary scan - this may take a minute...';
-
-      try {
-        const res = await fetch('/api/setup/run', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({skip_discover: false}),
-        });
-        const data = await safeJSON(res);
-        if (data.error) {
-          document.getElementById('setup-log').textContent += '\n[gui] Error: ' + data.error;
-        }
-      } catch (e) {
-        document.getElementById('setup-log').textContent += '\n[gui] Request failed: ' + e;
-      }
-
-      // Start rapid polling so log updates quickly
-      await pollAll();
-    }
-
     async function startRecording() {
       const label = document.getElementById('rec-label').value || 'gui';
       const modules = ['network', 'races', 'dump', 'skills', 'events'];
 
-      // Block if setup hasn't been run
       if (!setupReady) {
-        alert('Run setup first — click Scan Game Binary in the panel above.');
+        window.location.href = '/setup';
         return;
       }
 
-      showLogTab('rec');
       document.getElementById('rec-log').textContent = '[gui] Starting recorder…';
 
       try {
@@ -284,86 +175,9 @@
       }
     }
 
-    // ── Master DB settings ───────────────────────────────────
-    async function browseMasterDb() {
-      try {
-        const res = await fetch('/api/setup/pick_mdb', { method: 'POST' });
-        const d = await res.json();
-        if (d.ok) {
-          document.getElementById('mdb-path').value = d.path;
-          await pollMasterDb();
-        } else if (d.fallback) {
-          // Browser mode — just focus the text input
-          document.getElementById('mdb-path').focus();
-        }
-      } catch (e) {
-        console.error('browseMasterDb error:', e);
-      }
-    }
-
-    async function pollMasterDb() {
-      try {
-        const res = await fetch('/api/settings/master_db');
-        const d = await safeJSON(res);
-        const txt = document.getElementById('mdb-status-text');
-        const inp = document.getElementById('mdb-path');
-        const ind = document.getElementById('mdb-indicator');
-        const indText = document.getElementById('mdb-indicator-text');
-        ind.classList.remove('ready', 'missing');
-        if (d.available) {
-          txt.innerHTML = '<span style="color:var(--green)">✓ Connected</span>';
-          inp.value = d.path || '';
-          ind.classList.add('ready');
-          indText.textContent = 'DB ✓';
-        } else {
-          txt.innerHTML = '<span style="color:var(--text-muted)">Not configured</span>';
-          if (!inp.value) inp.value = d.path || '';
-          ind.classList.add('missing');
-          indText.textContent = 'DB';
-        }
-      } catch (e) {
-        document.getElementById('mdb-status-text').textContent = 'Error checking status';
-      }
-    }
-
-    async function setMasterDb() {
-      const path = document.getElementById('mdb-path').value.trim();
-      if (!path) return;
-      try {
-        const res = await fetch('/api/settings/master_db', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({path}),
-        });
-        const d = await safeJSON(res);
-        if (d.ok) {
-          await pollMasterDb();
-        } else {
-          alert(d.error || 'Invalid file');
-        }
-      } catch (e) {
-        alert('Failed: ' + e);
-      }
-    }
-
-    async function clearMasterDb() {
-      try {
-        await fetch('/api/settings/master_db', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({path: null}),
-        });
-        document.getElementById('mdb-path').value = '';
-        await pollMasterDb();
-      } catch (e) {
-        alert('Failed: ' + e);
-      }
-    }
-
     // ── Polling loop ────────────────────────────────────────
     setInterval(pollAll, 2000);
     setTimeout(pollAll, 300);
-    setTimeout(pollMasterDb, 300);
 
     // ── Default label = today's date ─────────────────────────
     document.getElementById('rec-label').value = new Date().toISOString().slice(0, 10);

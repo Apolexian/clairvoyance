@@ -120,17 +120,56 @@ def read_meta_entries(game_dir: Path) -> list[dict]:
         # Try UmaViewer standalone copy
         meta_path = game_dir / "meta_umaviewer"
     if not meta_path.is_file():
-        log.error("Meta database not found at %s", game_dir / "meta")
+        log.error(
+            "Meta database not found at %s or %s", game_dir / "meta", game_dir / "meta_umaviewer"
+        )
         return []
+
+    log.info("Opening meta database: %s (%.1f MB)", meta_path, meta_path.stat().st_size / 1e6)
 
     entries = []
     try:
         conn = sqlite3.connect(f"file:{meta_path}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
 
-        # Check if encryption column 'e' exists
-        cols = {r[1] for r in conn.execute("PRAGMA table_info(a)").fetchall()}
+        # Log all tables for diagnostics
+        tables = [
+            r[0]
+            for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        ]
+        log.info("Meta DB tables: %s", tables)
+
+        if "a" not in tables:
+            log.error("Meta DB has no table 'a' — tables found: %s. Schema may differ.", tables)
+            conn.close()
+            return []
+
+        # Log table schema
+        cols_info = conn.execute("PRAGMA table_info(a)").fetchall()
+        col_names = [r[1] for r in cols_info]
+        log.info("Table 'a' columns: %s", col_names)
+
+        # Check required columns exist
+        cols = set(col_names)
+        if "n" not in cols or "h" not in cols:
+            log.error(
+                "Table 'a' missing required columns 'n' and/or 'h'. "
+                "Found columns: %s. This meta DB may use a different schema.",
+                col_names,
+            )
+            conn.close()
+            return []
+
         has_key = "e" in cols
+
+        # Log total row count
+        total_rows = conn.execute("SELECT COUNT(*) FROM a").fetchone()[0]
+        log.info("Table 'a' has %d total rows", total_rows)
+
+        # Log a few sample rows for debugging
+        sample_rows = conn.execute("SELECT n, h FROM a LIMIT 5").fetchall()
+        for sr in sample_rows:
+            log.info("  Sample: name=%s hash=%s", sr["n"], sr["h"])
 
         if has_key:
             sql = "SELECT n, h, e FROM a WHERE n LIKE 'story/data/%storytimeline%'"
@@ -147,10 +186,24 @@ def read_meta_entries(game_dir: Path) -> list[dict]:
             entries.append(entry)
         conn.close()
         log.info("Found %d story timeline entries in meta database", len(entries))
+
+        if not entries and total_rows > 0:
+            # The DB has rows but none match our query — log what asset types exist
+            try:
+                conn2 = sqlite3.connect(f"file:{meta_path}?mode=ro", uri=True)
+                prefixes = conn2.execute(
+                    "SELECT DISTINCT substr(n, 1, instr(n, '/')) as prefix FROM a LIMIT 20"
+                ).fetchall()
+                log.info("Asset name prefixes in meta DB: %s", [p[0] for p in prefixes])
+                conn2.close()
+            except Exception:
+                pass
+
     except Exception as e:
         log.error("Failed to read meta database: %s", e)
         log.info(
-            "The meta database may be encrypted. Try using an unencrypted copy (meta_umaviewer)."
+            "The meta database may be encrypted or corrupted. "
+            "Try using an unencrypted copy named meta_umaviewer."
         )
 
     return entries

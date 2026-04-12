@@ -755,7 +755,14 @@ _webview_window = None
 
 # Story extraction state
 _extraction_running: bool = False
-_extraction_progress: dict = {"processed": 0, "total": 0, "found": 0, "error": None}
+_extraction_progress: dict = {
+    "processed": 0,
+    "total": 0,
+    "found": 0,
+    "skipped": 0,
+    "error": None,
+    "status": "idle",
+}
 _extraction_lock = threading.Lock()
 
 
@@ -788,6 +795,10 @@ def api_wizard_status():
                 if gdd and (Path(gdd) / "dat").is_dir():
                     game_data_dir = gdd
 
+    # Binary scan status
+    interesting = DISCOVERY_DIR / "interesting.json"
+    scan_ready = interesting.exists()
+
     return jsonify(
         {
             "master_db_configured": master_db_available(),
@@ -795,6 +806,9 @@ def api_wizard_status():
             "story_choices_exist": story_choices_loaded,
             "game_data_dir": game_data_dir,
             "extraction_running": _extraction_running,
+            "scan_ready": scan_ready,
+            "scan_running": _setup_running,
+            "scan_log": _setup_log[-80:],
         }
     )
 
@@ -852,12 +866,17 @@ def _find_game_data_dir(mdb_path: str) -> str | None:
     Also search common Windows game data paths via LocalLow.
     """
     p = Path(mdb_path).resolve()
+    log.info("_find_game_data_dir: starting from mdb_path=%s (resolved=%s)", mdb_path, p)
 
     # Try walking up from the mdb file (up to 4 levels)
     candidate = p.parent
-    for _ in range(4):
-        if (candidate / "dat").is_dir():
+    for i in range(4):
+        dat_candidate = candidate / "dat"
+        if dat_candidate.is_dir():
+            log.info("_find_game_data_dir: FOUND dat/ at %s (level %d up)", candidate, i)
             return str(candidate)
+        else:
+            log.debug("_find_game_data_dir: no dat/ at %s", candidate)
         candidate = candidate.parent
 
     # Check config for an explicit game_data_dir
@@ -866,8 +885,14 @@ def _find_game_data_dir(mdb_path: str) -> str | None:
         with contextlib.suppress(Exception):
             cfg = json.loads(cfg_file.read_text(encoding="utf-8"))
             gdd = cfg.get("game_data_dir")
-            if gdd and (Path(gdd) / "dat").is_dir():
-                return gdd
+            if gdd:
+                if (Path(gdd) / "dat").is_dir():
+                    log.info("_find_game_data_dir: FOUND via config game_data_dir=%s", gdd)
+                    return gdd
+                else:
+                    log.warning(
+                        "_find_game_data_dir: config game_data_dir=%s but dat/ not found there", gdd
+                    )
 
     # Try common Windows LocalLow paths (works even if mdb was copied elsewhere)
     import platform
@@ -877,8 +902,18 @@ def _find_game_data_dir(mdb_path: str) -> str | None:
         if localappdata:
             locallow = Path(localappdata).parent / "LocalLow" / "Cygames" / "umamusume"
             if (locallow / "dat").is_dir():
+                log.info("_find_game_data_dir: FOUND via LocalLow at %s", locallow)
                 return str(locallow)
+            else:
+                log.debug("_find_game_data_dir: no dat/ at LocalLow path %s", locallow)
 
+    log.warning(
+        "_find_game_data_dir: could NOT find dat/ directory. "
+        "Searched parents of %s (up 4 levels) and config. "
+        "Parent dirs tried: %s",
+        p,
+        [str(p.parents[i]) for i in range(min(4, len(p.parents)))],
+    )
     return None
 
 
@@ -886,6 +921,32 @@ def _mdb_success_response(path: str):
     """Build the success JSON after setting master DB path."""
     resolved = get_db_path() or path
     game_data_dir = _find_game_data_dir(resolved)
+
+    # Build diagnostic info about what we found
+    diag: dict = {"mdb_path_resolved": str(Path(resolved).resolve())}
+    if game_data_dir:
+        gd = Path(game_data_dir)
+        diag["game_data_dir"] = game_data_dir
+        diag["dat_exists"] = (gd / "dat").is_dir()
+        diag["meta_exists"] = (gd / "meta").is_file()
+        diag["meta_umaviewer_exists"] = (gd / "meta_umaviewer").is_file()
+        # Show first few dat/ subdirs for confirmation
+        dat_dir = gd / "dat"
+        if dat_dir.is_dir():
+            try:
+                subdirs = sorted([d.name for d in dat_dir.iterdir() if d.is_dir()][:10])
+                diag["dat_subdirs_sample"] = subdirs
+            except Exception:
+                pass
+    else:
+        # Show what we tried so the user can see why it failed
+        p = Path(resolved).resolve()
+        tried = []
+        candidate = p.parent
+        for _ in range(4):
+            tried.append(str(candidate / "dat"))
+            candidate = candidate.parent
+        diag["tried_paths"] = tried
 
     if game_data_dir:
         # Save game_data_dir to config
@@ -900,7 +961,7 @@ def _mdb_success_response(path: str):
         except Exception as e:
             log.warning("Failed to save game_data_dir to config: %s", e)
 
-    return jsonify({"ok": True, "path": resolved, "game_data_dir": game_data_dir})
+    return jsonify({"ok": True, "path": resolved, "game_data_dir": game_data_dir, "diag": diag})
 
 
 @app.route("/api/setup/set_game_dir", methods=["POST"])
@@ -964,11 +1025,26 @@ def api_extract_stories():
                     game_dir = Path(gdd)
 
     if not game_dir:
-        return jsonify(
-            {
-                "error": "Game data directory not found. Story extraction requires the full game install with dat/ and meta files."
-            }
-        ), 400
+        # Build a diagnostic message showing exactly what we tried
+        if db_path:
+            tried = []
+            p = Path(db_path).resolve()
+            candidate = p.parent
+            for _ in range(4):
+                tried.append(str(candidate / "dat"))
+                candidate = candidate.parent
+            msg = (
+                "Game data directory not found. "
+                "Story extraction requires the full game install with dat/ and meta files.\n"
+                f"Master DB path: {db_path}\n"
+                f"Searched for dat/ at:\n" + "\n".join(f"  {t}" for t in tried)
+            )
+        else:
+            msg = (
+                "Game data directory not found. "
+                "Set master.mdb first, or use the manual game dir input."
+            )
+        return jsonify({"error": msg}), 400
 
     # Check meta database
     meta_exists = (game_dir / "meta").is_file() or (game_dir / "meta_umaviewer").is_file()
@@ -977,10 +1053,19 @@ def api_extract_stories():
 
     with _extraction_lock:
         _extraction_running = True
-        _extraction_progress.update({"processed": 0, "total": 0, "found": 0, "error": None})
+        _extraction_progress.update(
+            {
+                "processed": 0,
+                "total": 0,
+                "found": 0,
+                "skipped": 0,
+                "error": None,
+                "status": "starting",
+            }
+        )
 
     threading.Thread(target=_run_extraction, args=(game_dir,), daemon=True).start()
-    return jsonify({"status": "started"})
+    return jsonify({"status": "started", "game_dir": str(game_dir)})
 
 
 def _run_extraction(game_dir: Path) -> None:
@@ -990,15 +1075,73 @@ def _run_extraction(game_dir: Path) -> None:
         from extract_story_text import extract_choices_from_bundle, read_meta_entries
 
         dat_dir = game_dir / "dat"
+        log.info("Story extraction: game_dir=%s, dat_dir=%s", game_dir, dat_dir)
+
+        # Check dat/ directory
+        if not dat_dir.is_dir():
+            msg = f"dat/ directory not found at {dat_dir}"
+            log.error(msg)
+            with _extraction_lock:
+                _extraction_progress["error"] = msg
+            return
+
+        # Log dat/ structure for diagnostics
+        try:
+            dat_subdirs = sorted([d.name for d in dat_dir.iterdir() if d.is_dir()])
+            log.info("dat/ has %d subdirectories: %s", len(dat_subdirs), dat_subdirs[:20])
+        except Exception as e:
+            log.warning("Could not list dat/ contents: %s", e)
+
+        # Read meta database
+        with _extraction_lock:
+            _extraction_progress["status"] = "reading meta database"
         entries = read_meta_entries(game_dir)
+        log.info("Meta returned %d story timeline entries", len(entries))
+
+        if not entries:
+            # Detailed error about WHY meta returned nothing
+            meta_path = game_dir / "meta"
+            meta_uv = game_dir / "meta_umaviewer"
+            if not meta_path.is_file() and not meta_uv.is_file():
+                msg = (
+                    f"meta database not found. Looked for:\n"
+                    f"  {meta_path}\n"
+                    f"  {meta_uv}\n"
+                    f"The meta database maps asset names to file hashes. "
+                    f"It should be in the game root next to dat/."
+                )
+            else:
+                which = meta_path if meta_path.is_file() else meta_uv
+                msg = (
+                    f"meta database found at {which} but returned 0 story entries. "
+                    f"It may be encrypted or have a different schema. "
+                    f"Try using an unencrypted copy named meta_umaviewer."
+                )
+            log.error(msg)
+            with _extraction_lock:
+                _extraction_progress["error"] = msg
+                _extraction_progress["total"] = 0
+            return
 
         with _extraction_lock:
             _extraction_progress["total"] = len(entries)
+            _extraction_progress["status"] = "extracting"
+
+        # Log a sample entry so we can verify hash format
+        sample = entries[0]
+        log.info(
+            "Sample meta entry: name=%s hash=%s key=%s → expected path: %s",
+            sample["name"],
+            sample["hash"],
+            sample["key"],
+            dat_dir / sample["hash"][:2] / sample["hash"],
+        )
 
         all_choices: dict[str, list[str]] = {}
         processed = 0
         found = 0
         skipped = 0
+        missing_samples: list[str] = []  # first few missing paths for diagnostics
 
         for entry in entries:
             h = entry["hash"]
@@ -1006,8 +1149,11 @@ def _run_extraction(game_dir: Path) -> None:
             if not file_path.is_file():
                 skipped += 1
                 processed += 1
+                if len(missing_samples) < 3:
+                    missing_samples.append(str(file_path))
                 with _extraction_lock:
                     _extraction_progress["processed"] = processed
+                    _extraction_progress["skipped"] = skipped
                 continue
 
             bundle_choices = extract_choices_from_bundle(file_path, entry["key"])
@@ -1021,10 +1167,31 @@ def _run_extraction(game_dir: Path) -> None:
             with _extraction_lock:
                 _extraction_progress["processed"] = processed
                 _extraction_progress["found"] = found
+                _extraction_progress["skipped"] = skipped
 
-        log.info("Story extraction complete: %d stories with choices", found)
+        log.info(
+            "Story extraction complete: %d entries, %d processed, %d skipped (file missing), %d with choices",
+            len(entries),
+            processed - skipped,
+            skipped,
+            found,
+        )
+
+        # If ALL files were missing, that's a specific diagnosable problem
+        if skipped == len(entries):
+            msg = (
+                f"All {len(entries)} asset files were missing from dat/. "
+                f"The meta database hash format may not match the file names on disk. "
+                f"Sample expected paths:\n" + "\n".join(f"  {p}" for p in missing_samples)
+            )
+            log.error(msg)
+            with _extraction_lock:
+                _extraction_progress["error"] = msg
+            return
+
         with _extraction_lock:
             _extraction_progress["found"] = found
+            _extraction_progress["status"] = "done"
 
         # Only write to file if we actually found something —
         # an empty file would falsely show "already loaded" in the wizard.
