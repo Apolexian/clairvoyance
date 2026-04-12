@@ -146,6 +146,25 @@ python build_win.py
 
 ### Output
 
+- **`discovery/analysis.md`** — human-readable report, top classes per domain
+- **`discovery/interesting.json`** — filtered/scored JSON for the dump module
+
+### 3. Collect — capture data while playing
+
+```bash
+# Targeted hooks (skills, events, races, network)
+uv run collect.py
+
+# Data-driven dump — reads field layouts from interesting.json,
+# hooks top-scored classes, dumps all field values at runtime
+uv run collect.py --modules dump --label my-session
+uv run collect.py --modules dump --dump-min-score 40 --dump-max-classes 50
+
+# Combine modules
+uv run collect.py --modules dump network skills
+
+# Network capture only
+uv run collect.py --modules network
 ```
 dist/Clairvoyance/
   Clairvoyance.exe      ← double-click to launch
