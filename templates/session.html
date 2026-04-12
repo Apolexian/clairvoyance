@@ -30,237 +30,320 @@
   .view-panel { display: none; }
   .view-panel.active { display: block; }
 
-  /* ── Profile Layout ── */
-  .profile {
-    max-width: 900px;
+  /* ══════════════════════════════════════════════════════
+     F1-STYLE BANNER
+     ══════════════════════════════════════════════════════ */
+  .f1-banner {
+    position: relative;
+    width: 100%;
+    height: 210px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, var(--accent-dim) 100%);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
   }
-
-  /* ── Profile Header: portrait + name + stats row ── */
-  .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
+  .f1-portrait-wrap {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 280px;
+    clip-path: polygon(0 0, 100% 0, 72% 100%, 0 100%);
+    background: linear-gradient(160deg, rgba(88,166,255,0.18) 0%, rgba(31,111,235,0.35) 100%);
+    z-index: 2;
   }
-  .profile-portrait {
-    width: 72px; height: 72px;
+  .f1-portrait {
+    position: absolute;
+    left: 30px; top: 50%;
+    transform: translateY(-50%);
+    width: 140px; height: 140px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--accent-dim);
-    flex-shrink: 0;
+    border: 3px solid rgba(88,166,255,0.45);
+    box-shadow: 0 0 50px rgba(88,166,255,0.3), 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 3;
   }
-  .profile-identity { flex: 1; min-width: 0; }
-  .profile-name { font-size: 1.3rem; font-weight: 700; color: var(--text); line-height: 1.2; }
-  .profile-sub { font-size: 0.82rem; color: var(--text-muted); display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.15rem; }
-
-  /* Five stat boxes inline */
-  .profile-stats {
+  .f1-portrait-placeholder {
+    position: absolute;
+    left: 30px; top: 50%;
+    transform: translateY(-50%);
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 3px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; color: var(--text-muted); opacity: 0.3;
+    z-index: 3;
+  }
+  .f1-banner::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 65%;
+    background: linear-gradient(90deg, transparent 0%, rgba(13,17,23,0.35) 25%, rgba(13,17,23,0.6) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .f1-info {
+    position: absolute;
+    right: 2rem; top: 50%;
+    transform: translateY(-50%);
+    z-index: 4;
+    text-align: right;
+    max-width: calc(100% - 300px);
+  }
+  .f1-name {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.05;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+    letter-spacing: -0.02em;
+  }
+  .f1-sub {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.55);
+    margin-top: 0.3rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .f1-stats-row {
     display: flex;
     gap: 0.5rem;
+    justify-content: flex-end;
     margin-top: 0.75rem;
   }
-  .pstat {
+  .f1-stat {
     text-align: center;
-    min-width: 52px;
+    min-width: 50px;
     padding: 0.3rem 0.5rem;
-    background: var(--bg-card);
-    border-radius: 6px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.07);
   }
-  .pstat-val { font-size: 1.15rem; font-weight: 700; color: var(--text); line-height: 1.1; }
-  .pstat-lbl { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  .f1-stat-val { font-size: 1.15rem; font-weight: 700; color: #fff; line-height: 1.1; }
+  .f1-stat-lbl { font-size: 0.58rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.04em; }
+  .f1-secondary {
+    display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap;
+    margin-top: 0.45rem; font-size: 0.75rem; color: rgba(255,255,255,0.4);
+  }
+  .f1-secondary strong { color: rgba(255,255,255,0.75); }
 
-  .profile-secondary {
-    display: flex; flex-wrap: wrap; gap: 0.75rem;
-    font-size: 0.8rem; color: var(--text-muted);
-    margin-top: 0.5rem;
+  /* ══════════════════════════════════════════════════════
+     TWO-COLUMN LAYOUT
+     ══════════════════════════════════════════════════════ */
+  .career-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 1.5rem;
+    align-items: start;
   }
-  .profile-secondary strong { color: var(--text); }
+  @media (max-width: 1100px) {
+    .career-grid { grid-template-columns: 1fr; }
+  }
+  .col-left, .col-right { min-width: 0; }
 
-  /* ── Section headings (no boxes) ── */
-  .psection {
-    margin-top: 1.5rem;
-  }
+  /* ── Section headings ── */
+  .psection { margin-top: 1.25rem; }
+  .psection:first-child { margin-top: 0; }
   .psection-title {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: var(--accent);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border);
   }
 
   /* ── Stats chart ── */
-  .stats-chart-wrap { height: 200px; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+  .stats-chart-wrap { height: 220px; }
 
-  /* ── Support Deck: horizontal row ── */
-  .deck-row {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
+  /* ── Support Deck ── */
+  .deck-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
   .deck-chip {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.3rem 0.6rem 0.3rem 0.3rem;
-    background: var(--bg-card);
-    border-radius: 6px;
-    font-size: 0.8rem;
-    color: var(--text);
-    white-space: nowrap;
-    min-width: 0;
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+    background: var(--bg-card); border-radius: 6px;
+    font-size: 0.78rem; color: var(--text); white-space: nowrap; min-width: 0;
+    border: 1px solid var(--border);
   }
-  .deck-chip-img {
-    width: 36px; height: 36px;
-    border-radius: 4px;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
+  .deck-chip-img { width: 30px; height: 30px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
   .deck-chip-placeholder {
-    width: 36px; height: 36px;
-    border-radius: 4px;
-    background: var(--bg);
+    width: 30px; height: 30px; border-radius: 4px; background: var(--bg);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; color: var(--text-muted); opacity: 0.4; flex-shrink: 0;
+    font-size: 0.85rem; color: var(--text-muted); opacity: 0.4; flex-shrink: 0;
   }
   .deck-chip-text { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-  .deck-chip-name { font-weight: 600; font-size: 0.78rem; }
-  .deck-chip-id { font-size: 0.65rem; color: var(--text-muted); }
-  .deck-chip.is-friend { border: 1px solid var(--accent-dim); }
-  .friend-tag { font-size: 0.6rem; color: var(--accent); font-weight: 700; margin-left: 0.2rem; }
+  .deck-chip-name { font-weight: 600; font-size: 0.74rem; }
+  .deck-chip.is-friend { border-color: var(--accent-dim); }
+  .friend-tag { font-size: 0.58rem; color: var(--accent); font-weight: 700; margin-left: 0.15rem; }
 
-  /* ── Training Partner Distribution ── */
-  .partner-dist-table {
-    width: 100%; border-collapse: collapse; font-size: 0.82rem;
-  }
+  /* ── Training Partners ── */
+  .partner-dist-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
   .partner-dist-table th {
     text-align: left; font-weight: 600; color: var(--accent);
-    padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.72rem;
+    padding: 0.2rem 0.35rem; border-bottom: 1px solid var(--border); font-size: 0.66rem;
   }
-  .partner-dist-table td {
-    padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text);
-  }
-  .pd-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; display: flex; align-items: center; }
+  .partner-dist-table td { padding: 0.2rem 0.35rem; border-bottom: 1px solid var(--border); color: var(--text); }
+  .pd-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; display: flex; align-items: center; }
   .pd-name > span { overflow: hidden; text-overflow: ellipsis; }
-  .pd-thumb { width: 22px; height: 22px; border-radius: 3px; object-fit: cover; vertical-align: middle; margin-right: 0.35rem; flex-shrink: 0; }
-  .pd-num { text-align: center; min-width: 34px; font-variant-numeric: tabular-nums; }
+  .pd-thumb { width: 18px; height: 18px; border-radius: 3px; object-fit: cover; vertical-align: middle; margin-right: 0.25rem; flex-shrink: 0; }
+  .pd-num { text-align: center; min-width: 26px; font-variant-numeric: tabular-nums; }
   .pd-num.pd-has-val { color: var(--text); font-weight: 600; }
   .pd-num:not(.pd-has-val) { color: var(--text-muted); opacity: 0.5; }
   .pd-total { font-weight: 700; color: var(--accent); }
-  .support-id { font-size: 0.72rem; color: var(--text-muted); margin-left: 0.4rem; }
+  .support-id { font-size: 0.66rem; color: var(--text-muted); margin-left: 0.25rem; }
 
-  /* ── Race Results: compact inline ── */
-  .race-list-compact {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
+  /* ── Race Results ── */
+  .race-list-compact { display: flex; flex-direction: column; gap: 0; }
   .race-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    padding: 0.2rem 0;
+    display: flex; align-items: baseline; gap: 0.5rem;
+    font-size: 0.82rem; padding: 0.3rem 0;
   }
   .race-row + .race-row { border-top: 1px solid var(--border); }
   .race-row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .race-row-name a { color: var(--accent); text-decoration: none; }
   .race-row-name a:hover { text-decoration: underline; }
   .race-result { font-weight: 700; min-width: 40px; text-align: right; }
-  .race-result.r1 { color: var(--gold, #f9c74f); }
-  .race-result.r2 { color: var(--silver, #8b949e); }
-  .race-result.r3 { color: var(--bronze, #d29922); }
+  .race-result.r1 { color: var(--gold); }
+  .race-result.r2 { color: var(--silver); }
+  .race-result.r3 { color: var(--bronze); }
   .race-turn { font-size: 0.72rem; color: var(--text-muted); min-width: 28px; text-align: right; }
 
-  /* ── Skills: inline pills ── */
-  .skill-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-  }
+  /* ── Skills ── */
+  .skill-pills { display: flex; flex-wrap: wrap; gap: 0.25rem; }
   .skill-pill {
-    font-size: 0.75rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    background: var(--bg-card);
-    color: var(--text);
-    white-space: nowrap;
-  }
-  .skill-pill .sp-turn { font-size: 0.65rem; color: var(--text-muted); margin-left: 0.3rem; }
-
-  /* ── Event Choices ── */
-  .event-list { }
-  .event-item {
-    padding: 0.4rem 0;
-  }
-  .event-item + .event-item { border-top: 1px solid var(--border); }
-  .event-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-  .event-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
-  .event-turn { font-size: 0.72rem; color: var(--text-muted); }
-  .event-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-top: 0.15rem;
-    font-size: 0.75rem;
-  }
-  .ev-source { color: var(--text-muted); white-space: nowrap; }
-  .ev-source.support { color: #58a6ff; }
-  .ev-source.card { color: #f9c74f; }
-  .ev-source.scenario { color: #8b949e; }
-  .ev-badge {
-    background: var(--accent-dim, rgba(88,166,255,0.15));
-    color: var(--accent);
-    padding: 0.05rem 0.35rem;
-    border-radius: 3px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .ev-badge.chosen { background: rgba(63,185,80,0.18); color: #3fb950; }
-  .choice-pills {
-    display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.25rem;
-  }
-  .cpill {
-    font-size: 0.7rem;
-    padding: 0.08rem 0.4rem;
-    border-radius: 3px;
-    background: var(--bg-card);
-    color: var(--text-muted);
+    font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 4px;
+    background: var(--bg-card); color: var(--text); white-space: nowrap;
     border: 1px solid var(--border);
-    white-space: nowrap;
   }
-  .cpill.chosen { background: rgba(63,185,80,0.12); color: #3fb950; border-color: rgba(63,185,80,0.35); font-weight: 600; }
-  .delta-row {
-    display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.2rem;
-  }
-  .delta {
-    font-size: 0.7rem; font-weight: 700;
-    padding: 0.05rem 0.3rem; border-radius: 3px; white-space: nowrap;
-  }
-  .delta.pos { background: rgba(63,185,80,0.15); color: #3fb950; }
-  .delta.neg { background: rgba(248,81,73,0.15); color: #f85149; }
+  .skill-pill .sp-turn { font-size: 0.6rem; color: var(--text-muted); margin-left: 0.2rem; }
 
-  /* ── Detected Races (session-level) ── */
+  /* ══════════════════════════════════════════════════════
+     EVENTS — Timeline Cards (Right Column)
+     ══════════════════════════════════════════════════════ */
+  .event-timeline { display: flex; flex-direction: column; gap: 0; }
+
+  .ev-card {
+    position: relative;
+    padding: 0.6rem 0.6rem 0.6rem 1.6rem;
+    border-left: 2px solid var(--border);
+    transition: background 0.1s;
+  }
+  .ev-card:hover { background: rgba(255,255,255,0.015); }
+  .ev-card::before {
+    content: '';
+    position: absolute;
+    left: -5px; top: 1rem;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 2px solid var(--bg);
+  }
+  .ev-card.has-choice::before { background: var(--accent); }
+  .ev-card.has-effect::before { background: var(--green); }
+  .ev-card.has-choice.has-effect::before { background: var(--green); box-shadow: 0 0 0 2px rgba(63,185,80,0.2); }
+  .ev-card:last-child { border-left-color: transparent; }
+
+  .ev-card-header {
+    display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+  }
+  .ev-turn-badge {
+    font-size: 0.62rem; font-weight: 700;
+    padding: 0.08rem 0.35rem; border-radius: 4px;
+    background: rgba(88,166,255,0.1); color: var(--accent);
+    font-variant-numeric: tabular-nums; flex-shrink: 0;
+  }
+  .ev-name { font-size: 0.85rem; font-weight: 600; color: var(--text); flex: 1; min-width: 0; }
+  .ev-source-tag {
+    font-size: 0.65rem; padding: 0.04rem 0.35rem; border-radius: 3px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .ev-source-tag.support { background: rgba(88,166,255,0.08); color: #58a6ff; }
+  .ev-source-tag.card { background: rgba(249,199,79,0.08); color: #f9c74f; }
+  .ev-source-tag.scenario { background: rgba(139,148,158,0.08); color: #8b949e; }
+
+  /* Choice cards */
+  .ev-choices {
+    margin-top: 0.4rem;
+    display: flex; flex-direction: column; gap: 0.25rem;
+  }
+  .ev-choice {
+    display: flex; align-items: flex-start; gap: 0.4rem;
+    padding: 0.35rem 0.55rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.35;
+  }
+  .ev-choice.chosen {
+    border-color: rgba(63,185,80,0.35);
+    background: rgba(63,185,80,0.05);
+    color: var(--text);
+  }
+  .ev-choice-num {
+    font-size: 0.65rem; font-weight: 700;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .ev-choice.chosen .ev-choice-num {
+    background: rgba(63,185,80,0.15);
+    border-color: rgba(63,185,80,0.4);
+    color: #3fb950;
+  }
+  .ev-choice-text { flex: 1; min-width: 0; }
+  .ev-choice-check { color: #3fb950; font-weight: 700; font-size: 0.82rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* Inline chosen badge when no multi-choice */
+  .ev-chosen-inline {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    margin-top: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(63,185,80,0.06);
+    border: 1px solid rgba(63,185,80,0.2);
+    border-radius: 5px;
+    font-size: 0.75rem; color: #3fb950; font-weight: 600;
+  }
+
+  /* Stat deltas */
+  .ev-deltas {
+    display: flex; flex-wrap: wrap; gap: 0.25rem;
+    margin-top: 0.35rem;
+  }
+  .ev-delta {
+    font-size: 0.7rem; font-weight: 700;
+    padding: 0.08rem 0.35rem; border-radius: 4px; white-space: nowrap;
+  }
+  .ev-delta.pos { background: rgba(63,185,80,0.1); color: #3fb950; }
+  .ev-delta.neg { background: rgba(248,81,73,0.1); color: #f85149; }
+
+  /* ── Detected Races chips ── */
   .race-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
   .race-chip {
     display: inline-block; padding: 0.3rem 0.65rem;
     background: var(--bg-card); border-radius: 5px;
     font-size: 0.8rem; color: var(--text); text-decoration: none;
-    transition: background 0.15s;
+    transition: background 0.15s; border: 1px solid var(--border);
   }
-  .race-chip:hover { background: var(--bg-hover, rgba(255,255,255,0.06)); }
+  .race-chip:hover { background: var(--bg-hover); text-decoration: none; }
   .race-chip-name { color: var(--accent); font-weight: 600; }
   .race-chip-meta { color: var(--text-muted); font-size: 0.7rem; margin-left: 0.3rem; }
 
   .profile-empty { color: var(--text-muted); font-size: 0.82rem; font-style: italic; }
 
-  /* ── Network (keep existing) ── */
+  /* ── Network styles (unchanged) ── */
   .net-stats-bar {
     display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;
     padding: 0.6rem 0.75rem; background: var(--bg-card); border: 1px solid var(--border);
@@ -288,7 +371,6 @@
     background: var(--bg); color: var(--text-muted); font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
   }
   .net-dir-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
-  .timeline-event { position: relative; }
   .timeline-event[data-pair-idx] { border-left: 2px solid transparent; }
   .timeline-event.pair-highlight { border-left-color: var(--accent-dim); background: var(--bg-hover); }
   .net-ev-meta { display: inline-flex; align-items: center; gap: 0.25rem; margin-left: 0.3rem; font-size: 0.72rem; color: var(--text-muted); }
@@ -315,10 +397,10 @@
   .timeline-badge.api_error { background: rgba(248,81,73,0.15); color: #f85149; }
 
   /* ── Career Accordion (multi-career) ── */
-  .career-panel { margin-bottom: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); overflow: hidden; }
+  .career-panel { margin-bottom: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .career-header {
     display: flex; align-items: center; gap: 0.75rem; width: 100%;
-    padding: 0.75rem 1rem; background: none; border: none; cursor: pointer;
+    padding: 0.75rem 1rem; background: var(--bg-card); border: none; cursor: pointer;
     text-align: left; transition: background 0.15s; color: var(--text); font-family: inherit;
   }
   .career-header:hover { background: var(--bg-hover); }
@@ -359,6 +441,7 @@
   {% set multi = careers|length > 1 if careers is defined else false %}
 
   {% for summary in (careers if careers is defined else [summary]) %}
+
   {# ── Multi-career: collapsible panel wrapper ── #}
   {% if multi %}
   <div class="career-panel {% if loop.last %}expanded{% endif %}" id="career-{{ loop.index0 }}">
@@ -382,203 +465,231 @@
         <span class="ch-total">= {{ summary._stats_total }}</span>
       </div>
       {% endif %}
-      <span class="career-chevron">▶</span>
+      <span class="career-chevron">&#9654;</span>
     </button>
     <div class="career-body" id="career-body-{{ loop.index0 }}" {% if not loop.last %}style="display:none"{% endif %}>
   {% endif %}
 
   {# ── Career content ── #}
   {% if summary and summary.latest_stats %}
-  <div class="profile">
 
-    {# ── Header: portrait + name + stats ── #}
-    <div class="profile-header">
+  {# ════════ F1 BANNER ════════ #}
+  <div class="f1-banner">
+    <div class="f1-portrait-wrap">
       {% if summary.chara_image %}
-      <img src="{{ summary.chara_image }}" alt="" class="profile-portrait">
+      <img src="{{ summary.chara_image }}" alt="" class="f1-portrait">
+      {% else %}
+      <div class="f1-portrait-placeholder">?</div>
       {% endif %}
-      <div class="profile-identity">
-        <div class="profile-name">{{ summary.chara_name or 'Unknown Character' }}</div>
-        <div class="profile-sub">
-          {% if summary.outfit_title %}<span>{{ summary.outfit_title }}</span>{% endif %}
-          {% if summary.scenario_name %}<span>{{ summary.scenario_name }}</span>{% endif %}
-        </div>
-        <div class="profile-stats">
-          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.speed }}</div><div class="pstat-lbl">Spd</div></div>
-          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.stamina }}</div><div class="pstat-lbl">Sta</div></div>
-          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.power }}</div><div class="pstat-lbl">Pow</div></div>
-          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.guts }}</div><div class="pstat-lbl">Gut</div></div>
-          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.wiz }}</div><div class="pstat-lbl">Wiz</div></div>
-        </div>
-        <div class="profile-secondary">
-          <span>Turn <strong>{{ summary.latest_stats.turn }}</strong></span>
-          <span>Vital <strong>{{ summary.latest_stats.vital }}/{{ summary.latest_stats.max_vital }}</strong></span>
-          <span>Fans <strong>{{ "{:,}".format(summary.latest_stats.fans) }}</strong></span>
-          <span>SP <strong>{{ summary.latest_stats.skill_point }}</strong></span>
-          {% set motiv = summary.latest_stats.motivation %}
-          <span>Mood <strong>{% if motiv == 5 %}Great{% elif motiv == 4 %}Good{% elif motiv == 3 %}Normal{% elif motiv == 2 %}Bad{% else %}Awful{% endif %}</strong></span>
-        </div>
+    </div>
+    <div class="f1-info">
+      <div class="f1-name">{{ summary.chara_name or 'Unknown Character' }}</div>
+      <div class="f1-sub">
+        {% if summary.outfit_title %}<span>{{ summary.outfit_title }}</span>{% endif %}
+        {% if summary.scenario_name %}<span>{{ summary.scenario_name }}</span>{% endif %}
+      </div>
+      <div class="f1-stats-row">
+        <div class="f1-stat"><div class="f1-stat-val">{{ summary.latest_stats.speed }}</div><div class="f1-stat-lbl">Spd</div></div>
+        <div class="f1-stat"><div class="f1-stat-val">{{ summary.latest_stats.stamina }}</div><div class="f1-stat-lbl">Sta</div></div>
+        <div class="f1-stat"><div class="f1-stat-val">{{ summary.latest_stats.power }}</div><div class="f1-stat-lbl">Pow</div></div>
+        <div class="f1-stat"><div class="f1-stat-val">{{ summary.latest_stats.guts }}</div><div class="f1-stat-lbl">Gut</div></div>
+        <div class="f1-stat"><div class="f1-stat-val">{{ summary.latest_stats.wiz }}</div><div class="f1-stat-lbl">Wiz</div></div>
+      </div>
+      <div class="f1-secondary">
+        <span>Turn <strong>{{ summary.latest_stats.turn }}</strong></span>
+        <span>Vital <strong>{{ summary.latest_stats.vital }}/{{ summary.latest_stats.max_vital }}</strong></span>
+        <span>Fans <strong>{{ "{:,}".format(summary.latest_stats.fans) }}</strong></span>
+        <span>SP <strong>{{ summary.latest_stats.skill_point }}</strong></span>
+        {% set motiv = summary.latest_stats.motivation %}
+        <span>Mood <strong>{% if motiv == 5 %}Great{% elif motiv == 4 %}Good{% elif motiv == 3 %}Normal{% elif motiv == 2 %}Bad{% else %}Awful{% endif %}</strong></span>
       </div>
     </div>
+  </div>
 
-    {# ── Stats chart ── #}
-    {% if summary.stats_history | length > 2 %}
-    <div class="stats-chart-wrap"><canvas id="{% if multi %}statsChart-{{ loop.index0 }}{% else %}statsChart{% endif %}"></canvas></div>
-    {% endif %}
+  {# ════════ TWO-COLUMN GRID ════════ #}
+  <div class="career-grid">
 
-    {# ── Support Deck ── #}
-    {% if summary.support_card_names or summary.friend_support_card_id %}
-    <div class="psection">
-      <div class="psection-title">Support Deck</div>
-      <div class="deck-row">
-        {% for sc in summary.support_card_names %}
-        <div class="deck-chip">
-          {% if sc.image %}
-          <img src="{{ sc.image }}" alt="" class="deck-chip-img" loading="lazy">
-          {% else %}
-          <span class="deck-chip-placeholder">🃏</span>
-          {% endif %}
-          <div class="deck-chip-text">
-            <div class="deck-chip-name">{{ sc.name }}</div>
-          </div>
-        </div>
-        {% endfor %}
-        {% if summary.friend_support_card_id %}
-        <div class="deck-chip is-friend">
-          {% if summary.friend_support_card_image %}
-          <img src="{{ summary.friend_support_card_image }}" alt="" class="deck-chip-img" loading="lazy">
-          {% else %}
-          <span class="deck-chip-placeholder">🤝</span>
-          {% endif %}
-          <div class="deck-chip-text">
-            <div class="deck-chip-name">{{ summary.friend_support_card_name or summary.friend_support_card_id }}<span class="friend-tag">Friend</span></div>
-          </div>
-        </div>
-        {% endif %}
+    {# ── LEFT COLUMN: Chart, Races, Support, Training Partners ── #}
+    <div class="col-left">
+
+      {# Stats chart #}
+      {% if summary.stats_history | length > 2 %}
+      <div class="psection">
+        <div class="psection-title">Stats Over Time</div>
+        <div class="stats-chart-wrap"><canvas id="{% if multi %}statsChart-{{ loop.index0 }}{% else %}statsChart{% endif %}"></canvas></div>
       </div>
-    </div>
-    {% endif %}
+      {% endif %}
 
-    {# ── Training Partner Distribution ── #}
-    {% if summary.training_partner_dist_enriched %}
-    <div class="psection">
-      <div class="psection-title">Training Partners</div>
-      <table class="partner-dist-table">
-        <thead>
-          <tr>
-            <th>Support Card</th>
-            <th class="pd-num">Spd</th>
-            <th class="pd-num">Sta</th>
-            <th class="pd-num">Pow</th>
-            <th class="pd-num">Gut</th>
-            <th class="pd-num">Wiz</th>
-            <th class="pd-num">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sc in summary.training_partner_dist_enriched %}
-          <tr>
-            <td class="pd-name">
-              {% if sc.image %}<img src="{{ sc.image }}" alt="" class="pd-thumb" loading="lazy">{% endif %}
-              <span>{{ sc.name }}<span class="support-id">#{{ sc.id }}</span>
-              {% if sc.is_friend %}<span class="friend-tag">Friend</span>{% endif %}</span>
-            </td>
-            {% for stat in ["Speed", "Stamina", "Power", "Guts", "Wiz"] %}
-            {% set cnt = sc.breakdown.get(stat, 0) %}
-            <td class="pd-num{% if cnt > 0 %} pd-has-val{% endif %}">{{ cnt or "–" }}</td>
-            {% endfor %}
-            <td class="pd-num pd-total">{{ sc.total }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% endif %}
-
-    {# ── Race Results ── #}
-    {% if summary.race_results %}
-    <div class="psection">
-      <div class="psection-title">Races</div>
-      <div class="race-list-compact">
-        {% for rr in summary.race_results %}
-        <div class="race-row">
-          <span class="race-row-name">
-            {% set race_name_display = rr.race_name or ('Race ' ~ loop.index) %}
-            {% if races and loop.index0 < races|length %}
-              <a href="/session/{{ session.name }}/race/{{ races[loop.index0]._race_index }}">{{ race_name_display }}</a>
-            {% else %}
-              {{ race_name_display }}
-            {% endif %}
-          </span>
-          <span class="race-result {% if rr.result_order == 1 %}r1{% elif rr.result_order == 2 %}r2{% elif rr.result_order == 3 %}r3{% endif %}">
-            {% if rr.result_order %}#{{ rr.result_order }}{% else %}—{% endif %}{% if rr.entry_count %}<small style="font-weight:400;color:var(--text-muted)">/{{ rr.entry_count }}</small>{% endif %}
-          </span>
-          <span class="race-turn">T{{ rr.turn }}</span>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    {# ── Skills ── #}
-    {% if summary.skills_acquired %}
-    <div class="psection">
-      <div class="psection-title">Skills ({{ summary.skills_acquired | length }})</div>
-      <div class="skill-pills">
-        {% for sk in summary.skills_acquired %}
-        <span class="skill-pill">{{ sk.name }}<span class="sp-turn">T{{ sk.turn }}</span></span>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    {# ── Events ── #}
-    {% if summary.events_with_choices %}
-    <div class="psection">
-      <div class="psection-title">Events ({{ summary.events_with_choices | length }}){% if summary.events_merged | length != summary.events_with_choices | length %} <span style="text-transform:none; letter-spacing:0; font-weight:400; color:var(--text-muted);">of {{ summary.events_merged | length }} total</span>{% endif %}</div>
-      <div class="event-list">
-        {% for ec in summary.events_with_choices %}
-        <div class="event-item">
-          <div class="event-head">
-            <span class="event-name">{{ ec.name or ('story:' ~ ec.story_id) }}</span>
-            <span class="event-turn">T{{ ec.turn }}</span>
-          </div>
-          <div class="event-meta">
-            {% if ec.source_type == 'support' and ec.source_name %}
-              <span class="ev-source support">🃏 {{ ec.source_name }}</span>
-            {% elif ec.source_type == 'card' and ec.source_name %}
-              <span class="ev-source card">🏇 {{ ec.source_name }}</span>
-            {% elif ec.source_type == 'scenario' %}
-              <span class="ev-source scenario">📋 Scenario</span>
-            {% endif %}
-            {% if ec.choice_number %}
-              {% if ec.choice_texts and ec.choice_number <= ec.choice_texts|length %}
-                <span class="ev-badge chosen" title="Chose option {{ ec.choice_number }}">✓ {{ ec.choice_texts[ec.choice_number - 1] }}</span>
+      {# Race Results #}
+      {% if summary.race_results %}
+      <div class="psection">
+        <div class="psection-title">Races ({{ summary.race_results | length }})</div>
+        <div class="race-list-compact">
+          {% for rr in summary.race_results %}
+          <div class="race-row">
+            <span class="race-row-name">
+              {% set race_name_display = rr.race_name or ('Race ' ~ loop.index) %}
+              {% if races and loop.index0 < races|length %}
+                <a href="/session/{{ session.name }}/race/{{ races[loop.index0]._race_index }}">{{ race_name_display }}</a>
               {% else %}
-                <span class="ev-badge">Option {{ ec.choice_number }}{% if ec.num_branches and ec.num_branches > 1 %}/{{ ec.num_branches }}{% endif %}</span>
+                {{ race_name_display }}
+              {% endif %}
+            </span>
+            <span class="race-result {% if rr.result_order == 1 %}r1{% elif rr.result_order == 2 %}r2{% elif rr.result_order == 3 %}r3{% endif %}">
+              {% if rr.result_order %}#{{ rr.result_order }}{% else %}&mdash;{% endif %}{% if rr.entry_count %}<small style="font-weight:400;color:var(--text-muted)">/{{ rr.entry_count }}</small>{% endif %}
+            </span>
+            <span class="race-turn">T{{ rr.turn }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# Support Deck #}
+      {% if summary.support_card_names or summary.friend_support_card_id %}
+      <div class="psection">
+        <div class="psection-title">Support Deck</div>
+        <div class="deck-row">
+          {% for sc in summary.support_card_names %}
+          <div class="deck-chip">
+            {% if sc.image %}
+            <img src="{{ sc.image }}" alt="" class="deck-chip-img" loading="lazy">
+            {% else %}
+            <span class="deck-chip-placeholder">?</span>
+            {% endif %}
+            <div class="deck-chip-text">
+              <div class="deck-chip-name">{{ sc.name }}</div>
+            </div>
+          </div>
+          {% endfor %}
+          {% if summary.friend_support_card_id %}
+          <div class="deck-chip is-friend">
+            {% if summary.friend_support_card_image %}
+            <img src="{{ summary.friend_support_card_image }}" alt="" class="deck-chip-img" loading="lazy">
+            {% else %}
+            <span class="deck-chip-placeholder">?</span>
+            {% endif %}
+            <div class="deck-chip-text">
+              <div class="deck-chip-name">{{ summary.friend_support_card_name or summary.friend_support_card_id }}<span class="friend-tag">Friend</span></div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# Training Partners #}
+      {% if summary.training_partner_dist_enriched %}
+      <div class="psection">
+        <div class="psection-title">Training Partners</div>
+        <table class="partner-dist-table">
+          <thead>
+            <tr>
+              <th>Support Card</th>
+              <th class="pd-num">Spd</th>
+              <th class="pd-num">Sta</th>
+              <th class="pd-num">Pow</th>
+              <th class="pd-num">Gut</th>
+              <th class="pd-num">Wiz</th>
+              <th class="pd-num">Tot</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sc in summary.training_partner_dist_enriched %}
+            <tr>
+              <td class="pd-name">
+                {% if sc.image %}<img src="{{ sc.image }}" alt="" class="pd-thumb" loading="lazy">{% endif %}
+                <span>{{ sc.name }}<span class="support-id">#{{ sc.id }}</span>
+                {% if sc.is_friend %}<span class="friend-tag">Friend</span>{% endif %}</span>
+              </td>
+              {% for stat in ["Speed", "Stamina", "Power", "Guts", "Wiz"] %}
+              {% set cnt = sc.breakdown.get(stat, 0) %}
+              <td class="pd-num{% if cnt > 0 %} pd-has-val{% endif %}">{{ cnt or "&ndash;" }}</td>
+              {% endfor %}
+              <td class="pd-num pd-total">{{ sc.total }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {# Skills #}
+      {% if summary.skills_acquired %}
+      <div class="psection">
+        <div class="psection-title">Skills ({{ summary.skills_acquired | length }})</div>
+        <div class="skill-pills">
+          {% for sk in summary.skills_acquired %}
+          <span class="skill-pill">{{ sk.name }}<span class="sp-turn">T{{ sk.turn }}</span></span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>{# .col-left #}
+
+    {# ── RIGHT COLUMN: Events ── #}
+    <div class="col-right">
+
+      {% if summary.events_with_choices %}
+      <div class="psection">
+        <div class="psection-title">Events ({{ summary.events_with_choices | length }}){% if summary.events_merged | length != summary.events_with_choices | length %} <span style="text-transform:none; letter-spacing:0; font-weight:400; color:var(--text-muted);">of {{ summary.events_merged | length }} total</span>{% endif %}</div>
+        <div class="event-timeline">
+          {% for ec in summary.events_with_choices %}
+          <div class="ev-card {% if ec.choice_number %}has-choice{% endif %} {% if ec.stat_deltas %}has-effect{% endif %}">
+            {# Header row: turn + name + source #}
+            <div class="ev-card-header">
+              <span class="ev-turn-badge">T{{ ec.turn }}</span>
+              <span class="ev-name">{{ ec.name or ('story:' ~ ec.story_id) }}</span>
+              {% if ec.source_type == 'support' and ec.source_name %}
+                <span class="ev-source-tag support">{{ ec.source_name }}</span>
+              {% elif ec.source_type == 'card' and ec.source_name %}
+                <span class="ev-source-tag card">{{ ec.source_name }}</span>
+              {% elif ec.source_type == 'scenario' %}
+                <span class="ev-source-tag scenario">Scenario</span>
+              {% endif %}
+            </div>
+
+            {# Choice options — show all as cards when multiple exist #}
+            {% if ec.choice_texts and ec.choice_texts|length > 1 %}
+            <div class="ev-choices">
+              {% for ct in ec.choice_texts %}
+              <div class="ev-choice {% if ec.choice_number == loop.index %}chosen{% endif %}">
+                <span class="ev-choice-num">{{ loop.index }}</span>
+                <span class="ev-choice-text">{{ ct }}</span>
+                {% if ec.choice_number == loop.index %}
+                <span class="ev-choice-check">&#10003;</span>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+            {% elif ec.choice_number %}
+              {# Single choice or unknown text #}
+              {% if ec.choice_texts and ec.choice_number <= ec.choice_texts|length %}
+              <div class="ev-chosen-inline">&#10003; {{ ec.choice_texts[ec.choice_number - 1] }}</div>
+              {% else %}
+              <div class="ev-chosen-inline">Option {{ ec.choice_number }}{% if ec.num_branches and ec.num_branches > 1 %}/{{ ec.num_branches }}{% endif %}</div>
               {% endif %}
             {% endif %}
-          </div>
-          {% if ec.choice_texts and ec.choice_texts|length > 1 %}
-          <div class="choice-pills">
-            {% for ct in ec.choice_texts %}
-              <span class="cpill {% if ec.choice_number == loop.index %}chosen{% endif %}">{{ loop.index }}. {{ ct }}</span>
-            {% endfor %}
-          </div>
-          {% endif %}
-          {% if ec.stat_deltas %}
-          <div class="delta-row">
-            {% for stat, delta in ec.stat_deltas.items() %}
-              <span class="delta {% if delta > 0 %}pos{% else %}neg{% endif %}">{{ stat }} {% if delta > 0 %}+{% endif %}{{ delta }}</span>
-            {% endfor %}
-          </div>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
 
-  </div>{# .profile #}
+            {# Stat deltas #}
+            {% if ec.stat_deltas %}
+            <div class="ev-deltas">
+              {% for stat, delta in ec.stat_deltas.items() %}
+              <span class="ev-delta {% if delta > 0 %}pos{% else %}neg{% endif %}">{{ stat }} {% if delta > 0 %}+{% endif %}{{ delta }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>{# .col-right #}
+
+  </div>{# .career-grid #}
+
   {% else %}
   <div class="profile-empty" style="text-align:center; padding:2rem;">
     No career/training data found{% if multi %} in this career run{% endif %}.<br>
@@ -606,7 +717,7 @@
         <span class="race-chip-name">{{ race._race_label }}</span>
         <span class="race-chip-meta">
           {{ race._source }}
-          {% if race.horse_summaries %}· {{ race.horse_summaries | length }} runners{% endif %}
+          {% if race.horse_summaries %}&middot; {{ race.horse_summaries | length }} runners{% endif %}
         </span>
       </a>
       {% endfor %}
@@ -645,11 +756,11 @@
         </div>
         <div class="race-card-body">
           {% if race._source == 'dump' %}
-            <span>{{ race.num_horses }} horses · {{ race.total_frames }} frames · ~{{ race.estimated_total_distance }}m</span>
+            <span>{{ race.num_horses }} horses &middot; {{ race.total_frames }} frames &middot; ~{{ race.estimated_total_distance }}m</span>
           {% elif race.horse_summaries %}
             <span>{{ race.horse_summaries | length }} horses
-              {% if race.phases and race.phases.total_distance %}· {{ race.phases.total_distance }}m{% endif %}
-              {% if race.skill_activations %}· {{ race.skill_activations | length }} skills{% endif %}
+              {% if race.phases and race.phases.total_distance %}&middot; {{ race.phases.total_distance }}m{% endif %}
+              {% if race.skill_activations %}&middot; {{ race.skill_activations | length }} skills{% endif %}
             </span>
           {% else %}
             <span>{{ race.get('horse_count', '?') }} horses</span>
@@ -666,12 +777,11 @@
     <h2>Network Traffic ({{ network | length }})</h2>
 
     {% if network_stats %}
-    <!-- ── Stats Bar ── -->
     <div class="net-stats-bar">
       <div class="ns-item"><span class="ns-val">{{ network_stats.total }}</span> events</div>
       <div class="ns-divider"></div>
-      <div class="ns-item">↑ <span class="ns-val">{{ network_stats.direction_counts.out }}</span></div>
-      <div class="ns-item">↓ <span class="ns-val">{{ network_stats.direction_counts['in'] }}</span></div>
+      <div class="ns-item">&uarr; <span class="ns-val">{{ network_stats.direction_counts.out }}</span></div>
+      <div class="ns-item">&darr; <span class="ns-val">{{ network_stats.direction_counts['in'] }}</span></div>
       <div class="ns-divider"></div>
       <div class="ns-item"><span class="ns-val">{{ network_stats.distinct_apis }}</span> APIs</div>
       <div class="ns-divider"></div>
@@ -688,9 +798,8 @@
     </div>
     {% endif %}
 
-    <!-- ── Filter Row ── -->
     <div class="net-filter-row">
-      <input type="text" id="filter-api" placeholder="Filter by API / formatter / URL…" oninput="filterNetwork()" class="input-sm">
+      <input type="text" id="filter-api" placeholder="Filter by API / formatter / URL..." oninput="filterNetwork()" class="input-sm">
       <div class="net-filter-pills" id="net-type-pills">
         {% if network_stats and network_stats.type_counts %}
         {% set default_active = ['api_send', 'api_response', 'api_error'] %}
@@ -704,12 +813,11 @@
       </div>
       <div style="display:flex; gap:0.2rem; margin-left:auto;">
         <button class="net-dir-btn active" data-dir="all" onclick="setDirFilter(this, 'all')">All</button>
-        <button class="net-dir-btn" data-dir="out" onclick="setDirFilter(this, 'out')">→ Out</button>
-        <button class="net-dir-btn" data-dir="in" onclick="setDirFilter(this, 'in')">← In</button>
+        <button class="net-dir-btn" data-dir="out" onclick="setDirFilter(this, 'out')">&rarr; Out</button>
+        <button class="net-dir-btn" data-dir="in" onclick="setDirFilter(this, 'in')">&larr; In</button>
       </div>
     </div>
 
-    <!-- ── Timeline ── -->
     <div class="timeline" id="network-timeline">
       {% for ev in network %}
       <div class="timeline-event {% if 'Race' in ev.api %}race-highlight{% endif %}"
@@ -722,36 +830,34 @@
         <div class="timeline-time">{{ ev._ts[11:19] if ev._ts else '' }}</div>
         <div class="timeline-content">
           <div class="timeline-summary" onclick="toggleDetail(this, '{{ session.name }}', {{ ev._idx }})">
-            {# ── Direction + Event Type Badge ── #}
             {% if ev.event == 'api_send' %}
-              <span class="timeline-badge api_send dir-out">→ Req</span>
+              <span class="timeline-badge api_send dir-out">&rarr; Req</span>
             {% elif ev.event == 'api_response' %}
-              <span class="timeline-badge api_response dir-in">← Res</span>
+              <span class="timeline-badge api_response dir-in">&larr; Res</span>
             {% elif ev.event == 'api_error' %}
-              <span class="timeline-badge api_error">✕ Err</span>
+              <span class="timeline-badge api_error">&times; Err</span>
             {% elif ev.event == 'ssl_read' %}
-              <span class="timeline-badge ssl_read">↓ SSL</span>
+              <span class="timeline-badge ssl_read">&darr; SSL</span>
             {% elif ev.event == 'ssl_write' %}
-              <span class="timeline-badge ssl_write">↑ SSL</span>
+              <span class="timeline-badge ssl_write">&uarr; SSL</span>
             {% elif ev.event == 'schannel_decrypt' %}
-              <span class="timeline-badge schannel_decrypt">↓ SCh</span>
+              <span class="timeline-badge schannel_decrypt">&darr; SCh</span>
             {% elif ev.event == 'schannel_encrypt' %}
-              <span class="timeline-badge schannel_encrypt">↑ SCh</span>
+              <span class="timeline-badge schannel_encrypt">&uarr; SCh</span>
             {% elif ev.event == 'libnative_decrypt' %}
-              <span class="timeline-badge libnative_decrypt">↓ Dec</span>
+              <span class="timeline-badge libnative_decrypt">&darr; Dec</span>
             {% elif ev.event == 'libnative_encrypt' %}
-              <span class="timeline-badge libnative_encrypt">↑ Enc</span>
+              <span class="timeline-badge libnative_encrypt">&uarr; Enc</span>
             {% elif ev.event == 'crypto_salt_found' %}
-              <span class="timeline-badge crypto_salt_found">✦ Salt</span>
+              <span class="timeline-badge crypto_salt_found">&#10022; Salt</span>
             {% elif ev.event == 'msgpack_serialize' %}
-              <span class="timeline-badge msgpack_serialize">⊞</span>
+              <span class="timeline-badge msgpack_serialize">&#8862;</span>
             {% elif ev.event == 'msgpack_deserialize' %}
-              <span class="timeline-badge msgpack_deserialize">⊟</span>
+              <span class="timeline-badge msgpack_deserialize">&#8863;</span>
             {% else %}
               <span class="timeline-badge">{{ ev.event }}</span>
             {% endif %}
 
-            {# ── Main label: API name, formatter, or URL ── #}
             {% if ev.api %}
               <strong>{{ ev.api }}</strong>
             {% elif ev._label %}
@@ -762,23 +868,22 @@
               <span class="net-ev-url">{{ ev.httpMethod or '' }} {{ ev.httpUrl }}</span>
             {% endif %}
 
-            {# ── Metadata: bytes + pair link (compact) ── #}
             <span class="net-ev-meta">
               {% if ev.bytes and ev.bytes > 0 %}
                 <span class="ne-bytes" title="{{ ev.bytes }} bytes{% if ev.truncated %} (truncated){% endif %}">
                   {% if ev.bytes >= 1048576 %}{{ (ev.bytes / 1048576) | round(1) }}MB
                   {% elif ev.bytes >= 1024 %}{{ (ev.bytes / 1024) | round(1) }}KB
-                  {% else %}{{ ev.bytes }}B{% endif %}{% if ev.truncated %}✂{% endif %}
+                  {% else %}{{ ev.bytes }}B{% endif %}{% if ev.truncated %}&#9986;{% endif %}
                 </span>
               {% endif %}
               {% if ev._pair_idx is not none %}
                 <button class="pair-link-btn" onclick="event.stopPropagation(); jumpToPair({{ ev._pair_idx }})" title="Jump to paired {% if ev.event == 'api_send' %}response{% else %}request{% endif %}">
-                  {% if ev.event == 'api_send' %}⇣{% else %}⇡{% endif %}
+                  {% if ev.event == 'api_send' %}&#8675;{% else %}&#8673;{% endif %}
                 </button>
               {% endif %}
             </span>
 
-            <span class="timeline-expand-icon">▶</span>
+            <span class="timeline-expand-icon">&#9654;</span>
 
             {% if ev.chara_stats %}
             <div class="chara-stats-inline">
@@ -788,7 +893,7 @@
             {% endif %}
           </div>
           <div class="timeline-detail" style="display:none">
-            <div class="detail-loading">Loading…</div>
+            <div class="detail-loading">Loading...</div>
           </div>
         </div>
       </div>
@@ -802,7 +907,7 @@
 
 {% block scripts %}
 <script>
-/* ── View Switching ──────────────────────────────────── */
+/* ── View Switching ── */
 function switchView(view, btn) {
   document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
@@ -810,11 +915,9 @@ function switchView(view, btn) {
   btn.classList.add('active');
 }
 
-/* ── Network Timeline Filtering ───────────────────────── */
+/* ── Network Timeline Filtering ── */
 let _activeTypes = new Set();
 let _activeDir = 'all';
-
-// Initialise: only API-level pills start active
 document.querySelectorAll('.net-type-pill.active').forEach(p => _activeTypes.add(p.dataset.type));
 
 function filterNetwork() {
@@ -823,11 +926,9 @@ function filterNetwork() {
     const api = (el.dataset.api || '').toLowerCase();
     const type = el.dataset.type || '';
     const dir = el.dataset.dir || '';
-
     const matchText = !q || api.includes(q);
     const matchType = _activeTypes.size === 0 || _activeTypes.has(type);
     const matchDir = _activeDir === 'all' || dir === _activeDir;
-
     el.style.display = (matchText && matchType && matchDir) ? '' : 'none';
   });
 }
@@ -851,15 +952,12 @@ function setDirFilter(btn, dir) {
   filterNetwork();
 }
 
-// Apply initial filter so only default-active types are visible
 filterNetwork();
 
 function jumpToPair(pairIdx) {
   const target = document.getElementById('net-ev-' + pairIdx);
   if (!target) return;
-  // Make sure it's visible (reset filters if hidden)
   if (target.style.display === 'none') {
-    // Reset all filters to show it
     document.querySelectorAll('.net-type-pill').forEach(p => { p.classList.add('active'); _activeTypes.add(p.dataset.type); });
     _activeDir = 'all';
     document.querySelectorAll('.net-dir-btn').forEach(b => b.classList.remove('active'));
@@ -877,20 +975,16 @@ async function toggleDetail(summaryEl, sessionName, idx) {
   const detailEl = summaryEl.nextElementSibling;
   const icon = summaryEl.querySelector('.timeline-expand-icon');
   const isOpen = detailEl.style.display !== 'none';
-
   if (isOpen) {
     detailEl.style.display = 'none';
-    icon.textContent = '▶';
+    icon.textContent = '\u25B6';
     icon.classList.remove('open');
     return;
   }
-
   detailEl.style.display = '';
-  icon.textContent = '▼';
+  icon.textContent = '\u25BC';
   icon.classList.add('open');
-
   if (detailEl.dataset.loaded) return;
-
   try {
     const res = await fetch(`/api/session/${sessionName}/network/${idx}`);
     const data = await res.json();
@@ -910,12 +1004,10 @@ async function toggleDetail(summaryEl, sessionName, idx) {
   }
 }
 
-/* ── Interactive JSON Viewer ─────────────────────────── */
-
+/* ── Interactive JSON Viewer ── */
 function buildJsonViewer(data, annotations) {
   const wrapper = document.createElement('div');
   wrapper.className = 'json-viewer';
-
   const toolbar = document.createElement('div');
   toolbar.className = 'jv-toolbar';
   toolbar.innerHTML = `
@@ -924,13 +1016,11 @@ function buildJsonViewer(data, annotations) {
     <button class="btn btn-sm jv-btn" onclick="jvCopy(this)">Copy</button>
   `;
   wrapper.appendChild(toolbar);
-
   const pre = document.createElement('pre');
   pre.className = 'detail-json jv-tree';
   pre.dataset.raw = JSON.stringify(data, null, 2);
   pre.appendChild(renderNode(data, '', 0, true, annotations || {}, ''));
   wrapper.appendChild(pre);
-
   return wrapper;
 }
 
@@ -942,7 +1032,6 @@ function renderNode(value, key, depth, isLast, annotations, parentPath) {
   const indent = '  '.repeat(depth);
   const comma = isLast ? '' : ',';
   const keyStr = key !== '' ? `<span class="json-key">"${esc(key)}"</span>: ` : '';
-
   const currentPath = key !== '' ? (parentPath ? parentPath + '.' + key : key) : parentPath;
   const annotation = currentPath && annotations[currentPath];
   const annotBadge = annotation ? ` <span class="jv-annotation" title="${esc(currentPath)}">${esc(annotation)}</span>` : '';
@@ -957,13 +1046,12 @@ function renderNode(value, key, depth, isLast, annotations, parentPath) {
   const open = isArray ? '[' : '{';
   const close = isArray ? ']' : '}';
   const count = entries.length;
-
   if (count === 0) return textFrag(`${indent}${keyStr}${open}${close}${comma}\n`);
 
   const frag = document.createDocumentFragment();
   const toggle = document.createElement('span');
   toggle.className = 'jv-toggle';
-  toggle.innerHTML = `${indent}${keyStr}<span class="jv-arrow">▼</span>${open} <span class="jv-count">${count} ${isArray ? (count === 1 ? 'item' : 'items') : (count === 1 ? 'key' : 'keys')}</span>\n`;
+  toggle.innerHTML = `${indent}${keyStr}<span class="jv-arrow">\u25BC</span>${open} <span class="jv-count">${count} ${isArray ? (count === 1 ? 'item' : 'items') : (count === 1 ? 'key' : 'keys')}</span>\n`;
 
   const body = document.createElement('span');
   body.className = 'jv-body';
@@ -977,7 +1065,7 @@ function renderNode(value, key, depth, isLast, annotations, parentPath) {
   const collapsed = document.createElement('span');
   collapsed.className = 'jv-collapsed';
   collapsed.style.display = 'none';
-  collapsed.innerHTML = `${indent}${keyStr}<span class="jv-arrow jv-arrow-right">▶</span>${open}<span class="jv-ellipsis">…${count}</span>${close}${comma}\n`;
+  collapsed.innerHTML = `${indent}${keyStr}<span class="jv-arrow jv-arrow-right">\u25B6</span>${open}<span class="jv-ellipsis">\u2026${count}</span>${close}${comma}\n`;
 
   toggle.addEventListener('click', () => { body.style.display='none'; closeLine.style.display='none'; toggle.style.display='none'; collapsed.style.display=''; });
   collapsed.addEventListener('click', () => { body.style.display=''; closeLine.style.display=''; toggle.style.display=''; collapsed.style.display='none'; });
@@ -1008,11 +1096,11 @@ function jvCollapseAll(btn) {
 function jvCopy(btn) {
   const raw = btn.closest('.json-viewer').querySelector('.jv-tree').dataset.raw;
   navigator.clipboard.writeText(raw).then(() => {
-    const orig = btn.textContent; btn.textContent = '✓ Copied!'; setTimeout(() => btn.textContent = orig, 1500);
+    const orig = btn.textContent; btn.textContent = '\u2713 Copied!'; setTimeout(() => btn.textContent = orig, 1500);
   });
 }
 
-/* ── Career Accordion ────────────────────────────────── */
+/* ── Career Accordion ── */
 function toggleCareer(idx) {
   const panel = document.getElementById('career-' + idx);
   const body = document.getElementById('career-body-' + idx);
@@ -1022,7 +1110,7 @@ function toggleCareer(idx) {
   panel.classList.toggle('expanded', !isOpen);
 }
 
-/* ── Stats Charts ────────────────────────────────────── */
+/* ── Stats Charts ── */
 {% set multi = careers|length > 1 if careers is defined else false %}
 {% for career in (careers if careers is defined else [summary]) %}
 {% if career.stats_history | length > 2 %}
