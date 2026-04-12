@@ -1,5 +1,9 @@
 // hook_network.js
-// Captures game-server API traffic via two layers:
+// Captures game-server API traffic via multiple layers:
+//
+// Layer 0: libnative.dll — hooks the game's own decryption/decompression
+//          function to capture clean, decrypted MsgPack data. This is the
+//          most reliable method (inspired by CarrotJuicer).
 //
 // Layer 1: SSL_read / SSL_write — hooks the TLS library to capture raw
 //          decrypted HTTP traffic (request + response bytes). Works
@@ -21,6 +25,367 @@
     console.log("[network] Initialising network capture...");
 
     let hookCount = 0;
+
+    // ── Global sequence counter & request ID pairing ──────────────────
+    // Every event gets a monotonic _seq so the Python side can order them
+    // and pair request→response even across interleaved hooks.
+    var _seq = 0;
+    var _nextReqId = 0;
+    // apiName → reqId (most recent Send for that API)
+    var _pendingReqIds = Object.create(null);
+
+    // ══════════════════════════════════════════════════════════════════
+    // LAYER 0: libnative.dll LZ4 hooks (request + response)
+    // ══════════════════════════════════════════════════════════════════
+    //
+    // The game uses libnative.dll for packet encryption/decryption.
+    // CarrotJuicer hooks both LZ4 functions:
+    //   - LZ4_decompress_safe  — response (server → game, after decrypt)
+    //   - LZ4_compress_default — request  (game → server, before encrypt)
+    //
+    // Both give us clean, plaintext MsgPack data.
+    //
+    // Request data has a blob1 header (4-byte LE offset, then UDID,
+    // session_id, response_key) followed by the MsgPack body at
+    // offset+4. We extract the crypto material from blob1 so we can
+    // decode SSL-layer captures offline.
+
+    var libnativeHooked = false;
+
+    // ── Extracted crypto material (from blob1 request headers) ────────
+    var _lastUdidHex = null; // 16 bytes → 32 hex chars
+    var _lastSessionIdHex = null; // 16 bytes → 32 hex chars
+    var _lastResponseKeyHex = null; // 32 bytes → 64 hex chars
+    var _extractedSalt = null; // ASCII salt string from GameAssembly.dll
+
+    try {
+        var libnative = Process.getModuleByName("libnative.dll");
+        if (libnative) {
+            console.log("[network] Found libnative.dll at " + libnative.base);
+
+            // ── LZ4_decompress_safe: response capture ─────────────────
+            var lz4Addr = libnative.findExportByName("LZ4_decompress_safe");
+            if (!lz4Addr) {
+                // Some builds export it as LZ4_decompress_safe_ext
+                lz4Addr = libnative.findExportByName("LZ4_decompress_safe_ext");
+            }
+            if (lz4Addr) {
+                Interceptor.attach(lz4Addr, {
+                    onEnter: function (args) {
+                        this.src = args[0];
+                        this.dst = args[1];
+                        this.srcSize = args[2].toInt32();
+                        this.dstCapacity = args[3].toInt32();
+                    },
+                    onLeave: function (retval) {
+                        var decompressedSize = retval.toInt32();
+                        if (decompressedSize <= 0 || decompressedSize > 4194304) return;
+
+                        try {
+                            var captureLen = Math.min(decompressedSize, 524288);
+                            var data = this.dst.readByteArray(captureLen);
+                            send(
+                                {
+                                    type: "collect",
+                                    domain: "network",
+                                    data: {
+                                        _seq: _seq++,
+                                        event: "libnative_decrypt",
+                                        direction: "in",
+                                        bytes: decompressedSize,
+                                        captured: captureLen,
+                                        truncated: decompressedSize > captureLen,
+                                        srcSize: this.srcSize,
+                                    },
+                                },
+                                data,
+                            );
+                        } catch (e) {}
+                    },
+                });
+                hookCount++;
+                libnativeHooked = true;
+                console.log("[network] Hooked libnative.dll LZ4_decompress_safe");
+            }
+
+            // ── LZ4_compress_default: request capture ─────────────────
+            // The input to LZ4 compress is the full request blob:
+            //   bytes[0:4]       = LE uint32 blob1 length (typically 166)
+            //   bytes[4:4+len]   = blob1 header (session_id, udid, response_key, auth_key)
+            //   bytes[4+len:]    = MsgPack request body
+            var lz4CompAddr = libnative.findExportByName("LZ4_compress_default");
+            if (!lz4CompAddr) {
+                lz4CompAddr = libnative.findExportByName("LZ4_compress_default_ext");
+            }
+            if (lz4CompAddr) {
+                Interceptor.attach(lz4CompAddr, {
+                    onEnter: function (args) {
+                        var src = args[0];
+                        var srcSize = args[2].toInt32();
+                        if (srcSize <= 0 || srcSize > 4194304) return;
+
+                        try {
+                            var captureLen = Math.min(srcSize, 524288);
+                            var data = src.readByteArray(captureLen);
+
+                            // ── Parse blob1 header for crypto material ────
+                            // blob1 layout: [4-byte LE offset][blob1 bytes][MsgPack body]
+                            // blob1 tail (last N bytes): session_id(16) + udid(16) + response_key(32) [+ auth_key(48)]
+                            var cryptoInfo = null;
+                            if (srcSize > 170) {
+                                try {
+                                    var headerLen = src.readU32();
+                                    // Sanity: typical header is 166 bytes, range 100-500
+                                    if (
+                                        headerLen >= 64 &&
+                                        headerLen <= 500 &&
+                                        headerLen + 4 < srcSize
+                                    ) {
+                                        var blob1End = 4 + headerLen;
+                                        // The crypto fields are at the END of blob1:
+                                        //   session_id: 16 bytes
+                                        //   udid_raw:   16 bytes
+                                        //   response_key: 32 bytes
+                                        //   auth_key:   48 bytes (optional)
+                                        // Total with auth: 112, without: 64
+                                        var tailSize = headerLen >= 112 + 4 ? 112 : 64;
+                                        if (headerLen >= tailSize) {
+                                            var tailStart = blob1End - tailSize;
+                                            var sessionId = src.add(tailStart).readByteArray(16);
+                                            var udidRaw = src.add(tailStart + 16).readByteArray(16);
+                                            var responseKey = src
+                                                .add(tailStart + 32)
+                                                .readByteArray(32);
+
+                                            // Convert to hex strings
+                                            var sidArr = new Uint8Array(sessionId);
+                                            var udidArr = new Uint8Array(udidRaw);
+                                            var rkArr = new Uint8Array(responseKey);
+
+                                            function toHex(arr) {
+                                                var h = "";
+                                                for (var i = 0; i < arr.length; i++) {
+                                                    var b = arr[i].toString(16);
+                                                    h += b.length < 2 ? "0" + b : b;
+                                                }
+                                                return h;
+                                            }
+
+                                            _lastSessionIdHex = toHex(sidArr);
+                                            _lastUdidHex = toHex(udidArr);
+                                            _lastResponseKeyHex = toHex(rkArr);
+
+                                            // Format UDID as UUID: 8-4-4-4-12
+                                            var u = _lastUdidHex;
+                                            var udidUuid =
+                                                u.slice(0, 8) +
+                                                "-" +
+                                                u.slice(8, 12) +
+                                                "-" +
+                                                u.slice(12, 16) +
+                                                "-" +
+                                                u.slice(16, 20) +
+                                                "-" +
+                                                u.slice(20, 32);
+
+                                            cryptoInfo = {
+                                                headerLen: headerLen,
+                                                sessionId: _lastSessionIdHex,
+                                                udid: udidUuid,
+                                                responseKey: _lastResponseKeyHex,
+                                            };
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.log("[network] blob1 parse error: " + e);
+                                }
+                            }
+
+                            var record = {
+                                _seq: _seq++,
+                                event: "libnative_encrypt",
+                                direction: "out",
+                                bytes: srcSize,
+                                captured: captureLen,
+                                truncated: srcSize > captureLen,
+                            };
+                            if (cryptoInfo) record.crypto = cryptoInfo;
+                            if (_extractedSalt) record.salt = _extractedSalt;
+
+                            send(
+                                {
+                                    type: "collect",
+                                    domain: "network",
+                                    data: record,
+                                },
+                                data,
+                            );
+                        } catch (e) {}
+                    },
+                });
+                hookCount++;
+                libnativeHooked = true;
+                console.log(
+                    "[network] Hooked libnative.dll LZ4_compress_default (request capture)",
+                );
+            }
+
+            // Also scan for exported functions that look like encrypt/decrypt
+            var exports = libnative.enumerateExports();
+            for (var ei = 0; ei < exports.length; ei++) {
+                var exp = exports[ei];
+                console.log("[network] libnative export: " + exp.name + " @ " + exp.address);
+            }
+        }
+    } catch (e) {
+        console.log("[network] libnative.dll not found or hook failed: " + e);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // LAYER 0.5: Auto-extract crypto salt from game binary
+    // ══════════════════════════════════════════════════════════════════
+    //
+    // The game uses a hardcoded ASCII salt for MD5-based session ID
+    // generation: MD5(viewerId + udid + SALT). This salt is embedded
+    // in GameAssembly.dll and can change with game updates.
+    //
+    // We scan the binary for it so Clairvoyance stays resilient to
+    // updates without manual intervention.
+    //
+    // Strategy 1: Scan for the known salt string.
+    // Strategy 2: If that fails, look for short ASCII strings near
+    //             MD5/crypto code patterns (future heuristic).
+
+    (function extractSalt() {
+        // Known salt values (current + historical)
+        var knownSalts = [
+            "co!=Y;(UQCGxJ_n82", // current as of 2025
+        ];
+
+        var gameAssembly = null;
+        try {
+            gameAssembly = Process.getModuleByName("GameAssembly.dll");
+        } catch (e) {}
+        if (!gameAssembly) {
+            try {
+                gameAssembly = Process.getModuleByName("libil2cpp.so");
+            } catch (e) {}
+        }
+
+        if (!gameAssembly) {
+            console.log("[network] GameAssembly not found — salt extraction skipped");
+            return;
+        }
+
+        console.log("[network] Scanning " + gameAssembly.name + " for crypto salt...");
+
+        // Strategy 1: Scan for each known salt string
+        for (var si = 0; si < knownSalts.length; si++) {
+            var saltStr = knownSalts[si];
+            var pattern = "";
+            for (var ci = 0; ci < saltStr.length; ci++) {
+                if (ci > 0) pattern += " ";
+                var byte = saltStr.charCodeAt(ci).toString(16);
+                pattern += (byte.length < 2 ? "0" : "") + byte;
+            }
+
+            try {
+                var matches = Memory.scanSync(gameAssembly.base, gameAssembly.size, pattern);
+                if (matches.length > 0) {
+                    _extractedSalt = saltStr;
+                    console.log(
+                        "[network] ✓ Found salt '" +
+                            saltStr +
+                            "' at " +
+                            matches[0].address +
+                            " (" +
+                            matches.length +
+                            " occurrences)",
+                    );
+
+                    // Report to Python side
+                    send({
+                        type: "collect",
+                        domain: "network",
+                        data: {
+                            _seq: _seq++,
+                            event: "crypto_salt_found",
+                            salt: saltStr,
+                            source: "known_pattern",
+                            module: gameAssembly.name,
+                            address: matches[0].address.toString(),
+                            occurrences: matches.length,
+                        },
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.log("[network] Salt scan error: " + e);
+            }
+        }
+
+        // Strategy 2: Heuristic — look for il2cpp string literals that
+        // look like a salt (short, has special chars, near MD5 code).
+        // We scan for UTF-16LE strings (il2cpp string objects) matching
+        // a salt-like pattern: 14-24 chars, contains =, ;, (, or !
+        // This is a best-effort fallback.
+        try {
+            // Look for the C# string object pattern for the salt.
+            // IL2CPP strings are: [klass_ptr(8)][monitor(8)][length(4)][UTF-16LE chars...]
+            // The known salt "co!=Y;(UQCGxJ_n82" in UTF-16LE:
+            // 63 00 6f 00 21 00 3d 00 59 00 3b 00 28 00 ...
+            // We search for the first 8 chars in UTF-16LE as a signature.
+            var sig16 = "";
+            var probe = "co!=Y;(U"; // first 8 chars — unique enough
+            for (var pi = 0; pi < probe.length; pi++) {
+                if (pi > 0) sig16 += " ";
+                var ch = probe.charCodeAt(pi).toString(16);
+                sig16 += (ch.length < 2 ? "0" : "") + ch + " 00";
+            }
+            var utf16Matches = Memory.scanSync(gameAssembly.base, gameAssembly.size, sig16);
+            if (utf16Matches.length > 0) {
+                // Read back the full string
+                try {
+                    var strAddr = utf16Matches[0].address;
+                    // Read up to 32 UTF-16LE chars
+                    var chars = [];
+                    for (var ri = 0; ri < 32; ri++) {
+                        var wchar = strAddr.add(ri * 2).readU16();
+                        if (wchar === 0 || wchar > 127) break;
+                        chars.push(String.fromCharCode(wchar));
+                    }
+                    if (chars.length >= 10) {
+                        _extractedSalt = chars.join("");
+                        console.log(
+                            "[network] ✓ Found salt (UTF-16 heuristic): '" + _extractedSalt + "'",
+                        );
+                        send({
+                            type: "collect",
+                            domain: "network",
+                            data: {
+                                _seq: _seq++,
+                                event: "crypto_salt_found",
+                                salt: _extractedSalt,
+                                source: "utf16_heuristic",
+                                module: gameAssembly.name,
+                                address: strAddr.toString(),
+                                occurrences: utf16Matches.length,
+                            },
+                        });
+                        return;
+                    }
+                } catch (e) {}
+            }
+        } catch (e) {
+            console.log("[network] UTF-16 salt heuristic error: " + e);
+        }
+
+        console.log(
+            "[network] Salt not found in " +
+                gameAssembly.name +
+                " (will still work via Layer 0 hooks)",
+        );
+    })();
 
     // ══════════════════════════════════════════════════════════════════
     // LAYER 1: SSL_read / SSL_write hooks
@@ -97,8 +462,8 @@
                     var bytesRead = retval.toInt32();
                     if (bytesRead <= 0) return;
 
-                    // Cap at 32KB to avoid sending huge blobs
-                    var captureLen = Math.min(bytesRead, 32768);
+                    // Cap at 256KB to capture full race responses
+                    var captureLen = Math.min(bytesRead, 262144);
                     try {
                         var data = this.buf.readByteArray(captureLen);
                         send(
@@ -106,7 +471,9 @@
                                 type: "collect",
                                 domain: "network",
                                 data: {
+                                    _seq: _seq++,
                                     event: "ssl_read",
+                                    direction: "in",
                                     bytes: bytesRead,
                                     captured: captureLen,
                                     truncated: bytesRead > captureLen,
@@ -160,7 +527,9 @@
                                                 type: "collect",
                                                 domain: "network",
                                                 data: {
+                                                    _seq: _seq++,
                                                     event: "schannel_decrypt",
+                                                    direction: "in",
                                                     bytes: cbBuffer,
                                                     captured: captureLen,
                                                     truncated: cbBuffer > captureLen,
@@ -199,19 +568,40 @@
                     var num = args[2].toInt32();
                     if (num <= 0) return;
 
-                    var captureLen = Math.min(num, 32768);
+                    var captureLen = Math.min(num, 262144);
                     try {
                         var data = buf.readByteArray(captureLen);
+
+                        // Try to extract HTTP method/path from the first bytes
+                        var httpMethod = null;
+                        var httpUrl = null;
+                        try {
+                            var peek = buf.readUtf8String(Math.min(num, 256));
+                            if (peek) {
+                                var m = peek.match(/^(POST|GET|PUT|DELETE|PATCH)\s+([^\s]+)/);
+                                if (m) {
+                                    httpMethod = m[1];
+                                    httpUrl = m[2];
+                                }
+                            }
+                        } catch (e) {}
+
+                        var record = {
+                            _seq: _seq++,
+                            event: "ssl_write",
+                            direction: "out",
+                            bytes: num,
+                            captured: captureLen,
+                            truncated: num > captureLen,
+                        };
+                        if (httpMethod) record.httpMethod = httpMethod;
+                        if (httpUrl) record.httpUrl = httpUrl;
+
                         send(
                             {
                                 type: "collect",
                                 domain: "network",
-                                data: {
-                                    event: "ssl_write",
-                                    bytes: num,
-                                    captured: captureLen,
-                                    truncated: num > captureLen,
-                                },
+                                data: record,
                             },
                             data,
                         );
@@ -252,7 +642,9 @@
                                                 type: "collect",
                                                 domain: "network",
                                                 data: {
+                                                    _seq: _seq++,
                                                     event: "schannel_encrypt",
+                                                    direction: "out",
                                                     bytes: cbBuffer,
                                                     captured: captureLen,
                                                     truncated: cbBuffer > captureLen,
@@ -305,6 +697,19 @@
     var formatterHooks = 0;
     var MAX_FORMATTER_HOOKS = 300; // safety cap
 
+    // Note: Request/Response class lookup is handled by Layer 3's
+    // dataClassPtrs / getDataClassInfo. Formatters use the same cache.
+
+    function getReqRespFields(formatterShortName) {
+        // formatterShortName is e.g. "Gallop_SingleModeFreeChoiceRewardRequest"
+        // Convert to "Gallop.SingleModeFreeChoiceRewardRequest"
+        var className = formatterShortName.replace(/_/g, ".");
+        // Reuse Layer 3's data class lookup (populated later during setup,
+        // but formatter hooks fire at runtime after setup completes)
+        var info = getDataClassInfo(className);
+        return info ? info.fieldList : null;
+    }
+
     for (var fqn in formatterClasses) {
         if (formatterHooks >= MAX_FORMATTER_HOOKS) break;
 
@@ -313,19 +718,37 @@
             var info = extractClassInfo(entry.classPtr, fqn);
             var sName = entry.shortName;
 
-            // Hook Serialize
+            // Hook Serialize — reads the value being serialized (request data)
             if (info.methods["Serialize"]) {
                 if (
                     hookMethod(info, "Serialize", -1, {
-                        onEnter: function () {
+                        onEnter: function (args) {
+                            // args: [this, ref writer, value, options]
+                            // For instance methods, args[0]=this, args[1]=writer,
+                            // args[2]=value (the request/response object), args[3]=options
+                            var record = {
+                                event: "msgpack_serialize",
+                                _seq: _seq++,
+                                direction: "out",
+                                formatter: sName,
+                            };
+
+                            // Try to read fields from the value object
+                            try {
+                                var valuePtr = args[2];
+                                if (valuePtr && !valuePtr.isNull()) {
+                                    var fields = getReqRespFields(sName);
+                                    if (fields) {
+                                        var data = readObjectFields(valuePtr, fields);
+                                        if (data) record.fields = data;
+                                    }
+                                }
+                            } catch (e) {}
+
                             send({
                                 type: "collect",
                                 domain: "network",
-                                data: {
-                                    event: "msgpack_serialize",
-                                    formatter: sName,
-                                    direction: "request",
-                                },
+                                data: record,
                             });
                         },
                     })
@@ -334,19 +757,36 @@
                 }
             }
 
-            // Hook Deserialize
+            // Hook Deserialize — reads the return value (response data)
             if (info.methods["Deserialize"]) {
                 if (
                     hookMethod(info, "Deserialize", -1, {
-                        onEnter: function () {
+                        onEnter: function (args) {
+                            this._formatterName = sName;
+                        },
+                        onLeave: function (retval) {
+                            var record = {
+                                event: "msgpack_deserialize",
+                                _seq: _seq++,
+                                direction: "in",
+                                formatter: this._formatterName,
+                            };
+
+                            // Try to read fields from the return value
+                            try {
+                                if (retval && !retval.isNull()) {
+                                    var fields = getReqRespFields(this._formatterName);
+                                    if (fields) {
+                                        var data = readObjectFields(retval, fields);
+                                        if (data) record.fields = data;
+                                    }
+                                }
+                            } catch (e) {}
+
                             send({
                                 type: "collect",
                                 domain: "network",
-                                data: {
-                                    event: "msgpack_deserialize",
-                                    formatter: sName,
-                                    direction: "response",
-                                },
+                                data: record,
                             });
                         },
                     })
@@ -361,75 +801,357 @@
     console.log("[network] " + formatterHooks + " MsgPack Formatter hooks installed.");
 
     // ══════════════════════════════════════════════════════════════════
-    // LAYER 3: Task pipeline hooks (il2cpp)
+    // LAYER 3: Gallop.*Task API hooks (il2cpp)
     // ══════════════════════════════════════════════════════════════════
     //
-    // The game follows a pattern: FooRequest + FooResponse + FooTask.
-    // The Task classes manage the full API lifecycle. We hook their
-    // main entry methods to log which API endpoint is being called.
+    // Every API call in the game is a `Gallop.*Task` class, e.g.
+    //   Gallop.SingleModeCheckEventTask
+    //   Gallop.SingleModeExecCommandTask
+    // They all share the same field layout:
+    //   offset 16: postData (byte[])
+    //   offset 24: onSuccess callback
+    //   offset 32: onError callback
+    //   offset 40: headers dict
+    //   offset 48: request (Cute.Http.IWebRequest)
+    //
+    // We scan for ALL Gallop.*Task classes and hook Send + Deserialize
+    // on each one. When Send fires, `this` IS the task, so we can read
+    // the class name and postData directly.
+    //
+    // IMPORTANT: Send, Deserialize, and OnError are base-class methods
+    // shared across ALL ~300 Task subclasses (same compiled address).
+    // hookMethod deduplicates — only ONE callback is installed.
+    // We use readClassName(self) at runtime to determine the concrete
+    // type, then look up the matching Request/Response class to read
+    // its fields dynamically.
 
-    console.log("[network] Scanning for API Task classes...");
+    console.log("[network] Scanning for Gallop API Task classes...");
+
+    // Helper: read the il2cpp class name from an object pointer
+    function readClassName(objPtr) {
+        try {
+            var klass = objPtr.readPointer();
+            if (klass.isNull()) return null;
+            var n = readCStr(fn.class_get_name(klass));
+            var ns = readCStr(fn.class_get_namespace(klass));
+            return ns ? ns + "." + n : n;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // Helper: read il2cpp array length
+    function readArrayLength(arrPtr) {
+        if (!arrPtr || arrPtr.isNull()) return -1;
+        try {
+            var lenOffset = ptrSize === 8 ? 24 : 12;
+            return arrPtr.add(lenOffset).readS32();
+        } catch (e) {
+            return -1;
+        }
+    }
+
+    // Helper: derive API short name from a task class name
+    function taskToApiName(taskClassName) {
+        return taskClassName.replace("Gallop.", "").replace(/Task$/, "");
+    }
+
+    // ── Step 1: Pre-scan Request/Response data classes ────────────────
+    //
+    // Each API has matching Gallop.*Request and Gallop.*Response classes
+    // with actual data fields (story_id, choice_number, stat changes etc.)
+    // We extract their field lists so we can read Response objects after
+    // Deserialize returns them, and Request objects if we find them.
+
+    console.log("[network] Scanning for Request/Response data classes...");
+
+    var dataClassPtrs = Object.create(null); // className → classPtr
+
+    iterAssemblyClasses(function (classPtr, fullName, ns, name) {
+        if (ns !== "Gallop") return;
+        if (name.endsWith("Request") || name.endsWith("Response")) {
+            dataClassPtrs[fullName] = classPtr;
+        }
+    });
+
+    // Extract field info for each Request/Response class
+    var dataClassInfoCache = Object.create(null); // className → classInfo
+
+    function getDataClassInfo(className) {
+        if (className in dataClassInfoCache) return dataClassInfoCache[className];
+        var cp = dataClassPtrs[className];
+        if (!cp) {
+            dataClassInfoCache[className] = null;
+            return null;
+        }
+        var info = extractClassInfoWithParents(cp, className);
+        dataClassInfoCache[className] = info;
+        return info;
+    }
+
+    // Cache for task class info extracted at runtime (keyed by class name)
+    var taskClassInfoCache = Object.create(null);
+
+    function getTaskClassInfo(objPtr, className) {
+        if (className in taskClassInfoCache) return taskClassInfoCache[className];
+        try {
+            var klass = objPtr.readPointer();
+            if (!klass || klass.isNull()) return null;
+            var info = extractClassInfoWithParents(klass, className);
+            taskClassInfoCache[className] = info;
+            return info;
+        } catch (e) {
+            taskClassInfoCache[className] = null;
+            return null;
+        }
+    }
+
+    console.log(
+        "[network] Found " + Object.keys(dataClassPtrs).length + " Request/Response data classes.",
+    );
+
+    // ── Step 2: Scan Task classes ─────────────────────────────────────
 
     var taskClasses = {};
 
     iterAssemblyClasses(function (classPtr, fullName, ns, name) {
+        // Match Gallop.*Task classes (the API call wrappers)
         if (ns !== "Gallop") return;
         if (!name.endsWith("Task")) return;
-        // Filter to likely API tasks (those with matching Request/Response)
-        // The naming convention is: FooRequest, FooResponse, FooTask
+        // Skip obvious non-API classes
+        if (name.indexOf("UniTask") !== -1) return;
+        if (name.indexOf("Coroutine") !== -1) return;
         taskClasses[fullName] = classPtr;
     });
 
     var taskCount = Object.keys(taskClasses).length;
-    console.log("[network] Found " + taskCount + " Task classes.");
+    console.log("[network] Found " + taskCount + " Gallop.*Task classes.");
+
+    // ── Step 3: Install hooks ─────────────────────────────────────────
+    //
+    // Because Send/Deserialize/OnError are inherited base-class methods,
+    // hookMethod will only succeed for the FIRST task (dedup).
+    // The callbacks must NOT rely on closure-captured task-specific vars —
+    // they resolve everything dynamically via readClassName(self).
 
     var taskHooks = 0;
-    var MAX_TASK_HOOKS = 200;
+    var MAX_TASK_HOOKS = 600;
 
-    for (var taskName in taskClasses) {
+    for (var taskFqn in taskClasses) {
         if (taskHooks >= MAX_TASK_HOOKS) break;
 
-        (function (taskName) {
-            var taskInfo = extractClassInfo(taskClasses[taskName], taskName);
+        (function (fullName) {
+            var classPtr = taskClasses[fullName];
+            var info = extractClassInfo(classPtr, fullName);
 
-            // Hook common task lifecycle methods
-            var taskMethods = [
-                "Start",
-                "Execute",
-                "SendRequest",
-                "OnComplete",
-                "OnSuccess",
-                "OnError",
-                "RunTask",
-            ];
-            for (var mi = 0; mi < taskMethods.length; mi++) {
-                (function (mName) {
-                    if (!taskInfo.methods[mName]) return;
+            // Hook Send — fires when the game sends this API request
+            if (info.methods["Send"]) {
+                if (
+                    hookMethod(info, "Send", -1, {
+                        onEnter: function (args) {
+                            var self = args[0];
+                            var taskName = readClassName(self) || "UnknownTask";
+                            var apiName = taskToApiName(taskName);
 
-                    if (
-                        hookMethod(taskInfo, mName, -1, {
-                            onEnter: function () {
-                                send({
+                            // Read postData byte[] at offset 16
+                            var postDataSize = -1;
+                            var postDataBuf = null;
+                            try {
+                                var arrPtr = self.add(16).readPointer();
+                                if (arrPtr && !arrPtr.isNull()) {
+                                    postDataSize = readArrayLength(arrPtr);
+                                    if (postDataSize > 0 && postDataSize <= 1048576) {
+                                        postDataBuf = readIl2cppByteArray(arrPtr, 262144);
+                                        if (!postDataBuf) {
+                                            console.log(
+                                                "[network] WARN: readIl2cppByteArray returned null for " +
+                                                    apiName +
+                                                    " (len=" +
+                                                    postDataSize +
+                                                    ", arrPtr=" +
+                                                    arrPtr +
+                                                    ")",
+                                            );
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                console.log(
+                                    "[network] ERROR reading postData for " + apiName + ": " + e,
+                                );
+                            }
+
+                            var record = {
+                                event: "api_send",
+                                _seq: _seq++,
+                                _reqId: ++_nextReqId,
+                                direction: "out",
+                                task: taskName,
+                                api: apiName,
+                                postDataBytes: postDataSize,
+                            };
+
+                            // Track for pairing with the response
+                            _pendingReqIds[apiName] = record._reqId;
+
+                            send(
+                                {
                                     type: "collect",
                                     domain: "network",
-                                    data: {
-                                        event: "api_task",
-                                        task: taskName,
-                                        method: mName,
-                                    },
-                                });
-                            },
-                        })
-                    ) {
-                        taskHooks++;
-                    }
-                })(taskMethods[mi]);
+                                    data: record,
+                                },
+                                postDataBuf,
+                            );
+                        },
+                    })
+                ) {
+                    taskHooks++;
+                }
             }
-        })(taskName);
+
+            // Hook Deserialize — fires when the response is parsed.
+            // retval is the deserialized Response object.
+            // args[1] may be the raw response byte[] or a MessagePackReader.
+            if (info.methods["Deserialize"]) {
+                if (
+                    hookMethod(info, "Deserialize", -1, {
+                        onEnter: function (args) {
+                            this._self = args[0];
+                            this._taskName = readClassName(args[0]) || "UnknownTask";
+                            this._apiName = taskToApiName(this._taskName);
+
+                            // Try to capture raw response bytes from args[1]
+                            // (byte[] parameter to Deserialize)
+                            this._rawBuf = null;
+                            try {
+                                var rawArg = args[1];
+                                if (rawArg && !rawArg.isNull()) {
+                                    // Check if it looks like an il2cpp array
+                                    var len = readArrayLength(rawArg);
+                                    if (len > 0 && len < 1048576) {
+                                        this._rawBuf = readIl2cppByteArray(rawArg, 262144);
+                                    }
+                                }
+                            } catch (e) {}
+                        },
+                        onLeave: function (retval) {
+                            // Pop the pending request ID for this API
+                            var pairedReqId = _pendingReqIds[this._apiName] || null;
+                            if (pairedReqId !== null) {
+                                delete _pendingReqIds[this._apiName];
+                            }
+
+                            var record = {
+                                event: "api_response",
+                                _seq: _seq++,
+                                _reqId: pairedReqId,
+                                direction: "in",
+                                task: this._taskName,
+                                api: this._apiName,
+                            };
+
+                            // ── Read Response object fields from retval ──
+                            // Deserialize returns the typed Response object
+                            // (e.g. SingleModeFreeCheckEventResponse).
+                            // Look up its class info and read all primitive fields.
+                            try {
+                                if (retval && !retval.isNull()) {
+                                    // Get the actual Response class name from retval's klass
+                                    var retClassName = readClassName(retval);
+                                    if (retClassName) {
+                                        record.responseClass = retClassName;
+                                        var respInfo = getDataClassInfo(retClassName);
+                                        if (!respInfo) {
+                                            // Fallback: extract fields on the fly via IL2CPP reflection
+                                            try {
+                                                var retKlass = retval.readPointer();
+                                                if (!retKlass.isNull()) {
+                                                    respInfo = extractClassInfoWithParents(
+                                                        retKlass,
+                                                        retClassName,
+                                                    );
+                                                }
+                                            } catch (e) {}
+                                        }
+                                        if (respInfo && respInfo.fieldList.length > 0) {
+                                            var fields = readObjectFields(
+                                                retval,
+                                                respInfo.fieldList,
+                                            );
+                                            if (fields) record.responseFields = fields;
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                console.log(
+                                    "[network] WARN: failed reading retval for " +
+                                        this._apiName +
+                                        ": " +
+                                        e,
+                                );
+                            }
+
+                            // ── Also try reading task object fields after Deserialize ──
+                            // Task classes end in "Task" not "Request"/"Response",
+                            // so they're not in dataClassPtrs. Extract live (cached).
+                            try {
+                                if (this._self && !this._self.isNull()) {
+                                    var taskInfo = getTaskClassInfo(this._self, this._taskName);
+                                    if (taskInfo && taskInfo.fieldList.length > 0) {
+                                        var tFields = readObjectFields(
+                                            this._self,
+                                            taskInfo.fieldList,
+                                        );
+                                        if (tFields) record.taskFields = tFields;
+                                    }
+                                }
+                            } catch (e) {}
+
+                            send(
+                                {
+                                    type: "collect",
+                                    domain: "network",
+                                    data: record,
+                                },
+                                this._rawBuf || null,
+                            );
+                        },
+                    })
+                ) {
+                    taskHooks++;
+                }
+            }
+
+            // Hook OnError
+            if (info.methods["OnError"]) {
+                if (
+                    hookMethod(info, "OnError", -1, {
+                        onEnter: function (args) {
+                            var self = args[0];
+                            var taskName = readClassName(self) || "UnknownTask";
+
+                            send({
+                                type: "collect",
+                                domain: "network",
+                                data: {
+                                    event: "api_error",
+                                    _seq: _seq++,
+                                    direction: "in",
+                                    task: taskName,
+                                    api: taskToApiName(taskName),
+                                },
+                            });
+                        },
+                    })
+                ) {
+                    taskHooks++;
+                }
+            }
+        })(taskFqn);
     }
 
     hookCount += taskHooks;
-    console.log("[network] " + taskHooks + " Task pipeline hooks installed.");
+    console.log("[network] " + taskHooks + " Gallop Task hooks installed.");
 
     // ── Summary ───────────────────────────────────────────────────────
 

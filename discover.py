@@ -15,7 +15,7 @@ With --trace, hooks key entry-point methods and logs call frequency
 during gameplay so you know exactly what to target in Phase 2.
 
 Usage:
-  uv run discover.py                   # broad class scan → JSON dump
+  uv run discover.py                   # broad class scan -> JSON dump
   uv run discover.py --trace           # live-trace during gameplay
   uv run discover.py --keywords extra  # add extra keywords to scan
 """
@@ -35,18 +35,50 @@ from lib.session import save_discovery
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-JS_DIR = os.path.join(SCRIPT_DIR, "js")
+_FROZEN = getattr(sys, "frozen", False)
+
+if _FROZEN:
+    # PyInstaller: data files (js/) live in the temp _MEIPASS bundle,
+    # but working directories (discovery/, logs) live next to the .exe.
+    _BUNDLE_DIR = os.path.dirname(os.path.abspath(__file__))  # _MEIPASS
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    JS_DIR = os.path.join(_BUNDLE_DIR, "js")
+else:
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    JS_DIR = os.path.join(SCRIPT_DIR, "js")
 
 
 # ── Logging ────────────────────────────────────────────────────────────────
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
-)
+LOG_FILE = os.path.join(SCRIPT_DIR, "discover.log")
+JS_LOG_FILE = os.path.join(SCRIPT_DIR, "discover_js.log")
+
+# Main logger — console + file, important events only
 log = logging.getLogger("clairvoyance")
+log.setLevel(logging.DEBUG)
+
+# Force UTF-8 on stdout so Unicode doesn't crash on Windows cp1252
+if sys.stdout:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+_console = logging.StreamHandler(sys.stdout)
+_console.setLevel(logging.INFO)
+_console.setFormatter(logging.Formatter("%(message)s"))
+log.addHandler(_console)
+
+_logfile = logging.FileHandler(LOG_FILE, mode="w", encoding="utf-8")
+_logfile.setLevel(logging.DEBUG)
+_logfile.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+log.addHandler(_logfile)
+
+# JS logger — verbose Frida console.log output, file only (no console spam)
+js_log = logging.getLogger("clairvoyance.js")
+js_log.setLevel(logging.DEBUG)
+js_log.propagate = False
+
+_js_logfile = logging.FileHandler(JS_LOG_FILE, mode="w", encoding="utf-8")
+_js_logfile.setLevel(logging.DEBUG)
+_js_logfile.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
+js_log.addHandler(_js_logfile)
 
 # ── CLI ────────────────────────────────────────────────────────────────────
 
@@ -98,32 +130,47 @@ SCAN_KEYWORDS = [
     "msgpack",
     "httpclien",
     "webrequest",
+    "cute.http",
 ]
 
 # For trace mode: which classes to look at
 TRACE_CLASS_KEYWORDS = [
+    # Skills
     "skillbase",
     "skilldetail",
     "skillmanager",
+    "skillability",
+    # Race
     "racemana",
     "raceresult",
+    "racesimulate",
+    "racehorsedata",
+    "racehorsesimulate",
+    "raceui",
+    # Events / training
     "singlemodeevent",
     "singlemodechar",
+    "singlemodeload",
+    "singlemodestart",
+    "singlemodegain",
     "storyevent",
     "choicereward",
     "trainingview",
     "trainingcontrol",
-    # Network / API
-    "msgpack.formatter",
-    "task",
-    "httpclient",
-    "webrequest",
+    # Network / API — base classes
+    "cute.http",
+    "cutehttp",
+    "iwebrequest",
+    # Jikkyo
+    "jikkyomanag",
+    "jikkyocomment",
 ]
 
 # For trace mode: which method names are interesting (low-frequency event methods)
 TRACE_METHOD_PATTERNS = [
     "activate",
     "begin",
+    "beginview",
     "start",
     "end",
     "finish",
@@ -137,7 +184,13 @@ TRACE_METHOD_PATTERNS = [
     "deserialize",
     "serialize",
     "onclick",
-    "beginview",
+    "send",
+    "onerror",
+    "onsuccess",
+    "oncomplete",
+    "setheader",
+    "record",
+    "torace",
 ]
 
 # Signature patterns: method/field name substrings that indicate a class is
@@ -291,13 +344,16 @@ def on_message(message, data):
     elif msg_type == "error":
         has_error = True
         log.error("  [X] JS Error: %s", message.get("description", ""))
+        js_log.error("[JS ERROR] %s", message.get("description", ""))
         stack = message.get("stack")
         if stack:
             for line in str(stack).splitlines()[:10]:
                 log.error("      %s", line)
+                js_log.error("  %s", line)
 
     elif msg_type == "log":
-        log.info("  [JS] %s", message.get("payload", ""))
+        # Verbose JS console output -> file only, not console
+        js_log.info("%s", message.get("payload", ""))
 
 
 # ── Main ───────────────────────────────────────────────────────────────────
@@ -398,6 +454,11 @@ def main():
     log.info("")
     log.info("=" * 60)
     log.info("  Done.")
+    log.info("  Log files:")
+    log.info("    Main:    %s", LOG_FILE)
+    log.info("    JS:      %s", JS_LOG_FILE)
+    if has_error:
+        log.info("  WARNING: Errors occurred — check logs above.")
     log.info("=" * 60)
 
 

@@ -7,14 +7,23 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
+import sys
 from datetime import datetime, timezone
 from io import TextIOWrapper
 from pathlib import Path
 
 log = logging.getLogger("clairvoyance")
 
-SESSIONS_DIR = Path(__file__).resolve().parent.parent / "sessions"
-DISCOVERY_DIR = Path(__file__).resolve().parent.parent / "discovery"
+_FROZEN = getattr(sys, "frozen", False)
+
+if _FROZEN:
+    # PyInstaller: working directories live next to the .exe, not in _MEIPASS
+    _APP_DIR = Path(sys.executable).resolve().parent
+else:
+    _APP_DIR = Path(__file__).resolve().parent.parent
+
+SESSIONS_DIR = _APP_DIR / "sessions"
+DISCOVERY_DIR = _APP_DIR / "discovery"
 
 
 def _ensure_dir(p: Path) -> Path:

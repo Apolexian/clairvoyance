@@ -1,0 +1,632 @@
+{% extends "layout.html" %}
+{% block title %}Clairvoyance — Setup{% endblock %}
+
+{% block head %}
+<style>
+  .setup-wizard {
+    max-width: 640px;
+    margin: 2rem auto;
+  }
+  .setup-wizard h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .setup-wizard .subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  .wizard-step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s, opacity 0.2s;
+  }
+  .wizard-step.locked {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .wizard-step.done {
+    border-color: #3fb950;
+  }
+  .wizard-step.active {
+    border-color: var(--accent);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+  .step-number {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+  }
+  .wizard-step.done .step-number {
+    background: #3fb950;
+    color: #0d1117;
+  }
+  .wizard-step.active .step-number {
+    background: var(--accent);
+    color: #0d1117;
+  }
+  .step-title {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .step-body {
+    margin-left: 2.4rem;
+  }
+  .step-body p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .path-display {
+    font-family: monospace;
+    font-size: 0.78rem;
+    padding: 0.4rem 0.6rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    word-break: break-all;
+    color: #3fb950;
+    margin-top: 0.5rem;
+  }
+
+  .progress-bar-wrap {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 0.75rem 0 0.4rem;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s;
+    width: 0;
+  }
+  .progress-text {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .step-success {
+    color: #3fb950;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .step-error {
+    color: #f85149;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    white-space: pre-wrap;
+    font-family: monospace;
+  }
+  .step-skip {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+  .step-skip a {
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .done-box {
+    text-align: center;
+    padding: 1rem 0;
+  }
+  .done-box .done-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .done-box h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  .done-box p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .browse-fallback {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+  .browse-fallback input {
+    flex: 1;
+    font-size: 0.82rem;
+  }
+
+  .scan-log {
+    font-family: monospace;
+    font-size: 0.72rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem;
+    max-height: 180px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="setup-wizard">
+  <h1>Clairvoyance Setup</h1>
+  <p class="subtitle">Configure everything in one place.</p>
+
+  <!-- Step 1: Select master.mdb -->
+  <div class="wizard-step active" id="step-1">
+    <div class="step-header">
+      <span class="step-number">1</span>
+      <span class="step-title">Select master.mdb</span>
+    </div>
+    <div class="step-body">
+      <p>
+        Point to the game's <code>master.mdb</code> so we can resolve event names,
+        skill names, and character data.
+        <br><small>Typically at <code>…/Cygames/umamusume/master/master.mdb</code></small>
+      </p>
+      <button class="btn btn-primary" id="btn-pick-mdb" onclick="pickMasterDb()">
+        Browse for master.mdb…
+      </button>
+      <div class="browse-fallback" id="fallback-path" style="display:none">
+        <input type="text" id="manual-mdb-path" class="input-sm" placeholder="Paste full path to master.mdb…">
+        <button class="btn btn-primary btn-sm" onclick="setManualPath()">Set</button>
+      </div>
+      <div id="step1-result"></div>
+      <div id="step1-error" class="step-error" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Step 2: Scan game binary -->
+  <div class="wizard-step locked" id="step-2">
+    <div class="step-header">
+      <span class="step-number">2</span>
+      <span class="step-title">Scan game binary</span>
+    </div>
+    <div class="step-body">
+      <p>
+        Analyse the running game process to find the memory addresses we need to hook.
+        <br><small>The game must be running. Takes ~1 minute.</small>
+      </p>
+      <button class="btn btn-primary" id="btn-scan" onclick="startScan()">Scan Game Binary</button>
+      <div id="step2-result"></div>
+      <div id="step2-error" class="step-error" style="display:none"></div>
+      <pre class="scan-log" id="scan-log" style="display:none"></pre>
+      <div class="step-skip" id="step2-skip" style="display:none">
+        <a onclick="skipScan()">Skip</a> — you can run this later. Recording won't work without it.
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Extract story text (optional) -->
+  <div class="wizard-step locked" id="step-3">
+    <div class="step-header">
+      <span class="step-number">3</span>
+      <span class="step-title">Extract event choice text</span>
+      <span style="font-size:0.7rem; color:var(--text-muted); margin-left:auto;">optional</span>
+    </div>
+    <div class="step-body">
+      <p>
+        Extract choice option labels from the game's story asset bundles.
+        This shows what each event choice says, not just "Option 1 of 3".
+      </p>
+      <div id="step3-auto" style="display:none">
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="extract-progress"></div>
+        </div>
+        <div class="progress-text" id="extract-status">Preparing…</div>
+      </div>
+      <div id="step3-gamedir" style="display:none; margin-top:0.5rem;">
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.4rem;">
+          Could not auto-detect the game data directory. Paste the path to the folder containing <code>dat/</code> and <code>meta</code>:
+          <br><small>e.g. <code>…/AppData/LocalLow/Cygames/umamusume</code></small>
+        </p>
+        <div class="browse-fallback">
+          <input type="text" id="manual-game-dir" class="input-sm" placeholder="Paste path to game data folder…">
+          <button class="btn btn-primary btn-sm" onclick="setGameDir()">Set</button>
+        </div>
+      </div>
+      <div id="step3-result"></div>
+      <div id="step3-error" class="step-error" style="display:none"></div>
+      <div class="step-skip" id="step3-skip">
+        <a onclick="skipExtraction()">Skip this step</a> — you can run it later.
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Done -->
+  <div class="wizard-step locked" id="step-4">
+    <div class="step-header">
+      <span class="step-number">✓</span>
+      <span class="step-title">All set!</span>
+    </div>
+    <div class="step-body">
+      <div class="done-box">
+        <div class="done-icon">✓</div>
+        <h2>You're ready to go</h2>
+        <p>Click <strong>Record</strong> in the top bar to start capturing game data, or browse your sessions.</p>
+        <a href="/" class="btn btn-primary">Go to Sessions →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let gameDataDir = null;
+  const TOTAL_STEPS = 4;
+
+  // ── Step state machine ─────────────────────────────────────
+  function setStepState(stepNum, state) {
+    const el = document.getElementById(`step-${stepNum}`);
+    el.classList.remove('locked', 'active', 'done');
+    el.classList.add(state);
+  }
+
+  function advanceTo(stepNum) {
+    for (let i = 1; i <= TOTAL_STEPS; i++) {
+      if (i < stepNum) setStepState(i, 'done');
+      else if (i === stepNum) setStepState(i, 'active');
+      else setStepState(i, 'locked');
+    }
+  }
+
+  // ── Step 1: Pick master.mdb ────────────────────────────────
+  async function pickMasterDb() {
+    const btn = document.getElementById('btn-pick-mdb');
+    btn.disabled = true;
+    btn.textContent = 'Opening file dialog…';
+
+    try {
+      const res = await fetch('/api/setup/pick_mdb', { method: 'POST' });
+      const d = await res.json();
+
+      if (d.fallback) {
+        document.getElementById('fallback-path').style.display = 'flex';
+        btn.textContent = 'Browse for master.mdb…';
+        btn.disabled = false;
+        return;
+      }
+
+      if (d.ok) {
+        onMdbSelected(d);
+      } else if (d.cancelled) {
+        btn.textContent = 'Browse for master.mdb…';
+        btn.disabled = false;
+      } else {
+        document.getElementById('step1-error').textContent = d.error || 'Invalid file';
+        document.getElementById('step1-error').style.display = '';
+        btn.textContent = 'Browse for master.mdb…';
+        btn.disabled = false;
+      }
+    } catch (e) {
+      document.getElementById('step1-error').textContent = 'Request failed: ' + e;
+      document.getElementById('step1-error').style.display = '';
+      btn.textContent = 'Browse for master.mdb…';
+      btn.disabled = false;
+    }
+  }
+
+  async function setManualPath() {
+    const path = document.getElementById('manual-mdb-path').value.trim();
+    if (!path) return;
+    try {
+      const res = await fetch('/api/setup/pick_mdb', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({path}),
+      });
+      const d = await res.json();
+      if (d.ok) {
+        onMdbSelected(d);
+      } else {
+        document.getElementById('step1-error').textContent = d.error || 'Invalid file';
+        document.getElementById('step1-error').style.display = '';
+      }
+    } catch (e) {
+      document.getElementById('step1-error').textContent = 'Request failed: ' + e;
+      document.getElementById('step1-error').style.display = '';
+    }
+  }
+
+  function showStep1Done(path) {
+    document.getElementById('step1-error').style.display = 'none';
+    document.getElementById('btn-pick-mdb').style.display = 'none';
+    document.getElementById('fallback-path').style.display = 'none';
+    document.getElementById('step1-result').innerHTML =
+      '<div class="step-success">✓ Master DB connected</div>' +
+      '<div class="path-display">' + path + '</div>';
+  }
+
+  function onMdbSelected(d) {
+    showStep1Done(d.path);
+    gameDataDir = d.game_data_dir;
+    advanceTo(2);
+
+    // Log diagnostics to console for debugging
+    if (d.diag) console.log('MDB diagnostics:', d.diag);
+  }
+
+  // ── Step 2: Scan game binary ───────────────────────────────
+  let scanPollTimer = null;
+
+  async function startScan() {
+    const btn = document.getElementById('btn-scan');
+    btn.disabled = true;
+    btn.textContent = 'Scanning…';
+    document.getElementById('step2-error').style.display = 'none';
+    document.getElementById('scan-log').style.display = '';
+    document.getElementById('scan-log').textContent = 'Starting binary scan…';
+    document.getElementById('step2-skip').style.display = '';
+
+    try {
+      const res = await fetch('/api/setup/run', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({skip_discover: false}),
+      });
+      const d = await res.json();
+      if (d.error) {
+        document.getElementById('step2-error').textContent = d.error;
+        document.getElementById('step2-error').style.display = '';
+        btn.disabled = false;
+        btn.textContent = 'Scan Game Binary';
+        return;
+      }
+      scanPollTimer = setInterval(pollScan, 1000);
+    } catch (e) {
+      document.getElementById('step2-error').textContent = 'Request failed: ' + e;
+      document.getElementById('step2-error').style.display = '';
+      btn.disabled = false;
+      btn.textContent = 'Scan Game Binary';
+    }
+  }
+
+  async function pollScan() {
+    try {
+      const res = await fetch('/api/setup/status');
+      const d = await res.json();
+
+      const logEl = document.getElementById('scan-log');
+      if (d.log && d.log.length) {
+        logEl.textContent = d.log.join('\n');
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      if (!d.running) {
+        clearInterval(scanPollTimer);
+        const btn = document.getElementById('btn-scan');
+        if (d.ready) {
+          btn.style.display = 'none';
+          document.getElementById('step2-skip').style.display = 'none';
+          document.getElementById('step2-result').innerHTML =
+            '<div class="step-success">✓ Binary scan complete — ready to record</div>';
+          advanceTo(3);
+          onScanDone();
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Retry Scan';
+          document.getElementById('step2-error').textContent =
+            'Scan failed — make sure the game is running and try again.';
+          document.getElementById('step2-error').style.display = '';
+        }
+      }
+    } catch (e) {
+      console.error('pollScan error:', e);
+    }
+  }
+
+  function skipScan() {
+    if (scanPollTimer) clearInterval(scanPollTimer);
+    document.getElementById('btn-scan').style.display = 'none';
+    document.getElementById('scan-log').style.display = 'none';
+    document.getElementById('step2-skip').style.display = 'none';
+    document.getElementById('step2-result').innerHTML =
+      '<div style="color:var(--text-muted);font-size:0.85rem;">Skipped — recording won\'t work until you run this.</div>';
+    advanceTo(3);
+    onScanDone();
+  }
+
+  function onScanDone() {
+    // After scan step, try to auto-start story extraction if game dir is known
+    if (gameDataDir) {
+      startExtraction();
+    } else {
+      document.getElementById('step3-gamedir').style.display = '';
+      document.getElementById('step3-skip').style.display = '';
+    }
+  }
+
+  // ── Step 3: Extract story text ─────────────────────────────
+  let extractionPollTimer = null;
+
+  async function setGameDir() {
+    const path = document.getElementById('manual-game-dir').value.trim();
+    if (!path) return;
+    try {
+      const res = await fetch('/api/setup/set_game_dir', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({path}),
+      });
+      const d = await res.json();
+      if (d.ok) {
+        gameDataDir = d.path;
+        document.getElementById('step3-gamedir').style.display = 'none';
+        document.getElementById('step3-error').style.display = 'none';
+        startExtraction();
+      } else {
+        document.getElementById('step3-error').textContent = d.error || 'Invalid directory';
+        document.getElementById('step3-error').style.display = '';
+      }
+    } catch (e) {
+      document.getElementById('step3-error').textContent = 'Request failed: ' + e;
+      document.getElementById('step3-error').style.display = '';
+    }
+  }
+
+  async function startExtraction() {
+    document.getElementById('step3-auto').style.display = '';
+    document.getElementById('step3-skip').style.display = '';
+    document.getElementById('step3-error').style.display = 'none';
+    document.getElementById('extract-status').textContent = 'Starting extraction…';
+
+    try {
+      const res = await fetch('/api/setup/extract_stories', { method: 'POST' });
+      const d = await res.json();
+      if (d.error) {
+        document.getElementById('step3-error').textContent = d.error;
+        document.getElementById('step3-error').style.display = '';
+        document.getElementById('extract-status').textContent = 'Failed to start.';
+        return;
+      }
+      extractionPollTimer = setInterval(pollExtraction, 1000);
+    } catch (e) {
+      document.getElementById('step3-error').textContent = 'Request failed: ' + e;
+      document.getElementById('step3-error').style.display = '';
+    }
+  }
+
+  async function pollExtraction() {
+    try {
+      const res = await fetch('/api/setup/extract_status');
+      const d = await res.json();
+
+      const statusEl = document.getElementById('extract-status');
+
+      if (d.status === 'reading meta database') {
+        statusEl.textContent = 'Reading meta database…';
+      } else if (d.total > 0) {
+        const pct = Math.round(d.processed / d.total * 100);
+        document.getElementById('extract-progress').style.width = pct + '%';
+        let text = `${d.processed} / ${d.total} entries`;
+        if (d.found > 0) text += ` · ${d.found} with choices`;
+        if (d.skipped > 0) text += ` · ${d.skipped} files missing`;
+        statusEl.textContent = text;
+      }
+
+      if (!d.running) {
+        clearInterval(extractionPollTimer);
+        if (d.found > 0) {
+          document.getElementById('step3-auto').style.display = 'none';
+          document.getElementById('step3-skip').style.display = 'none';
+          document.getElementById('step3-result').innerHTML =
+            `<div class="step-success">✓ Extracted choice text for ${d.found} events</div>`;
+          advanceTo(4);
+        } else if (d.error) {
+          document.getElementById('step3-error').style.display = '';
+          document.getElementById('step3-error').textContent = d.error;
+          document.getElementById('step3-skip').style.display = '';
+        } else {
+          statusEl.textContent =
+            'No choice text found. The game data directory may not contain story assets.';
+          document.getElementById('step3-skip').style.display = '';
+        }
+      }
+    } catch (e) {
+      console.error('poll error', e);
+    }
+  }
+
+  function skipExtraction() {
+    if (extractionPollTimer) clearInterval(extractionPollTimer);
+    document.getElementById('step3-auto').style.display = 'none';
+    document.getElementById('step3-skip').style.display = 'none';
+    document.getElementById('step3-gamedir').style.display = 'none';
+    document.getElementById('step3-result').innerHTML =
+      '<div style="color:var(--text-muted);font-size:0.85rem;">Skipped — you can run this later.</div>';
+    advanceTo(4);
+  }
+
+  // ── Init: check existing state ─────────────────────────────
+  (async function init() {
+    try {
+      const res = await fetch('/api/setup/wizard_status');
+      const d = await res.json();
+
+      gameDataDir = d.game_data_dir;
+
+      const mdbDone = d.master_db_configured;
+      const scanDone = d.scan_ready;
+      const storyDone = d.story_choices_exist;
+
+      if (!mdbDone) {
+        advanceTo(1);
+        return;
+      }
+
+      // Step 1 done
+      showStep1Done(d.master_db_path || '');
+
+      if (d.scan_running) {
+        // Scan in progress — show live log
+        advanceTo(2);
+        document.getElementById('btn-scan').disabled = true;
+        document.getElementById('btn-scan').textContent = 'Scanning…';
+        document.getElementById('scan-log').style.display = '';
+        document.getElementById('step2-skip').style.display = '';
+        if (d.scan_log && d.scan_log.length) {
+          document.getElementById('scan-log').textContent = d.scan_log.join('\n');
+        }
+        scanPollTimer = setInterval(pollScan, 1000);
+        return;
+      }
+
+      if (!scanDone) {
+        advanceTo(2);
+        return;
+      }
+
+      // Step 2 done
+      document.getElementById('btn-scan').style.display = 'none';
+      document.getElementById('step2-result').innerHTML =
+        '<div class="step-success">✓ Binary scan complete</div>';
+
+      if (storyDone) {
+        document.getElementById('step3-result').innerHTML =
+          '<div class="step-success">✓ Story choices loaded</div>';
+        document.getElementById('step3-skip').style.display = 'none';
+        advanceTo(4);
+      } else {
+        // Step 3 — show options, don't auto-start on revisit
+        advanceTo(3);
+        if (gameDataDir) {
+          document.getElementById('step3-skip').style.display = '';
+          document.getElementById('step3-result').innerHTML =
+            '<button class="btn btn-primary btn-sm" onclick="startExtraction()" style="margin-top:0.5rem;">Extract Story Text</button>';
+        } else {
+          document.getElementById('step3-gamedir').style.display = '';
+          document.getElementById('step3-skip').style.display = '';
+        }
+      }
+    } catch (e) {
+      console.error('init error:', e);
+    }
+  })();
+</script>
+{% endblock %}
+

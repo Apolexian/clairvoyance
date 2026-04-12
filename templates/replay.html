@@ -1,0 +1,994 @@
+{% extends "layout.html" %}
+{% block title %}Race Replay — {{ session.label or session.name }}{% endblock %}
+
+{% block head %}
+<style>
+  /* Replay-specific overrides */
+  .container { max-width: 100%; padding: 0.75rem 1rem; }
+  .replay-wrap { display: flex; flex-direction: column; height: calc(100vh - 80px); }
+  .track-wrap {
+    flex: 1; position: relative; background: #0a1628;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; min-height: 340px;
+  }
+  canvas { width: 100%; height: 100%; display: block; }
+
+  /* Controls bar */
+  .controls {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.5rem 0; flex-shrink: 0;
+  }
+  .controls .btn { min-width: 36px; text-align: center; font-size: 1rem; }
+  .scrubber { flex: 1; -webkit-appearance: none; appearance: none;
+    height: 6px; border-radius: 3px; background: var(--border);
+    outline: none; cursor: pointer; transition: background 0.15s;
+  }
+  .scrubber:hover { background: #484f58; }
+  .scrubber::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--accent); cursor: pointer;
+    border: 2px solid var(--bg); box-shadow: 0 0 0 2px var(--accent-dim);
+    transition: box-shadow 0.15s, transform 0.1s;
+  }
+  .scrubber::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 4px rgba(88,166,255,0.25);
+    transform: scale(1.15);
+  }
+  .scrubber:active::-webkit-slider-thumb {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 5px rgba(88,166,255,0.35);
+  }
+  .scrubber::-moz-range-track {
+    height: 6px; border-radius: 3px; background: var(--border); border: none;
+  }
+  .scrubber::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    border: 2px solid var(--bg); box-shadow: 0 0 0 2px var(--accent-dim); cursor: pointer;
+  }
+  .speed-label { color: var(--text-muted); font-size: 0.8rem; min-width: 32px; text-align: center; }
+  .frame-label { color: var(--text-muted); font-size: 0.8rem; font-family: monospace; min-width: 120px; }
+
+  /* Info panel header */
+  .info-header {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; flex-shrink: 0;
+  }
+  .info-header .filter-input {
+    background: var(--bg-input); border: 1px solid var(--border); color: var(--text);
+    border-radius: 4px; padding: 3px 8px; font-size: 0.78rem; width: 160px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .info-header .filter-input:focus { border-color: var(--accent); }
+  .info-header .filter-input::placeholder { color: var(--text-muted); }
+  .sort-btns { display: flex; gap: 0.25rem; }
+  .sort-btn { font-size: 0.7rem !important; padding: 2px 8px !important; opacity: 0.6; transition: opacity 0.15s; }
+  .sort-btn.active { opacity: 1; background: var(--accent-dim); color: #fff; }
+
+  /* Info table */
+  .info-table-wrap {
+    flex-shrink: 0; max-height: 200px; overflow-y: auto;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg-card);
+  }
+  .info-table {
+    width: 100%; border-collapse: collapse; font-size: 0.78rem;
+  }
+  .info-table thead { position: sticky; top: 0; z-index: 2; }
+  .info-table th {
+    background: #1c2333; color: var(--text-muted); font-weight: 600;
+    padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .info-table td {
+    padding: 3px 8px; border-bottom: 1px solid rgba(48,54,61,0.5);
+    white-space: nowrap; vertical-align: middle;
+  }
+  .info-table tr { transition: background 0.1s; }
+  .info-table tr:hover { background: var(--bg-hover); }
+  .info-table tr.highlight-skill { background: rgba(249,199,79,0.08); }
+  .info-table tr.highlight-duel { background: rgba(248,113,113,0.08); }
+
+  .tbl-portrait {
+    width: 24px; height: 24px; border-radius: 50%; object-fit: cover;
+    object-position: center 15%; vertical-align: middle; border: 1px solid var(--border);
+    margin-right: 6px;
+  }
+  .tbl-dot {
+    display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+    vertical-align: middle; margin-right: 6px;
+  }
+  .tbl-name { font-weight: 600; }
+  .tbl-val { font-family: monospace; font-size: 0.75rem; }
+  .tbl-state {
+    font-size: 0.62rem; font-weight: 700; padding: 1px 5px;
+    border-radius: 3px; background: rgba(255,255,255,0.06);
+    display: inline-block; margin-left: 3px;
+  }
+  .tbl-state.sk   { color: var(--gold); }
+  .tbl-state.duel { color: #f87171; }
+  .tbl-state.strug { color: #fbbf24; }
+  .tbl-state.rush { color: var(--orange); }
+  .tbl-state.pd   { color: var(--accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/">Sessions</a> /
+  <a href="/session/{{ session.name }}">{{ session.label or session.name }}</a> /
+  <a href="/session/{{ session.name }}/race/{{ race_idx }}">Race {{ race_idx }}</a> /
+  <strong>Replay</strong>
+</div>
+
+<div class="replay-wrap">
+  <!-- Track canvas -->
+  <div class="track-wrap" id="track-wrap">
+    <canvas id="track"></canvas>
+  </div>
+
+  <!-- Playback controls -->
+  <div class="controls">
+    <button class="btn btn-sm" id="btn-play" onclick="togglePlay()">▶</button>
+    <button class="btn btn-sm" onclick="stepFrame(-1)">◀◀</button>
+    <button class="btn btn-sm" onclick="stepFrame(1)">▶▶</button>
+    <input type="range" class="scrubber" id="scrubber" min="0" max="1" step="1" value="0" oninput="scrubTo(+this.value)">
+    <span class="frame-label" id="frame-label">0 / 0</span>
+    <button class="btn btn-sm" onclick="changeSpeed(-1)">−</button>
+    <span class="speed-label" id="speed-label">1×</span>
+    <button class="btn btn-sm" onclick="changeSpeed(1)">+</button>
+  </div>
+
+  <!-- Sort / filter controls -->
+  <div class="info-header">
+    <input type="text" class="filter-input" id="horse-filter" placeholder="Filter horses…" oninput="updateInfoPanel()">
+    <div class="sort-btns">
+      <button class="btn btn-sm sort-btn active" onclick="setSort('pos',this)">Position</button>
+      <button class="btn btn-sm sort-btn" onclick="setSort('speed',this)">Speed</button>
+      <button class="btn btn-sm sort-btn" onclick="setSort('hp',this)">HP</button>
+      <button class="btn btn-sm sort-btn" onclick="setSort('name',this)">Name</button>
+    </div>
+  </div>
+
+  <!-- Horse info table -->
+  <div class="info-table-wrap">
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th style="width:30px">#</th>
+          <th>Horse</th>
+          <th>Distance</th>
+          <th>Speed</th>
+          <th>Accel</th>
+          <th>HP</th>
+          <th>Lane</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="info-tbody"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  Race Replay Engine — v2 (pseudo-3D terrain + improved UI)
+// ═══════════════════════════════════════════════════════════════════════
+
+const DATA    = {{ replay | tojson }};
+const FRAMES  = DATA.frames;
+const SKILLS  = DATA.skills || [];
+const PHASES  = DATA.phases || {};
+const NUM_H   = DATA.num_horses;
+const TOTAL_D = DATA.total_distance || 1;
+const SUMMARIES = DATA.horse_summaries || [];
+const COMPETE_EVENTS = DATA.compete_events || [];
+const PACE_DOWN_SEGMENTS = DATA.pace_down_segments || {};
+const COURSE = DATA.course_profile || null;
+
+const COLORS = [
+  '#f94144','#f3722c','#f8961e','#f9c74f','#90be6d',
+  '#43aa8b','#577590','#4cc9f0','#7209b7','#b5179e',
+  '#3a86ff','#ff006e','#fb5607','#8338ec','#06d6a0',
+  '#ef476f','#ffd166','#118ab2','#073b4c',
+];
+
+// ── Horse portrait preload ────────────────────────────────────────────
+const HORSE_INFO = {};
+for (const s of SUMMARIES) {
+  const hi = s.horse_index;
+  const url = s._image_url || '';
+  const name = s._name || `H${hi}`;
+  const info = { url, name, img: null, loaded: false };
+  if (url) {
+    const img = new Image();
+    img.src = url;
+    img.onload = () => { info.loaded = true; draw(); };
+    info.img = img;
+  }
+  HORSE_INFO[hi] = info;
+}
+
+function horseLabel(hi) {
+  return HORSE_INFO[hi] ? HORSE_INFO[hi].name : `H${hi}`;
+}
+
+// ── Elevation profile ─────────────────────────────────────────────────
+const ELEV_STEP = 3;
+const ELEV_PROFILE = [];
+let ELEV_MIN = 0, ELEV_MAX = 0, ELEV_MID = 0;
+
+(function buildElevation() {
+  if (!COURSE || !COURSE.slopes || COURSE.slopes.length === 0) return;
+  let elevation = 0;
+  for (let d = 0; d <= TOTAL_D + ELEV_STEP; d += ELEV_STEP) {
+    let grade = 0;
+    for (const s of COURSE.slopes) {
+      if (d >= s.start && d < s.end) {
+        grade = s.slope_raw / 10000;
+        break;
+      }
+    }
+    elevation += grade * ELEV_STEP;
+    ELEV_PROFILE.push({ d, e: elevation });
+  }
+  for (const p of ELEV_PROFILE) {
+    if (p.e < ELEV_MIN) ELEV_MIN = p.e;
+    if (p.e > ELEV_MAX) ELEV_MAX = p.e;
+  }
+  ELEV_MID = (ELEV_MIN + ELEV_MAX) / 2;
+})();
+
+const ELEV_RANGE = Math.max(0.01, ELEV_MAX - ELEV_MIN);
+const HAS_ELEVATION = ELEV_PROFILE.length > 0 && ELEV_RANGE > 0.3;
+
+function getElevationAt(d) {
+  if (!HAS_ELEVATION || ELEV_PROFILE.length === 0) return 0;
+  const idx = Math.floor(d / ELEV_STEP);
+  if (idx < 0) return ELEV_PROFILE[0].e;
+  if (idx >= ELEV_PROFILE.length - 1) return ELEV_PROFILE[ELEV_PROFILE.length - 1].e;
+  const p0 = ELEV_PROFILE[idx];
+  const p1 = ELEV_PROFILE[idx + 1];
+  const t = (d - p0.d) / ELEV_STEP;
+  return p0.e + (p1.e - p0.e) * t;
+}
+
+// ── State ─────────────────────────────────────────────────────────────
+let frameIdx  = 0;
+let playing   = false;
+let speed     = 1;
+let animId    = null;
+let lastTime  = 0;
+let simTime   = 0;
+
+const SIM_END = FRAMES.length > 0 ? (FRAMES[FRAMES.length - 1].time || 0) : 0;
+
+let sortBy  = 'pos';
+let sortAsc = false;
+
+// ── Canvas ────────────────────────────────────────────────────────────
+const canvas = document.getElementById('track');
+const ctx    = canvas.getContext('2d');
+const wrap   = document.getElementById('track-wrap');
+
+function resize() {
+  canvas.width  = wrap.clientWidth  * devicePixelRatio;
+  canvas.height = wrap.clientHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  draw();
+}
+window.addEventListener('resize', resize);
+
+// ── Track geometry ────────────────────────────────────────────────────
+const MARGIN_L = 120;
+const MARGIN_R = 40;
+const HORSE_R  = 20;
+
+function trackWidth() { return wrap.clientWidth - MARGIN_L - MARGIN_R; }
+
+// ── Camera ────────────────────────────────────────────────────────────
+let _cam = { centerD: 0, windowSize: 400, viewStart: 0, viewEnd: 400 };
+
+function updateCamera(interpFrame) {
+  const f = interpFrame || FRAMES[frameIdx];
+  if (!f) return;
+  let minD = Infinity, maxD = -Infinity;
+  for (let i = 0; i < NUM_H; i++) {
+    const hd = f[i] ? f[i].d : 0;
+    if (hd < minD) minD = hd;
+    if (hd > maxD) maxD = hd;
+  }
+  _cam.centerD = (minD + maxD) / 2;
+  const spread = maxD - minD;
+  _cam.windowSize = Math.max(400, spread * 2.5);
+  _cam.viewStart = _cam.centerD - _cam.windowSize / 2;
+  _cam.viewEnd   = _cam.centerD + _cam.windowSize / 2;
+}
+
+function distToX(d) {
+  return MARGIN_L + ((d - _cam.viewStart) / _cam.windowSize) * trackWidth();
+}
+
+function xToDist(x) {
+  return _cam.viewStart + ((x - MARGIN_L) / trackWidth()) * _cam.windowSize;
+}
+
+// ── Lane bounds ───────────────────────────────────────────────────────
+let _laneMin = Infinity, _laneMax = -Infinity;
+for (const f of FRAMES) {
+  for (let hi = 0; hi < NUM_H; hi++) {
+    const hd = f[hi];
+    if (hd && hd.lane !== undefined) {
+      if (hd.lane < _laneMin) _laneMin = hd.lane;
+      if (hd.lane > _laneMax) _laneMax = hd.lane;
+    }
+  }
+}
+const HAS_LANE_DATA = isFinite(_laneMin) && (_laneMax - _laneMin) > 0.005;
+if (!HAS_LANE_DATA) { _laneMin = 0; _laneMax = 1; }
+const LANE_PAD = Math.max(0.03, (_laneMax - _laneMin) * 0.15);
+const LANE_VIEW_MIN = _laneMin - LANE_PAD;
+const LANE_VIEW_MAX = _laneMax + LANE_PAD;
+
+// ── Terrain Y ─────────────────────────────────────────────────────────
+function terrainBaseY() { return wrap.clientHeight * 0.78; }
+
+function terrainScale() {
+  if (!HAS_ELEVATION) return 0;
+  const maxPx = wrap.clientHeight * 0.18;
+  return Math.min(maxPx / ELEV_RANGE, 300);
+}
+
+function getTerrainY(d) {
+  if (!HAS_ELEVATION) return terrainBaseY();
+  const elev = getElevationAt(d);
+  return terrainBaseY() - (elev - ELEV_MID) * terrainScale();
+}
+
+// ── Horse Y ───────────────────────────────────────────────────────────
+function horseY(hd, hi) {
+  const d = hd ? hd.d : 0;
+  const surfY = getTerrainY(d);
+  const LANE_HEIGHT = Math.min(280, wrap.clientHeight * 0.45);
+  const pad = HORSE_R + 6;
+
+  if (HAS_LANE_DATA && hd && hd.lane !== undefined) {
+    const ratio = (hd.lane - LANE_VIEW_MIN) / (LANE_VIEW_MAX - LANE_VIEW_MIN);
+    return surfY - pad - ratio * LANE_HEIGHT;
+  }
+  const step = NUM_H > 1 ? LANE_HEIGHT / (NUM_H - 1) : 0;
+  return surfY - pad - hi * step;
+}
+
+// ── Active skills / competes ──────────────────────────────────────────
+let activeSkills = [];
+let activeCompetes = [];
+
+function updateActiveSkills() {
+  const f = FRAMES[frameIdx];
+  if (!f) return;
+  const curTime = f.time;
+  activeSkills = [];
+  for (const sk of SKILLS) {
+    const ft = sk.frame_time;
+    if (ft === undefined) continue;
+    const dur = sk.duration_secs || 2.0;
+    if (curTime >= ft && curTime <= ft + dur) activeSkills.push(sk);
+  }
+  activeCompetes = [];
+  for (const ce of COMPETE_EVENTS) {
+    const ft = ce.frame_time;
+    const dur = ce.duration || 0;
+    if (dur > 0 && curTime >= ft && curTime < ft + dur) activeCompetes.push(ce);
+  }
+}
+
+// ── Frame interpolation (lerp between data frames for smooth motion) ──
+// The game sends ~1 data frame per second but we render at 60fps.
+// Hakuraku does the same: lerp distance, lane, speed, hp between frames.
+function lerpVal(a, b, t) { return a + (b - a) * t; }
+
+function getInterpolatedFrame() {
+  if (FRAMES.length === 0) return null;
+  const i = frameIdx;
+  const f0 = FRAMES[i];
+  const f1 = FRAMES[i + 1] || f0;
+  const t0 = f0.time || 0;
+  const t1 = f1.time || t0;
+  const alpha = (i < FRAMES.length - 1 && t1 > t0)
+    ? Math.max(0, Math.min(1, (simTime - t0) / (t1 - t0)))
+    : 0;
+
+  // Build interpolated frame
+  const interp = { time: lerpVal(t0, t1, alpha) };
+  for (let hi = 0; hi < NUM_H; hi++) {
+    const h0 = f0[hi];
+    const h1 = f1[hi] || h0;
+    if (!h0) continue;
+    interp[hi] = {
+      d:    lerpVal(h0.d    || 0, h1.d    || 0, alpha),
+      s:    lerpVal(h0.s    || 0, h1.s    || 0, alpha),
+      hp:   lerpVal(h0.hp   || 0, h1.hp   || 0, alpha),
+      lane: lerpVal(h0.lane || 0, h1.lane || 0, alpha),
+      t_id: alpha >= 0.5 ? (h1.t_id || 0) : (h0.t_id || 0),
+      blk:  alpha >= 0.5 ? (h1.blk  || -1) : (h0.blk  || -1),
+    };
+  }
+  return interp;
+}
+
+// ── Main draw ─────────────────────────────────────────────────────────
+function draw() {
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+  ctx.clearRect(0, 0, W, H);
+
+  if (FRAMES.length === 0) {
+    ctx.fillStyle = '#888';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No frame data available', W / 2, H / 2);
+    return;
+  }
+
+  const f = getInterpolatedFrame();
+  updateCamera(f);
+
+  // ── Sky gradient ──────────────────────────────────────
+  const skyGrd = ctx.createLinearGradient(0, 0, 0, H * 0.4);
+  skyGrd.addColorStop(0, '#0c1929');
+  skyGrd.addColorStop(1, 'transparent');
+  ctx.fillStyle = skyGrd;
+  ctx.fillRect(0, 0, W, H * 0.5);
+
+  // ── Terrain ───────────────────────────────────────────
+  drawTerrain(W, H);
+
+  // ── Phase bands ───────────────────────────────────────
+  if (PHASES.total_distance) {
+    const phases = [
+      { end: PHASES.phase_1_end,    color: 'rgba(26,82,118,0.18)',  label: 'Opening' },
+      { end: PHASES.phase_2_end,    color: 'rgba(30,132,73,0.15)',  label: 'Mid' },
+      { end: PHASES.phase_3_end,    color: 'rgba(183,149,11,0.13)', label: 'Final' },
+      { end: PHASES.total_distance, color: 'rgba(146,43,33,0.16)',  label: 'Spurt' },
+    ];
+    let prev = 0;
+    for (const p of phases) {
+      const x1 = distToX(prev);
+      const x2 = distToX(p.end);
+      if (x2 > MARGIN_L && x1 < W - MARGIN_R) {
+        const rx = Math.max(x1, MARGIN_L);
+        const rw = Math.min(x2, W - MARGIN_R) - rx;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(rx, 40, rw, H - 40);
+        const mid = rx + rw / 2;
+        if (rw > 40 && mid > MARGIN_L + 20 && mid < W - MARGIN_R - 20) {
+          ctx.fillStyle = '#ffffff40';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(p.label, mid, 54);
+        }
+      }
+      prev = p.end;
+    }
+  }
+
+  // ── Distance markers ──────────────────────────────────
+  ctx.strokeStyle = '#ffffff10';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#ffffff35';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'center';
+  const dStep = TOTAL_D > 2000 ? 500 : TOTAL_D > 1000 ? 200 : 100;
+  for (let dm = 0; dm <= TOTAL_D; dm += dStep) {
+    const x = distToX(dm);
+    if (x > MARGIN_L + 10 && x < W - MARGIN_R - 10) {
+      ctx.beginPath();
+      ctx.moveTo(x, 50);
+      ctx.lineTo(x, H - 10);
+      ctx.stroke();
+      const ty = getTerrainY(dm);
+      ctx.fillText(dm + 'm', x, ty + 18);
+    }
+  }
+
+  // ── Finish line ───────────────────────────────────────
+  const finishX = distToX(TOTAL_D);
+  if (finishX > MARGIN_L && finishX < W - MARGIN_R) {
+    const fy1 = getTerrainY(TOTAL_D) - 160;
+    const fy2 = getTerrainY(TOTAL_D) + 4;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(finishX, fy1);
+    ctx.lineTo(finishX, fy2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('FINISH', finishX, fy1 - 4);
+  }
+
+  // ── Lane labels ───────────────────────────────────────
+  if (HAS_LANE_DATA) {
+    const refD = _cam.centerD;
+    const sY = getTerrainY(refD);
+    const LH = Math.min(280, H * 0.45);
+    ctx.fillStyle = '#ffffff18';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('INNER', MARGIN_L + 4, sY - HORSE_R - 2);
+    ctx.fillText('OUTER', MARGIN_L + 4, sY - HORSE_R - LH);
+  }
+
+  // ── Horses ────────────────────────────────────────────
+  if (!f) return;
+  updateActiveSkills();
+
+  for (let hi = 0; hi < NUM_H; hi++) {
+    const hd = f[hi];
+    if (!hd) continue;
+    const x = distToX(hd.d);
+    const y = horseY(hd, hi);
+    const color = COLORS[hi % COLORS.length];
+
+    const hasSkill = activeSkills.some(s => s.horse_index === hi);
+    const hInfo = HORSE_INFO[hi];
+    const temptId = hd.t_id || 0;
+    const isTempted = temptId > 0;
+    const isRushedBoost = temptId === 4;
+    const pdSegs = PACE_DOWN_SEGMENTS[String(hi)] || [];
+    const curTime = f.time || 0;
+    const isPaceDown = pdSegs.some(s => curTime >= s.start_time && curTime <= s.end_time);
+    const isDueling = activeCompetes.some(c => c.horse_index === hi && c.type_id === 5);
+    const isSpotStruggle = activeCompetes.some(c => c.horse_index === hi && c.type_id === 4);
+
+    // Shadow on terrain
+    const shadowY = getTerrainY(hd.d);
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.beginPath();
+    ctx.ellipse(x, shadowY - 2, HORSE_R * 0.7, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Outer ring for states
+    if (isDueling) {
+      ctx.beginPath(); ctx.arc(x, y, HORSE_R + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(248,113,113,0.8)'; ctx.lineWidth = 2.5; ctx.stroke();
+    } else if (isSpotStruggle) {
+      ctx.beginPath(); ctx.arc(x, y, HORSE_R + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(251,191,36,0.8)'; ctx.lineWidth = 2.5; ctx.stroke();
+    } else if (isRushedBoost) {
+      ctx.beginPath(); ctx.arc(x, y, HORSE_R + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(210,153,34,0.8)'; ctx.lineWidth = 2.5; ctx.stroke();
+    } else if (isTempted) {
+      ctx.beginPath(); ctx.arc(x, y, HORSE_R + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(139,148,158,0.5)'; ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]); ctx.stroke(); ctx.setLineDash([]);
+    } else if (isPaceDown) {
+      ctx.beginPath(); ctx.arc(x, y, HORSE_R + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(88,166,255,0.7)'; ctx.lineWidth = 2;
+      ctx.setLineDash([5, 3]); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // Glow
+    if (hasSkill) { ctx.shadowColor = '#f9c74f'; ctx.shadowBlur = 16; }
+    else if (isDueling) { ctx.shadowColor = '#f87171'; ctx.shadowBlur = 14; }
+    else if (isSpotStruggle) { ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 14; }
+
+    // Portrait or dot
+    if (hInfo && hInfo.loaded && hInfo.img) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, HORSE_R, 0, Math.PI * 2);
+      ctx.clip();
+      const imgSz = HORSE_R * 2.4;
+      ctx.drawImage(hInfo.img, x - HORSE_R, y - HORSE_R * 1.2, imgSz, imgSz);
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(x, y, HORSE_R, 0, Math.PI * 2);
+      ctx.strokeStyle = hasSkill ? '#f9c74f' : color;
+      ctx.lineWidth = hasSkill ? 3 : 2;
+      ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(x, y, HORSE_R, 0, Math.PI * 2);
+      ctx.fillStyle = color; ctx.fill();
+      ctx.strokeStyle = hasSkill ? '#f9c74f' : '#00000080';
+      ctx.lineWidth = hasSkill ? 2.5 : 1.5;
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(hi, x, y);
+    }
+    ctx.shadowBlur = 0;
+
+    // Name label in gutter
+    const label = horseLabel(hi);
+    ctx.font = 'bold 12px sans-serif';
+    const lw = ctx.measureText(label).width;
+    ctx.fillStyle = 'rgba(13,17,23,0.8)';
+    roundRect(ctx, MARGIN_L - lw - 18, y - 9, lw + 14, 18, 4);
+    ctx.fill();
+    ctx.fillStyle = color;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, MARGIN_L - 11, y);
+
+    // Skill popup above horse
+    if (hasSkill) {
+      const skillsH = activeSkills.filter(s => s.horse_index === hi);
+      for (let si = 0; si < skillsH.length; si++) {
+        const sk = skillsH[si];
+        const popY = y - HORSE_R - 10 - si * 22;
+        const slbl = sk.skill_label || `SKILL ${sk.skill_id}`;
+        ctx.font = 'bold 11px sans-serif';
+        const stw = ctx.measureText(slbl).width + 12;
+        ctx.fillStyle = 'rgba(249,199,79,0.92)';
+        roundRect(ctx, x - stw/2, popY - 14, stw, 20, 5);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(slbl, x, popY - 4);
+      }
+    }
+
+    // HP bar
+    if (hd.hp !== undefined) {
+      const maxHp = getMaxHp(hi);
+      const hpPct = maxHp > 0 ? hd.hp / maxHp : 1;
+      const barW = 32, barH = 4;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      roundRect(ctx, x - barW/2 - 1, y + HORSE_R + 4, barW + 2, barH + 2, 2);
+      ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.fillRect(x - barW/2, y + HORSE_R + 5, barW, barH);
+      ctx.fillStyle = hpPct > 0.5 ? '#3fb950' : hpPct > 0.2 ? '#d29922' : '#f85149';
+      ctx.fillRect(x - barW/2, y + HORSE_R + 5, barW * hpPct, barH);
+    }
+  }
+
+  // ── Time badge ────────────────────────────────────────
+  ctx.fillStyle = 'rgba(13,17,23,0.75)';
+  roundRect(ctx, 6, 6, 80, 24, 5);
+  ctx.fill();
+  ctx.fillStyle = '#ffffffdd';
+  ctx.font = 'bold 13px monospace';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  const ts = f.time !== undefined ? f.time.toFixed(1) + 's' : `F${frameIdx}`;
+  ctx.fillText(ts, 14, 18);
+  ctx.textBaseline = 'alphabetic';
+}
+
+// ── Terrain rendering ─────────────────────────────────────────────────
+function drawTerrain(W, H) {
+  const sStep = _cam.windowSize / 250;
+  const startD = _cam.viewStart - sStep * 2;
+  const endD   = _cam.viewEnd   + sStep * 2;
+
+  // Ground polygon
+  ctx.beginPath();
+  let first = true;
+  for (let d = startD; d <= endD; d += sStep) {
+    const x = distToX(d), y = getTerrainY(d);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else ctx.lineTo(x, y);
+  }
+  ctx.lineTo(distToX(endD), H + 10);
+  ctx.lineTo(distToX(startD), H + 10);
+  ctx.closePath();
+
+  const baseY = terrainBaseY();
+  const grd = ctx.createLinearGradient(0, baseY - 80, 0, H);
+  if (HAS_ELEVATION) {
+    grd.addColorStop(0, 'rgba(34,120,55,0.40)');
+    grd.addColorStop(0.15, 'rgba(26,85,42,0.32)');
+    grd.addColorStop(0.4, 'rgba(18,55,35,0.22)');
+    grd.addColorStop(1, 'rgba(10,22,40,0.12)');
+  } else {
+    grd.addColorStop(0, 'rgba(30,80,50,0.20)');
+    grd.addColorStop(1, 'rgba(10,22,40,0.08)');
+  }
+  ctx.fillStyle = grd;
+  ctx.fill();
+
+  // Road band
+  const roadW = HAS_ELEVATION ? 10 : 6;
+  ctx.beginPath();
+  first = true;
+  for (let d = startD; d <= endD; d += sStep) {
+    const x = distToX(d), y = getTerrainY(d);
+    if (first) { ctx.moveTo(x, y - roadW); first = false; }
+    else ctx.lineTo(x, y - roadW);
+  }
+  for (let d = endD; d >= startD; d -= sStep) {
+    ctx.lineTo(distToX(d), getTerrainY(d));
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(100,110,120,0.18)';
+  ctx.fill();
+
+  // Grass edge
+  ctx.beginPath();
+  first = true;
+  for (let d = startD; d <= endD; d += sStep) {
+    const x = distToX(d), y = getTerrainY(d);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = HAS_ELEVATION ? 'rgba(63,185,80,0.45)' : 'rgba(63,185,80,0.2)';
+  ctx.lineWidth = HAS_ELEVATION ? 2.5 : 1.5;
+  ctx.stroke();
+
+  // Slope overlays
+  if (COURSE && COURSE.slopes) {
+    for (const s of COURSE.slopes) {
+      const x1 = distToX(s.start), x2 = distToX(s.end);
+      if (x2 < MARGIN_L || x1 > W - MARGIN_R) continue;
+      const isUp = s.direction === 'uphill';
+
+      ctx.beginPath();
+      let f2 = true;
+      for (let d = Math.max(s.start, xToDist(MARGIN_L)); d <= Math.min(s.end, xToDist(W - MARGIN_R)); d += sStep) {
+        const px = distToX(d), py = getTerrainY(d);
+        if (f2) { ctx.moveTo(px, py); f2 = false; }
+        else ctx.lineTo(px, py);
+      }
+      for (let d = Math.min(s.end, xToDist(W - MARGIN_R)); d >= Math.max(s.start, xToDist(MARGIN_L)); d -= sStep) {
+        ctx.lineTo(distToX(d), getTerrainY(d) + 40);
+      }
+      ctx.closePath();
+      ctx.fillStyle = isUp ? 'rgba(248,81,73,0.12)' : 'rgba(63,185,80,0.12)';
+      ctx.fill();
+
+      const midD = (s.start + s.end) / 2;
+      const midX = distToX(midD), midY = getTerrainY(midD);
+      const rx1 = Math.max(x1, MARGIN_L), rx2 = Math.min(x2, W - MARGIN_R);
+      if (rx2 - rx1 > 30 && midX > MARGIN_L + 10 && midX < W - MARGIN_R - 10) {
+        ctx.fillStyle = isUp ? 'rgba(248,81,73,0.85)' : 'rgba(63,185,80,0.85)';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(s.label, midX, midY + 22);
+      }
+    }
+  }
+
+  // Corner markers
+  if (COURSE && COURSE.corners) {
+    for (const c of COURSE.corners) {
+      const cEnd = c.start + c.length;
+      const x1 = distToX(c.start), x2 = distToX(cEnd);
+      if (x2 < MARGIN_L || x1 > W - MARGIN_R) continue;
+      ctx.fillStyle = 'rgba(188,140,255,0.35)';
+      for (let d = c.start; d <= cEnd; d += 20) {
+        const px = distToX(d);
+        if (px < MARGIN_L || px > W - MARGIN_R) continue;
+        ctx.beginPath();
+        ctx.arc(px, getTerrainY(d) + 2, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+// ── Max HP ────────────────────────────────────────────────────────────
+const _maxHp = {};
+function getMaxHp(hi) {
+  if (_maxHp[hi] !== undefined) return _maxHp[hi];
+  if (FRAMES.length > 0 && FRAMES[0][hi]) {
+    _maxHp[hi] = FRAMES[0][hi].hp || 1;
+  } else { _maxHp[hi] = 1; }
+  return _maxHp[hi];
+}
+
+// ── Info table (sortable / filterable) ────────────────────────────────
+function setSort(field, btn) {
+  if (sortBy === field) { sortAsc = !sortAsc; }
+  else { sortBy = field; sortAsc = field === 'name'; }
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateInfoPanel();
+}
+
+function updateInfoPanel() {
+  const f = getInterpolatedFrame();
+  if (!f) return;
+  const filter = (document.getElementById('horse-filter').value || '').toLowerCase();
+  const curTime = f.time || 0;
+
+  let horses = [];
+  for (let hi = 0; hi < NUM_H; hi++) {
+    const hd = f[hi];
+    if (!hd) continue;
+    const name = horseLabel(hi);
+    if (filter && !name.toLowerCase().includes(filter)) continue;
+    horses.push({ hi, hd, name });
+  }
+
+  horses.sort((a, b) => {
+    let cmp = 0;
+    switch (sortBy) {
+      case 'pos':   cmp = b.hd.d - a.hd.d; break;
+      case 'speed': cmp = b.hd.s - a.hd.s; break;
+      case 'hp':    cmp = (b.hd.hp || 0) - (a.hd.hp || 0); break;
+      case 'name':  cmp = a.name.localeCompare(b.name); break;
+    }
+    return sortAsc ? -cmp : cmp;
+  });
+
+  const tbody = document.getElementById('info-tbody');
+  let html = '';
+  let rank = 0;
+  for (const { hi, hd, name } of horses) {
+    rank++;
+    const color = COLORS[hi % COLORS.length];
+    const hInfo = HORSE_INFO[hi];
+    const maxHp = getMaxHp(hi);
+    const hpPct = maxHp > 0 ? Math.round(hd.hp / maxHp * 100) : 100;
+    const hasSkill = activeSkills.some(s => s.horse_index === hi);
+    const isDueling = activeCompetes.some(c => c.horse_index === hi && c.type_id === 5);
+    const isSpotStruggle = activeCompetes.some(c => c.horse_index === hi && c.type_id === 4);
+    const temptId = hd.t_id || 0;
+    const pdSegs = PACE_DOWN_SEGMENTS[String(hi)] || [];
+    const isPaceDown = pdSegs.some(s => curTime >= s.start_time && curTime <= s.end_time);
+
+    let cls = '';
+    if (hasSkill) cls = ' class="highlight-skill"';
+    else if (isDueling) cls = ' class="highlight-duel"';
+
+    const portrait = hInfo && hInfo.url
+      ? `<img src="${hInfo.url}" class="tbl-portrait" alt="">`
+      : `<span class="tbl-dot" style="background:${color}"></span>`;
+
+    let accelHtml = '<span class="tbl-val" style="color:var(--text-muted)">—</span>';
+    const nextF = FRAMES[frameIdx + 1];
+    if (nextF && nextF[hi]) {
+      const dt = (nextF.time || 0) - (f.time || 0);
+      if (dt > 0) {
+        const accel = (nextF[hi].s - hd.s) / dt;
+        const sign = accel >= 0 ? '+' : '';
+        const ac = accel > 0.1 ? 'var(--green)' : accel < -0.1 ? 'var(--red)' : 'var(--text-muted)';
+        accelHtml = `<span class="tbl-val" style="color:${ac}">${sign}${accel.toFixed(2)}</span>`;
+      }
+    }
+
+    const hpColor = hpPct > 50 ? 'var(--green)' : hpPct > 20 ? 'var(--orange)' : 'var(--red)';
+
+    let statusHtml = '';
+    if (hasSkill) {
+      const sn = activeSkills.filter(s => s.horse_index === hi).map(s => s.skill_label || s.skill_id).join(', ');
+      statusHtml += `<span class="tbl-state sk" title="${sn}">✦ Skill</span>`;
+    }
+    if (isDueling) statusHtml += '<span class="tbl-state duel">Duel</span>';
+    if (isSpotStruggle) statusHtml += '<span class="tbl-state strug">Struggle</span>';
+    if (temptId > 0) {
+      const tn = {1:'掛Sashi',2:'掛Senko',3:'掛Nige',4:'掛Boost'}[temptId] || `掛${temptId}`;
+      statusHtml += `<span class="tbl-state rush">${tn}</span>`;
+    }
+    if (isPaceDown) statusHtml += '<span class="tbl-state pd">Pace↓</span>';
+
+    html += `<tr${cls}>
+      <td class="tbl-val">${rank}</td>
+      <td>${portrait}<span class="tbl-name" style="color:${color}">${name}</span></td>
+      <td class="tbl-val">${Math.round(hd.d)}m</td>
+      <td class="tbl-val">${hd.s}</td>
+      <td>${accelHtml}</td>
+      <td><span class="tbl-val" style="color:${hpColor}">${hpPct}%</span></td>
+      <td class="tbl-val" style="color:var(--text-muted)">${HAS_LANE_DATA ? (hd.lane * 100).toFixed(0) : '—'}</td>
+      <td>${statusHtml || '<span style="color:var(--text-muted)">—</span>'}</td>
+    </tr>`;
+  }
+  tbody.innerHTML = html;
+}
+
+// ── Playback ──────────────────────────────────────────────────────────
+const scrubber   = document.getElementById('scrubber');
+const frameLabel = document.getElementById('frame-label');
+const speedLabel = document.getElementById('speed-label');
+const btnPlay    = document.getElementById('btn-play');
+
+scrubber.max = Math.max(0, FRAMES.length - 1);
+
+function setFrame(idx) {
+  frameIdx = Math.max(0, Math.min(idx, FRAMES.length - 1));
+  simTime = FRAMES[frameIdx] ? (FRAMES[frameIdx].time || 0) : 0;
+  scrubber.value = frameIdx;
+  const t = simTime.toFixed(1);
+  frameLabel.textContent = `${frameIdx} / ${FRAMES.length - 1}  (${t}s)`;
+  draw();
+  updateInfoPanel();
+}
+
+function togglePlay() {
+  playing = !playing;
+  btnPlay.textContent = playing ? '‖' : '▶';
+  if (playing) { lastTime = performance.now(); animate(); }
+  else cancelAnimationFrame(animId);
+}
+
+function findFrameForTime(t) {
+  let lo = 0, hi = FRAMES.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if ((FRAMES[mid].time || 0) <= t) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
+}
+
+function animate(now) {
+  if (!playing) return;
+  if (!now) now = performance.now();
+  const dtMs = now - lastTime;
+  lastTime = now;
+  simTime += (dtMs / 1000) * speed;
+  if (simTime >= SIM_END) {
+    simTime = SIM_END; playing = false;
+    btnPlay.textContent = '▶';
+  }
+  const newIdx = findFrameForTime(simTime);
+  if (newIdx !== frameIdx) frameIdx = newIdx;
+  setFrameFromSim();
+  if (playing) animId = requestAnimationFrame(animate);
+}
+
+function setFrameFromSim() {
+  scrubber.value = frameIdx;
+  const t = simTime.toFixed(1);
+  frameLabel.textContent = `${frameIdx} / ${FRAMES.length - 1}  (${t}s)`;
+  draw();
+  updateInfoPanel();
+}
+
+function stepFrame(delta) {
+  if (playing) togglePlay();
+  setFrame(frameIdx + delta);
+}
+function scrubTo(val) {
+  if (playing) togglePlay();
+  setFrame(val);
+}
+
+const SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
+let speedIdx = 2;
+function changeSpeed(dir) {
+  speedIdx = Math.max(0, Math.min(SPEEDS.length - 1, speedIdx + dir));
+  speed = SPEEDS[speedIdx];
+  speedLabel.textContent = speed + '×';
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space')      { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowRight') { e.preventDefault(); stepFrame(1); }
+  if (e.code === 'ArrowLeft')  { e.preventDefault(); stepFrame(-1); }
+  if (e.code === 'ArrowUp')    { e.preventDefault(); changeSpeed(1); }
+  if (e.code === 'ArrowDown')  { e.preventDefault(); changeSpeed(-1); }
+  if (e.code === 'Home')       { e.preventDefault(); setFrame(0); }
+  if (e.code === 'End')        { e.preventDefault(); setFrame(FRAMES.length - 1); }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────
+resize();
+setFrame(0);
+</script>
+{% endblock %}
+

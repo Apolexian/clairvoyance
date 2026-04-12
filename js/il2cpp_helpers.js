@@ -200,7 +200,12 @@ function getNestedTypes(classPtr) {
 }
 
 function extractClassInfo(classPtr, fullName) {
-    const classInfo = { fullName, methods: {}, fields: {}, fieldList: [] };
+    const classInfo = {
+        fullName,
+        methods: Object.create(null),
+        fields: Object.create(null),
+        fieldList: [],
+    };
 
     // Methods
     const iter = Memory.alloc(ptrSize);
@@ -238,6 +243,176 @@ function extractClassInfo(classPtr, fullName) {
     }
 
     return classInfo;
+}
+
+/**
+ * Like extractClassInfo but also walks the parent class chain,
+ * merging inherited fields and methods so you get the FULL layout.
+ */
+function extractClassInfoWithParents(classPtr, fullName) {
+    var info = extractClassInfo(classPtr, fullName);
+    if (!fn.class_get_parent) return info;
+
+    var parentPtr = fn.class_get_parent(classPtr);
+    while (parentPtr && !parentPtr.isNull()) {
+        var pName = readCStr(fn.class_get_name(parentPtr));
+        if (
+            pName === "Object" ||
+            pName === "ValueType" ||
+            pName === "" ||
+            pName === "MonoBehaviour"
+        )
+            break;
+        var pNs = readCStr(fn.class_get_namespace(parentPtr));
+        var pFull = pNs ? pNs + "." + pName : pName;
+        var pInfo = extractClassInfo(parentPtr, pFull);
+
+        // Merge parent fields (only if not already present)
+        for (var i = 0; i < pInfo.fieldList.length; i++) {
+            var pf = pInfo.fieldList[i];
+            if (!(pf.name in info.fields)) {
+                info.fields[pf.name] = { offset: pf.offset, type: pf.type };
+                info.fieldList.push(pf);
+            }
+        }
+        // Merge parent methods
+        for (var mn in pInfo.methods) {
+            if (!(mn in info.methods)) {
+                info.methods[mn] = pInfo.methods[mn];
+            }
+        }
+        parentPtr = fn.class_get_parent(parentPtr);
+    }
+    return info;
+}
+
+// ── Field reader utility ──────────────────────────────────────────────
+// Shared by all modules: read a single field from an object pointer.
+
+function readField(objPtr, offset, typeName) {
+    try {
+        if (typeName === "System.Int32" || typeName === "int") {
+            return objPtr.add(offset).readS32();
+        }
+        if (typeName === "System.UInt32" || typeName === "uint") {
+            return objPtr.add(offset).readU32();
+        }
+        if (typeName === "System.Int64" || typeName === "long") {
+            return objPtr.add(offset).readS64().toNumber();
+        }
+        if (typeName === "System.UInt64" || typeName === "ulong") {
+            return objPtr.add(offset).readU64().toNumber();
+        }
+        if (typeName === "System.Single" || typeName === "float") {
+            return objPtr.add(offset).readFloat();
+        }
+        if (typeName === "System.Double" || typeName === "double") {
+            return objPtr.add(offset).readDouble();
+        }
+        if (typeName === "System.Boolean" || typeName === "bool") {
+            return objPtr.add(offset).readU8() !== 0;
+        }
+        if (typeName === "System.Byte" || typeName === "byte") {
+            return objPtr.add(offset).readU8();
+        }
+        if (typeName === "System.SByte" || typeName === "sbyte") {
+            return objPtr.add(offset).readS8();
+        }
+        if (typeName === "System.Int16" || typeName === "short") {
+            return objPtr.add(offset).readS16();
+        }
+        if (typeName === "System.UInt16" || typeName === "ushort") {
+            return objPtr.add(offset).readU16();
+        }
+        if (typeName === "System.String" || typeName === "string") {
+            var strPtr = objPtr.add(offset).readPointer();
+            if (strPtr.isNull()) return null;
+            return readIl2cppString(strPtr);
+        }
+        // For arrays, report length (reading elements would be recursive)
+        if (typeName.endsWith("[]")) {
+            var arrPtr = objPtr.add(offset).readPointer();
+            if (arrPtr.isNull()) return null;
+            var lenOffset = ptrSize === 8 ? 24 : 12;
+            var len = arrPtr.add(lenOffset).readS32();
+            return { _array: true, length: len };
+        }
+        // Skip complex types
+        return undefined;
+    } catch (e) {
+        return undefined;
+    }
+}
+
+/**
+ * Read all primitive fields from an il2cpp object.
+ * Returns { fieldName: value, ... } or null if nothing readable.
+ */
+function readObjectFields(objPtr, fieldList) {
+    if (!objPtr || objPtr.isNull()) return null;
+    var result = Object.create(null);
+    var count = 0;
+    for (var i = 0; i < fieldList.length; i++) {
+        var f = fieldList[i];
+        if (f.offset <= 0) continue; // skip static/constant fields
+        var val = readField(objPtr, f.offset, f.type);
+        if (val !== undefined) {
+            result[f.name] = val;
+            count++;
+        }
+    }
+    return count > 0 ? result : null;
+}
+
+/**
+ * Read the raw bytes from an il2cpp byte[] array pointer.
+ * Returns an ArrayBuffer or null.
+ *
+ * IL2CPP array layout (64-bit):
+ *   0:  klass ptr (8)
+ *   8:  monitor   (8)
+ *  16:  bounds    (8)
+ *  24:  max_length (4 bytes as uint32, but struct padded to 8)
+ *  32:  data[]
+ *
+ * Some builds pack max_length as 4 bytes with data starting at 28.
+ * We try offset 32 first, then fall back to 28.
+ */
+function readIl2cppByteArray(arrPtr, maxBytes) {
+    if (!arrPtr || arrPtr.isNull()) return null;
+    try {
+        var lenOffset = ptrSize === 8 ? 24 : 12;
+        var len = arrPtr.add(lenOffset).readS32();
+        if (len <= 0 || len > 1048576) return null; // sanity cap 1MB
+        var captureLen = Math.min(len, maxBytes || 32768);
+
+        // Try standard data offset first
+        var dataOffset = ptrSize === 8 ? 32 : 16;
+        try {
+            return arrPtr.add(dataOffset).readByteArray(captureLen);
+        } catch (e1) {
+            // Fallback: some builds pack data at offset 28 (no padding after 4-byte max_length)
+            if (ptrSize === 8) {
+                try {
+                    return arrPtr.add(28).readByteArray(captureLen);
+                } catch (e2) {}
+            }
+            console.log(
+                "[il2cpp] readByteArray failed at offset " +
+                    dataOffset +
+                    " len=" +
+                    captureLen +
+                    " arrPtr=" +
+                    arrPtr +
+                    ": " +
+                    e1,
+            );
+            return null;
+        }
+    } catch (e) {
+        console.log("[il2cpp] readIl2cppByteArray outer error: " + e);
+        return null;
+    }
 }
 
 // ── Assembly iteration ────────────────────────────────────────────────
@@ -284,13 +459,16 @@ function iterAssemblyClasses(callback) {
 
 // ── Hook helper ───────────────────────────────────────────────────────
 
+// Track addresses we've already hooked to avoid duplicate attach errors
+const _hookedAddrs = {};
+
 /**
  * Hook a method on a class that has already been extracted via extractClassInfo.
  * @param {Object} classInfo - result of extractClassInfo()
  * @param {string} methodName
  * @param {number} paramCount - expected param count (-1 = any)
  * @param {Object} callback - Interceptor.attach callback { onEnter, onLeave }
- * @returns {boolean} true if hooked
+ * @returns {boolean} true if hooked (or already hooked at that address)
  */
 function hookMethod(classInfo, methodName, paramCount, callback) {
     if (!classInfo) return false;
@@ -306,8 +484,15 @@ function hookMethod(classInfo, methodName, paramCount, callback) {
     const addr = ptr(match.compiledAddr);
     if (addr.isNull()) return false;
 
+    const addrStr = addr.toString();
+    if (addrStr in _hookedAddrs) {
+        // Already hooked (inherited method shared across subclasses)
+        return false;
+    }
+
     try {
         Interceptor.attach(addr, callback);
+        _hookedAddrs[addrStr] = classInfo.fullName + "." + methodName;
         return true;
     } catch (e) {
         console.log("[HOOK FAIL] " + classInfo.fullName + "." + methodName + ": " + e);

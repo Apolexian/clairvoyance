@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Clairvoyance{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav class="topbar">
+    <div class="nav-links">
+      <a href="/">Sessions</a>
+      <a href="/masterdata">Master Data</a>
+      <a href="/setup" class="nav-setup-link" id="setup-link">
+        <span class="setup-dot" id="setup-dot"></span> Setup
+      </a>
+      <button id="btn-recorder-toggle" class="btn btn-sm btn-record" onclick="toggleRecorder()">
+        <span class="rec-dot"></span> Record
+      </button>
+    </div>
+  </nav>
+
+  <!-- Recorder Panel (slide-down) — recording only -->
+  <div id="recorder-panel" class="recorder-panel hidden">
+    <div class="recorder-inner">
+      <div class="recorder-controls">
+        <div class="record-section">
+          <div class="section-label">Record — Capture Game Data</div>
+          <div class="form-row">
+            <label>Label:</label>
+            <input type="text" id="rec-label" class="input-sm">
+          </div>
+          <div class="form-row" style="margin-top: 0.4rem;">
+            <button id="btn-rec-start" class="btn btn-primary" onclick="startRecording()" disabled>Start Recording</button>
+            <button id="btn-rec-stop" class="btn btn-danger" onclick="stopRecording()" disabled>Stop</button>
+          </div>
+          <div id="rec-not-ready" class="setup-missing" style="display:none; margin-top:0.3rem; font-size:0.8rem;">
+            <a href="/setup">Run setup</a> first — binary scan is required before recording.
+          </div>
+        </div>
+      </div>
+      <div class="recorder-log">
+        <pre id="rec-log" class="log-pane">Recorder idle.</pre>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script>
+    // ── State ───────────────────────────────────────────────
+    let recorderVisible = false;
+    let setupReady = false;
+    let wasRecording = false;
+
+    // ── Safe JSON parser ────────────────────────────────────
+    async function safeJSON(res) {
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) return res.json();
+      const text = (await res.text()).slice(0, 300);
+      throw new Error(`Server ${res.status}: ${text}`);
+    }
+
+    // ── Panel toggle ────────────────────────────────────────
+    function toggleRecorder() {
+      recorderVisible = !recorderVisible;
+      document.getElementById('recorder-panel').classList.toggle('hidden', !recorderVisible);
+      if (recorderVisible) pollAll();
+    }
+
+    // ── Poll ────────────────────────────────────────────────
+    async function pollAll() {
+      await Promise.all([pollSetupDot(), pollRecorderStatus()]);
+    }
+
+    // ── Setup dot — lightweight status for nav indicator ────
+    async function pollSetupDot() {
+      try {
+        const res = await fetch('/api/setup/status');
+        const d = await safeJSON(res);
+        setupReady = d.ready;
+
+        const dot = document.getElementById('setup-dot');
+        const link = document.getElementById('setup-link');
+        if (d.running) {
+          dot.className = 'setup-dot running';
+          link.title = 'Binary scan in progress…';
+        } else if (d.ready) {
+          dot.className = 'setup-dot ready';
+          link.title = 'Setup complete';
+        } else {
+          dot.className = 'setup-dot missing';
+          link.title = 'Setup needed — click to configure';
+        }
+
+        // Gate record button on scan readiness
+        const notReady = document.getElementById('rec-not-ready');
+        notReady.style.display = (!d.ready && !d.running) ? '' : 'none';
+      } catch (e) {
+        console.error('pollSetupDot error:', e);
+      }
+    }
+
+    // ── Recorder status ─────────────────────────────────────
+    async function pollRecorderStatus() {
+      try {
+        const res = await fetch('/api/recorder/status');
+        const data = await safeJSON(res);
+        const logEl = document.getElementById('rec-log');
+        logEl.textContent = data.log.join('\n') || 'Recorder idle.';
+        logEl.scrollTop = logEl.scrollHeight;
+
+        const startBtn = document.getElementById('btn-rec-start');
+        const stopBtn = document.getElementById('btn-rec-stop');
+        const toggleBtn = document.getElementById('btn-recorder-toggle');
+
+        if (data.running) {
+          startBtn.disabled = true;
+          stopBtn.disabled = false;
+          toggleBtn.classList.add('recording');
+          wasRecording = true;
+        } else {
+          startBtn.disabled = false;
+          stopBtn.disabled = true;
+          toggleBtn.classList.remove('recording');
+          if (wasRecording) {
+            wasRecording = false;
+            window.location.href = '/';
+          }
+        }
+      } catch (e) {
+        console.error('pollRecorderStatus error:', e);
+      }
+    }
+
+    // ── Actions ─────────────────────────────────────────────
+    async function startRecording() {
+      const label = document.getElementById('rec-label').value || 'gui';
+      const modules = ['network', 'races', 'dump', 'skills', 'events'];
+
+      if (!setupReady) {
+        window.location.href = '/setup';
+        return;
+      }
+
+      document.getElementById('rec-log').textContent = '[gui] Starting recorder…';
+
+      try {
+        const res = await fetch('/api/recorder/start', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({label, modules}),
+        });
+        const data = await safeJSON(res);
+        if (data.error) {
+          document.getElementById('rec-log').textContent += '\n[gui] Error: ' + data.error;
+        }
+      } catch (e) {
+        document.getElementById('rec-log').textContent += '\n[gui] Request failed: ' + e;
+      }
+      await pollAll();
+    }
+
+    async function stopRecording() {
+      try {
+        const res = await fetch('/api/recorder/stop', {method: 'POST'});
+        const data = await safeJSON(res);
+        if (data.error) alert(data.error);
+      } catch (e) {
+        alert('Stop failed: ' + e);
+      }
+    }
+
+    // ── Polling loop ────────────────────────────────────────
+    setInterval(pollAll, 2000);
+    setTimeout(pollAll, 300);
+
+    // ── Default label = today's date ─────────────────────────
+    document.getElementById('rec-label').value = new Date().toISOString().slice(0, 10);
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
+
