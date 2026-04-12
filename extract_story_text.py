@@ -553,11 +553,33 @@ def read_meta_entries(game_dir: Path) -> list[dict]:
         total_rows = conn.execute("SELECT COUNT(*) FROM a").fetchone()[0]
         log.info("Table 'a' has %d total rows", total_rows)
 
+        # Query for actual story timeline bundles.
+        # Exclude 'resourcelist' entries — those are dependency manifests,
+        # not the actual story data bundles with TextAsset JSON.
         if has_key:
-            sql = "SELECT n, h, e FROM a WHERE n LIKE 'story/data/%storytimeline%'"
+            sql = (
+                "SELECT n, h, e FROM a "
+                "WHERE n LIKE 'story/data/%storytimeline%' "
+                "AND n NOT LIKE '%resourcelist%'"
+            )
+            sql_reslist = (
+                "SELECT COUNT(*) FROM a "
+                "WHERE n LIKE 'story/data/%storytimeline%' "
+                "AND n LIKE '%resourcelist%'"
+            )
         else:
-            sql = "SELECT n, h FROM a WHERE n LIKE 'story/data/%storytimeline%'"
+            sql = (
+                "SELECT n, h FROM a "
+                "WHERE n LIKE 'story/data/%storytimeline%' "
+                "AND n NOT LIKE '%resourcelist%'"
+            )
+            sql_reslist = (
+                "SELECT COUNT(*) FROM a "
+                "WHERE n LIKE 'story/data/%storytimeline%' "
+                "AND n LIKE '%resourcelist%'"
+            )
 
+        reslist_count = conn.execute(sql_reslist).fetchone()[0]
         rows = conn.execute(sql).fetchall()
         for r in rows:
             entries.append(
@@ -567,7 +589,11 @@ def read_meta_entries(game_dir: Path) -> list[dict]:
                     "key": r["e"] if has_key else 0,
                 }
             )
-        log.info("Found %d story timeline entries", len(entries))
+        log.info(
+            "Found %d story timeline data entries (%d resourcelist entries excluded)",
+            len(entries),
+            reslist_count,
+        )
 
         if entries:
             sample = entries[0]
@@ -675,9 +701,13 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
         log.debug("Failed to load bundle %s: %s", file_path.name, e)
         return results
 
+    text_asset_count = 0
+    json_count = 0
+    blocklist_count = 0
     for obj in env.objects:
         try:
             if obj.type.name == "TextAsset":
+                text_asset_count += 1
                 text_asset = obj.read()
                 # The asset name often encodes the story ID
                 asset_name = getattr(text_asset, "m_Name", "") or ""
@@ -701,8 +731,10 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
                 if not text_content.startswith("{"):
                     continue
 
+                json_count += 1
                 choices = parse_story_choices(text_content)
                 if choices:
+                    blocklist_count += 1
                     # Try to get story_id from the asset name
                     story_id = None
                     m = re.search(r"storytimeline_?(\d+)", asset_name)
@@ -714,6 +746,15 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
         except Exception:
             continue
 
+    if text_asset_count > 0 and log.isEnabledFor(logging.DEBUG):
+        log.debug(
+            "  bundle %s: %d objects, %d TextAssets, %d JSON, %d with choices",
+            file_path.name[:16],
+            len(list(env.objects)) if hasattr(env, "objects") else -1,
+            text_asset_count,
+            json_count,
+            blocklist_count,
+        )
     return results
 
 

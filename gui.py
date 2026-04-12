@@ -1245,7 +1245,13 @@ def _run_extraction(game_dir: Path) -> None:
     """Background thread for story text extraction."""
     global _extraction_running
     try:
-        from extract_story_text import extract_choices_from_bundle, read_meta_entries
+        import UnityPy
+
+        from extract_story_text import (
+            decrypt_bundle,
+            extract_choices_from_bundle,
+            read_meta_entries,
+        )
 
         # Ensure extract_story_text logger output goes to gui.log too
         est_logger = logging.getLogger("extract_story_text")
@@ -1320,8 +1326,9 @@ def _run_extraction(game_dir: Path) -> None:
         found = 0
         skipped = 0
         missing_samples: list[str] = []  # first few missing paths for diagnostics
+        first_bundle_logged = False
 
-        for entry in entries:
+        for i, entry in enumerate(entries):
             h = entry["hash"]
             file_path = dat_dir / h[:2] / h
             if not file_path.is_file():
@@ -1333,6 +1340,53 @@ def _run_extraction(game_dir: Path) -> None:
                     _extraction_progress["processed"] = processed
                     _extraction_progress["skipped"] = skipped
                 continue
+
+            # Deep diagnostic on the first loadable bundle so we can
+            # see exactly what UnityPy finds inside.
+            if not first_bundle_logged:
+                first_bundle_logged = True
+                try:
+                    _diag_data = (
+                        decrypt_bundle(file_path, entry["key"])
+                        if entry["key"] != 0
+                        else file_path.read_bytes()
+                    )
+                    _diag_env = UnityPy.load(
+                        _diag_data if isinstance(_diag_data, (bytes, bytearray)) else str(file_path)
+                    )
+                    obj_types: dict[str, int] = {}
+                    _diag_samples: list[str] = []
+                    for _obj in _diag_env.objects:
+                        tname = _obj.type.name
+                        obj_types[tname] = obj_types.get(tname, 0) + 1
+                        if tname == "TextAsset" and len(_diag_samples) < 3:
+                            try:
+                                _ta = _obj.read()
+                                _name = getattr(_ta, "m_Name", "?")
+                                _raw = getattr(_ta, "m_Script", None)
+                                if isinstance(_raw, bytes):
+                                    _preview = _raw[:200].decode("utf-8", errors="replace")
+                                elif _raw is not None:
+                                    _preview = str(_raw)[:200]
+                                else:
+                                    _preview = "(no m_Script)"
+                                _diag_samples.append(f"  name={_name} preview={_preview!r}")
+                            except Exception as _te:
+                                _diag_samples.append(f"  (read error: {_te})")
+                    log.info(
+                        "First bundle diagnostic: %s\n"
+                        "  file_size=%d entry_name=%s key=%s\n"
+                        "  object_types=%s\n"
+                        "  TextAsset samples:\n%s",
+                        file_path.name,
+                        file_path.stat().st_size,
+                        entry["name"],
+                        entry["key"],
+                        obj_types,
+                        "\n".join(_diag_samples) if _diag_samples else "  (none)",
+                    )
+                except Exception as _de:
+                    log.warning("First bundle diagnostic failed: %s", _de)
 
             bundle_choices = extract_choices_from_bundle(file_path, entry["key"])
             processed += 1
@@ -1346,6 +1400,15 @@ def _run_extraction(game_dir: Path) -> None:
                 _extraction_progress["processed"] = processed
                 _extraction_progress["found"] = found
                 _extraction_progress["skipped"] = skipped
+
+            if (i + 1) % 500 == 0:
+                log.info(
+                    "  Progress: %d/%d entries (%d with choices, %d missing)",
+                    i + 1,
+                    len(entries),
+                    found,
+                    skipped,
+                )
 
         log.info(
             "Story extraction complete: %d entries, %d processed, %d skipped (file missing), %d with choices",
