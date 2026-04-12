@@ -833,26 +833,14 @@
   {% if other_races is defined and other_races %}
   <div class="summary-card" style="margin-top: 0.75rem;">
     <h3>Other Races ({{ other_races | length }})</h3>
-    <p style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 0.5rem;">Champions Meeting, Room Match, Team Stadium, and other non-career races.</p>
-    <table class="race-results-table">
-      <thead><tr><th>Race</th><th>Result</th><th>Mode</th></tr></thead>
-      <tbody>
-        {% for rr in other_races %}
-        <tr>
-          <td>{{ rr.race_name or ('Race ' ~ loop.index) }}</td>
-          <td>
-            {% if rr.result_order == 1 %}<span class="result-1st">1st</span>
-            {% elif rr.result_order == 2 %}<span class="result-2nd">2nd</span>
-            {% elif rr.result_order == 3 %}<span class="result-3rd">3rd</span>
-            {% elif rr.result_order %}{{ rr.result_order }}th
-            {% else %}<span style="color:var(--text-muted)">—</span>{% endif %}
-            {% if rr.entry_count %}<span style="color:var(--text-muted); font-size:0.72rem">/{{ rr.entry_count }}</span>{% endif %}
-          </td>
-          <td style="font-size:0.75rem; color:var(--text-muted);">{{ rr.api | replace('RaceStart', '') | replace('RaceResult', '') | replace('Start', '') | replace('Result', '') }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <p style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 0.5rem;">Non-career races detected during this session (Champions Meeting, Room Match, etc.). See Detected Races for full details.</p>
+    <div style="display:flex; flex-wrap:wrap; gap:0.4rem;">
+      {% for rr in other_races %}
+      <span style="padding:0.3rem 0.6rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.78rem; color:var(--text-muted);">
+        {{ rr.api | replace('RaceStart', '') | replace('RaceResult', '') | replace('Start', '') | replace('Result', '') }}
+      </span>
+      {% endfor %}
+    </div>
   </div>
   {% endif %}
 </div>

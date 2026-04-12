@@ -354,49 +354,78 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             msg = dll.sqlite3_errmsg(db)
             return msg.decode("utf-8", errors="replace") if msg else "(null)"
 
-        # ── Open encrypted DB ────────────────────────────────────────
+        # ── Open encrypted DB and try cipher IDs ────────────────────
+        # sqlite3mc cipher IDs vary by version:
+        #   RC4 (System.Data.SQLite) = 5 in recent builds, 4 in older ones
+        #   ChaCha20 (sqleet)        = 3
+        #   SQLCipher AES-256        = 4 in recent builds
+        # Uma Musume uses RC4, so try 5 first, then 4.
         SQLITE_OPEN_READWRITE = 0x00000002
         SQLITE_OPEN_CREATE = 0x00000004
-        db_ptr = ctypes.c_void_p()
-        rc = dll.sqlite3_open_v2(
-            str(meta_path).encode("utf-8"),
-            ctypes.byref(db_ptr),
-            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
-            None,
-        )
-        if rc != 0:
-            log.error("sqlite3mc open failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
-            return None
-        log.debug("sqlite3_open_v2 OK, db_ptr=%s", db_ptr.value)
+        _RC4_CIPHER_IDS = [5, 4]
 
-        # Set cipher (before any DB access, matching UmaViewer)
-        rc = dll.sqlite3mc_config(db_ptr, b"cipher", 3)
-        log.debug("sqlite3mc_config('cipher', 3) rc=%d", rc)
+        validated_db_ptr = None
+        for cipher_id in _RC4_CIPHER_IDS:
+            db_ptr = ctypes.c_void_p()
+            rc = dll.sqlite3_open_v2(
+                str(meta_path).encode("utf-8"),
+                ctypes.byref(db_ptr),
+                SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+                None,
+            )
+            if rc != 0:
+                log.error("sqlite3mc open failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
+                continue
+            log.debug("sqlite3_open_v2 OK, db_ptr=%s", db_ptr.value)
 
-        # Set key via PRAGMA with hex encoding — the x'...' format tells
-        # sqlite3mc this is a raw key (no KDF/passphrase derivation).
-        # Passing raw binary via sqlite3_key makes some ciphers apply KDF,
-        # producing the wrong decryption key.
-        key_hex = key.hex()
-        pragma_key = f"PRAGMA key = \"x'{key_hex}'\";".encode()
-        log.debug("Setting key via PRAGMA (hex, %d bytes)", len(key))
-        err_ptr = ctypes.c_void_p()
-        rc = dll.sqlite3_exec(db_ptr, pragma_key, None, None, ctypes.byref(err_ptr))
-        if rc != 0:
-            log.error("PRAGMA key failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
-            dll.sqlite3_close(db_ptr)
-            return None
+            # Set cipher (before any DB access, matching UmaViewer)
+            rc = dll.sqlite3mc_config(db_ptr, b"cipher", cipher_id)
+            log.debug("sqlite3mc_config('cipher', %d) rc=%d", cipher_id, rc)
 
-        # Validate: try a read to confirm key works (matching UmaViewer)
-        err_ptr = ctypes.c_void_p()
-        rc = dll.sqlite3_exec(
-            db_ptr, b"SELECT name FROM sqlite_master LIMIT 1;", None, None, ctypes.byref(err_ptr)
-        )
-        if rc != 0:
-            log.error("sqlite3mc validation failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
-            dll.sqlite3_close(db_ptr)
+            # Set key via PRAGMA with hex encoding — the x'...' format tells
+            # sqlite3mc this is a raw key (no KDF/passphrase derivation).
+            key_hex = key.hex()
+            pragma_key = f"PRAGMA key = \"x'{key_hex}'\";".encode()
+            log.debug("Setting key via PRAGMA (hex, %d bytes)", len(key))
+            err_ptr = ctypes.c_void_p()
+            rc = dll.sqlite3_exec(db_ptr, pragma_key, None, None, ctypes.byref(err_ptr))
+            if rc != 0:
+                log.debug(
+                    "PRAGMA key failed for cipher %d rc=%d errmsg=%s",
+                    cipher_id,
+                    rc,
+                    _errmsg(db_ptr),
+                )
+                dll.sqlite3_close(db_ptr)
+                continue
+
+            # Validate: try a read to confirm key+cipher works
+            err_ptr = ctypes.c_void_p()
+            rc = dll.sqlite3_exec(
+                db_ptr,
+                b"SELECT name FROM sqlite_master LIMIT 1;",
+                None,
+                None,
+                ctypes.byref(err_ptr),
+            )
+            if rc != 0:
+                log.debug(
+                    "sqlite3mc validation failed for cipher %d rc=%d errmsg=%s",
+                    cipher_id,
+                    rc,
+                    _errmsg(db_ptr),
+                )
+                dll.sqlite3_close(db_ptr)
+                continue
+
+            log.info("Validation OK — cipher=%d key=%d bytes", cipher_id, len(key))
+            validated_db_ptr = db_ptr
+            break
+
+        if validated_db_ptr is None:
+            log.error("sqlite3mc: no cipher ID worked (tried %s)", _RC4_CIPHER_IDS)
             return None
-        log.debug("Validation SELECT OK — key is correct")
+        db_ptr = validated_db_ptr
 
         # ── Create plaintext copy via backup API ─────────────────────
         decrypted_path = meta_path.parent / "meta_decrypted"

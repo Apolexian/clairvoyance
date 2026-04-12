@@ -782,19 +782,14 @@ def _build_summary_from_records(records: list[dict]) -> dict:
 
         # ── Skip non-career records for career-specific fields ─────
         # PvP / Champions Meeting / Room Match / Team Stadium / Legend Race
-        # records may appear mid-career.  We capture their race results
-        # into a separate list so they can be displayed at the session
-        # level rather than polluting a career summary.
+        # records may appear mid-career.  We don't know which runner is
+        # the player's so we only record that a race happened (no result).
+        # The user can see full details via the Detected Races links.
         if _is_non_career_context(api):
-            race_result = data.get("race_result_info") or data.get("race_scenario", {})
-            if isinstance(race_result, dict) and race_result.get("result_order"):
+            # Only log one entry per race (result APIs, not start APIs)
+            if "Result" in api or "result" in api:
                 summary.setdefault("_non_career_races", []).append(
                     {
-                        "turn": 0,
-                        "race_instance_id": race_result.get("race_instance_id"),
-                        "program_id": race_result.get("program_id"),
-                        "result_order": race_result.get("result_order"),
-                        "entry_count": race_result.get("entry_count") or race_result.get("num"),
                         "api": api,
                         "_ts": ts,
                     }
@@ -1020,18 +1015,48 @@ def _build_summary_from_records(records: list[dict]) -> dict:
                             dist[sc_key][cmd_key] = dist[sc_key].get(cmd_key, 0) + 1
 
         # ── Race results ────────────────────────────────────────
-        race_result = data.get("race_result_info") or data.get("race_scenario", {})
-        if isinstance(race_result, dict) and race_result.get("result_order"):
+        # Find the player's race result by matching chara_id.
+        # The API may return results as:
+        #   - race_result_info: single dict (usually the player in career)
+        #   - race_result_array: list of all horses' results
+        # We match by the career's chara_id to be sure we get the right horse.
+        player_cid = summary.get("chara_id")
+        player_race_result = None
+
+        # Check race_result_array first (list of all horses)
+        race_arr = data.get("race_result_array")
+        if isinstance(race_arr, list) and player_cid:
+            for rr_entry in race_arr:
+                if isinstance(rr_entry, dict) and rr_entry.get("chara_id") == player_cid:
+                    player_race_result = rr_entry
+                    break
+
+        # Fall back to race_result_info (single dict)
+        if player_race_result is None:
+            rri = data.get("race_result_info")
+            if isinstance(rri, list):
+                # Sometimes it's a list — find our horse
+                for rr_entry in rri:
+                    if isinstance(rr_entry, dict) and (
+                        not player_cid or rr_entry.get("chara_id") == player_cid
+                    ):
+                        player_race_result = rr_entry
+                        break
+            elif isinstance(rri, dict) and rri.get("result_order"):
+                player_race_result = rri
+
+        if player_race_result and player_race_result.get("result_order"):
             turn = 0
             if isinstance(chara, dict):
                 turn = chara.get("turn", 0)
             summary["race_results"].append(
                 {
                     "turn": turn,
-                    "race_instance_id": race_result.get("race_instance_id"),
-                    "program_id": race_result.get("program_id"),
-                    "result_order": race_result.get("result_order"),
-                    "entry_count": race_result.get("entry_count") or race_result.get("num"),
+                    "race_instance_id": player_race_result.get("race_instance_id"),
+                    "program_id": player_race_result.get("program_id"),
+                    "result_order": player_race_result.get("result_order"),
+                    "entry_count": player_race_result.get("entry_count")
+                    or player_race_result.get("num"),
                     "api": api,
                     "_ts": ts,
                 }

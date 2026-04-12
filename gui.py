@@ -468,11 +468,6 @@ def session_detail(name: str):
     for career in careers:
         _enrich_career_summary(career)
 
-    # Enrich non-career race results (CM, PvP, etc.) with names
-    for rr in other_races:
-        if rr.get("race_instance_id"):
-            rr["race_name"] = race_instance_name(rr["race_instance_id"])
-
     net = get_network_events(name)
     races = get_races(name)
 
@@ -480,19 +475,28 @@ def session_detail(name: str):
     # (multi-career: each career already has its own race_results from the parser)
     if len(careers) == 1 and not careers[0].get("race_results") and races:
         summary = careers[0]
+        player_cid = summary.get("chara_id")
         for race in races:
             meta = race.get("race_metadata", {})
             rid = meta.get("race_instance_id")
 
             result_order = None
             entry_count = None
-            summaries = race.get("horse_summaries", [])
-            if summaries:
-                entry_count = len(summaries)
-                player = next(
-                    (h for h in summaries if h.get("horse_index") == 0),
-                    summaries[0] if summaries else None,
-                )
+            horse_list = race.get("horse_summaries", [])
+            if horse_list:
+                entry_count = len(horse_list)
+                # Match by career's chara_id first, then fall back to horse_index 0
+                player = None
+                if player_cid:
+                    player = next(
+                        (h for h in horse_list if h.get("chara_id") == player_cid),
+                        None,
+                    )
+                if player is None:
+                    player = next(
+                        (h for h in horse_list if h.get("horse_index") == 0),
+                        horse_list[0] if horse_list else None,
+                    )
                 if player:
                     result_order = player.get("finish_order") or player.get("estimated_rank")
 
