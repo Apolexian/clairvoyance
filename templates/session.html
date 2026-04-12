@@ -30,405 +30,279 @@
   .view-panel { display: none; }
   .view-panel.active { display: block; }
 
-  /* ── Summary Cards ── */
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  .summary-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-  }
-  .summary-card h3 {
-    font-size: 0.85rem;
-    color: var(--accent);
-    margin-bottom: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+  /* ── Profile Layout ── */
+  .profile {
+    max-width: 900px;
   }
 
-  .chara-header {
+  /* ── Profile Header: portrait + name + stats row ── */
+  .profile-header {
     display: flex;
-    gap: 1rem;
     align-items: center;
+    gap: 1.25rem;
+    padding-bottom: 1rem;
     margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
   }
-  .chara-portrait {
-    width: 64px;
-    height: 64px;
+  .profile-portrait {
+    width: 72px; height: 72px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--accent-dim);
     flex-shrink: 0;
   }
-  .chara-info .chara-name { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-  .chara-info .chara-card { font-size: 0.82rem; color: var(--text-muted); }
-  .chara-info .chara-scenario { font-size: 0.72rem; color: var(--accent); margin-top: 0.2rem; opacity: 0.85; }
+  .profile-identity { flex: 1; min-width: 0; }
+  .profile-name { font-size: 1.3rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .profile-sub { font-size: 0.82rem; color: var(--text-muted); display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.15rem; }
 
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+  /* Five stat boxes inline */
+  .profile-stats {
+    display: flex;
     gap: 0.5rem;
     margin-top: 0.75rem;
   }
-  .stat-item { text-align: center; padding: 0.4rem; background: var(--bg); border-radius: 6px; }
-  .stat-item .stat-val { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-  .stat-item .stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
-
-  .stats-secondary {
-    display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem;
-    font-size: 0.82rem; color: var(--text-muted);
-  }
-  .stats-secondary span { white-space: nowrap; }
-  .stats-secondary strong { color: var(--text); }
-
-  /* ── Deck Grid (3 × 2) ── */
-  .deck-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.6rem;
-  }
-  .deck-tile {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.5rem 0.35rem 0.45rem;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    overflow: hidden;
-  }
-  .deck-tile:hover { border-color: var(--accent-dim); box-shadow: 0 0 6px rgba(88,166,255,0.1); }
-  .deck-tile.is-friend { border-color: var(--accent-dim); }
-
-  .deck-tile-img-wrap {
-    width: 60px;
-    height: 60px;
-    border-radius: 6px;
-    overflow: hidden;
-    background: var(--bg-card);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .deck-tile-img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .deck-tile-placeholder {
-    font-size: 1.5rem;
-    color: var(--text-muted);
-    opacity: 0.35;
-    user-select: none;
-  }
-  .deck-tile-name {
-    margin-top: 0.35rem;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text);
+  .pstat {
     text-align: center;
-    line-height: 1.2;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    word-break: break-word;
-    max-width: 100%;
+    min-width: 52px;
+    padding: 0.3rem 0.5rem;
+    background: var(--bg-card);
+    border-radius: 6px;
   }
-  .deck-tile-id {
-    font-size: 0.62rem;
-    color: var(--text-muted);
-    margin-top: 0.1rem;
+  .pstat-val { font-size: 1.15rem; font-weight: 700; color: var(--text); line-height: 1.1; }
+  .pstat-lbl { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+
+  .profile-secondary {
+    display: flex; flex-wrap: wrap; gap: 0.75rem;
+    font-size: 0.8rem; color: var(--text-muted);
+    margin-top: 0.5rem;
   }
-  .friend-badge {
-    font-size: 0.6rem; color: var(--accent); background: rgba(88,166,255,0.12);
-    padding: 0.05rem 0.35rem; border-radius: 4px;
-    font-weight: 600; letter-spacing: 0.02em;
-    position: absolute;
-    top: 0.25rem;
-    right: 0.25rem;
+  .profile-secondary strong { color: var(--text); }
+
+  /* ── Section headings (no boxes) ── */
+  .psection {
+    margin-top: 1.5rem;
+  }
+  .psection-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
   }
 
-  .support-id { font-size: 0.72rem; color: var(--text-muted); margin-left: 0.4rem; }
+  /* ── Stats chart ── */
+  .stats-chart-wrap { height: 200px; margin-top: 0.5rem; margin-bottom: 0.5rem; }
 
-  /* Small thumbnails in partner dist table */
-  .pd-thumb {
-    width: 22px;
-    height: 22px;
-    border-radius: 3px;
+  /* ── Support Deck: horizontal row ── */
+  .deck-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .deck-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.6rem 0.3rem 0.3rem;
+    background: var(--bg-card);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--text);
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .deck-chip-img {
+    width: 36px; height: 36px;
+    border-radius: 4px;
     object-fit: cover;
-    vertical-align: middle;
-    margin-right: 0.35rem;
     flex-shrink: 0;
   }
+  .deck-chip-placeholder {
+    width: 36px; height: 36px;
+    border-radius: 4px;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: var(--text-muted); opacity: 0.4; flex-shrink: 0;
+  }
+  .deck-chip-text { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .deck-chip-name { font-weight: 600; font-size: 0.78rem; }
+  .deck-chip-id { font-size: 0.65rem; color: var(--text-muted); }
+  .deck-chip.is-friend { border: 1px solid var(--accent-dim); }
+  .friend-tag { font-size: 0.6rem; color: var(--accent); font-weight: 700; margin-left: 0.2rem; }
 
-  /* ── Partner Distribution Table ── */
-  .partner-dist-card { grid-column: 1 / -1; }
+  /* ── Training Partner Distribution ── */
   .partner-dist-table {
     width: 100%; border-collapse: collapse; font-size: 0.82rem;
   }
   .partner-dist-table th {
     text-align: left; font-weight: 600; color: var(--accent);
-    padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.75rem;
+    padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.72rem;
   }
   .partner-dist-table td {
-    padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text);
+    padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text);
   }
   .pd-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; display: flex; align-items: center; }
   .pd-name > span { overflow: hidden; text-overflow: ellipsis; }
-  .pd-num { text-align: center; min-width: 38px; font-variant-numeric: tabular-nums; }
+  .pd-thumb { width: 22px; height: 22px; border-radius: 3px; object-fit: cover; vertical-align: middle; margin-right: 0.35rem; flex-shrink: 0; }
+  .pd-num { text-align: center; min-width: 34px; font-variant-numeric: tabular-nums; }
   .pd-num.pd-has-val { color: var(--text); font-weight: 600; }
   .pd-num:not(.pd-has-val) { color: var(--text-muted); opacity: 0.5; }
   .pd-total { font-weight: 700; color: var(--accent); }
+  .support-id { font-size: 0.72rem; color: var(--text-muted); margin-left: 0.4rem; }
 
-  .skill-list { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
-  .skill-list li {
-    padding: 0.25rem 0; font-size: 0.82rem; color: var(--text);
-    display: flex; justify-content: space-between; border-bottom: 1px solid var(--border);
+  /* ── Race Results: compact inline ── */
+  .race-list-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
   }
-  .skill-list li:last-child { border-bottom: none; }
-  .skill-turn { font-size: 0.72rem; color: var(--text-muted); }
-
-  .race-results-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  .race-results-table th {
-    text-align: left; font-weight: 600; color: var(--accent);
-    padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.78rem;
+  .race-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    padding: 0.2rem 0;
   }
-  .race-results-table td { padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); color: var(--text); }
-  .result-1st { color: var(--gold); font-weight: 700; }
-  .result-2nd { color: var(--silver); }
-  .result-3rd { color: var(--bronze); }
+  .race-row + .race-row { border-top: 1px solid var(--border); }
+  .race-row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .race-row-name a { color: var(--accent); text-decoration: none; }
+  .race-row-name a:hover { text-decoration: underline; }
+  .race-result { font-weight: 700; min-width: 40px; text-align: right; }
+  .race-result.r1 { color: var(--gold, #f9c74f); }
+  .race-result.r2 { color: var(--silver, #8b949e); }
+  .race-result.r3 { color: var(--bronze, #d29922); }
+  .race-turn { font-size: 0.72rem; color: var(--text-muted); min-width: 28px; text-align: right; }
 
-
-  .summary-empty { color: var(--text-muted); font-size: 0.85rem; font-style: italic; padding: 0.5rem 0; }
-  .stats-chart-wrap { margin-top: 0.75rem; height: 200px; }
+  /* ── Skills: inline pills ── */
+  .skill-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .skill-pill {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .skill-pill .sp-turn { font-size: 0.65rem; color: var(--text-muted); margin-left: 0.3rem; }
 
   /* ── Event Choices ── */
-  .event-choices-list { max-height: 400px; overflow-y: auto; }
-  .event-choice-item {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
+  .event-list { }
+  .event-item {
+    padding: 0.4rem 0;
   }
-  .event-choice-item:last-child { border-bottom: none; }
-  .event-choice-header {
+  .event-item + .event-item { border-top: 1px solid var(--border); }
+  .event-head {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
   }
-  .event-choice-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .event-choice-meta {
+  .event-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+  .event-turn { font-size: 0.72rem; color: var(--text-muted); }
+  .event-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 0.25rem;
+    gap: 0.35rem;
+    margin-top: 0.15rem;
     font-size: 0.75rem;
   }
-  .event-source {
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-  .event-source.support { color: #58a6ff; }
-  .event-source.card { color: #f9c74f; }
-  .event-source.scenario { color: #8b949e; }
-  .event-choice-badge {
+  .ev-source { color: var(--text-muted); white-space: nowrap; }
+  .ev-source.support { color: #58a6ff; }
+  .ev-source.card { color: #f9c74f; }
+  .ev-source.scenario { color: #8b949e; }
+  .ev-badge {
     background: var(--accent-dim, rgba(88,166,255,0.15));
     color: var(--accent);
-    padding: 0.1rem 0.4rem;
-    border-radius: 4px;
+    padding: 0.05rem 0.35rem;
+    border-radius: 3px;
     font-weight: 600;
     white-space: nowrap;
   }
-  .event-choice-badge.chosen {
-    background: rgba(63,185,80,0.18);
-    color: #3fb950;
+  .ev-badge.chosen { background: rgba(63,185,80,0.18); color: #3fb950; }
+  .choice-pills {
+    display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.25rem;
   }
-  .event-choice-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.35rem;
-  }
-  .choice-pill {
-    font-size: 0.72rem;
-    padding: 0.1rem 0.45rem;
-    border-radius: 4px;
-    background: var(--surface, rgba(255,255,255,0.04));
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  .choice-pill.chosen {
-    background: rgba(63,185,80,0.12);
-    color: #3fb950;
-    border-color: rgba(63,185,80,0.35);
-    font-weight: 600;
-  }
-  .event-deltas {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.3rem;
-  }
-  .delta-badge {
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 0.1rem 0.35rem;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
-  .delta-badge.positive { background: rgba(63,185,80,0.15); color: #3fb950; }
-  .delta-badge.negative { background: rgba(248,81,73,0.15); color: #f85149; }
-
-  /* ── Network Stats Bar ── */
-  .net-stats-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-    padding: 0.6rem 0.75rem;
+  .cpill {
+    font-size: 0.7rem;
+    padding: 0.08rem 0.4rem;
+    border-radius: 3px;
     background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 0.78rem;
-    align-items: center;
-  }
-  .net-stats-bar .ns-item {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
     color: var(--text-muted);
+    border: 1px solid var(--border);
     white-space: nowrap;
   }
-  .net-stats-bar .ns-val {
-    color: var(--text);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
+  .cpill.chosen { background: rgba(63,185,80,0.12); color: #3fb950; border-color: rgba(63,185,80,0.35); font-weight: 600; }
+  .delta-row {
+    display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.2rem;
   }
-  .net-stats-bar .ns-divider {
-    width: 1px;
-    height: 1.2em;
-    background: var(--border);
-    margin: 0 0.15rem;
+  .delta {
+    font-size: 0.7rem; font-weight: 700;
+    padding: 0.05rem 0.3rem; border-radius: 3px; white-space: nowrap;
   }
+  .delta.pos { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .delta.neg { background: rgba(248,81,73,0.15); color: #f85149; }
 
-  /* ── Network Filter Row ── */
+  /* ── Detected Races (session-level) ── */
+  .race-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .race-chip {
+    display: inline-block; padding: 0.3rem 0.65rem;
+    background: var(--bg-card); border-radius: 5px;
+    font-size: 0.8rem; color: var(--text); text-decoration: none;
+    transition: background 0.15s;
+  }
+  .race-chip:hover { background: var(--bg-hover, rgba(255,255,255,0.06)); }
+  .race-chip-name { color: var(--accent); font-weight: 600; }
+  .race-chip-meta { color: var(--text-muted); font-size: 0.7rem; margin-left: 0.3rem; }
+
+  .profile-empty { color: var(--text-muted); font-size: 0.82rem; font-style: italic; }
+
+  /* ── Network (keep existing) ── */
+  .net-stats-bar {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;
+    padding: 0.6rem 0.75rem; background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 0.78rem; align-items: center;
+  }
+  .net-stats-bar .ns-item { display: flex; align-items: center; gap: 0.3rem; color: var(--text-muted); white-space: nowrap; }
+  .net-stats-bar .ns-val { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .net-stats-bar .ns-divider { width: 1px; height: 1.2em; background: var(--border); margin: 0 0.15rem; }
   .net-filter-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-bottom: 0.6rem;
-    align-items: center;
+    display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; align-items: center;
   }
-  .net-filter-row .input-sm {
-    min-width: 180px;
-    flex: 1;
-    max-width: 320px;
-  }
-  .net-filter-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-  }
+  .net-filter-row .input-sm { min-width: 180px; flex: 1; max-width: 320px; }
+  .net-filter-pills { display: flex; flex-wrap: wrap; gap: 0.25rem; }
   .net-type-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 0.2rem;
+    padding: 0.15rem 0.5rem; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text-muted); font-size: 0.72rem;
+    cursor: pointer; transition: all 0.15s; user-select: none; white-space: nowrap;
   }
   .net-type-pill:hover { border-color: var(--text-muted); }
-  .net-type-pill.active {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-    color: var(--text);
-  }
-  .net-type-pill .pill-count {
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    font-size: 0.68rem;
-    opacity: 0.7;
-  }
+  .net-type-pill.active { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
+  .net-type-pill .pill-count { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.68rem; opacity: 0.7; }
   .net-dir-btn {
-    padding: 0.15rem 0.5rem;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text-muted);
-    font-size: 0.72rem;
-    cursor: pointer;
-    transition: all 0.15s;
+    padding: 0.15rem 0.5rem; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text-muted); font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
   }
   .net-dir-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
-
-  /* ── Network Timeline: enhanced event rows ── */
   .timeline-event { position: relative; }
   .timeline-event[data-pair-idx] { border-left: 2px solid transparent; }
   .timeline-event.pair-highlight { border-left-color: var(--accent-dim); background: var(--bg-hover); }
-
-  .net-ev-meta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    margin-left: 0.3rem;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-  }
-  .net-ev-meta .ne-bytes {
-    font-variant-numeric: tabular-nums;
-    color: var(--text-muted);
-  }
-
-  .net-ev-label {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    font-style: italic;
-    margin-left: 0.25rem;
-  }
-  .net-ev-url {
-    font-size: 0.72rem;
-    color: var(--purple);
-    font-family: monospace;
-    margin-left: 0.25rem;
-  }
-
+  .net-ev-meta { display: inline-flex; align-items: center; gap: 0.25rem; margin-left: 0.3rem; font-size: 0.72rem; color: var(--text-muted); }
+  .net-ev-meta .ne-bytes { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+  .net-ev-label { font-size: 0.78rem; color: var(--text-muted); font-style: italic; margin-left: 0.25rem; }
+  .net-ev-url { font-size: 0.72rem; color: var(--purple); font-family: monospace; margin-left: 0.25rem; }
   .pair-link-btn {
-    font-size: 0.72rem;
-    color: var(--accent);
-    background: none;
-    border: 1px solid var(--accent-dim);
-    border-radius: 4px;
-    padding: 0 0.25rem;
-    cursor: pointer;
-    line-height: 1.3;
-    transition: background 0.15s;
+    font-size: 0.72rem; color: var(--accent); background: none;
+    border: 1px solid var(--accent-dim); border-radius: 4px;
+    padding: 0 0.25rem; cursor: pointer; line-height: 1.3; transition: background 0.15s;
   }
   .pair-link-btn:hover { background: var(--accent-dim); }
-
-  /* Direction badges */
   .timeline-badge.dir-out { color: #58a6ff; }
   .timeline-badge.dir-in { color: #3fb950; }
-
-  /* Event type colors */
   .timeline-badge.ssl_read { background: rgba(63,185,80,0.12); color: #3fb950; }
   .timeline-badge.ssl_write { background: rgba(88,166,255,0.12); color: #58a6ff; }
   .timeline-badge.schannel_decrypt { background: rgba(63,185,80,0.12); color: #3fb950; }
@@ -440,85 +314,23 @@
   .timeline-badge.msgpack_deserialize { background: rgba(210,153,34,0.12); color: #d29922; }
   .timeline-badge.api_error { background: rgba(248,81,73,0.15); color: #f85149; }
 
-  /* ── Career Accordion (multi-career sessions) ── */
-  .career-panel {
-    margin-bottom: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg-card);
-    overflow: hidden;
-  }
+  /* ── Career Accordion (multi-career) ── */
+  .career-panel { margin-bottom: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); overflow: hidden; }
   .career-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.15s;
-    color: var(--text);
-    font-family: inherit;
+    display: flex; align-items: center; gap: 0.75rem; width: 100%;
+    padding: 0.75rem 1rem; background: none; border: none; cursor: pointer;
+    text-align: left; transition: background 0.15s; color: var(--text); font-family: inherit;
   }
   .career-header:hover { background: var(--bg-hover); }
-
-  .career-header-portrait {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--accent-dim);
-    flex-shrink: 0;
-  }
-  .career-number {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--accent);
-    background: rgba(88,166,255,0.12);
-    padding: 0.15rem 0.45rem;
-    border-radius: 4px;
-    flex-shrink: 0;
-  }
+  .career-header-portrait { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-dim); flex-shrink: 0; }
+  .career-number { font-size: 0.65rem; font-weight: 700; color: var(--accent); background: rgba(88,166,255,0.12); padding: 0.15rem 0.45rem; border-radius: 4px; flex-shrink: 0; }
   .career-header-info { flex: 1; min-width: 0; }
-  .career-header-name {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .career-header-meta {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    margin-top: 0.1rem;
-  }
-  .career-header-stats {
-    display: flex;
-    gap: 0.35rem;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .career-header-stats .ch-total {
-    color: var(--accent);
-    font-weight: 700;
-  }
-  .career-chevron {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    transition: transform 0.2s;
-    flex-shrink: 0;
-  }
+  .career-header-name { font-size: 1rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .career-header-meta { font-size: 0.78rem; color: var(--text-muted); display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.1rem; }
+  .career-header-stats { display: flex; gap: 0.35rem; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+  .career-header-stats .ch-total { color: var(--accent); font-weight: 700; }
+  .career-chevron { font-size: 0.75rem; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
   .career-panel.expanded .career-chevron { transform: rotate(90deg); }
-
   .career-body { padding: 0 1rem 1rem; }
 </style>
 {% endblock %}
@@ -577,89 +389,79 @@
 
   {# ── Career content ── #}
   {% if summary and summary.latest_stats %}
-  <div class="summary-grid">
-    <!-- Character & Stats -->
-    <div class="summary-card">
-      <h3>Character</h3>
-      <div class="chara-header">
-        {% if summary.chara_image %}
-        <img src="{{ summary.chara_image }}" alt="" class="chara-portrait">
-        {% endif %}
-        <div class="chara-info">
-          <div class="chara-name">{{ summary.chara_name or 'Unknown Character' }}</div>
-          {% if summary.outfit_title %}
-          <div class="chara-card">{{ summary.outfit_title }}</div>
-          {% endif %}
-          {% if summary.scenario_name %}
-          <div class="chara-scenario">{{ summary.scenario_name }}</div>
-          {% endif %}
+  <div class="profile">
+
+    {# ── Header: portrait + name + stats ── #}
+    <div class="profile-header">
+      {% if summary.chara_image %}
+      <img src="{{ summary.chara_image }}" alt="" class="profile-portrait">
+      {% endif %}
+      <div class="profile-identity">
+        <div class="profile-name">{{ summary.chara_name or 'Unknown Character' }}</div>
+        <div class="profile-sub">
+          {% if summary.outfit_title %}<span>{{ summary.outfit_title }}</span>{% endif %}
+          {% if summary.scenario_name %}<span>{{ summary.scenario_name }}</span>{% endif %}
+        </div>
+        <div class="profile-stats">
+          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.speed }}</div><div class="pstat-lbl">Spd</div></div>
+          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.stamina }}</div><div class="pstat-lbl">Sta</div></div>
+          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.power }}</div><div class="pstat-lbl">Pow</div></div>
+          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.guts }}</div><div class="pstat-lbl">Gut</div></div>
+          <div class="pstat"><div class="pstat-val">{{ summary.latest_stats.wiz }}</div><div class="pstat-lbl">Wiz</div></div>
+        </div>
+        <div class="profile-secondary">
+          <span>Turn <strong>{{ summary.latest_stats.turn }}</strong></span>
+          <span>Vital <strong>{{ summary.latest_stats.vital }}/{{ summary.latest_stats.max_vital }}</strong></span>
+          <span>Fans <strong>{{ "{:,}".format(summary.latest_stats.fans) }}</strong></span>
+          <span>SP <strong>{{ summary.latest_stats.skill_point }}</strong></span>
+          {% set motiv = summary.latest_stats.motivation %}
+          <span>Mood <strong>{% if motiv == 5 %}Great{% elif motiv == 4 %}Good{% elif motiv == 3 %}Normal{% elif motiv == 2 %}Bad{% else %}Awful{% endif %}</strong></span>
         </div>
       </div>
-
-      <div class="stats-grid">
-        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.speed }}</div><div class="stat-lbl">Speed</div></div>
-        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.stamina }}</div><div class="stat-lbl">Stamina</div></div>
-        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.power }}</div><div class="stat-lbl">Power</div></div>
-        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.guts }}</div><div class="stat-lbl">Guts</div></div>
-        <div class="stat-item"><div class="stat-val">{{ summary.latest_stats.wiz }}</div><div class="stat-lbl">Wiz</div></div>
-      </div>
-
-      <div class="stats-secondary">
-        <span>Turn <strong>{{ summary.latest_stats.turn }}</strong></span>
-        <span>Vital <strong>{{ summary.latest_stats.vital }}/{{ summary.latest_stats.max_vital }}</strong></span>
-        <span>Fans <strong>{{ "{:,}".format(summary.latest_stats.fans) }}</strong></span>
-        <span>SP <strong>{{ summary.latest_stats.skill_point }}</strong></span>
-        {% set motiv = summary.latest_stats.motivation %}
-        <span>Mood <strong>{% if motiv == 5 %}Great{% elif motiv == 4 %}Good{% elif motiv == 3 %}Normal{% elif motiv == 2 %}Bad{% else %}Awful{% endif %}</strong></span>
-      </div>
-
-      {% if summary.stats_history | length > 2 %}
-      <div class="stats-chart-wrap"><canvas id="{% if multi %}statsChart-{{ loop.index0 }}{% else %}statsChart{% endif %}"></canvas></div>
-      {% endif %}
     </div>
 
-    <!-- Support Deck (3 × 2 grid) -->
-    <div class="summary-card">
-      <h3>Support Deck</h3>
-      {% if summary.support_card_names or summary.friend_support_card_id %}
-      <div class="deck-grid">
+    {# ── Stats chart ── #}
+    {% if summary.stats_history | length > 2 %}
+    <div class="stats-chart-wrap"><canvas id="{% if multi %}statsChart-{{ loop.index0 }}{% else %}statsChart{% endif %}"></canvas></div>
+    {% endif %}
+
+    {# ── Support Deck ── #}
+    {% if summary.support_card_names or summary.friend_support_card_id %}
+    <div class="psection">
+      <div class="psection-title">Support Deck</div>
+      <div class="deck-row">
         {% for sc in summary.support_card_names %}
-        <div class="deck-tile">
-          <div class="deck-tile-img-wrap">
-            {% if sc.image %}
-            <img src="{{ sc.image }}" alt="{{ sc.name }}" loading="lazy">
-            {% else %}
-            <span class="deck-tile-placeholder">🃏</span>
-            {% endif %}
+        <div class="deck-chip">
+          {% if sc.image %}
+          <img src="{{ sc.image }}" alt="" class="deck-chip-img" loading="lazy">
+          {% else %}
+          <span class="deck-chip-placeholder">🃏</span>
+          {% endif %}
+          <div class="deck-chip-text">
+            <div class="deck-chip-name">{{ sc.name }}</div>
           </div>
-          <div class="deck-tile-name">{{ sc.name }}</div>
-          <div class="deck-tile-id">#{{ sc.id }}</div>
         </div>
         {% endfor %}
         {% if summary.friend_support_card_id %}
-        <div class="deck-tile is-friend">
-          <span class="friend-badge">Friend</span>
-          <div class="deck-tile-img-wrap">
-            {% if summary.friend_support_card_image %}
-            <img src="{{ summary.friend_support_card_image }}" alt="{{ summary.friend_support_card_name }}" loading="lazy">
-            {% else %}
-            <span class="deck-tile-placeholder">🤝</span>
-            {% endif %}
+        <div class="deck-chip is-friend">
+          {% if summary.friend_support_card_image %}
+          <img src="{{ summary.friend_support_card_image }}" alt="" class="deck-chip-img" loading="lazy">
+          {% else %}
+          <span class="deck-chip-placeholder">🤝</span>
+          {% endif %}
+          <div class="deck-chip-text">
+            <div class="deck-chip-name">{{ summary.friend_support_card_name or summary.friend_support_card_id }}<span class="friend-tag">Friend</span></div>
           </div>
-          <div class="deck-tile-name">{{ summary.friend_support_card_name or summary.friend_support_card_id }}</div>
-          <div class="deck-tile-id">#{{ summary.friend_support_card_id }}</div>
         </div>
         {% endif %}
       </div>
-      {% else %}
-      <div class="summary-empty">No support card data captured</div>
-      {% endif %}
     </div>
+    {% endif %}
 
-    <!-- Training Partner Distribution -->
+    {# ── Training Partner Distribution ── #}
     {% if summary.training_partner_dist_enriched %}
-    <div class="summary-card partner-dist-card">
-      <h3>Training Partner Distribution</h3>
+    <div class="psection">
+      <div class="psection-title">Training Partners</div>
       <table class="partner-dist-table">
         <thead>
           <tr>
@@ -678,7 +480,7 @@
             <td class="pd-name">
               {% if sc.image %}<img src="{{ sc.image }}" alt="" class="pd-thumb" loading="lazy">{% endif %}
               <span>{{ sc.name }}<span class="support-id">#{{ sc.id }}</span>
-              {% if sc.is_friend %}<span class="friend-badge" style="position:static;">Friend</span>{% endif %}</span>
+              {% if sc.is_friend %}<span class="friend-tag">Friend</span>{% endif %}</span>
             </td>
             {% for stat in ["Speed", "Stamina", "Power", "Guts", "Wiz"] %}
             {% set cnt = sc.breakdown.get(stat, 0) %}
@@ -692,110 +494,93 @@
     </div>
     {% endif %}
 
-    <!-- Race Results -->
-    <div class="summary-card">
-      <h3>Race Results</h3>
-      {% if summary.race_results %}
-      <table class="race-results-table">
-        <thead><tr><th>Race</th><th>Result</th><th>Turn</th></tr></thead>
-        <tbody>
-          {% for rr in summary.race_results %}
-          <tr>
-            <td>
-              {% set race_name_display = rr.race_name or ('Race ' ~ loop.index) %}
-              {% if races and loop.index0 < races|length %}
-                <a href="/session/{{ session.name }}/race/{{ races[loop.index0]._race_index }}" style="color:var(--accent); text-decoration:none;">{{ race_name_display }}</a>
-              {% else %}
-                {{ race_name_display }}
-              {% endif %}
-            </td>
-            <td>
-              {% if rr.result_order == 1 %}<span class="result-1st">1st</span>
-              {% elif rr.result_order == 2 %}<span class="result-2nd">2nd</span>
-              {% elif rr.result_order == 3 %}<span class="result-3rd">3rd</span>
-              {% elif rr.result_order %}{{ rr.result_order }}th
-              {% else %}<span style="color:var(--text-muted)">—</span>{% endif %}
-              {% if rr.entry_count %}<span style="color:var(--text-muted); font-size:0.72rem">/{{ rr.entry_count }}</span>{% endif %}
-            </td>
-            <td class="skill-turn">T{{ rr.turn }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="summary-empty">No race data captured</div>
-      {% endif %}
-    </div>
-
-    <!-- Skills Acquired -->
-    <div class="summary-card">
-      <h3>Skills Acquired ({{ summary.skills_acquired | length }})</h3>
-      {% if summary.skills_acquired %}
-      <ul class="skill-list">
-        {% for sk in summary.skills_acquired %}
-        <li><span>{{ sk.name }}</span><span class="skill-turn">T{{ sk.turn }}</span></li>
+    {# ── Race Results ── #}
+    {% if summary.race_results %}
+    <div class="psection">
+      <div class="psection-title">Races</div>
+      <div class="race-list-compact">
+        {% for rr in summary.race_results %}
+        <div class="race-row">
+          <span class="race-row-name">
+            {% set race_name_display = rr.race_name or ('Race ' ~ loop.index) %}
+            {% if races and loop.index0 < races|length %}
+              <a href="/session/{{ session.name }}/race/{{ races[loop.index0]._race_index }}">{{ race_name_display }}</a>
+            {% else %}
+              {{ race_name_display }}
+            {% endif %}
+          </span>
+          <span class="race-result {% if rr.result_order == 1 %}r1{% elif rr.result_order == 2 %}r2{% elif rr.result_order == 3 %}r3{% endif %}">
+            {% if rr.result_order %}#{{ rr.result_order }}{% else %}—{% endif %}{% if rr.entry_count %}<small style="font-weight:400;color:var(--text-muted)">/{{ rr.entry_count }}</small>{% endif %}
+          </span>
+          <span class="race-turn">T{{ rr.turn }}</span>
+        </div>
         {% endfor %}
-      </ul>
-      {% else %}
-      <div class="summary-empty">No skills captured yet</div>
-      {% endif %}
+      </div>
     </div>
+    {% endif %}
 
-    <!-- Events -->
-    <div class="summary-card">
-      <h3>Event Choices ({{ summary.events_with_choices | length }}){% if summary.events_merged | length != summary.events_with_choices | length %} <small style="color:var(--text-muted); font-weight:normal;">of {{ summary.events_merged | length }} total</small>{% endif %}</h3>
-      {% if summary.events_with_choices %}
-      <div class="event-choices-list">
+    {# ── Skills ── #}
+    {% if summary.skills_acquired %}
+    <div class="psection">
+      <div class="psection-title">Skills ({{ summary.skills_acquired | length }})</div>
+      <div class="skill-pills">
+        {% for sk in summary.skills_acquired %}
+        <span class="skill-pill">{{ sk.name }}<span class="sp-turn">T{{ sk.turn }}</span></span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Events ── #}
+    {% if summary.events_with_choices %}
+    <div class="psection">
+      <div class="psection-title">Events ({{ summary.events_with_choices | length }}){% if summary.events_merged | length != summary.events_with_choices | length %} <span style="text-transform:none; letter-spacing:0; font-weight:400; color:var(--text-muted);">of {{ summary.events_merged | length }} total</span>{% endif %}</div>
+      <div class="event-list">
         {% for ec in summary.events_with_choices %}
-        <div class="event-choice-item">
-          <div class="event-choice-header">
-            <span class="event-choice-name">{{ ec.name or ('story:' ~ ec.story_id) }}</span>
-            <span class="skill-turn">T{{ ec.turn }}</span>
+        <div class="event-item">
+          <div class="event-head">
+            <span class="event-name">{{ ec.name or ('story:' ~ ec.story_id) }}</span>
+            <span class="event-turn">T{{ ec.turn }}</span>
           </div>
-          <div class="event-choice-meta">
+          <div class="event-meta">
             {% if ec.source_type == 'support' and ec.source_name %}
-              <span class="event-source support" title="Support card event">🃏 {{ ec.source_name }}</span>
+              <span class="ev-source support">🃏 {{ ec.source_name }}</span>
             {% elif ec.source_type == 'card' and ec.source_name %}
-              <span class="event-source card" title="Trainee card event">🏇 {{ ec.source_name }}</span>
+              <span class="ev-source card">🏇 {{ ec.source_name }}</span>
             {% elif ec.source_type == 'scenario' %}
-              <span class="event-source scenario">📋 Scenario</span>
+              <span class="ev-source scenario">📋 Scenario</span>
             {% endif %}
             {% if ec.choice_number %}
               {% if ec.choice_texts and ec.choice_number <= ec.choice_texts|length %}
-                <span class="event-choice-badge chosen" title="Chose option {{ ec.choice_number }} of {{ ec.choice_texts|length }}">✓ {{ ec.choice_texts[ec.choice_number - 1] }}</span>
+                <span class="ev-badge chosen" title="Chose option {{ ec.choice_number }}">✓ {{ ec.choice_texts[ec.choice_number - 1] }}</span>
               {% else %}
-                <span class="event-choice-badge">Chose option {{ ec.choice_number }}{% if ec.num_branches and ec.num_branches > 1 and ec.choice_number <= ec.num_branches %} of {{ ec.num_branches }}{% endif %}</span>
+                <span class="ev-badge">Option {{ ec.choice_number }}{% if ec.num_branches and ec.num_branches > 1 %}/{{ ec.num_branches }}{% endif %}</span>
               {% endif %}
             {% endif %}
           </div>
           {% if ec.choice_texts and ec.choice_texts|length > 1 %}
-          <div class="event-choice-options">
+          <div class="choice-pills">
             {% for ct in ec.choice_texts %}
-              <span class="choice-pill {% if ec.choice_number == loop.index %}chosen{% endif %}">{{ loop.index }}. {{ ct }}</span>
+              <span class="cpill {% if ec.choice_number == loop.index %}chosen{% endif %}">{{ loop.index }}. {{ ct }}</span>
             {% endfor %}
           </div>
           {% endif %}
           {% if ec.stat_deltas %}
-          <div class="event-deltas">
+          <div class="delta-row">
             {% for stat, delta in ec.stat_deltas.items() %}
-              <span class="delta-badge {% if delta > 0 %}positive{% else %}negative{% endif %}">
-                {{ stat }}
-                {% if delta > 0 %}+{% endif %}{{ delta }}
-              </span>
+              <span class="delta {% if delta > 0 %}pos{% else %}neg{% endif %}">{{ stat }} {% if delta > 0 %}+{% endif %}{{ delta }}</span>
             {% endfor %}
           </div>
           {% endif %}
         </div>
         {% endfor %}
       </div>
-      {% else %}
-      <div class="summary-empty">No events captured</div>
-      {% endif %}
     </div>
+    {% endif %}
 
-  </div>
+  </div>{# .profile #}
   {% else %}
-  <div class="summary-empty" style="text-align:center; padding:2rem;">
+  <div class="profile-empty" style="text-align:center; padding:2rem;">
     No career/training data found{% if multi %} in this career run{% endif %}.<br>
     {% if not multi %}
     The summary view shows character stats, support cards, races, and skills
@@ -813,15 +598,15 @@
 
   <!-- Detected Races (session-level, outside career loop) -->
   {% if races %}
-  <div class="summary-card" style="margin-top: 1rem;">
-    <h3>Detected Races ({{ races | length }})</h3>
-    <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+  <div class="psection" style="margin-top: 1.5rem;">
+    <div class="psection-title">Detected Races ({{ races | length }})</div>
+    <div class="race-chips">
       {% for race in races %}
-      <a href="/session/{{ session.name }}/race/{{ race._race_index }}" style="text-decoration:none; padding:0.4rem 0.8rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.82rem; color:var(--text); transition:border-color 0.15s, background 0.15s; display:inline-block;">
-        <span style="color:var(--accent); font-weight:600;">{{ race._race_label }}</span>
-        <span style="color:var(--text-muted); font-size:0.72rem; margin-left:0.3rem;">
+      <a href="/session/{{ session.name }}/race/{{ race._race_index }}" class="race-chip">
+        <span class="race-chip-name">{{ race._race_label }}</span>
+        <span class="race-chip-meta">
           {{ race._source }}
-          {% if race.horse_summaries %}· {{ race.horse_summaries | length }} horses{% endif %}
+          {% if race.horse_summaries %}· {{ race.horse_summaries | length }} runners{% endif %}
         </span>
       </a>
       {% endfor %}
@@ -829,14 +614,13 @@
   </div>
   {% endif %}
 
-  <!-- Other Races: CM, PvP, Team Stadium, etc. (session-level) -->
+  <!-- Other Races -->
   {% if other_races is defined and other_races %}
-  <div class="summary-card" style="margin-top: 0.75rem;">
-    <h3>Other Races ({{ other_races | length }})</h3>
-    <p style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 0.5rem;">Non-career races detected during this session (Champions Meeting, Room Match, etc.). See Detected Races for full details.</p>
-    <div style="display:flex; flex-wrap:wrap; gap:0.4rem;">
+  <div class="psection" style="margin-top: 0.75rem;">
+    <div class="psection-title">Other Races ({{ other_races | length }})</div>
+    <div class="race-chips">
       {% for rr in other_races %}
-      <span style="padding:0.3rem 0.6rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.78rem; color:var(--text-muted);">
+      <span class="race-chip" style="cursor:default;">
         {{ rr.api | replace('RaceStart', '') | replace('RaceResult', '') | replace('Start', '') | replace('Result', '') }}
       </span>
       {% endfor %}
