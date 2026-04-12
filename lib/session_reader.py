@@ -1159,11 +1159,21 @@ def _build_summary_from_records(records: list[dict]) -> dict:
                     turn = 0
                     if isinstance(chara, dict):
                         turn = chara.get("turn", 0)
+                    # Extract choice_count and support_card_id from the API
+                    # response — these are the authoritative source for how
+                    # many choices this event actually has and who owns it.
+                    eci = ev.get("event_contents_info") or {}
+                    choice_arr = eci.get("choice_array") or []
+                    choice_count = len(choice_arr) if isinstance(choice_arr, list) else 0
+                    sc_id = eci.get("support_card_id") or 0
                     summary["events_seen"].append(
                         {
                             "story_id": ev["story_id"],
                             "turn": turn,
                             "event_id": ev.get("event_id"),
+                            "choice_count": choice_count,
+                            "support_card_id": sc_id,
+                            "chara_id": ev.get("chara_id") or 0,
                         }
                     )
 

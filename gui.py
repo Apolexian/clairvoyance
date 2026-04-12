@@ -141,10 +141,10 @@ def _scan_uma_images():
     if not uma_dir.is_dir():
         return
     for f in uma_dir.iterdir():
-        if f.suffix != ".webp":
+        if f.suffix not in (".webp", ".png"):
             continue
-        # chr_icon_{charaId}.webp  (from UmamusumeExplorer pattern)
-        m = re.match(r"chr_icon_(\d{4})\.webp$", f.name)
+        # chr_icon_{charaId}.webp or .png  (from UmamusumeExplorer pattern)
+        m = re.match(r"chr_icon_(\d{4})\.(?:webp|png)$", f.name)
         if m:
             _UMA_ICONS[int(m.group(1))] = f.name
             continue
@@ -192,7 +192,7 @@ app.jinja_env.filters["uma_image"] = uma_image_url
 app.jinja_env.globals["uma_image"] = uma_image_url
 
 # ── Support card image lookup ──────────────────────────────────────────
-# Scan static/cards/ for extracted support card webp images
+# Scan static/cards/ for extracted support card images (webp or png)
 _SC_IMAGES: dict[int, str] = {}
 
 
@@ -202,15 +202,18 @@ def _scan_support_card_images():
     if not cards_dir.is_dir():
         return
     for f in cards_dir.iterdir():
-        if f.suffix != ".webp":
+        if f.suffix not in (".webp", ".png"):
             continue
-        # support_thumb_{id}.webp  (UmamusumeExplorer pattern — preferred)
-        m = re.match(r"support_thumb_(\d+)\.webp$", f.name)
+        # support_thumb_{id}.webp/png  (UmamusumeExplorer pattern — preferred)
+        m = re.match(r"support_thumb_(\d+)\.(webp|png)$", f.name)
         if m:
-            _SC_IMAGES[int(m.group(1))] = f.name
+            sid = int(m.group(1))
+            # Prefer webp over png if both exist
+            if sid not in _SC_IMAGES or f.suffix == ".webp":
+                _SC_IMAGES[sid] = f.name
             continue
-        # support_card_{id}.webp  (legacy)
-        m = re.match(r"support_card_(\d+)\.webp$", f.name)
+        # support_card_{id}.webp/png  (legacy)
+        m = re.match(r"support_card_(\d+)\.(webp|png)$", f.name)
         if m:
             sid = int(m.group(1))
             if sid not in _SC_IMAGES:  # don't overwrite thumb with legacy
@@ -409,7 +412,13 @@ def _enrich_career_summary(summary: dict) -> None:
                 ev["source_chara"] = ei["source_chara"]
                 ev["has_choice"] = ei["has_choice"]
                 ev["num_branches"] = ei["num_branches"]
-                ev["choice_texts"] = ei.get("choice_texts")
+                # Only populate choice_texts if the API says this event
+                # actually has multiple choices.  The API's choice_count
+                # is authoritative; story_choices.json can contain choices
+                # from unrelated events that share the same story_id.
+                api_cc = ev.get("choice_count", -1)
+                if api_cc < 0 or api_cc > 1:
+                    ev["choice_texts"] = ei.get("choice_texts")
             else:
                 ev["name"] = story_name(sid)
 
@@ -435,30 +444,65 @@ def _enrich_career_summary(summary: dict) -> None:
             ec["name"] = event_name_by_event_id(eid)
 
     # ── Merge events_seen + event_choices ──
+    # Use event_id as primary key for matching (story_id is NOT unique —
+    # the same story_id can appear for different event instances).
+    _choices_by_eid: dict[int, dict] = {}
     _choices_by_sid: dict[int, dict] = {}
     for ec in summary.get("event_choices", []):
+        eid = ec.get("event_id")
         sid = ec.get("story_id")
+        if eid:
+            _choices_by_eid[eid] = ec
         if sid:
             _choices_by_sid[sid] = ec
 
     merged: list[dict] = []
     _seen_sids: set[int] = set()
+    _seen_eids: set[int] = set()
     for ev in summary.get("events_seen", []):
         sid = ev.get("story_id")
+        eid = ev.get("event_id")
         entry = dict(ev)
-        if sid and sid in _choices_by_sid:
+
+        # The API's choice_count is authoritative: it tells us how many
+        # choices this specific event instance actually has.
+        api_choice_count = entry.get("choice_count", -1)
+
+        # Only attach choice_texts if the API says this event actually
+        # has multiple choices (choice_count > 1).  Events with 0 or 1
+        # options in choice_array are auto-advance and should not show
+        # choices from story_choices.json.
+        if api_choice_count >= 0 and api_choice_count <= 1:
+            entry.pop("choice_texts", None)
+
+        # Match by event_id first (unique), fallback to story_id
+        ch = None
+        if eid and eid in _choices_by_eid:
+            ch = _choices_by_eid[eid]
+        elif sid and sid in _choices_by_sid:
             ch = _choices_by_sid[sid]
+
+        if ch is not None:
             entry["choice_number"] = ch.get("choice_number")
             entry["stat_deltas"] = ch.get("stat_deltas")
-            if ch.get("choice_texts"):
+            if ch.get("choice_texts") and api_choice_count != 0 and api_choice_count != 1:
                 entry["choice_texts"] = ch["choice_texts"]
+
         if sid:
             _seen_sids.add(sid)
+        if eid:
+            _seen_eids.add(eid)
         merged.append(entry)
 
     for ec in summary.get("event_choices", []):
         sid = ec.get("story_id")
-        if sid and sid not in _seen_sids:
+        eid = ec.get("event_id")
+        if eid and eid not in _seen_eids:
+            merged.append(ec)
+            if sid:
+                _seen_sids.add(sid)
+            _seen_eids.add(eid)
+        elif sid and sid not in _seen_sids and (not eid or eid not in _seen_eids):
             merged.append(ec)
             _seen_sids.add(sid)
 

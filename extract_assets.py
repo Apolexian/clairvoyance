@@ -47,6 +47,34 @@ except ImportError:
 
 log = logging.getLogger("extract_assets")
 
+# ── Detect image format support once at import time ────────────────────
+
+
+def _check_webp_support() -> bool:
+    """Return True if Pillow can actually encode WEBP."""
+    if Image is None:
+        return False
+    try:
+        import io
+
+        img = Image.new("RGBA", (1, 1))
+        buf = io.BytesIO()
+        img.save(buf, "WEBP")
+        return True
+    except Exception:
+        return False
+
+
+_WEBP_OK: bool = _check_webp_support()
+if not _WEBP_OK and Image is not None:
+    log.info("WEBP encoder not available (missing dynlib); will save images as PNG")
+
+
+def _img_ext() -> str:
+    """Preferred image file extension based on runtime capabilities."""
+    return ".webp" if _WEBP_OK else ".png"
+
+
 # ── Constants (same as extract_story_text.py / UmaViewer Config.cs) ────
 
 AB_KEY = bytes([0x53, 0x2B, 0x46, 0x31, 0xE4, 0xA7, 0xB9, 0x47, 0x3E, 0x7C, 0xFB])
@@ -89,7 +117,8 @@ def _try_open_encrypted_meta(meta_path: Path):
         from extract_story_text import _try_open_encrypted_meta as _open
 
         return _open(meta_path)
-    except ImportError:
+    except Exception:
+        # ImportError, SystemExit (from sys.exit in extract_story_text), etc.
         pass
     return None
 
@@ -158,20 +187,27 @@ def read_meta_entries_for_pattern(game_dir: Path, name_pattern: str) -> list[dic
 # ── Image extraction from bundles ──────────────────────────────────────
 
 
-def _save_image(image_data, output_path: Path) -> bool:
-    """Save a UnityPy image object to a .webp file."""
+def _save_image(image_data, output_path: Path) -> Path | None:
+    """Save a UnityPy image object.  Returns the actual file path on success, None on failure.
+
+    Uses WEBP if available, otherwise PNG.  The returned path may differ from
+    *output_path* when the extension changes due to format fallback.
+    """
     try:
         img = image_data.image  # PIL Image from UnityPy
-        if img.mode == "RGBA":
-            # Keep transparency
-            pass
-        elif img.mode != "RGB":
+        if img.mode not in ("RGBA", "RGB"):
             img = img.convert("RGBA")
-        img.save(str(output_path), "WEBP", quality=85)
-        return True
+
+        if _WEBP_OK:
+            img.save(str(output_path), "WEBP", quality=85)
+            return output_path
+        else:
+            png_path = output_path.with_suffix(".png")
+            img.save(str(png_path), "PNG")
+            return png_path
     except Exception as e:
-        log.debug("Failed to save image to %s: %s", output_path, e)
-        return False
+        log.warning("Failed to save image to %s: %s", output_path, e)
+        return None
 
 
 def extract_texture_from_bundle(
@@ -179,43 +215,60 @@ def extract_texture_from_bundle(
     entry_key: int,
     output_path: Path,
     target_name: str | None = None,
-) -> bool:
+) -> Path | None:
     """
-    Extract a Texture2D/Sprite from an asset bundle and save as .webp.
+    Extract a Texture2D/Sprite from an asset bundle and save as an image.
+
+    The image format is chosen automatically (WEBP if available, else PNG).
+    The returned ``Path`` reflects the actual file written, which may have a
+    different extension than *output_path* when WEBP is not available.
 
     Args:
         file_path:   Path to the encrypted bundle on disk.
         entry_key:   Decryption key from meta DB.
-        output_path: Where to write the .webp image.
+        output_path: Where to write the image (extension may be adjusted).
         target_name: If set, only extract textures whose name contains this.
 
-    Returns True if an image was successfully saved.
+    Returns the Path of the saved file, or None on failure.
     """
     if UnityPy is None:
-        return False
+        return None
 
+    import io
+
+    env = None
     try:
         if entry_key != 0:
             data = decrypt_bundle(file_path, entry_key)
-            env = UnityPy.load(data)
+            # Some UnityPy versions need io.BytesIO for in-memory data
+            try:
+                env = UnityPy.load(data)
+            except Exception:
+                env = UnityPy.load(io.BytesIO(data))
         else:
             env = UnityPy.load(str(file_path))
     except Exception as e:
-        log.debug("Failed to load bundle %s: %s", file_path.name, e)
-        return False
+        log.warning("Failed to load bundle %s (key=%d): %s", file_path.name, entry_key, e)
+        return None
 
+    tex_count = 0
     for obj in env.objects:
         try:
             if obj.type.name in ("Texture2D", "Sprite"):
+                tex_count += 1
                 tex = obj.read()
                 name = getattr(tex, "m_Name", "") or ""
                 if target_name and target_name not in name:
                     continue
                 return _save_image(tex, output_path)
-        except Exception:
+        except Exception as e:
+            log.debug("Failed reading object in %s: %s", file_path.name, e)
             continue
 
-    return False
+    if tex_count == 0:
+        log.debug("No Texture2D/Sprite objects in bundle %s", file_path.name)
+
+    return None
 
 
 # ── Public API: Extract support card images ────────────────────────────
@@ -283,23 +336,34 @@ def extract_support_card_images(
     results: dict[int, str] = {}
     total = len(entry_map)
     processed = 0
+    skipped_missing = 0
 
     for sc_id, entry in entry_map.items():
         h = entry["hash"]
         file_path = dat_dir / h[:2] / h
-        out_name = f"support_thumb_{sc_id}.webp"
-        out_file = output_dir / out_name
+        ext = _img_ext()
+        out_file = output_dir / f"support_thumb_{sc_id}{ext}"
 
-        # Also accept the old naming convention
-        old_file = output_dir / f"support_card_{sc_id}.webp"
-        if out_file.exists() or old_file.exists():
-            results[sc_id] = out_file.name if out_file.exists() else old_file.name
+        # Check for already-extracted files (webp, png, and old naming convention)
+        existing = None
+        for candidate in (
+            output_dir / f"support_thumb_{sc_id}.webp",
+            output_dir / f"support_thumb_{sc_id}.png",
+            output_dir / f"support_card_{sc_id}.webp",
+            output_dir / f"support_card_{sc_id}.png",
+        ):
+            if candidate.exists():
+                existing = candidate
+                break
+        if existing:
+            results[sc_id] = existing.name
             processed += 1
             if progress_callback:
                 progress_callback(processed, total, len(results))
             continue
 
         if not file_path.is_file():
+            skipped_missing += 1
             processed += 1
             if progress_callback:
                 progress_callback(processed, total, len(results))
@@ -307,12 +371,14 @@ def extract_support_card_images(
 
         # target_name: match the texture's m_Name inside the bundle
         tex_target = f"support_thumb_{sc_id:05d}" if thumb_mode else f"tex_support_card_{sc_id}"
-        ok = extract_texture_from_bundle(file_path, entry["key"], out_file, target_name=tex_target)
-        if not ok:
+        saved = extract_texture_from_bundle(
+            file_path, entry["key"], out_file, target_name=tex_target
+        )
+        if not saved:
             # Try without target_name filter (grab first texture)
-            ok = extract_texture_from_bundle(file_path, entry["key"], out_file)
-        if ok:
-            results[sc_id] = out_file.name
+            saved = extract_texture_from_bundle(file_path, entry["key"], out_file)
+        if saved:
+            results[sc_id] = saved.name
 
         processed += 1
         if progress_callback and processed % 10 == 0:
@@ -321,7 +387,12 @@ def extract_support_card_images(
     if progress_callback:
         progress_callback(total, total, len(results))
 
-    log.info("Extracted %d / %d support card images", len(results), total)
+    log.info(
+        "Extracted %d / %d support card images (%d dat files missing)",
+        len(results),
+        total,
+        skipped_missing,
+    )
     return results
 
 
@@ -387,10 +458,19 @@ def extract_chara_icons(
     for cid, entry in entry_map.items():
         h = entry["hash"]
         file_path = dat_dir / h[:2] / h
-        out_file = output_dir / f"chr_icon_{cid:04d}.webp"
+        out_file = output_dir / f"chr_icon_{cid:04d}{_img_ext()}"
 
-        if out_file.exists():
-            results[cid] = out_file.name
+        # Check for already-extracted files in either format
+        existing = None
+        for candidate in (
+            output_dir / f"chr_icon_{cid:04d}.webp",
+            output_dir / f"chr_icon_{cid:04d}.png",
+        ):
+            if candidate.exists():
+                existing = candidate
+                break
+        if existing:
+            results[cid] = existing.name
             processed += 1
             if progress_callback:
                 progress_callback(processed, total, len(results))
@@ -402,14 +482,14 @@ def extract_chara_icons(
                 progress_callback(processed, total, len(results))
             continue
 
-        ok = extract_texture_from_bundle(
+        saved = extract_texture_from_bundle(
             file_path, entry["key"], out_file, target_name=f"chr_icon_{cid:04d}"
         )
-        if not ok:
+        if not saved:
             # Try without target filter (grab first texture in bundle)
-            ok = extract_texture_from_bundle(file_path, entry["key"], out_file)
-        if ok:
-            results[cid] = out_file.name
+            saved = extract_texture_from_bundle(file_path, entry["key"], out_file)
+        if saved:
+            results[cid] = saved.name
 
         processed += 1
         if progress_callback and processed % 20 == 0:
@@ -453,9 +533,19 @@ def extract_chara_portraits(
             continue
 
         stem = m.group(1)
-        out_file = output_dir / f"{stem}.webp"
-        if out_file.exists():
-            results[stem] = out_file.name
+        out_file = output_dir / f"{stem}{_img_ext()}"
+
+        # Check for already-extracted files in either format
+        existing = None
+        for candidate in (
+            output_dir / f"{stem}.webp",
+            output_dir / f"{stem}.png",
+        ):
+            if candidate.exists():
+                existing = candidate
+                break
+        if existing:
+            results[stem] = existing.name
             processed += 1
             continue
 
@@ -465,9 +555,9 @@ def extract_chara_portraits(
             processed += 1
             continue
 
-        ok = extract_texture_from_bundle(file_path, entry["key"], out_file, target_name=stem)
-        if ok:
-            results[stem] = out_file.name
+        saved = extract_texture_from_bundle(file_path, entry["key"], out_file, target_name=stem)
+        if saved:
+            results[stem] = saved.name
 
         processed += 1
         if progress_callback and processed % 20 == 0:
