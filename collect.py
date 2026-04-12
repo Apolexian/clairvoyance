@@ -214,6 +214,10 @@ _dump_frame_records: list[dict] = []
 _race_lifecycle_records: list[dict] = []
 _race_skill_records: list[dict] = []
 
+# Extracted crypto material from the game (auto-detected)
+_crypto_salt: str | None = None
+_crypto_udid: str | None = None
+
 # ── MsgPack decode helpers ─────────────────────────────────────────────
 
 
@@ -296,7 +300,7 @@ def _try_msgpack_decode(raw: bytes) -> dict | list | None:
 
 
 def on_message(message, data):
-    global is_ready, has_error
+    global is_ready, has_error, _crypto_salt, _crypto_udid
 
     msg_type = message.get("type")
 
@@ -348,12 +352,27 @@ def on_message(message, data):
                     record["raw_bytes_len"] = len(raw)
                     record["raw_b64"] = base64.b64encode(raw).decode("ascii")
 
+            # ── Crypto material tracking ──────────────────────────────
+            # Store extracted salt and UDID for the session manifest.
+            event_name = record.get("event", "")
+            if event_name == "crypto_salt_found":
+                _crypto_salt = record.get("salt")
+                log.info(
+                    "  [crypto] Salt extracted: %s (source: %s)",
+                    _crypto_salt,
+                    record.get("source", "?"),
+                )
+            elif event_name == "libnative_encrypt":
+                crypto = record.get("crypto")
+                if crypto and crypto.get("udid"):
+                    _crypto_udid = crypto["udid"]
+                    log.info("  [crypto] UDID extracted: %s", _crypto_udid)
+
             # ── Race data extraction ──────────────────────────────────
             # When we see decoded MsgPack data (from API hooks or libnative
             # decryption), try to extract race simulation data.
-            event_name = record.get("event", "")
             is_api_event = event_name in ("api_response", "api_send")
-            is_decrypt_event = event_name in ("libnative_decrypt",)
+            is_decrypt_event = event_name in ("libnative_decrypt", "libnative_encrypt")
 
             if domain == "network" and (is_api_event or is_decrypt_event):
                 api = record.get("api", "") if is_api_event else ""
@@ -513,9 +532,16 @@ def main():
             log.warning("  [race-dump] Failed to process dump frames: %s", e)
 
     # Save manifest and close
+    crypto_info = {}
+    if _crypto_salt:
+        crypto_info["salt"] = _crypto_salt
+    if _crypto_udid:
+        crypto_info["udid"] = _crypto_udid
+
     session_data.write_manifest(
         modules=args.modules,
         hookStatuses=hook_statuses,
+        **({"crypto": crypto_info} if crypto_info else {}),
     )
     session_data.close()
 

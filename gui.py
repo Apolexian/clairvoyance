@@ -304,11 +304,14 @@ def session_detail(name: str):
             else:
                 ec["name"] = story_name(sid)
 
+    net = get_network_events(name)
+
     return render_template(
         "session.html",
         session=session,
         races=get_races(name),
-        network=get_network_events(name),
+        network=net["events"],
+        network_stats=net["stats"],
         summary=summary,
     )
 

@@ -410,18 +410,59 @@ def _strip_pii(obj: object) -> object:
     return obj
 
 
-def get_network_events(session_name: str) -> list[dict]:
-    """Get network events with summary info."""
+def get_network_events(session_name: str) -> dict:
+    """
+    Get all network events with rich summary info and aggregate stats.
+
+    Returns ``{"events": [...], "stats": {...}}`` where each event has:
+      _idx, event, direction, api, task, formatter, httpUrl, httpMethod,
+      bytes, has_decoded, raw_bytes_len, _reqId, _pair_idx, _ts, chara_stats
+    """
     records = read_domain(session_name, "network")
-    events = []
-    for rec in records:
-        summary = {
-            "event": rec.get("event", ""),
-            "api": rec.get("api", ""),
+    events: list[dict] = []
+
+    # ── Pass 1: build summary for every record ────────────────────
+    total_bytes = 0
+    decoded_count = 0
+    type_counts: dict[str, int] = {}
+    api_set: set[str] = set()
+
+    for idx, rec in enumerate(records):
+        event_type = rec.get("event", "")
+        type_counts[event_type] = type_counts.get(event_type, 0) + 1
+
+        raw_bytes = rec.get("bytes") or rec.get("raw_bytes_len") or 0
+        total_bytes += raw_bytes
+
+        has_decoded = "msgpack_decoded" in rec
+        if has_decoded:
+            decoded_count += 1
+
+        api = rec.get("api", "")
+        if api:
+            api_set.add(api)
+
+        summary: dict = {
+            "_idx": idx,
+            "event": event_type,
+            "direction": rec.get("direction", ""),
+            "api": api,
             "task": rec.get("task", ""),
+            "formatter": rec.get("formatter", ""),
+            "httpUrl": rec.get("httpUrl", ""),
+            "httpMethod": rec.get("httpMethod", ""),
+            "bytes": raw_bytes,
+            "captured": rec.get("captured", 0),
+            "truncated": rec.get("truncated", False),
+            "has_decoded": has_decoded,
+            "raw_bytes_len": rec.get("raw_bytes_len", 0),
+            "_reqId": rec.get("_reqId"),
+            "_seq": rec.get("_seq"),
+            "_pair_idx": None,
             "_ts": rec.get("_ts", ""),
         }
-        # Extract key game state if present
+
+        # Extract key game state if present (for chara_stats inline display)
         decoded = rec.get("msgpack_decoded", {})
         if isinstance(decoded, dict):
             data = decoded.get("data", {})
@@ -439,8 +480,66 @@ def get_network_events(session_name: str) -> list[dict]:
                         "fans": chara.get("fans"),
                         "motivation": chara.get("motivation"),
                     }
+
+        # For formatter events, derive a short "API-like" label
+        if not api and summary["formatter"]:
+            # Gallop_SingleModeFreeChoiceRewardRequest → SingleModeFreeChoiceReward
+            short = summary["formatter"].replace("Gallop_", "").replace("Gallop.", "")
+            for suffix in ("Request", "Response"):
+                if short.endswith(suffix):
+                    short = short[: -len(suffix)]
+                    break
+            summary["_label"] = short
+
         events.append(summary)
-    return events
+
+    # ── Pass 2: pair api_send ↔ api_response ──────────────────────
+    # Strategy: use _reqId when available (new sessions), fall back to
+    # matching api name (legacy sessions).
+    pending_by_reqid: dict[int, int] = {}  # reqId → event idx
+    pending_by_api: dict[str, int] = {}  # apiName → event idx (fallback)
+
+    for ev in events:
+        event_type = ev["event"]
+        req_id = ev.get("_reqId")
+        api = ev["api"]
+
+        if event_type == "api_send":
+            if req_id is not None:
+                pending_by_reqid[req_id] = ev["_idx"]
+            if api:
+                pending_by_api[api] = ev["_idx"]
+
+        elif event_type in ("api_response", "api_error"):
+            paired_idx = None
+            # Try reqId match first
+            if req_id is not None and req_id in pending_by_reqid:
+                paired_idx = pending_by_reqid.pop(req_id)
+            # Fallback: match by api name
+            elif api and api in pending_by_api:
+                paired_idx = pending_by_api.pop(api)
+
+            if paired_idx is not None:
+                ev["_pair_idx"] = paired_idx
+                events[paired_idx]["_pair_idx"] = ev["_idx"]
+
+    # ── Build aggregate stats ─────────────────────────────────────
+    total = len(events)
+    stats = {
+        "total": total,
+        "type_counts": type_counts,
+        "total_bytes": total_bytes,
+        "decoded_count": decoded_count,
+        "decode_rate": round(decoded_count / total * 100, 1) if total else 0,
+        "distinct_apis": len(api_set),
+        "direction_counts": {
+            "in": sum(1 for e in events if e["direction"] == "in"),
+            "out": sum(1 for e in events if e["direction"] == "out"),
+            "unknown": sum(1 for e in events if not e["direction"]),
+        },
+    }
+
+    return {"events": events, "stats": stats}
 
 
 def get_network_event_detail(session_name: str, idx: int) -> dict | None:

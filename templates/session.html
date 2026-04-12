@@ -175,6 +175,164 @@
   .delta-badge.positive { background: rgba(63,185,80,0.15); color: #3fb950; }
   .delta-badge.negative { background: rgba(248,81,73,0.15); color: #f85149; }
   .event-source-tag { font-size: 0.7rem; margin-left: 0.2rem; }
+
+  /* ── Network Stats Bar ── */
+  .net-stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.78rem;
+    align-items: center;
+  }
+  .net-stats-bar .ns-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .net-stats-bar .ns-val {
+    color: var(--text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .net-stats-bar .ns-divider {
+    width: 1px;
+    height: 1.2em;
+    background: var(--border);
+    margin: 0 0.15rem;
+  }
+
+  /* ── Network Filter Row ── */
+  .net-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+    align-items: center;
+  }
+  .net-filter-row .input-sm {
+    min-width: 180px;
+    flex: 1;
+    max-width: 320px;
+  }
+  .net-filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .net-type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .net-type-pill:hover { border-color: var(--text-muted); }
+  .net-type-pill.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .net-type-pill .pill-count {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 0.68rem;
+    opacity: 0.7;
+  }
+  .net-dir-btn {
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .net-dir-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
+
+  /* ── Network Timeline: enhanced event rows ── */
+  .timeline-event { position: relative; }
+  .timeline-event[data-pair-idx] { border-left: 2px solid transparent; }
+  .timeline-event.pair-highlight { border-left-color: var(--accent-dim); background: var(--bg-hover); }
+
+  .net-ev-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .net-ev-meta .ne-bytes {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+  .net-ev-meta .ne-decode-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .ne-decode-dot.decoded { background: var(--green); }
+  .ne-decode-dot.raw { background: var(--orange); }
+  .ne-decode-dot.none { background: var(--border); }
+
+  .net-ev-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-left: 0.25rem;
+  }
+  .net-ev-url {
+    font-size: 0.72rem;
+    color: var(--purple);
+    font-family: monospace;
+    margin-left: 0.25rem;
+  }
+
+  .pair-link-btn {
+    font-size: 0.68rem;
+    color: var(--accent);
+    background: none;
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    padding: 0.05rem 0.3rem;
+    cursor: pointer;
+    margin-left: 0.3rem;
+    transition: background 0.15s;
+  }
+  .pair-link-btn:hover { background: var(--accent-dim); }
+
+  /* Direction badges */
+  .timeline-badge.dir-out { color: #58a6ff; }
+  .timeline-badge.dir-in { color: #3fb950; }
+
+  /* Event type colors */
+  .timeline-badge.ssl_read { background: rgba(63,185,80,0.12); color: #3fb950; }
+  .timeline-badge.ssl_write { background: rgba(88,166,255,0.12); color: #58a6ff; }
+  .timeline-badge.schannel_decrypt { background: rgba(63,185,80,0.12); color: #3fb950; }
+  .timeline-badge.schannel_encrypt { background: rgba(88,166,255,0.12); color: #58a6ff; }
+  .timeline-badge.libnative_decrypt { background: rgba(188,140,255,0.12); color: #bc8cff; }
+  .timeline-badge.libnative_encrypt { background: rgba(88,166,255,0.12); color: #58a6ff; }
+  .timeline-badge.crypto_salt_found { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .timeline-badge.msgpack_serialize { background: rgba(210,153,34,0.12); color: #d29922; }
+  .timeline-badge.msgpack_deserialize { background: rgba(210,153,34,0.12); color: #d29922; }
+  .timeline-badge.api_error { background: rgba(248,81,73,0.15); color: #f85149; }
 </style>
 {% endblock %}
 
@@ -461,19 +619,130 @@
 
   {% if network %}
   <section class="section">
-    <h2>Network Events</h2>
-    <div class="timeline-filter">
-      <input type="text" id="filter-api" placeholder="Filter by API name..." oninput="filterTimeline()" class="input-sm">
+    <h2>Network Traffic ({{ network | length }})</h2>
+
+    {% if network_stats %}
+    <!-- ── Stats Bar ── -->
+    <div class="net-stats-bar">
+      <div class="ns-item"><span class="ns-val">{{ network_stats.total }}</span> events</div>
+      <div class="ns-divider"></div>
+      <div class="ns-item">↑ <span class="ns-val">{{ network_stats.direction_counts.out }}</span></div>
+      <div class="ns-item">↓ <span class="ns-val">{{ network_stats.direction_counts['in'] }}</span></div>
+      <div class="ns-divider"></div>
+      <div class="ns-item"><span class="ns-val">{{ network_stats.distinct_apis }}</span> APIs</div>
+      <div class="ns-divider"></div>
+      <div class="ns-item">
+        Decoded: <span class="ns-val">{{ network_stats.decoded_count }}</span>
+        <span>({{ network_stats.decode_rate }}%)</span>
+      </div>
+      <div class="ns-divider"></div>
+      <div class="ns-item">
+        {% set kb = (network_stats.total_bytes / 1024) | round(1) %}
+        {% set mb = (network_stats.total_bytes / 1048576) | round(2) %}
+        <span class="ns-val">{% if mb >= 1 %}{{ mb }} MB{% else %}{{ kb }} KB{% endif %}</span> captured
+      </div>
     </div>
+    {% endif %}
+
+    <!-- ── Filter Row ── -->
+    <div class="net-filter-row">
+      <input type="text" id="filter-api" placeholder="Filter by API / formatter / URL…" oninput="filterNetwork()" class="input-sm">
+      <div class="net-filter-pills" id="net-type-pills">
+        {% if network_stats and network_stats.type_counts %}
+        {% for etype, cnt in network_stats.type_counts.items() %}
+        <button class="net-type-pill active" data-type="{{ etype }}" onclick="toggleTypePill(this)">
+          {{ etype | replace('_', ' ') }}
+          <span class="pill-count">{{ cnt }}</span>
+        </button>
+        {% endfor %}
+        {% endif %}
+      </div>
+      <div style="display:flex; gap:0.2rem; margin-left:auto;">
+        <button class="net-dir-btn active" data-dir="all" onclick="setDirFilter(this, 'all')">All</button>
+        <button class="net-dir-btn" data-dir="out" onclick="setDirFilter(this, 'out')">→ Out</button>
+        <button class="net-dir-btn" data-dir="in" onclick="setDirFilter(this, 'in')">← In</button>
+      </div>
+    </div>
+
+    <!-- ── Timeline ── -->
     <div class="timeline" id="network-timeline">
       {% for ev in network %}
-      <div class="timeline-event {% if 'Race' in ev.api %}race-highlight{% endif %}" data-api="{{ ev.api }}" data-idx="{{ loop.index0 }}">
+      <div class="timeline-event {% if 'Race' in ev.api %}race-highlight{% endif %}"
+           data-api="{{ ev.api or ev._label or ev.formatter or ev.httpUrl or '' }}"
+           data-type="{{ ev.event }}"
+           data-dir="{{ ev.direction }}"
+           data-idx="{{ ev._idx }}"
+           {% if ev._pair_idx is not none %}data-pair-idx="{{ ev._pair_idx }}"{% endif %}
+           id="net-ev-{{ ev._idx }}">
         <div class="timeline-time">{{ ev._ts[11:19] if ev._ts else '' }}</div>
         <div class="timeline-content">
-          <div class="timeline-summary" onclick="toggleDetail(this, '{{ session.name }}', {{ loop.index0 }})">
-            <span class="timeline-badge {{ ev.event }}">{% if ev.event == 'api_send' %}→ Sent{% elif ev.event == 'api_response' %}← Response{% else %}{{ ev.event }}{% endif %}</span>
-            <strong>{{ ev.api }}</strong>
+          <div class="timeline-summary" onclick="toggleDetail(this, '{{ session.name }}', {{ ev._idx }})">
+            {# ── Direction + Event Type Badge ── #}
+            {% if ev.event == 'api_send' %}
+              <span class="timeline-badge api_send dir-out">→ Request</span>
+            {% elif ev.event == 'api_response' %}
+              <span class="timeline-badge api_response dir-in">← Response</span>
+            {% elif ev.event == 'api_error' %}
+              <span class="timeline-badge api_error">✕ Error</span>
+            {% elif ev.event == 'ssl_read' %}
+              <span class="timeline-badge ssl_read">↓ SSL Read</span>
+            {% elif ev.event == 'ssl_write' %}
+              <span class="timeline-badge ssl_write">↑ SSL Write</span>
+            {% elif ev.event == 'schannel_decrypt' %}
+              <span class="timeline-badge schannel_decrypt">↓ SChannel</span>
+            {% elif ev.event == 'schannel_encrypt' %}
+              <span class="timeline-badge schannel_encrypt">↑ SChannel</span>
+            {% elif ev.event == 'libnative_decrypt' %}
+              <span class="timeline-badge libnative_decrypt">🔓 Decrypt</span>
+            {% elif ev.event == 'libnative_encrypt' %}
+              <span class="timeline-badge libnative_encrypt">🔒 Encrypt</span>
+            {% elif ev.event == 'crypto_salt_found' %}
+              <span class="timeline-badge crypto_salt_found">🔑 Salt</span>
+            {% elif ev.event == 'msgpack_serialize' %}
+              <span class="timeline-badge msgpack_serialize">⊞ Serialize</span>
+            {% elif ev.event == 'msgpack_deserialize' %}
+              <span class="timeline-badge msgpack_deserialize">⊟ Deserialize</span>
+            {% else %}
+              <span class="timeline-badge">{{ ev.event }}</span>
+            {% endif %}
+
+            {# ── Main label: API name, formatter, or URL ── #}
+            {% if ev.api %}
+              <strong>{{ ev.api }}</strong>
+            {% elif ev._label %}
+              <span class="net-ev-label">{{ ev._label }}</span>
+            {% elif ev.formatter %}
+              <span class="net-ev-label">{{ ev.formatter }}</span>
+            {% elif ev.httpUrl %}
+              <span class="net-ev-url">{{ ev.httpMethod or '' }} {{ ev.httpUrl }}</span>
+            {% endif %}
+
+            {# ── Metadata: bytes, decode status, pair link ── #}
+            <span class="net-ev-meta">
+              {% if ev.bytes %}
+                <span class="ne-bytes" title="{{ ev.bytes }} bytes{% if ev.truncated %} (truncated){% endif %}">
+                  {% if ev.bytes >= 1048576 %}{{ (ev.bytes / 1048576) | round(1) }}MB
+                  {% elif ev.bytes >= 1024 %}{{ (ev.bytes / 1024) | round(1) }}KB
+                  {% else %}{{ ev.bytes }}B{% endif %}
+                  {% if ev.truncated %}✂{% endif %}
+                </span>
+              {% endif %}
+              {% if ev.has_decoded %}
+                <span class="ne-decode-dot decoded" title="MsgPack decoded"></span>
+              {% elif ev.bytes and ev.bytes > 0 %}
+                <span class="ne-decode-dot raw" title="Raw bytes (not decoded)"></span>
+              {% else %}
+                <span class="ne-decode-dot none" title="No payload"></span>
+              {% endif %}
+              {% if ev._pair_idx is not none %}
+                <button class="pair-link-btn" onclick="event.stopPropagation(); jumpToPair({{ ev._pair_idx }})" title="Jump to paired {% if ev.event == 'api_send' %}response{% else %}request{% endif %}">
+                  {% if ev.event == 'api_send' %}⇣ resp{% else %}⇡ req{% endif %}
+                </button>
+              {% endif %}
+            </span>
+
             <span class="timeline-expand-icon">▶</span>
+
             {% if ev.chara_stats %}
             <div class="chara-stats-inline">
               SPD:{{ ev.chara_stats.speed }}
@@ -508,13 +777,64 @@ function switchView(view, btn) {
   btn.classList.add('active');
 }
 
-/* ── Network Timeline ────────────────────────────────── */
-function filterTimeline() {
-  const q = document.getElementById('filter-api').value.toLowerCase();
+/* ── Network Timeline Filtering ───────────────────────── */
+let _activeTypes = new Set();
+let _activeDir = 'all';
+
+// Initialise: all type pills start active
+document.querySelectorAll('.net-type-pill.active').forEach(p => _activeTypes.add(p.dataset.type));
+
+function filterNetwork() {
+  const q = (document.getElementById('filter-api')?.value || '').toLowerCase();
   document.querySelectorAll('#network-timeline .timeline-event').forEach(el => {
-    const api = el.dataset.api.toLowerCase();
-    el.style.display = api.includes(q) ? '' : 'none';
+    const api = (el.dataset.api || '').toLowerCase();
+    const type = el.dataset.type || '';
+    const dir = el.dataset.dir || '';
+
+    const matchText = !q || api.includes(q);
+    const matchType = _activeTypes.size === 0 || _activeTypes.has(type);
+    const matchDir = _activeDir === 'all' || dir === _activeDir;
+
+    el.style.display = (matchText && matchType && matchDir) ? '' : 'none';
   });
+}
+
+function toggleTypePill(btn) {
+  const type = btn.dataset.type;
+  if (btn.classList.contains('active')) {
+    btn.classList.remove('active');
+    _activeTypes.delete(type);
+  } else {
+    btn.classList.add('active');
+    _activeTypes.add(type);
+  }
+  filterNetwork();
+}
+
+function setDirFilter(btn, dir) {
+  _activeDir = dir;
+  document.querySelectorAll('.net-dir-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterNetwork();
+}
+
+function jumpToPair(pairIdx) {
+  const target = document.getElementById('net-ev-' + pairIdx);
+  if (!target) return;
+  // Make sure it's visible (reset filters if hidden)
+  if (target.style.display === 'none') {
+    // Reset all filters to show it
+    document.querySelectorAll('.net-type-pill').forEach(p => { p.classList.add('active'); _activeTypes.add(p.dataset.type); });
+    _activeDir = 'all';
+    document.querySelectorAll('.net-dir-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.net-dir-btn[data-dir="all"]')?.classList.add('active');
+    const input = document.getElementById('filter-api');
+    if (input) input.value = '';
+    filterNetwork();
+  }
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  target.classList.add('pair-highlight');
+  setTimeout(() => target.classList.remove('pair-highlight'), 2000);
 }
 
 async function toggleDetail(summaryEl, sessionName, idx) {

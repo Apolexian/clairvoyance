@@ -26,25 +26,49 @@
 
     let hookCount = 0;
 
+    // ── Global sequence counter & request ID pairing ──────────────────
+    // Every event gets a monotonic _seq so the Python side can order them
+    // and pair request→response even across interleaved hooks.
+    var _seq = 0;
+    var _nextReqId = 0;
+    // apiName → reqId (most recent Send for that API)
+    var _pendingReqIds = Object.create(null);
+
     // ══════════════════════════════════════════════════════════════════
-    // LAYER 0: libnative.dll decryption hook
+    // LAYER 0: libnative.dll LZ4 hooks (request + response)
     // ══════════════════════════════════════════════════════════════════
     //
     // The game uses libnative.dll for packet encryption/decryption.
-    // CarrotJuicer hooks the decryption function to capture clean
-    // MsgPack data. We look for LZ4_decompress_safe (used after
-    // decryption) or the decrypt export itself.
+    // CarrotJuicer hooks both LZ4 functions:
+    //   - LZ4_decompress_safe  — response (server → game, after decrypt)
+    //   - LZ4_compress_default — request  (game → server, before encrypt)
+    //
+    // Both give us clean, plaintext MsgPack data.
+    //
+    // Request data has a blob1 header (4-byte LE offset, then UDID,
+    // session_id, response_key) followed by the MsgPack body at
+    // offset+4. We extract the crypto material from blob1 so we can
+    // decode SSL-layer captures offline.
 
     var libnativeHooked = false;
+
+    // ── Extracted crypto material (from blob1 request headers) ────────
+    var _lastUdidHex = null; // 16 bytes → 32 hex chars
+    var _lastSessionIdHex = null; // 16 bytes → 32 hex chars
+    var _lastResponseKeyHex = null; // 32 bytes → 64 hex chars
+    var _extractedSalt = null; // ASCII salt string from GameAssembly.dll
 
     try {
         var libnative = Process.getModuleByName("libnative.dll");
         if (libnative) {
             console.log("[network] Found libnative.dll at " + libnative.base);
 
-            // Look for LZ4_decompress_safe — called after decryption,
-            // output buffer contains the clean MsgPack response
+            // ── LZ4_decompress_safe: response capture ─────────────────
             var lz4Addr = libnative.findExportByName("LZ4_decompress_safe");
+            if (!lz4Addr) {
+                // Some builds export it as LZ4_decompress_safe_ext
+                lz4Addr = libnative.findExportByName("LZ4_decompress_safe_ext");
+            }
             if (lz4Addr) {
                 Interceptor.attach(lz4Addr, {
                     onEnter: function (args) {
@@ -65,7 +89,9 @@
                                     type: "collect",
                                     domain: "network",
                                     data: {
+                                        _seq: _seq++,
                                         event: "libnative_decrypt",
+                                        direction: "in",
                                         bytes: decompressedSize,
                                         captured: captureLen,
                                         truncated: decompressedSize > captureLen,
@@ -82,6 +108,128 @@
                 console.log("[network] Hooked libnative.dll LZ4_decompress_safe");
             }
 
+            // ── LZ4_compress_default: request capture ─────────────────
+            // The input to LZ4 compress is the full request blob:
+            //   bytes[0:4]       = LE uint32 blob1 length (typically 166)
+            //   bytes[4:4+len]   = blob1 header (session_id, udid, response_key, auth_key)
+            //   bytes[4+len:]    = MsgPack request body
+            var lz4CompAddr = libnative.findExportByName("LZ4_compress_default");
+            if (!lz4CompAddr) {
+                lz4CompAddr = libnative.findExportByName("LZ4_compress_default_ext");
+            }
+            if (lz4CompAddr) {
+                Interceptor.attach(lz4CompAddr, {
+                    onEnter: function (args) {
+                        var src = args[0];
+                        var srcSize = args[2].toInt32();
+                        if (srcSize <= 0 || srcSize > 4194304) return;
+
+                        try {
+                            var captureLen = Math.min(srcSize, 524288);
+                            var data = src.readByteArray(captureLen);
+
+                            // ── Parse blob1 header for crypto material ────
+                            // blob1 layout: [4-byte LE offset][blob1 bytes][MsgPack body]
+                            // blob1 tail (last N bytes): session_id(16) + udid(16) + response_key(32) [+ auth_key(48)]
+                            var cryptoInfo = null;
+                            if (srcSize > 170) {
+                                try {
+                                    var headerLen = src.readU32();
+                                    // Sanity: typical header is 166 bytes, range 100-500
+                                    if (
+                                        headerLen >= 64 &&
+                                        headerLen <= 500 &&
+                                        headerLen + 4 < srcSize
+                                    ) {
+                                        var blob1End = 4 + headerLen;
+                                        // The crypto fields are at the END of blob1:
+                                        //   session_id: 16 bytes
+                                        //   udid_raw:   16 bytes
+                                        //   response_key: 32 bytes
+                                        //   auth_key:   48 bytes (optional)
+                                        // Total with auth: 112, without: 64
+                                        var tailSize = headerLen >= 112 + 4 ? 112 : 64;
+                                        if (headerLen >= tailSize) {
+                                            var tailStart = blob1End - tailSize;
+                                            var sessionId = src.add(tailStart).readByteArray(16);
+                                            var udidRaw = src.add(tailStart + 16).readByteArray(16);
+                                            var responseKey = src
+                                                .add(tailStart + 32)
+                                                .readByteArray(32);
+
+                                            // Convert to hex strings
+                                            var sidArr = new Uint8Array(sessionId);
+                                            var udidArr = new Uint8Array(udidRaw);
+                                            var rkArr = new Uint8Array(responseKey);
+
+                                            function toHex(arr) {
+                                                var h = "";
+                                                for (var i = 0; i < arr.length; i++) {
+                                                    var b = arr[i].toString(16);
+                                                    h += b.length < 2 ? "0" + b : b;
+                                                }
+                                                return h;
+                                            }
+
+                                            _lastSessionIdHex = toHex(sidArr);
+                                            _lastUdidHex = toHex(udidArr);
+                                            _lastResponseKeyHex = toHex(rkArr);
+
+                                            // Format UDID as UUID: 8-4-4-4-12
+                                            var u = _lastUdidHex;
+                                            var udidUuid =
+                                                u.slice(0, 8) +
+                                                "-" +
+                                                u.slice(8, 12) +
+                                                "-" +
+                                                u.slice(12, 16) +
+                                                "-" +
+                                                u.slice(16, 20) +
+                                                "-" +
+                                                u.slice(20, 32);
+
+                                            cryptoInfo = {
+                                                headerLen: headerLen,
+                                                sessionId: _lastSessionIdHex,
+                                                udid: udidUuid,
+                                                responseKey: _lastResponseKeyHex,
+                                            };
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.log("[network] blob1 parse error: " + e);
+                                }
+                            }
+
+                            var record = {
+                                _seq: _seq++,
+                                event: "libnative_encrypt",
+                                direction: "out",
+                                bytes: srcSize,
+                                captured: captureLen,
+                                truncated: srcSize > captureLen,
+                            };
+                            if (cryptoInfo) record.crypto = cryptoInfo;
+                            if (_extractedSalt) record.salt = _extractedSalt;
+
+                            send(
+                                {
+                                    type: "collect",
+                                    domain: "network",
+                                    data: record,
+                                },
+                                data,
+                            );
+                        } catch (e) {}
+                    },
+                });
+                hookCount++;
+                libnativeHooked = true;
+                console.log(
+                    "[network] Hooked libnative.dll LZ4_compress_default (request capture)",
+                );
+            }
+
             // Also scan for exported functions that look like encrypt/decrypt
             var exports = libnative.enumerateExports();
             for (var ei = 0; ei < exports.length; ei++) {
@@ -92,6 +240,152 @@
     } catch (e) {
         console.log("[network] libnative.dll not found or hook failed: " + e);
     }
+
+    // ══════════════════════════════════════════════════════════════════
+    // LAYER 0.5: Auto-extract crypto salt from game binary
+    // ══════════════════════════════════════════════════════════════════
+    //
+    // The game uses a hardcoded ASCII salt for MD5-based session ID
+    // generation: MD5(viewerId + udid + SALT). This salt is embedded
+    // in GameAssembly.dll and can change with game updates.
+    //
+    // We scan the binary for it so Clairvoyance stays resilient to
+    // updates without manual intervention.
+    //
+    // Strategy 1: Scan for the known salt string.
+    // Strategy 2: If that fails, look for short ASCII strings near
+    //             MD5/crypto code patterns (future heuristic).
+
+    (function extractSalt() {
+        // Known salt values (current + historical)
+        var knownSalts = [
+            "co!=Y;(UQCGxJ_n82", // current as of 2025
+        ];
+
+        var gameAssembly = null;
+        try {
+            gameAssembly = Process.getModuleByName("GameAssembly.dll");
+        } catch (e) {}
+        if (!gameAssembly) {
+            try {
+                gameAssembly = Process.getModuleByName("libil2cpp.so");
+            } catch (e) {}
+        }
+
+        if (!gameAssembly) {
+            console.log("[network] GameAssembly not found — salt extraction skipped");
+            return;
+        }
+
+        console.log("[network] Scanning " + gameAssembly.name + " for crypto salt...");
+
+        // Strategy 1: Scan for each known salt string
+        for (var si = 0; si < knownSalts.length; si++) {
+            var saltStr = knownSalts[si];
+            var pattern = "";
+            for (var ci = 0; ci < saltStr.length; ci++) {
+                if (ci > 0) pattern += " ";
+                var byte = saltStr.charCodeAt(ci).toString(16);
+                pattern += (byte.length < 2 ? "0" : "") + byte;
+            }
+
+            try {
+                var matches = Memory.scanSync(gameAssembly.base, gameAssembly.size, pattern);
+                if (matches.length > 0) {
+                    _extractedSalt = saltStr;
+                    console.log(
+                        "[network] ✓ Found salt '" +
+                            saltStr +
+                            "' at " +
+                            matches[0].address +
+                            " (" +
+                            matches.length +
+                            " occurrences)",
+                    );
+
+                    // Report to Python side
+                    send({
+                        type: "collect",
+                        domain: "network",
+                        data: {
+                            _seq: _seq++,
+                            event: "crypto_salt_found",
+                            salt: saltStr,
+                            source: "known_pattern",
+                            module: gameAssembly.name,
+                            address: matches[0].address.toString(),
+                            occurrences: matches.length,
+                        },
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.log("[network] Salt scan error: " + e);
+            }
+        }
+
+        // Strategy 2: Heuristic — look for il2cpp string literals that
+        // look like a salt (short, has special chars, near MD5 code).
+        // We scan for UTF-16LE strings (il2cpp string objects) matching
+        // a salt-like pattern: 14-24 chars, contains =, ;, (, or !
+        // This is a best-effort fallback.
+        try {
+            // Look for the C# string object pattern for the salt.
+            // IL2CPP strings are: [klass_ptr(8)][monitor(8)][length(4)][UTF-16LE chars...]
+            // The known salt "co!=Y;(UQCGxJ_n82" in UTF-16LE:
+            // 63 00 6f 00 21 00 3d 00 59 00 3b 00 28 00 ...
+            // We search for the first 8 chars in UTF-16LE as a signature.
+            var sig16 = "";
+            var probe = "co!=Y;(U"; // first 8 chars — unique enough
+            for (var pi = 0; pi < probe.length; pi++) {
+                if (pi > 0) sig16 += " ";
+                var ch = probe.charCodeAt(pi).toString(16);
+                sig16 += (ch.length < 2 ? "0" : "") + ch + " 00";
+            }
+            var utf16Matches = Memory.scanSync(gameAssembly.base, gameAssembly.size, sig16);
+            if (utf16Matches.length > 0) {
+                // Read back the full string
+                try {
+                    var strAddr = utf16Matches[0].address;
+                    // Read up to 32 UTF-16LE chars
+                    var chars = [];
+                    for (var ri = 0; ri < 32; ri++) {
+                        var wchar = strAddr.add(ri * 2).readU16();
+                        if (wchar === 0 || wchar > 127) break;
+                        chars.push(String.fromCharCode(wchar));
+                    }
+                    if (chars.length >= 10) {
+                        _extractedSalt = chars.join("");
+                        console.log(
+                            "[network] ✓ Found salt (UTF-16 heuristic): '" + _extractedSalt + "'",
+                        );
+                        send({
+                            type: "collect",
+                            domain: "network",
+                            data: {
+                                _seq: _seq++,
+                                event: "crypto_salt_found",
+                                salt: _extractedSalt,
+                                source: "utf16_heuristic",
+                                module: gameAssembly.name,
+                                address: strAddr.toString(),
+                                occurrences: utf16Matches.length,
+                            },
+                        });
+                        return;
+                    }
+                } catch (e) {}
+            }
+        } catch (e) {
+            console.log("[network] UTF-16 salt heuristic error: " + e);
+        }
+
+        console.log(
+            "[network] Salt not found in " +
+                gameAssembly.name +
+                " (will still work via Layer 0 hooks)",
+        );
+    })();
 
     // ══════════════════════════════════════════════════════════════════
     // LAYER 1: SSL_read / SSL_write hooks
@@ -177,7 +471,9 @@
                                 type: "collect",
                                 domain: "network",
                                 data: {
+                                    _seq: _seq++,
                                     event: "ssl_read",
+                                    direction: "in",
                                     bytes: bytesRead,
                                     captured: captureLen,
                                     truncated: bytesRead > captureLen,
@@ -231,7 +527,9 @@
                                                 type: "collect",
                                                 domain: "network",
                                                 data: {
+                                                    _seq: _seq++,
                                                     event: "schannel_decrypt",
+                                                    direction: "in",
                                                     bytes: cbBuffer,
                                                     captured: captureLen,
                                                     truncated: cbBuffer > captureLen,
@@ -273,16 +571,37 @@
                     var captureLen = Math.min(num, 262144);
                     try {
                         var data = buf.readByteArray(captureLen);
+
+                        // Try to extract HTTP method/path from the first bytes
+                        var httpMethod = null;
+                        var httpUrl = null;
+                        try {
+                            var peek = buf.readUtf8String(Math.min(num, 256));
+                            if (peek) {
+                                var m = peek.match(/^(POST|GET|PUT|DELETE|PATCH)\s+([^\s]+)/);
+                                if (m) {
+                                    httpMethod = m[1];
+                                    httpUrl = m[2];
+                                }
+                            }
+                        } catch (e) {}
+
+                        var record = {
+                            _seq: _seq++,
+                            event: "ssl_write",
+                            direction: "out",
+                            bytes: num,
+                            captured: captureLen,
+                            truncated: num > captureLen,
+                        };
+                        if (httpMethod) record.httpMethod = httpMethod;
+                        if (httpUrl) record.httpUrl = httpUrl;
+
                         send(
                             {
                                 type: "collect",
                                 domain: "network",
-                                data: {
-                                    event: "ssl_write",
-                                    bytes: num,
-                                    captured: captureLen,
-                                    truncated: num > captureLen,
-                                },
+                                data: record,
                             },
                             data,
                         );
@@ -323,7 +642,9 @@
                                                 type: "collect",
                                                 domain: "network",
                                                 data: {
+                                                    _seq: _seq++,
                                                     event: "schannel_encrypt",
+                                                    direction: "out",
                                                     bytes: cbBuffer,
                                                     captured: captureLen,
                                                     truncated: cbBuffer > captureLen,
@@ -407,8 +728,9 @@
                             // args[2]=value (the request/response object), args[3]=options
                             var record = {
                                 event: "msgpack_serialize",
+                                _seq: _seq++,
+                                direction: "out",
                                 formatter: sName,
-                                direction: "request",
                             };
 
                             // Try to read fields from the value object
@@ -445,8 +767,9 @@
                         onLeave: function (retval) {
                             var record = {
                                 event: "msgpack_deserialize",
+                                _seq: _seq++,
+                                direction: "in",
                                 formatter: this._formatterName,
-                                direction: "response",
                             };
 
                             // Try to read fields from the return value
@@ -660,10 +983,16 @@
 
                             var record = {
                                 event: "api_send",
+                                _seq: _seq++,
+                                _reqId: ++_nextReqId,
+                                direction: "out",
                                 task: taskName,
                                 api: apiName,
                                 postDataBytes: postDataSize,
                             };
+
+                            // Track for pairing with the response
+                            _pendingReqIds[apiName] = record._reqId;
 
                             send(
                                 {
@@ -706,8 +1035,17 @@
                             } catch (e) {}
                         },
                         onLeave: function (retval) {
+                            // Pop the pending request ID for this API
+                            var pairedReqId = _pendingReqIds[this._apiName] || null;
+                            if (pairedReqId !== null) {
+                                delete _pendingReqIds[this._apiName];
+                            }
+
                             var record = {
                                 event: "api_response",
+                                _seq: _seq++,
+                                _reqId: pairedReqId,
+                                direction: "in",
                                 task: this._taskName,
                                 api: this._apiName,
                             };
@@ -797,6 +1135,8 @@
                                 domain: "network",
                                 data: {
                                     event: "api_error",
+                                    _seq: _seq++,
+                                    direction: "in",
                                     task: taskName,
                                     api: taskToApiName(taskName),
                                 },
