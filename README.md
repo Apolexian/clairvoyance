@@ -107,6 +107,13 @@ uv run gui.py --browser          # fallback: open in browser instead
 Opens a native OS window (WebKit on macOS, EdgeChromium on Windows) — no
 browser required, just double-click to launch.
 
+> **Windows requirement:** The native window uses .NET Framework via
+> [pythonnet](https://github.com/pythonnet/pythonnet). .NET Framework 4.x is
+> pre-installed on Windows 10/11, so most users need nothing extra.
+> If the GUI fails to open, install the
+> [.NET Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+> (free, from Microsoft).
+
 Features:
 - **Setup** — Scan game binary and analyse classes directly from the app
 - **Record** — Start/stop data collection sessions from the app
@@ -152,6 +159,10 @@ dist/Clairvoyance/
 
 Zip the `dist/Clairvoyance/` folder and distribute. Users extract it,
 double-click `Clairvoyance.exe`, and they're running.
+
+**End-user requirements:** Windows 10/11 with .NET Framework 4.x (pre-installed
+on all modern Windows). If the GUI window doesn't appear, the user should
+install the [.NET Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 ## How It Works
 
