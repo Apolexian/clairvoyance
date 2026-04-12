@@ -98,6 +98,10 @@ def build_gui():
         extra_imports += [
             "--collect-all=UnityPy",
             "--hidden-import=UnityPy",
+            # UnityPy's native dependencies — their DLLs must be collected
+            # explicitly or they won't be found in the frozen build.
+            "--collect-all=fmod_toolkit",
+            "--collect-all=texture2ddecoder",
         ]
         print("  UnityPy detected — will be bundled for story extraction")
     except ImportError:
