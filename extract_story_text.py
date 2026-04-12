@@ -306,9 +306,6 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
         dll.sqlite3mc_config.argtypes = [_vp, _cp, _ci]
         dll.sqlite3mc_config.restype = _ci
 
-        dll.sqlite3_key.argtypes = [_vp, _cp, _ci]
-        dll.sqlite3_key.restype = _ci
-
         dll.sqlite3_exec.argtypes = [_vp, _cp, _vp, _vp, _pp]
         dll.sqlite3_exec.restype = _ci
 
@@ -316,7 +313,7 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
         dll.sqlite3_errmsg.restype = _cp
 
         dll.sqlite3_backup_init.argtypes = [_vp, _cp, _vp, _cp]
-        dll.sqlite3_backup_init.restype = _vp  # returns sqlite3_backup*
+        dll.sqlite3_backup_init.restype = _vp
 
         dll.sqlite3_backup_step.argtypes = [_vp, _ci]
         dll.sqlite3_backup_step.restype = _ci
@@ -332,8 +329,6 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             return msg.decode("utf-8", errors="replace") if msg else "(null)"
 
         # ── Open encrypted DB ────────────────────────────────────────
-        # Must use READWRITE|CREATE — the sqlite3mc cipher layer needs
-        # write access during key/cipher setup (matching UmaViewer).
         SQLITE_OPEN_READWRITE = 0x00000002
         SQLITE_OPEN_CREATE = 0x00000004
         db_ptr = ctypes.c_void_p()
@@ -348,17 +343,23 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             return None
         log.debug("sqlite3_open_v2 OK, db_ptr=%s", db_ptr.value)
 
-        # Set cipher to RC4 (index 3)
+        # Set cipher (before any DB access, matching UmaViewer)
         rc = dll.sqlite3mc_config(db_ptr, b"cipher", 3)
         log.debug("sqlite3mc_config('cipher', 3) rc=%d", rc)
 
-        # Set key
-        rc = dll.sqlite3_key(db_ptr, key, len(key))
+        # Set key via PRAGMA with hex encoding — the x'...' format tells
+        # sqlite3mc this is a raw key (no KDF/passphrase derivation).
+        # Passing raw binary via sqlite3_key makes some ciphers apply KDF,
+        # producing the wrong decryption key.
+        key_hex = key.hex()
+        pragma_key = f"PRAGMA key = \"x'{key_hex}'\";".encode()
+        log.debug("Setting key via PRAGMA (hex, %d bytes)", len(key))
+        err_ptr = ctypes.c_void_p()
+        rc = dll.sqlite3_exec(db_ptr, pragma_key, None, None, ctypes.byref(err_ptr))
         if rc != 0:
-            log.error("sqlite3_key failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
+            log.error("PRAGMA key failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
             dll.sqlite3_close(db_ptr)
             return None
-        log.debug("sqlite3_key OK")
 
         # Validate: try a read to confirm key works (matching UmaViewer)
         err_ptr = ctypes.c_void_p()
@@ -395,7 +396,6 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             dll.sqlite3_close(db_ptr)
             return None
 
-        # Step through backup (5 pages at a time, matching UmaViewer)
         SQLITE_OK = 0
         SQLITE_DONE = 101
         while True:
