@@ -752,7 +752,7 @@ def _frame_to_dict(f: Frame) -> dict:
 
 def _horse_result_to_dict(hr: HorseResult) -> dict:
     return {
-        "finish_order": hr.finish_order,
+        "finish_order": hr.finish_order + 1,  # binary is 0-based; convert to 1-based
         "finish_time": round(hr.finish_time, 4),
         "finish_diff_time": round(hr.finish_diff_time, 4),
         "start_delay_time": round(hr.start_delay_time, 4),

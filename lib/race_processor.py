@@ -739,7 +739,7 @@ def _summarize_horse(
 
     summary: dict = {
         "horse_index": idx,
-        "finish_order": hr.finish_order,
+        "finish_order": hr.finish_order + 1,  # binary is 0-based; convert to 1-based
         "finish_time": round(hr.finish_time, 4),
         "finish_time_raw": round(hr.finish_time_raw, 4),
         "finish_diff_time": round(hr.finish_diff_time, 4),

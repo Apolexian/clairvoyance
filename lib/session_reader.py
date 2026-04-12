@@ -699,6 +699,54 @@ def _is_non_career_context(api: str) -> bool:
     return any(kw in api for kw in _NON_CAREER_KEYWORDS)
 
 
+def _chara_matches(entry: dict, player_cid: int | None, player_card: int | None) -> bool:
+    """Check if a race entry belongs to the player using multiple ID strategies.
+
+    The game uses two ID schemes:
+      - chara_id: base character (4-digit, e.g. 1001)
+      - card_id:  outfit variant (6-digit, e.g. 100101)
+
+    ``chara_info`` may populate ``chara_id`` with either form depending on
+    the API version / scenario, while race results and horse data may use
+    the other.  We try exact matches first, then cross-match by deriving
+    the base character from the card_id (``card_id // 100``).
+    """
+    if not isinstance(entry, dict):
+        return False
+
+    e_cid = entry.get("chara_id")
+    e_card = entry.get("card_id")
+
+    # 1. Exact chara_id match
+    if player_cid is not None and e_cid is not None and e_cid == player_cid:
+        return True
+
+    # 2. Exact card_id match
+    if player_card is not None and e_card is not None and e_card == player_card:
+        return True
+
+    # 3. Cross-match: player_cid is actually a card_id (6-digit)
+    #    and entry has the base chara_id, or vice-versa.
+    try:
+        if player_cid is not None and e_cid is not None:
+            # player_cid is 6-digit card-style, entry has base chara
+            if player_cid > 9999 and e_cid == player_cid // 100:
+                return True
+            # entry is 6-digit card-style, player has base chara
+            if e_cid > 9999 and player_cid == e_cid // 100:
+                return True
+
+        # 4. Derive base from card_id fields
+        if player_card is not None and e_cid is not None and player_card // 100 == e_cid:
+            return True
+        if player_cid is not None and e_card is not None and e_card // 100 == player_cid:
+            return True
+    except (TypeError, ValueError):
+        pass
+
+    return False
+
+
 def _build_summary_from_records(records: list[dict]) -> dict:
     """
     Build a structured summary from a list of network event records.
@@ -1015,19 +1063,21 @@ def _build_summary_from_records(records: list[dict]) -> dict:
                             dist[sc_key][cmd_key] = dist[sc_key].get(cmd_key, 0) + 1
 
         # ── Race results ────────────────────────────────────────
-        # Find the player's race result by matching chara_id.
+        # Find the player's race result by matching chara_id / card_id.
         # The API may return results as:
         #   - race_result_info: single dict (usually the player in career)
         #   - race_result_array: list of all horses' results
-        # We match by the career's chara_id to be sure we get the right horse.
+        # We use _chara_matches() for robust matching across ID formats
+        # (base chara_id vs outfit card_id).
         player_cid = summary.get("chara_id")
+        player_card = summary.get("card_id")
         player_race_result = None
 
         # Check race_result_array first (list of all horses)
         race_arr = data.get("race_result_array")
-        if isinstance(race_arr, list) and player_cid:
+        if isinstance(race_arr, list) and (player_cid or player_card):
             for rr_entry in race_arr:
-                if isinstance(rr_entry, dict) and rr_entry.get("chara_id") == player_cid:
+                if _chara_matches(rr_entry, player_cid, player_card):
                     player_race_result = rr_entry
                     break
 
@@ -1038,23 +1088,25 @@ def _build_summary_from_records(records: list[dict]) -> dict:
                 # Sometimes it's a list — find our horse
                 for rr_entry in rri:
                     if isinstance(rr_entry, dict) and (
-                        not player_cid or rr_entry.get("chara_id") == player_cid
+                        (not player_cid and not player_card)
+                        or _chara_matches(rr_entry, player_cid, player_card)
                     ):
                         player_race_result = rr_entry
                         break
-            elif isinstance(rri, dict) and rri.get("result_order"):
+            elif isinstance(rri, dict) and rri.get("result_order") is not None:
                 player_race_result = rri
 
-        if player_race_result and player_race_result.get("result_order"):
+        if player_race_result and player_race_result.get("result_order") is not None:
             turn = 0
             if isinstance(chara, dict):
                 turn = chara.get("turn", 0)
+            raw_order = player_race_result["result_order"]
             summary["race_results"].append(
                 {
                     "turn": turn,
                     "race_instance_id": player_race_result.get("race_instance_id"),
                     "program_id": player_race_result.get("program_id"),
-                    "result_order": player_race_result.get("result_order"),
+                    "result_order": raw_order + 1,  # game is 0-based; convert to 1-based
                     "entry_count": player_race_result.get("entry_count")
                     or player_race_result.get("num"),
                     "api": api,

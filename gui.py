@@ -58,6 +58,7 @@ from lib.master_db import (
     list_tables as master_list_tables,
 )
 from lib.session_reader import (
+    _chara_matches,
     build_session_summaries,
     get_network_event_detail,
     get_network_events,
@@ -476,6 +477,7 @@ def session_detail(name: str):
     if len(careers) == 1 and not careers[0].get("race_results") and races:
         summary = careers[0]
         player_cid = summary.get("chara_id")
+        player_card = summary.get("card_id")
         for race in races:
             meta = race.get("race_metadata", {})
             rid = meta.get("race_instance_id")
@@ -485,20 +487,23 @@ def session_detail(name: str):
             horse_list = race.get("horse_summaries", [])
             if horse_list:
                 entry_count = len(horse_list)
-                # Match by career's chara_id first, then fall back to horse_index 0
+                # Match by chara_id / card_id (robust across outfit variants)
                 player = None
-                if player_cid:
+                if player_cid or player_card:
                     player = next(
-                        (h for h in horse_list if h.get("chara_id") == player_cid),
+                        (h for h in horse_list
+                         if _chara_matches(h, player_cid, player_card)),
                         None,
                     )
                 if player is None:
+                    # Last resort: horse_index 0 (usually the player in career)
                     player = next(
                         (h for h in horse_list if h.get("horse_index") == 0),
                         horse_list[0] if horse_list else None,
                     )
                 if player:
-                    result_order = player.get("finish_order") or player.get("estimated_rank")
+                    fo = player.get("finish_order")
+                    result_order = fo if fo is not None else player.get("estimated_rank")
 
             rr = {
                 "race_instance_id": rid,
