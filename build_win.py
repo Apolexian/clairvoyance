@@ -33,6 +33,7 @@ DIST = HERE / "dist" / "Clairvoyance"
 BUILD = HERE / "build"
 ICON_PNG = HERE / "static" / "main_small_icon.png"
 ICON_ICO = BUILD / "clairvoyance.ico"
+RUNTIME_HOOK = BUILD / "hook-pythonnet.py"
 
 # sqlite3mc DLL — needed at runtime to decrypt the game's encrypted meta database.
 # Place the DLL in vendor/ (preferred) or the project root.
@@ -129,10 +130,12 @@ def build_gui():
             f"--add-data={HERE / 'templates'};templates",
             f"--add-data={HERE / 'static'};static",
             f"--add-data={HERE / 'js'};js",
-            # Hidden imports for pywebview
-            "--hidden-import=webview",
-            "--hidden-import=clr_loader",
-            "--hidden-import=pythonnet",
+            # pywebview native window + its .NET dependencies
+            "--collect-all=webview",
+            "--collect-all=pythonnet",
+            "--collect-all=clr_loader",
+            "--hidden-import=clr",
+            f"--runtime-hook={RUNTIME_HOOK}",
             # Ensure local modules are discoverable
             f"--paths={HERE}",
             *extra_imports,
@@ -258,9 +261,32 @@ def generate_icon():
     print(f"  Generated icon: {ICON_ICO}")
 
 
+def generate_runtime_hook():
+    """Write a PyInstaller runtime hook that configures pythonnet for frozen builds."""
+    BUILD.mkdir(parents=True, exist_ok=True)
+    RUNTIME_HOOK.write_text(
+        "import glob, os, sys\n"
+        "if getattr(sys, 'frozen', False):\n"
+        "    _d = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))\n"
+        "    os.environ['PATH'] = _d + os.pathsep + os.environ.get('PATH', '')\n"
+        "    os.add_dll_directory(_d)\n"
+        "    os.environ.setdefault('PYTHONNET_RUNTIME', 'netfx')\n"
+        "    if 'PYTHONNET_PYDLL' not in os.environ:\n"
+        "        _c = [p for p in glob.glob(os.path.join(_d, 'python3*.dll'))\n"
+        "              if os.path.basename(p).lower() != 'python3.dll']\n"
+        "        if _c:\n"
+        "            os.environ['PYTHONNET_PYDLL'] = _c[0]\n",
+        encoding="utf-8",
+    )
+    print(f"  Generated runtime hook: {RUNTIME_HOOK}")
+
+
 def main():
     # Generate .ico from PNG
     generate_icon()
+
+    # Generate pythonnet runtime hook
+    generate_runtime_hook()
 
     # Clean previous build
     if DIST.exists():
