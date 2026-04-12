@@ -929,7 +929,6 @@ def _mdb_success_response(path: str):
         diag["game_data_dir"] = game_data_dir
         diag["dat_exists"] = (gd / "dat").is_dir()
         diag["meta_exists"] = (gd / "meta").is_file()
-        diag["meta_umaviewer_exists"] = (gd / "meta_umaviewer").is_file()
         # Show first few dat/ subdirs for confirmation
         dat_dir = gd / "dat"
         if dat_dir.is_dir():
@@ -1046,9 +1045,8 @@ def api_extract_stories():
             )
         return jsonify({"error": msg}), 400
 
-    # Check meta database
-    meta_exists = (game_dir / "meta").is_file() or (game_dir / "meta_umaviewer").is_file()
-    if not meta_exists:
+    # Check meta database exists (decryption is handled by read_meta_entries)
+    if not (game_dir / "meta").is_file():
         return jsonify({"error": f"meta database not found in {game_dir}"}), 400
 
     with _extraction_lock:
@@ -1073,6 +1071,14 @@ def _run_extraction(game_dir: Path) -> None:
     global _extraction_running
     try:
         from extract_story_text import extract_choices_from_bundle, read_meta_entries
+
+        # Ensure extract_story_text logger output goes to gui.log too
+        est_logger = logging.getLogger("extract_story_text")
+        if not est_logger.handlers:
+            est_logger.setLevel(logging.DEBUG)
+        for h in log.handlers:
+            if h not in est_logger.handlers:
+                est_logger.addHandler(h)
 
         dat_dir = game_dir / "dat"
         log.info("Story extraction: game_dir=%s, dat_dir=%s", game_dir, dat_dir)
@@ -1099,23 +1105,20 @@ def _run_extraction(game_dir: Path) -> None:
         log.info("Meta returned %d story timeline entries", len(entries))
 
         if not entries:
-            # Detailed error about WHY meta returned nothing
+            # read_meta_entries already logged detailed errors.
+            # Surface a summary to the frontend.
             meta_path = game_dir / "meta"
-            meta_uv = game_dir / "meta_umaviewer"
-            if not meta_path.is_file() and not meta_uv.is_file():
+            if not meta_path.is_file():
                 msg = (
-                    f"meta database not found. Looked for:\n"
-                    f"  {meta_path}\n"
-                    f"  {meta_uv}\n"
-                    f"The meta database maps asset names to file hashes. "
+                    f"meta database not found at {meta_path}.\n"
                     f"It should be in the game root next to dat/."
                 )
             else:
-                which = meta_path if meta_path.is_file() else meta_uv
                 msg = (
-                    f"meta database found at {which} but returned 0 story entries. "
-                    f"It may be encrypted or have a different schema. "
-                    f"Try using an unencrypted copy named meta_umaviewer."
+                    f"meta database at {meta_path} returned 0 story entries.\n"
+                    f"It may be encrypted and decryption failed.\n"
+                    f"Place sqlite3mc_x64.dll next to the program, "
+                    f"or install pysqlcipher3."
                 )
             log.error(msg)
             with _extraction_lock:

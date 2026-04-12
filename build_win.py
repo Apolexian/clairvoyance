@@ -34,6 +34,14 @@ BUILD = HERE / "build"
 ICON_PNG = HERE / "static" / "main_small_icon.png"
 ICON_ICO = BUILD / "clairvoyance.ico"
 
+# sqlite3mc DLL — needed at runtime to decrypt the game's encrypted meta database.
+# Place the DLL in vendor/ (preferred) or the project root.
+SQLITE3MC_DLL_NAME = "sqlite3mc_x64.dll"
+SQLITE3MC_SEARCH_DIRS = [
+    HERE / "vendor",
+    HERE,
+]
+
 # PyInstaller flags shared across all builds
 COMMON = [
     "--noconfirm",
@@ -48,6 +56,15 @@ COMMON = [
     "--hidden-import=flask",
     "--hidden-import=engineio",
 ]
+
+
+def find_sqlite3mc_dll() -> Path | None:
+    """Locate sqlite3mc_x64.dll for bundling into the frozen build."""
+    for d in SQLITE3MC_SEARCH_DIRS:
+        candidate = d / SQLITE3MC_DLL_NAME
+        if candidate.is_file():
+            return candidate
+    return None
 
 
 def run(cmd: list[str], label: str) -> None:
@@ -85,6 +102,20 @@ def build_gui():
     except ImportError:
         print("  UnityPy not installed — story extraction will not be available in build")
 
+    # Bundle sqlite3mc DLL for encrypted meta database decryption
+    add_binaries: list[str] = []
+    dll_path = find_sqlite3mc_dll()
+    if dll_path:
+        # Place in the root of _internal so _MEIPASS / APP_DIR / "_internal" finds it
+        add_binaries.append(f"--add-binary={dll_path};.")
+        print(f"  sqlite3mc DLL found — bundling: {dll_path}")
+    else:
+        print(
+            f"  WARNING: {SQLITE3MC_DLL_NAME} not found.\n"
+            f"           Encrypted meta decryption will not work in the frozen build.\n"
+            f"           Place the DLL in: {HERE / 'vendor' / SQLITE3MC_DLL_NAME}"
+        )
+
     run(
         [
             sys.executable,
@@ -105,6 +136,7 @@ def build_gui():
             # Ensure local modules are discoverable
             f"--paths={HERE}",
             *extra_imports,
+            *add_binaries,
             "gui.py",
         ],
         "Building Clairvoyance.exe (GUI)",
@@ -184,6 +216,14 @@ def post_build():
     (DIST / "sessions").mkdir(exist_ok=True)
     (DIST / "discovery").mkdir(exist_ok=True)
 
+    # ── Step 4: Copy sqlite3mc DLL next to the exe for easy discovery ─
+    dll_path = find_sqlite3mc_dll()
+    if dll_path:
+        dest = DIST / SQLITE3MC_DLL_NAME
+        if not dest.exists():
+            shutil.copy2(str(dll_path), str(dest))
+            print(f"  Copied {SQLITE3MC_DLL_NAME} -> {dest}")
+
     # ── Verify final layout ─────────────────────────────────────────────
     expected = ["Clairvoyance.exe", "collect.exe", "discover.exe", "analyse.exe", "_internal"]
     missing = [name for name in expected if not (DIST / name).exists()]
@@ -191,6 +231,16 @@ def post_build():
         print(f"\n  WARNING: Missing in output: {missing}")
     else:
         print(f"\n  All executables verified in {DIST}")
+
+    if (
+        not (DIST / SQLITE3MC_DLL_NAME).exists()
+        and not (DIST / "_internal" / SQLITE3MC_DLL_NAME).exists()
+    ):
+        print(
+            f"\n  WARNING: {SQLITE3MC_DLL_NAME} not in build — encrypted meta decryption won't work."
+        )
+        print(f"           To fix, place the DLL in: {HERE / 'vendor' / SQLITE3MC_DLL_NAME}")
+        print("           Then rebuild.")
 
     print(f"\n{'=' * 60}")
     print("  Build complete!")

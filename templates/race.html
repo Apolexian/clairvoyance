@@ -130,7 +130,7 @@
         background:{% if sec.subtype == 'home' %}rgba(88,166,255,0.15){% else %}rgba(139,148,158,0.1){% endif %};
         display:flex; align-items:center; justify-content:center;
         font-size:0.6rem; color:{% if sec.subtype == 'home' %}var(--accent){% else %}var(--text-muted){% endif %};"
-        title="{{ sec.subtype|title }} straight {{ sec.start }}m–{{ sec.end }}m">{{ '🏠' if sec.subtype == 'home' else '→' }}</div>
+        title="{{ sec.subtype|title }} straight {{ sec.start }}m–{{ sec.end }}m">{{ 'H' if sec.subtype == 'home' else '→' }}</div>
       {% endif %}
       {% endfor %}
     </div>
@@ -506,13 +506,13 @@
           {% set width = (ce.duration / race_end_time * 100)|round(2) %}
           {% if ce.type_id == 5 %}
           <div style="position:absolute; left:{{ left }}%; width:{{ width }}%; height:100%; background:rgba(248,113,113,0.3); border-left:2px solid #f87171; border-top:2px solid #f87171;"
-               title="⚔ Dueling · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
+               title="Dueling · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
           {% elif ce.type_id == 4 %}
           <div style="position:absolute; left:{{ left }}%; width:{{ width }}%; height:100%; background:rgba(251,191,36,0.25); border-left:2px solid #fbbf24; border-top:2px solid #fbbf24;"
-               title="🏃 Spot Struggle · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
+               title="Spot Struggle · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
           {% elif ce.type_id == 8 %}
           <div style="position:absolute; left:{{ left }}%; width:{{ width }}%; height:100%; background:rgba(88,166,255,0.25); border-left:2px solid var(--accent);"
-               title="⚡ Before Spurt · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
+               title="Before Spurt · {{ ce.frame_time|round(1) }}s–{{ (ce.frame_time + ce.duration)|round(1) }}s"></div>
           {% endif %}
         {% endif %}
         {% endfor %}
@@ -625,11 +625,11 @@
         </td>
         <td>
           {% if ce.type_id is defined and ce.type_id == 5 %}
-            <span class="compete-dueling">⚔ {{ ce.label or 'Dueling' }}</span>
+            <span class="compete-dueling">{{ ce.label or 'Dueling' }}</span>
           {% elif ce.type_id is defined and ce.type_id == 4 %}
-            <span class="compete-struggle">🏃 {{ ce.label or 'Spot Struggle' }}</span>
+            <span class="compete-struggle">{{ ce.label or 'Spot Struggle' }}</span>
           {% elif ce.type_id is defined and ce.type_id == 8 %}
-            <span class="compete-spurt">⚡ {{ ce.label or 'Before Spurt' }}</span>
+            <span class="compete-spurt">{{ ce.label or 'Before Spurt' }}</span>
           {% else %}
             {{ ce.label or ce.type }}
           {% endif %}

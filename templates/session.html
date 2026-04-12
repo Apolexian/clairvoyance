@@ -469,9 +469,9 @@
               {% endif %}
             </td>
             <td>
-              {% if rr.result_order == 1 %}<span class="result-1st">🥇 1st</span>
-              {% elif rr.result_order == 2 %}<span class="result-2nd">🥈 2nd</span>
-              {% elif rr.result_order == 3 %}<span class="result-3rd">🥉 3rd</span>
+              {% if rr.result_order == 1 %}<span class="result-1st">1st</span>
+              {% elif rr.result_order == 2 %}<span class="result-2nd">2nd</span>
+              {% elif rr.result_order == 3 %}<span class="result-3rd">3rd</span>
               {% elif rr.result_order %}{{ rr.result_order }}th
               {% else %}<span style="color:var(--text-muted)">—</span>{% endif %}
               {% if rr.entry_count %}<span style="color:var(--text-muted); font-size:0.72rem">/{{ rr.entry_count }}</span>{% endif %}
@@ -733,11 +733,11 @@
             {% elif ev.event == 'schannel_encrypt' %}
               <span class="timeline-badge schannel_encrypt">↑ SCh</span>
             {% elif ev.event == 'libnative_decrypt' %}
-              <span class="timeline-badge libnative_decrypt">🔓</span>
+              <span class="timeline-badge libnative_decrypt">↓ Dec</span>
             {% elif ev.event == 'libnative_encrypt' %}
-              <span class="timeline-badge libnative_encrypt">🔒</span>
+              <span class="timeline-badge libnative_encrypt">↑ Enc</span>
             {% elif ev.event == 'crypto_salt_found' %}
-              <span class="timeline-badge crypto_salt_found">🔑</span>
+              <span class="timeline-badge crypto_salt_found">✦ Salt</span>
             {% elif ev.event == 'msgpack_serialize' %}
               <span class="timeline-badge msgpack_serialize">⊞</span>
             {% elif ev.event == 'msgpack_deserialize' %}
@@ -916,7 +916,7 @@ function buildJsonViewer(data, annotations) {
   toolbar.innerHTML = `
     <button class="btn btn-sm jv-btn" onclick="jvExpandAll(this)">Expand All</button>
     <button class="btn btn-sm jv-btn" onclick="jvCollapseAll(this)">Collapse All</button>
-    <button class="btn btn-sm jv-btn" onclick="jvCopy(this)">📋 Copy</button>
+    <button class="btn btn-sm jv-btn" onclick="jvCopy(this)">Copy</button>
   `;
   wrapper.appendChild(toolbar);
 

@@ -25,6 +25,7 @@ The game directory should contain:
 
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import re
@@ -106,6 +107,252 @@ def detect_game_dir(explicit_path: str | None = None) -> Path | None:
     return None
 
 
+# ── Meta database decryption keys (from UmaViewer Config.cs) ───────────
+
+# DB encryption key (XOR'd with DBBaseKey to produce the final key)
+DB_KEY = bytes(
+    [
+        0x6D,
+        0x5B,
+        0x65,
+        0x33,
+        0x63,
+        0x36,
+        0x63,
+        0x25,
+        0x54,
+        0x71,
+        0x2D,
+        0x73,
+        0x50,
+        0x53,
+        0x63,
+        0x38,
+        0x6D,
+        0x34,
+        0x37,
+        0x7B,
+        0x35,
+        0x63,
+        0x70,
+        0x23,
+        0x37,
+        0x34,
+        0x53,
+        0x29,
+        0x73,
+        0x43,
+        0x36,
+        0x33,
+    ]
+)
+
+DB_BASE_KEY = bytes(
+    [
+        0xF1,
+        0x70,
+        0xCE,
+        0xA4,
+        0xDF,
+        0xCE,
+        0xA3,
+        0xE1,
+        0xA5,
+        0xD8,
+        0xC7,
+        0x0B,
+        0xD1,
+        0x00,
+        0x00,
+        0x00,
+    ]
+)
+
+
+def _derive_db_key() -> bytes:
+    """Derive the final decryption key: DBKey XOR DBBaseKey (cycling 13 bytes)."""
+    key = bytearray(DB_KEY)
+    for i in range(len(key)):
+        key[i] ^= DB_BASE_KEY[i % 13]
+    return bytes(key)
+
+
+def _try_open_encrypted_meta(meta_path: Path) -> sqlite3.Connection | None:
+    """
+    Try to open an encrypted meta database.
+
+    Strategy:
+      1. Try pysqlcipher3 (if installed) — pure Python SQLCipher binding
+      2. Try decrypting via sqlite3mc DLL on Windows (same as UmaViewer)
+      3. Return None if we can't decrypt
+
+    On success, returns a sqlite3.Connection to a decrypted in-memory or temp copy.
+    """
+    key = _derive_db_key()
+    key_hex = key.hex()
+
+    # ── Strategy 1: try pysqlcipher3 ──────────────────────────
+    try:
+        from pysqlcipher3 import dbapi2 as sqlcipher  # type: ignore
+
+        conn = sqlcipher.connect(str(meta_path))
+        conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
+        conn.execute("PRAGMA cipher_compatibility = 3")
+        # Test if it works
+        conn.execute("SELECT name FROM sqlite_master LIMIT 1")
+        conn.row_factory = sqlite3.Row
+        log.info("Opened encrypted meta via pysqlcipher3")
+        return conn
+    except ImportError:
+        log.debug("pysqlcipher3 not available")
+    except Exception as e:
+        log.debug("pysqlcipher3 failed: %s", e)
+
+    # ── Strategy 2: try sqlcipher3 (alternative package name) ─
+    try:
+        import sqlcipher3  # type: ignore
+
+        conn = sqlcipher3.connect(str(meta_path))
+        conn.execute(f"PRAGMA key = \"x'{key_hex}'\"")
+        conn.execute("PRAGMA cipher_compatibility = 3")
+        conn.execute("SELECT name FROM sqlite_master LIMIT 1")
+        conn.row_factory = sqlite3.Row
+        log.info("Opened encrypted meta via sqlcipher3")
+        return conn
+    except ImportError:
+        log.debug("sqlcipher3 not available")
+    except Exception as e:
+        log.debug("sqlcipher3 failed: %s", e)
+
+    # ── Strategy 3: try sqlite3mc via ctypes (Windows) ────────
+    if sys.platform == "win32":
+        conn = _try_decrypt_via_sqlite3mc(meta_path, key)
+        if conn:
+            return conn
+
+    return None
+
+
+def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connection | None:
+    """
+    Use sqlite3mc DLL via ctypes to decrypt the meta DB to a plaintext copy.
+    Creates meta_decrypted next to the original.
+    """
+    import ctypes
+
+    # Search for the DLL in multiple locations.
+    # For a PyInstaller --onedir build the layout is:
+    #   dist/Clairvoyance/Clairvoyance.exe
+    #   dist/Clairvoyance/sqlite3mc_x64.dll      ← next to exe (APP_DIR)
+    #   dist/Clairvoyance/_internal/              ← sys._MEIPASS
+    #   dist/Clairvoyance/_internal/sqlite3mc_x64.dll  ← bundled via --add-binary
+    _meipass = Path(sys._MEIPASS) if _FROZEN and hasattr(sys, "_MEIPASS") else None
+    _exe_dir = Path(sys.executable).resolve().parent if _FROZEN else None
+
+    search_dirs = [
+        APP_DIR,  # next to script / exe
+        _exe_dir,  # exe's own directory (frozen)
+        _meipass,  # PyInstaller _MEIPASS (onedir → _internal/)
+        APP_DIR / "_internal",  # explicit _internal/ fallback
+    ]
+    dll_names = ["sqlite3mc_x64.dll", "sqlite3mc.dll"]
+
+    log.debug("sqlite3mc DLL search dirs: %s", [str(d) for d in search_dirs if d])
+
+    dll = None
+    for d in search_dirs:
+        if d is None or not d.is_dir():
+            continue
+        for name in dll_names:
+            candidate = d / name
+            if candidate.is_file():
+                try:
+                    dll = ctypes.CDLL(str(candidate))
+                    log.info("Loaded %s from %s", name, d)
+                    break
+                except OSError:
+                    continue
+        if dll:
+            break
+
+    # Also try bare name (system PATH)
+    if dll is None:
+        for name in ["sqlite3mc_x64", "sqlite3mc_x64.dll", "sqlite3mc"]:
+            try:
+                dll = ctypes.CDLL(name)
+                log.info("Loaded %s from system PATH", name)
+                break
+            except OSError:
+                continue
+
+    if dll is None:
+        log.debug("sqlite3mc DLL not found — cannot decrypt meta natively")
+        return None
+
+    try:
+        log.info("Decrypting meta via sqlite3mc DLL...")
+        # Open encrypted DB
+        db_ptr = ctypes.c_void_p()
+        rc = dll.sqlite3_open_v2(
+            str(meta_path).encode("utf-8"),
+            ctypes.byref(db_ptr),
+            0x00000001,  # SQLITE_OPEN_READONLY
+            None,
+        )
+        if rc != 0:
+            log.error("sqlite3mc open failed rc=%d", rc)
+            return None
+
+        # Set cipher to RC4 (index 3)
+        dll.sqlite3mc_config(db_ptr, b"cipher", 3)
+
+        # Set key
+        key_buf = ctypes.create_string_buffer(key)
+        rc = dll.sqlite3_key(db_ptr, key_buf, len(key))
+        if rc != 0:
+            log.error("sqlite3_key failed rc=%d", rc)
+            dll.sqlite3_close(db_ptr)
+            return None
+
+        # Create plaintext copy via backup API
+        decrypted_path = meta_path.parent / "meta_decrypted"
+        dest_ptr = ctypes.c_void_p()
+        rc = dll.sqlite3_open_v2(
+            str(decrypted_path).encode("utf-8"),
+            ctypes.byref(dest_ptr),
+            0x00000002 | 0x00000004,  # READWRITE | CREATE
+            None,
+        )
+        if rc != 0:
+            log.error("sqlite3mc open dest failed rc=%d", rc)
+            dll.sqlite3_close(db_ptr)
+            return None
+
+        backup = dll.sqlite3_backup_init(dest_ptr, b"main", db_ptr, b"main")
+        if not backup:
+            log.error("sqlite3_backup_init failed")
+            dll.sqlite3_close(dest_ptr)
+            dll.sqlite3_close(db_ptr)
+            return None
+
+        dll.sqlite3_backup_step(backup, -1)
+        dll.sqlite3_backup_finish(backup)
+        dll.sqlite3_close(dest_ptr)
+        dll.sqlite3_close(db_ptr)
+
+        log.info("Decrypted meta → %s", decrypted_path)
+
+        # Open the decrypted copy with standard sqlite3
+        conn = sqlite3.connect(f"file:{decrypted_path}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        conn.execute("SELECT name FROM sqlite_master LIMIT 1")
+        return conn
+
+    except Exception as e:
+        log.error("sqlite3mc decryption failed: %s", e)
+        return None
+
+
 # ── Meta database reading ──────────────────────────────────────────────
 
 
@@ -114,62 +361,68 @@ def read_meta_entries(game_dir: Path) -> list[dict]:
     Read story data entries from the meta database.
 
     Returns list of {name, hash, key} dicts for story timeline assets.
+
+    The game's meta file is encrypted (sqlite3mc RC4). We try:
+      1. meta opened as plain SQLite (works if already decrypted)
+      2. meta decrypted on-the-fly using the known game key
     """
     meta_path = game_dir / "meta"
+    conn = None
+
     if not meta_path.is_file():
-        # Try UmaViewer standalone copy
-        meta_path = game_dir / "meta_umaviewer"
-    if not meta_path.is_file():
-        log.error(
-            "Meta database not found at %s or %s", game_dir / "meta", game_dir / "meta_umaviewer"
-        )
+        log.error("meta database not found at %s", meta_path)
         return []
 
-    log.info("Opening meta database: %s (%.1f MB)", meta_path, meta_path.stat().st_size / 1e6)
-
-    entries = []
+    # ── Try 1: plain (unencrypted or already-decrypted) meta ──
     try:
-        conn = sqlite3.connect(f"file:{meta_path}?mode=ro", uri=True)
-        conn.row_factory = sqlite3.Row
-
-        # Log all tables for diagnostics
+        c = sqlite3.connect(f"file:{meta_path}?mode=ro", uri=True)
+        c.row_factory = sqlite3.Row
         tables = [
-            r[0]
-            for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+            r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
         ]
-        log.info("Meta DB tables: %s", tables)
+        if "a" in tables:
+            log.info("Using plain meta: %s", meta_path)
+            conn = c
+        else:
+            c.close()
+            log.info(
+                "meta file exists but appears encrypted (0 tables visible). "
+                "Attempting decryption..."
+            )
+    except Exception as e:
+        log.info("meta plain open failed (%s) — attempting decryption...", e)
 
-        if "a" not in tables:
-            log.error("Meta DB has no table 'a' — tables found: %s. Schema may differ.", tables)
-            conn.close()
+    # ── Try 2: decrypt the encrypted meta ─────────────────────
+    if conn is None:
+        conn = _try_open_encrypted_meta(meta_path)
+        if conn is None:
+            log.error(
+                "Could not decrypt meta database at %s.\n"
+                "The meta file is encrypted (sqlite3mc RC4 cipher).\n"
+                "To fix this, either:\n"
+                "  • Place sqlite3mc_x64.dll next to this program (Windows)\n"
+                "  • Install pysqlcipher3: pip install pysqlcipher3",
+                meta_path,
+            )
             return []
 
-        # Log table schema
+    # ── Read entries from the opened connection ───────────────
+    entries = []
+    try:
         cols_info = conn.execute("PRAGMA table_info(a)").fetchall()
         col_names = [r[1] for r in cols_info]
-        log.info("Table 'a' columns: %s", col_names)
-
-        # Check required columns exist
         cols = set(col_names)
+        log.info("Meta DB table 'a' columns: %s", col_names)
+
         if "n" not in cols or "h" not in cols:
-            log.error(
-                "Table 'a' missing required columns 'n' and/or 'h'. "
-                "Found columns: %s. This meta DB may use a different schema.",
-                col_names,
-            )
+            log.error("Table 'a' missing required columns 'n'/'h'. Found: %s", col_names)
             conn.close()
             return []
 
         has_key = "e" in cols
 
-        # Log total row count
         total_rows = conn.execute("SELECT COUNT(*) FROM a").fetchone()[0]
         log.info("Table 'a' has %d total rows", total_rows)
-
-        # Log a few sample rows for debugging
-        sample_rows = conn.execute("SELECT n, h FROM a LIMIT 5").fetchall()
-        for sr in sample_rows:
-            log.info("  Sample: name=%s hash=%s", sr["n"], sr["h"])
 
         if has_key:
             sql = "SELECT n, h, e FROM a WHERE n LIKE 'story/data/%storytimeline%'"
@@ -178,33 +431,24 @@ def read_meta_entries(game_dir: Path) -> list[dict]:
 
         rows = conn.execute(sql).fetchall()
         for r in rows:
-            entry = {
-                "name": r["n"],
-                "hash": r["h"],
-                "key": r["e"] if has_key else 0,
-            }
-            entries.append(entry)
-        conn.close()
-        log.info("Found %d story timeline entries in meta database", len(entries))
+            entries.append(
+                {
+                    "name": r["n"],
+                    "hash": r["h"],
+                    "key": r["e"] if has_key else 0,
+                }
+            )
+        log.info("Found %d story timeline entries", len(entries))
 
-        if not entries and total_rows > 0:
-            # The DB has rows but none match our query — log what asset types exist
-            try:
-                conn2 = sqlite3.connect(f"file:{meta_path}?mode=ro", uri=True)
-                prefixes = conn2.execute(
-                    "SELECT DISTINCT substr(n, 1, instr(n, '/')) as prefix FROM a LIMIT 20"
-                ).fetchall()
-                log.info("Asset name prefixes in meta DB: %s", [p[0] for p in prefixes])
-                conn2.close()
-            except Exception:
-                pass
+        if entries:
+            sample = entries[0]
+            log.info("  Sample: name=%s hash=%s", sample["name"], sample["hash"])
 
     except Exception as e:
-        log.error("Failed to read meta database: %s", e)
-        log.info(
-            "The meta database may be encrypted or corrupted. "
-            "Try using an unencrypted copy named meta_umaviewer."
-        )
+        log.error("Failed to query meta database: %s", e)
+    finally:
+        with contextlib.suppress(Exception):
+            conn.close()
 
     return entries
 
@@ -452,7 +696,7 @@ def main():
     log.info("Game directory: %s", game_dir)
 
     # Verify expected structure
-    meta_exists = (game_dir / "meta").is_file() or (game_dir / "meta_umaviewer").is_file()
+    meta_exists = (game_dir / "meta").is_file()
     dat_exists = (game_dir / "dat").is_dir()
     if not meta_exists:
         log.error("meta database not found in %s", game_dir)

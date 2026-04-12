@@ -128,8 +128,8 @@
   <!-- Playback controls -->
   <div class="controls">
     <button class="btn btn-sm" id="btn-play" onclick="togglePlay()">▶</button>
-    <button class="btn btn-sm" onclick="stepFrame(-1)">⏮</button>
-    <button class="btn btn-sm" onclick="stepFrame(1)">⏭</button>
+    <button class="btn btn-sm" onclick="stepFrame(-1)">◀◀</button>
+    <button class="btn btn-sm" onclick="stepFrame(1)">▶▶</button>
     <input type="range" class="scrubber" id="scrubber" min="0" max="1" step="1" value="0" oninput="scrubTo(+this.value)">
     <span class="frame-label" id="frame-label">0 / 0</span>
     <button class="btn btn-sm" onclick="changeSpeed(-1)">−</button>
@@ -876,13 +876,13 @@ function updateInfoPanel() {
       const sn = activeSkills.filter(s => s.horse_index === hi).map(s => s.skill_label || s.skill_id).join(', ');
       statusHtml += `<span class="tbl-state sk" title="${sn}">✦ Skill</span>`;
     }
-    if (isDueling) statusHtml += '<span class="tbl-state duel">⚔ Duel</span>';
-    if (isSpotStruggle) statusHtml += '<span class="tbl-state strug">🏃 Struggle</span>';
+    if (isDueling) statusHtml += '<span class="tbl-state duel">Duel</span>';
+    if (isSpotStruggle) statusHtml += '<span class="tbl-state strug">Struggle</span>';
     if (temptId > 0) {
       const tn = {1:'掛Sashi',2:'掛Senko',3:'掛Nige',4:'掛Boost'}[temptId] || `掛${temptId}`;
       statusHtml += `<span class="tbl-state rush">${tn}</span>`;
     }
-    if (isPaceDown) statusHtml += '<span class="tbl-state pd">⏬ Pace↓</span>';
+    if (isPaceDown) statusHtml += '<span class="tbl-state pd">Pace↓</span>';
 
     html += `<tr${cls}>
       <td class="tbl-val">${rank}</td>
@@ -918,7 +918,7 @@ function setFrame(idx) {
 
 function togglePlay() {
   playing = !playing;
-  btnPlay.textContent = playing ? '⏸' : '▶';
+  btnPlay.textContent = playing ? '‖' : '▶';
   if (playing) { lastTime = performance.now(); animate(); }
   else cancelAnimationFrame(animId);
 }
