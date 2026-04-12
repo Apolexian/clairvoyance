@@ -309,6 +309,12 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
         dll.sqlite3_key.argtypes = [_vp, _cp, _ci]
         dll.sqlite3_key.restype = _ci
 
+        dll.sqlite3_exec.argtypes = [_vp, _cp, _vp, _vp, _pp]
+        dll.sqlite3_exec.restype = _ci
+
+        dll.sqlite3_errmsg.argtypes = [_vp]
+        dll.sqlite3_errmsg.restype = _cp
+
         dll.sqlite3_backup_init.argtypes = [_vp, _cp, _vp, _cp]
         dll.sqlite3_backup_init.restype = _vp  # returns sqlite3_backup*
 
@@ -321,27 +327,49 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
         dll.sqlite3_close.argtypes = [_vp]
         dll.sqlite3_close.restype = _ci
 
+        def _errmsg(db: ctypes.c_void_p) -> str:
+            msg = dll.sqlite3_errmsg(db)
+            return msg.decode("utf-8", errors="replace") if msg else "(null)"
+
         # ── Open encrypted DB ────────────────────────────────────────
+        # Must use READWRITE|CREATE — the sqlite3mc cipher layer needs
+        # write access during key/cipher setup (matching UmaViewer).
+        SQLITE_OPEN_READWRITE = 0x00000002
+        SQLITE_OPEN_CREATE = 0x00000004
         db_ptr = ctypes.c_void_p()
         rc = dll.sqlite3_open_v2(
             str(meta_path).encode("utf-8"),
             ctypes.byref(db_ptr),
-            0x00000001,  # SQLITE_OPEN_READONLY
+            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
             None,
         )
         if rc != 0:
-            log.error("sqlite3mc open failed rc=%d", rc)
+            log.error("sqlite3mc open failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
             return None
+        log.debug("sqlite3_open_v2 OK, db_ptr=%s", db_ptr.value)
 
         # Set cipher to RC4 (index 3)
-        dll.sqlite3mc_config(db_ptr, b"cipher", 3)
+        rc = dll.sqlite3mc_config(db_ptr, b"cipher", 3)
+        log.debug("sqlite3mc_config('cipher', 3) rc=%d", rc)
 
         # Set key
         rc = dll.sqlite3_key(db_ptr, key, len(key))
         if rc != 0:
-            log.error("sqlite3_key failed rc=%d", rc)
+            log.error("sqlite3_key failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
             dll.sqlite3_close(db_ptr)
             return None
+        log.debug("sqlite3_key OK")
+
+        # Validate: try a read to confirm key works (matching UmaViewer)
+        err_ptr = ctypes.c_void_p()
+        rc = dll.sqlite3_exec(
+            db_ptr, b"SELECT name FROM sqlite_master LIMIT 1;", None, None, ctypes.byref(err_ptr)
+        )
+        if rc != 0:
+            log.error("sqlite3mc validation failed rc=%d errmsg=%s", rc, _errmsg(db_ptr))
+            dll.sqlite3_close(db_ptr)
+            return None
+        log.debug("Validation SELECT OK — key is correct")
 
         # ── Create plaintext copy via backup API ─────────────────────
         decrypted_path = meta_path.parent / "meta_decrypted"
@@ -349,22 +377,32 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
         rc = dll.sqlite3_open_v2(
             str(decrypted_path).encode("utf-8"),
             ctypes.byref(dest_ptr),
-            0x00000002 | 0x00000004,  # READWRITE | CREATE
+            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
             None,
         )
         if rc != 0:
-            log.error("sqlite3mc open dest failed rc=%d", rc)
+            log.error("sqlite3mc open dest failed rc=%d errmsg=%s", rc, _errmsg(dest_ptr))
             dll.sqlite3_close(db_ptr)
             return None
 
         backup = dll.sqlite3_backup_init(dest_ptr, b"main", db_ptr, b"main")
         if not backup:
-            log.error("sqlite3_backup_init failed")
+            log.error("sqlite3_backup_init failed errmsg=%s", _errmsg(dest_ptr))
             dll.sqlite3_close(dest_ptr)
             dll.sqlite3_close(db_ptr)
             return None
 
-        dll.sqlite3_backup_step(backup, -1)
+        # Step through backup (5 pages at a time, matching UmaViewer)
+        SQLITE_OK = 0
+        SQLITE_DONE = 101
+        while True:
+            rc = dll.sqlite3_backup_step(backup, 5)
+            if rc == SQLITE_DONE:
+                break
+            if rc != SQLITE_OK:
+                log.error("sqlite3_backup_step failed rc=%d", rc)
+                break
+
         dll.sqlite3_backup_finish(backup)
         dll.sqlite3_close(dest_ptr)
         dll.sqlite3_close(db_ptr)
