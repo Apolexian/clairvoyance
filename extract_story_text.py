@@ -373,6 +373,9 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
 
         # ── Create plaintext copy via backup API ─────────────────────
         decrypted_path = meta_path.parent / "meta_decrypted"
+        # Remove stale file from a previous run so backup starts fresh
+        if decrypted_path.exists():
+            decrypted_path.unlink()
         dest_ptr = ctypes.c_void_p()
         rc = dll.sqlite3_open_v2(
             str(decrypted_path).encode("utf-8"),
