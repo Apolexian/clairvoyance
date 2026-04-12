@@ -291,7 +291,37 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
 
     try:
         log.info("Decrypting meta via sqlite3mc DLL...")
-        # Open encrypted DB
+
+        # ── Declare function signatures (critical on 64-bit Windows) ──
+        # Without these, ctypes assumes c_int returns, truncating 64-bit
+        # pointers and causing access violations.
+        _vp = ctypes.c_void_p
+        _cp = ctypes.c_char_p
+        _ci = ctypes.c_int
+        _pp = ctypes.POINTER(ctypes.c_void_p)
+
+        dll.sqlite3_open_v2.argtypes = [_cp, _pp, _ci, _cp]
+        dll.sqlite3_open_v2.restype = _ci
+
+        dll.sqlite3mc_config.argtypes = [_vp, _cp, _ci]
+        dll.sqlite3mc_config.restype = _ci
+
+        dll.sqlite3_key.argtypes = [_vp, _cp, _ci]
+        dll.sqlite3_key.restype = _ci
+
+        dll.sqlite3_backup_init.argtypes = [_vp, _cp, _vp, _cp]
+        dll.sqlite3_backup_init.restype = _vp  # returns sqlite3_backup*
+
+        dll.sqlite3_backup_step.argtypes = [_vp, _ci]
+        dll.sqlite3_backup_step.restype = _ci
+
+        dll.sqlite3_backup_finish.argtypes = [_vp]
+        dll.sqlite3_backup_finish.restype = _ci
+
+        dll.sqlite3_close.argtypes = [_vp]
+        dll.sqlite3_close.restype = _ci
+
+        # ── Open encrypted DB ────────────────────────────────────────
         db_ptr = ctypes.c_void_p()
         rc = dll.sqlite3_open_v2(
             str(meta_path).encode("utf-8"),
@@ -307,14 +337,13 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
         dll.sqlite3mc_config(db_ptr, b"cipher", 3)
 
         # Set key
-        key_buf = ctypes.create_string_buffer(key)
-        rc = dll.sqlite3_key(db_ptr, key_buf, len(key))
+        rc = dll.sqlite3_key(db_ptr, key, len(key))
         if rc != 0:
             log.error("sqlite3_key failed rc=%d", rc)
             dll.sqlite3_close(db_ptr)
             return None
 
-        # Create plaintext copy via backup API
+        # ── Create plaintext copy via backup API ─────────────────────
         decrypted_path = meta_path.parent / "meta_decrypted"
         dest_ptr = ctypes.c_void_p()
         rc = dll.sqlite3_open_v2(
@@ -340,7 +369,7 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
         dll.sqlite3_close(dest_ptr)
         dll.sqlite3_close(db_ptr)
 
-        log.info("Decrypted meta → %s", decrypted_path)
+        log.info("Decrypted meta -> %s", decrypted_path)
 
         # Open the decrypted copy with standard sqlite3
         conn = sqlite3.connect(f"file:{decrypted_path}?mode=ro", uri=True)
