@@ -191,6 +191,42 @@ def uma_image_url(chara_id, card_id=None):
 app.jinja_env.filters["uma_image"] = uma_image_url
 app.jinja_env.globals["uma_image"] = uma_image_url
 
+
+def horse_image_url(horse):
+    """Return image URL for a horse dict, trying chara_id then mob_id."""
+    if not isinstance(horse, dict):
+        return ""
+    img = uma_image_url(horse.get("chara_id"), horse.get("card_id"))
+    if not img and horse.get("mob_id"):
+        img = uma_image_url(horse["mob_id"])
+    return img
+
+
+def horse_display_name(horse):
+    """Return display name for a horse dict, trying chara → mob → trainer → fallback."""
+    if not isinstance(horse, dict):
+        return "?"
+    cid = horse.get("chara_id")
+    if cid:
+        name = chara_name(cid)
+        if not name.startswith("Character #"):
+            return name
+    mid = horse.get("mob_id")
+    if mid:
+        from lib.master_db import mob_name
+
+        mname = mob_name(mid)
+        if mname:
+            return mname
+    tname = horse.get("trainer_name")
+    if tname:
+        return tname
+    return f"Horse {horse.get('horse_index', '?')}"
+
+
+app.jinja_env.globals["horse_image"] = horse_image_url
+app.jinja_env.globals["horse_name"] = horse_display_name
+
 # ── Support card image lookup ──────────────────────────────────────────
 # Scan static/cards/ for extracted support card images (webp or png)
 _SC_IMAGES: dict[int, str] = {}
@@ -508,6 +544,18 @@ def _enrich_career_summary(summary: dict) -> None:
 
     summary["events_merged"] = merged
 
+    # Filtered view: hide pure auto-advance VN narration that has no player
+    # interaction AND no gameplay effect.  Keep events that have choices,
+    # stat deltas, or any other meaningful outcome.
+    summary["events_with_choices"] = [
+        e
+        for e in merged
+        if e.get("choice_number")  # player made a choice
+        or e.get("choice_texts")  # has choice text options
+        or e.get("stat_deltas")  # gave stats / mood / SP etc.
+        or (e.get("has_choice") and (e.get("num_branches") or 0) > 1)  # DB says multi-branch
+    ]
+
     # ── Compute a compact header label for multi-career display ──
     stats = summary.get("latest_stats", {})
     if stats:
@@ -628,9 +676,26 @@ def race_replay(name: str, race_idx: int):
     for hs in replay.get("horse_summaries", []):
         cid = hs.get("chara_id")
         card = hs.get("card_id")
+        mid = hs.get("mob_id")
+        # Try chara_id first, fall back to mob_id for NPC icons
+        img = ""
+        name = ""
         if cid:
-            hs["_image_url"] = uma_image_url(cid, card)
-            hs["_name"] = chara_name(cid)
+            img = uma_image_url(cid, card)
+            name = chara_name(cid)
+        if not img and mid:
+            img = uma_image_url(mid)
+        if not name or name.startswith("Character #"):
+            if mid:
+                from lib.master_db import mob_name
+
+                mname = mob_name(mid)
+                if mname:
+                    name = mname
+            if (not name or name.startswith("Character #")) and hs.get("trainer_name"):
+                name = hs["trainer_name"]
+        hs["_image_url"] = img
+        hs["_name"] = name or f"Horse {hs.get('horse_index', '?')}"
     # Attach course profile for slope/corner visualization
     from lib.course_data import build_course_profile, guess_course_id
 

@@ -743,10 +743,10 @@
 
     <!-- Events -->
     <div class="summary-card">
-      <h3>Events ({{ summary.events_merged | length }})</h3>
-      {% if summary.events_merged %}
+      <h3>Event Choices ({{ summary.events_with_choices | length }}){% if summary.events_merged | length != summary.events_with_choices | length %} <small style="color:var(--text-muted); font-weight:normal;">of {{ summary.events_merged | length }} total</small>{% endif %}</h3>
+      {% if summary.events_with_choices %}
       <div class="event-choices-list">
-        {% for ec in summary.events_merged %}
+        {% for ec in summary.events_with_choices %}
         <div class="event-choice-item">
           <div class="event-choice-header">
             <span class="event-choice-name">{{ ec.name or ('story:' ~ ec.story_id) }}</span>

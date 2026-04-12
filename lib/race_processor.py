@@ -895,6 +895,8 @@ def try_process_race(record: dict, include_frames: str = "all") -> dict | None:
                 "frame_order": h.get("frame_order", i + 1),
                 "chara_id": h.get("chara_id"),
                 "card_id": h.get("card_id"),
+                "mob_id": h.get("mob_id") or 0,
+                "trainer_name": h.get("trainer_name") or "",
                 "speed": h.get("speed"),
                 "stamina": h.get("stamina"),
                 "power": h.get("pow") or h.get("power"),
@@ -991,6 +993,8 @@ def try_process_race(record: dict, include_frames: str = "all") -> dict | None:
                     if h_info:
                         s["chara_id"] = h_info.get("chara_id")
                         s["card_id"] = h_info.get("card_id")
+                        s["mob_id"] = h_info.get("mob_id") or 0
+                        s["trainer_name"] = h_info.get("trainer_name") or ""
                         s["guts_stat"] = h_info.get("guts")
                     summaries.append(s)
             race_record["horse_summaries"] = summaries

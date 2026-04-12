@@ -159,9 +159,9 @@
     <button class="horse-tab active" onclick="showHorse(-1, this)">All</button>
     {% for h in summaries %}
     <button class="horse-tab" onclick="showHorse({{ h.horse_index }}, this)">
-      {% set img = uma_image(h.chara_id, h.card_id) %}
+      {% set img = horse_image(h) %}
       {% if img %}<img src="{{ img }}" class="horse-tab-img" alt="">{% endif %}
-      {% if h.chara_id %}{{ h.chara_id | chara_name }}{% else %}Horse {{ h.horse_index }}{% endif %}
+      {{ horse_name(h) }}
       {% if h.finish_order is defined %}
         <small>#{{ h.finish_order }}</small>
       {% elif h.estimated_rank is defined %}
@@ -193,9 +193,9 @@
         {% for h in summaries %}
         <tr>
           <td>
-            {% set img = uma_image(h.chara_id, h.card_id) %}
+            {% set img = horse_image(h) %}
             {% if img %}<img src="{{ img }}" class="horse-table-img" alt="">{% endif %}
-            <strong>{% if h.chara_id %}{{ h.chara_id | chara_name }}{% else %}Horse {{ h.horse_index }}{% endif %}</strong>
+            <strong>{{ horse_name(h) }}</strong>
           </td>
           {% if source == 'api' %}
           <td class="{% if h.finish_order == 1 %}gold{% elif h.finish_order == 2 %}silver{% elif h.finish_order == 3 %}bronze{% endif %}">#{{ h.finish_order }}</td>
@@ -251,9 +251,9 @@
   {% for h in summaries %}
   <div id="horse-{{ h.horse_index }}" class="horse-panel" style="display:none">
     <div class="horse-detail-header">
-      {% set img = uma_image(h.chara_id, h.card_id) %}
+      {% set img = horse_image(h) %}
       {% if img %}<img src="{{ img }}" class="horse-detail-img" alt="">{% endif %}
-      <h3>{% if h.chara_id %}{{ h.chara_id | chara_name }}{% else %}Horse {{ h.horse_index }}{% endif %} —
+      <h3>{{ horse_name(h) }} —
         {% if h.finish_order is defined %}
           Finish #{{ h.finish_order }}
         {% elif h.estimated_rank is defined %}
@@ -697,7 +697,7 @@ function showHorse(idx, btn) {
   const horseNames = {};
   {% if summaries %}
   {% for h in summaries %}
-  horseNames['horse_{{ h.horse_index }}'] = {{ (h.chara_id | chara_name if h.chara_id else 'Horse ' ~ h.horse_index) | tojson }};
+  horseNames['horse_{{ h.horse_index }}'] = {{ horse_name(h) | tojson }};
   {% endfor %}
   {% endif %}
 

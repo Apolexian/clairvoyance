@@ -256,7 +256,25 @@ def chara_name(chara_id: int | str | None) -> str:
         return str(chara_id)
 
     names = _load_text_data(CATEGORY_CHARA_NAME)
-    return names.get(cid, f"Character #{cid}")
+    name = names.get(cid)
+    if name:
+        return name
+
+    # Fall back to mob name table — NPCs/generic opponents use mob_id as chara_id
+    mob_names = _load_text_data(CATEGORY_MOB_NAME)
+    return mob_names.get(cid, f"Character #{cid}")
+
+
+def mob_name(mob_id: int | str | None) -> str:
+    """Return the mob (NPC) name from text_data category 59, or a fallback."""
+    if mob_id is None or mob_id == 0:
+        return ""
+    try:
+        mid = int(mob_id)
+    except (ValueError, TypeError):
+        return str(mob_id)
+    names = _load_text_data(CATEGORY_MOB_NAME)
+    return names.get(mid, "")
 
 
 def race_instance_name(race_instance_id: int | str | None) -> str:

@@ -296,20 +296,20 @@ def extract_support_card_images(
     output_dir.mkdir(parents=True, exist_ok=True)
     dat_dir = game_dir / "dat"
 
-    # ── Try thumbnail entries first (smaller, always downloaded) ────────
-    # UmamusumeExplorer: "support_thumb_{id:d5}"
-    # Meta name e.g. "supportcard/supportcardthumbnail/support_thumb_30001"
-    entries = read_meta_entries_for_pattern(game_dir, "%support_thumb_%")
-    id_pattern = re.compile(r"support_thumb_(\d+)")
-    thumb_mode = True
+    # ── Try full-resolution card textures first ─────────────────────────
+    # Meta name e.g. "supportcard/supportcardtexture/tex_support_card_30001"
+    entries = read_meta_entries_for_pattern(game_dir, "%tex_support_card_%")
+    if not entries:
+        entries = read_meta_entries_for_pattern(game_dir, "supportcard/%tex_support_card_%")
+    id_pattern = re.compile(r"tex_support_card_(\d+)")
+    thumb_mode = False
 
     if not entries:
-        # Fallback: full card textures
-        entries = read_meta_entries_for_pattern(game_dir, "%tex_support_card_%")
-        if not entries:
-            entries = read_meta_entries_for_pattern(game_dir, "supportcard/%tex_support_card_%")
-        id_pattern = re.compile(r"tex_support_card_(\d+)")
-        thumb_mode = False
+        # Fallback: thumbnail icons (smaller, but always downloaded)
+        # UmamusumeExplorer: "support_thumb_{id:05d}"
+        entries = read_meta_entries_for_pattern(game_dir, "%support_thumb_%")
+        id_pattern = re.compile(r"support_thumb_(\d+)")
+        thumb_mode = True
 
     log.info(
         "Found %d support card %s entries in meta",
