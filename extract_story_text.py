@@ -659,6 +659,34 @@ def extract_story_id_from_name(asset_name: str) -> int | None:
     return None
 
 
+def _extract_choices_from_dict(data: dict) -> list[str]:
+    """
+    Extract choice text labels from a story data dict.
+
+    Works on both parsed JSON and MonoBehaviour typetree dicts.
+    The dict has a BlockList array. Blocks with ChoiceDataList
+    contain the player's choice options.
+    """
+    choices: list[str] = []
+    block_list = data.get("BlockList", [])
+    if not isinstance(block_list, list):
+        return choices
+    for block in block_list:
+        if not isinstance(block, dict):
+            continue
+        choice_data_list = block.get("ChoiceDataList")
+        if choice_data_list and isinstance(choice_data_list, list):
+            for choice in choice_data_list:
+                if not isinstance(choice, dict):
+                    continue
+                text = choice.get("Text", "")
+                if isinstance(text, str):
+                    text = text.strip()
+                    if text:
+                        choices.append(text)
+    return choices
+
+
 def parse_story_choices(json_text: str) -> list[str]:
     """
     Parse a StoryData JSON and extract choice text labels.
@@ -666,26 +694,22 @@ def parse_story_choices(json_text: str) -> list[str]:
     The StoryData has a BlockList array. Blocks with ChoiceDataList
     contain the player's choice options.
     """
-    choices: list[str] = []
     try:
         data = json.loads(json_text)
     except (json.JSONDecodeError, ValueError):
-        return choices
-
-    block_list = data.get("BlockList", [])
-    for block in block_list:
-        choice_data_list = block.get("ChoiceDataList")
-        if choice_data_list and isinstance(choice_data_list, list):
-            for choice in choice_data_list:
-                text = choice.get("Text", "").strip()
-                if text:
-                    choices.append(text)
-    return choices
+        return []
+    if not isinstance(data, dict):
+        return []
+    return _extract_choices_from_dict(data)
 
 
 def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int, list[str]]:
     """
-    Load an asset bundle and extract story choice text from TextAsset objects.
+    Load an asset bundle and extract story choice text.
+
+    Checks both TextAsset objects (JSON story data) and MonoBehaviour
+    objects (serialized StoryTimelineData with typetree) — the game
+    stores story timelines as MonoBehaviour, not TextAsset.
 
     Returns {story_id: [choice_texts]} for all stories found in the bundle.
     """
@@ -702,17 +726,59 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
         return results
 
     text_asset_count = 0
+    mono_count = 0
     json_count = 0
     blocklist_count = 0
+
     for obj in env.objects:
         try:
-            if obj.type.name == "TextAsset":
+            # ── Strategy 1: MonoBehaviour → read_typetree() ──────────
+            # Story timeline data is serialized as MonoBehaviour objects.
+            # read_typetree() returns the full field dict including
+            # BlockList → ChoiceDataList → Text.
+            if obj.type.name == "MonoBehaviour":
+                mono_count += 1
+                try:
+                    tree = obj.read_typetree()
+                except Exception:
+                    continue
+                if not isinstance(tree, dict):
+                    continue
+                # Must have BlockList to be a story timeline
+                if "BlockList" not in tree:
+                    continue
+                json_count += 1
+                choices = _extract_choices_from_dict(tree)
+                if choices:
+                    blocklist_count += 1
+                    # Get story_id: try StoryId field, then m_Name
+                    story_id = None
+                    raw_sid = tree.get("StoryId")
+                    if raw_sid and isinstance(raw_sid, int) and raw_sid > 0:
+                        story_id = raw_sid
+                    if not story_id:
+                        m_name = tree.get("m_Name", "")
+                        if isinstance(m_name, str):
+                            m = re.search(r"storytimeline_?(\d+)", m_name)
+                            if m:
+                                story_id = int(m.group(1))
+                    # Last resort: try Title field numeric suffix
+                    if not story_id:
+                        title = tree.get("Title", "")
+                        if isinstance(title, str):
+                            m = re.search(r"(\d{6,})", title)
+                            if m:
+                                story_id = int(m.group(1))
+                    if story_id:
+                        results[story_id] = choices
+
+            # ── Strategy 2: TextAsset → parse JSON text ──────────────
+            # Kept as fallback in case some bundles use TextAsset.
+            elif obj.type.name == "TextAsset":
                 text_asset_count += 1
                 text_asset = obj.read()
-                # The asset name often encodes the story ID
                 asset_name = getattr(text_asset, "m_Name", "") or ""
 
-                # Try to get the text content
                 text_content = None
                 if hasattr(text_asset, "m_Script"):
                     raw = text_asset.m_Script
@@ -726,7 +792,6 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
                 if not text_content:
                     continue
 
-                # Only parse JSON-like content that looks like story data
                 text_content = text_content.strip()
                 if not text_content.startswith("{"):
                     continue
@@ -735,22 +800,21 @@ def extract_choices_from_bundle(file_path: Path, entry_key: int = 0) -> dict[int
                 choices = parse_story_choices(text_content)
                 if choices:
                     blocklist_count += 1
-                    # Try to get story_id from the asset name
                     story_id = None
                     m = re.search(r"storytimeline_?(\d+)", asset_name)
                     if m:
                         story_id = int(m.group(1))
-
                     if story_id:
                         results[story_id] = choices
-        except Exception:
+        except Exception as e:
+            log.debug("  object read error in %s: %s", file_path.name, e)
             continue
 
-    if text_asset_count > 0 and log.isEnabledFor(logging.DEBUG):
+    if (text_asset_count > 0 or mono_count > 0) and log.isEnabledFor(logging.DEBUG):
         log.debug(
-            "  bundle %s: %d objects, %d TextAssets, %d JSON, %d with choices",
+            "  bundle %s: %d MonoBehaviour, %d TextAsset, %d with BlockList, %d with choices",
             file_path.name[:16],
-            len(list(env.objects)) if hasattr(env, "objects") else -1,
+            mono_count,
             text_asset_count,
             json_count,
             blocklist_count,

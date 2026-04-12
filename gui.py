@@ -1356,6 +1356,7 @@ def _run_extraction(game_dir: Path) -> None:
                     )
                     obj_types: dict[str, int] = {}
                     _diag_samples: list[str] = []
+                    _mono_samples: list[str] = []
                     for _obj in _diag_env.objects:
                         tname = _obj.type.name
                         obj_types[tname] = obj_types.get(tname, 0) + 1
@@ -1373,17 +1374,33 @@ def _run_extraction(game_dir: Path) -> None:
                                 _diag_samples.append(f"  name={_name} preview={_preview!r}")
                             except Exception as _te:
                                 _diag_samples.append(f"  (read error: {_te})")
+                        if tname == "MonoBehaviour" and len(_mono_samples) < 3:
+                            try:
+                                _tree = _obj.read_typetree()
+                                _top_keys = (
+                                    list(_tree.keys())[:10] if isinstance(_tree, dict) else []
+                                )
+                                _has_bl = "BlockList" in _tree if isinstance(_tree, dict) else False
+                                _bl_len = len(_tree.get("BlockList", [])) if _has_bl else 0
+                                _sid = _tree.get("StoryId", "?") if isinstance(_tree, dict) else "?"
+                                _mono_samples.append(
+                                    f"  StoryId={_sid} has_BlockList={_has_bl} blocks={_bl_len} top_keys={_top_keys}"
+                                )
+                            except Exception as _me:
+                                _mono_samples.append(f"  (typetree error: {_me})")
                     log.info(
                         "First bundle diagnostic: %s\n"
                         "  file_size=%d entry_name=%s key=%s\n"
                         "  object_types=%s\n"
-                        "  TextAsset samples:\n%s",
+                        "  TextAsset samples:\n%s\n"
+                        "  MonoBehaviour samples:\n%s",
                         file_path.name,
                         file_path.stat().st_size,
                         entry["name"],
                         entry["key"],
                         obj_types,
                         "\n".join(_diag_samples) if _diag_samples else "  (none)",
+                        "\n".join(_mono_samples) if _mono_samples else "  (none)",
                     )
                 except Exception as _de:
                     log.warning("First bundle diagnostic failed: %s", _de)
