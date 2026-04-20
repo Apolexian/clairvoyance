@@ -1,0 +1,108 @@
+{
+  "table": "single_mode_event_item_detail",
+  "row_count": 16,
+  "columns": [
+    "id",
+    "event_category_id",
+    "item_id",
+    "name_index"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "event_category_id": 177,
+      "item_id": 1,
+      "name_index": 180001
+    },
+    {
+      "id": 2,
+      "event_category_id": 177,
+      "item_id": 2,
+      "name_index": 180002
+    },
+    {
+      "id": 3,
+      "event_category_id": 177,
+      "item_id": 3,
+      "name_index": 180003
+    },
+    {
+      "id": 4,
+      "event_category_id": 177,
+      "item_id": 4,
+      "name_index": 180004
+    },
+    {
+      "id": 5,
+      "event_category_id": 177,
+      "item_id": 5,
+      "name_index": 180005
+    },
+    {
+      "id": 6,
+      "event_category_id": 178,
+      "item_id": 1,
+      "name_index": 180006
+    },
+    {
+      "id": 7,
+      "event_category_id": 178,
+      "item_id": 2,
+      "name_index": 180007
+    },
+    {
+      "id": 8,
+      "event_category_id": 179,
+      "item_id": 2,
+      "name_index": 180008
+    },
+    {
+      "id": 9,
+      "event_category_id": 180,
+      "item_id": 1,
+      "name_index": 180009
+    },
+    {
+      "id": 10,
+      "event_category_id": 181,
+      "item_id": 1,
+      "name_index": 180010
+    },
+    {
+      "id": 11,
+      "event_category_id": 182,
+      "item_id": 1,
+      "name_index": 180011
+    },
+    {
+      "id": 12,
+      "event_category_id": 183,
+      "item_id": 1,
+      "name_index": 180012
+    },
+    {
+      "id": 13,
+      "event_category_id": 184,
+      "item_id": 1,
+      "name_index": 180013
+    },
+    {
+      "id": 14,
+      "event_category_id": 185,
+      "item_id": 1,
+      "name_index": 180014
+    },
+    {
+      "id": 15,
+      "event_category_id": 186,
+      "item_id": 1,
+      "name_index": 180015
+    },
+    {
+      "id": 16,
+      "event_category_id": 187,
+      "item_id": 1,
+      "name_index": 180016
+    }
+  ]
+}

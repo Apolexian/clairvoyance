@@ -1,0 +1,2101 @@
+{
+  "table": "sqlite_stat1",
+  "row_count": 418,
+  "columns": [
+    "tbl",
+    "idx",
+    "stat"
+  ],
+  "rows": [
+    {
+      "tbl": "team_stadium_bgm",
+      "idx": "team_stadium_bgm_0_scene_type",
+      "stat": "11 2"
+    },
+    {
+      "tbl": "team_stadium_class",
+      "idx": "team_stadium_class_0_team_stadium_id",
+      "stat": "6 6"
+    },
+    {
+      "tbl": "trained_chara_trade_item",
+      "idx": "trained_chara_trade_item_0_trained_chara_rank",
+      "stat": "98 1"
+    },
+    {
+      "tbl": "topics",
+      "idx": "topics_0_type",
+      "stat": "339 113"
+    },
+    {
+      "tbl": "main_story_race_chara_data",
+      "idx": "main_story_race_chara_data_0_running_style",
+      "stat": "262 53"
+    },
+    {
+      "tbl": "main_story_race_chara_data",
+      "idx": "main_story_race_chara_data_0_group_id",
+      "stat": "262 11"
+    },
+    {
+      "tbl": "team_stadium_race_result_motion",
+      "idx": "team_stadium_race_result_motion_0_character_id",
+      "stat": "71 1"
+    },
+    {
+      "tbl": "single_mode_route_condition",
+      "idx": "single_mode_route_condition_0_condition_set_id",
+      "stat": "16 2"
+    },
+    {
+      "tbl": "mini_face_type_data",
+      "idx": "sqlite_autoindex_mini_face_type_data_1",
+      "stat": "35 1"
+    },
+    {
+      "tbl": "directory",
+      "idx": "directory_0_rank_level",
+      "stat": "200 1"
+    },
+    {
+      "tbl": "directory",
+      "idx": "directory_0_required_point",
+      "stat": "200 1"
+    },
+    {
+      "tbl": "story_event_win_bonus",
+      "idx": "story_event_win_bonus_0_story_event_id",
+      "stat": "308 26"
+    },
+    {
+      "tbl": "single_mode_aoharu_cutt_type",
+      "idx": "single_mode_aoharu_cutt_type_0_chara_type_1_cutt_type",
+      "stat": "24 4 2"
+    },
+    {
+      "tbl": "single_mode_aoharu_cutt_type",
+      "idx": "single_mode_aoharu_cutt_type_0_chara_type",
+      "stat": "24 4"
+    },
+    {
+      "tbl": "single_mode_aoharu_cutt_type",
+      "idx": "single_mode_aoharu_cutt_type_0_cutt_type",
+      "stat": "24 12"
+    },
+    {
+      "tbl": "fan_raid_top_chara",
+      "idx": "fan_raid_top_chara_0_top_data_id",
+      "stat": "10 3"
+    },
+    {
+      "tbl": "single_mode_special_chara",
+      "idx": "single_mode_special_chara_0_scenario_id_1_chara_id",
+      "stat": "6 3 1"
+    },
+    {
+      "tbl": "single_mode_special_chara",
+      "idx": "single_mode_special_chara_0_scenario_id",
+      "stat": "6 3"
+    },
+    {
+      "tbl": "profile_card_bg",
+      "idx": null,
+      "stat": "9"
+    },
+    {
+      "tbl": "crane_game_catch_result",
+      "idx": "sqlite_autoindex_crane_game_catch_result_1",
+      "stat": "68 3 1"
+    },
+    {
+      "tbl": "name_card_bg",
+      "idx": null,
+      "stat": "150"
+    },
+    {
+      "tbl": "training_cutt_chara_data",
+      "idx": "training_cutt_chara_data_0_command_id_1_sub_id",
+      "stat": "280 22 22"
+    },
+    {
+      "tbl": "story_event_top_chara",
+      "idx": "story_event_top_chara_0_story_event_id",
+      "stat": "137 12"
+    },
+    {
+      "tbl": "single_mode_wins_saddle",
+      "idx": null,
+      "stat": "155"
+    },
+    {
+      "tbl": "story_hip_offset",
+      "idx": "sqlite_autoindex_story_hip_offset_1",
+      "stat": "50 13 1"
+    },
+    {
+      "tbl": "single_mode_free_training_plate",
+      "idx": "single_mode_free_training_plate_0_condition_type",
+      "stat": "3 3"
+    },
+    {
+      "tbl": "single_mode_scenario_record",
+      "idx": "single_mode_scenario_record_0_scenario_id",
+      "stat": "27 9"
+    },
+    {
+      "tbl": "succession_relation_rank",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "crane_game_define_param",
+      "idx": null,
+      "stat": "1"
+    },
+    {
+      "tbl": "single_mode_recommend_setting",
+      "idx": "single_mode_recommend_setting_0_recommend_course_id",
+      "stat": "3 1"
+    },
+    {
+      "tbl": "single_mode_analyze_ticket",
+      "idx": "single_mode_analyze_ticket_0_grade",
+      "stat": "7 1"
+    },
+    {
+      "tbl": "race_trophy",
+      "idx": "race_trophy_0_race_instance_id",
+      "stat": "257 1"
+    },
+    {
+      "tbl": "race_trophy",
+      "idx": "race_trophy_0_trophy_id",
+      "stat": "257 2"
+    },
+    {
+      "tbl": "campaign_single_race_add_reward",
+      "idx": "campaign_single_race_add_reward_0_race_additional_reward_id",
+      "stat": "27 3"
+    },
+    {
+      "tbl": "audience_dress_color_set",
+      "idx": null,
+      "stat": "78"
+    },
+    {
+      "tbl": "mob_data",
+      "idx": null,
+      "stat": "797"
+    },
+    {
+      "tbl": "race_jikkyo_cue",
+      "idx": "race_jikkyo_cue_0_cuesheet_type",
+      "stat": "1675 838"
+    },
+    {
+      "tbl": "race_jikkyo_cue",
+      "idx": "sqlite_autoindex_race_jikkyo_cue_1",
+      "stat": "1675 1 1"
+    },
+    {
+      "tbl": "fan_raid_all_reward",
+      "idx": "fan_raid_all_reward_0_fan_raid_id",
+      "stat": "7 7"
+    },
+    {
+      "tbl": "fan_raid_individual_reward",
+      "idx": "fan_raid_individual_reward_0_fan_raid_id",
+      "stat": "7 7"
+    },
+    {
+      "tbl": "event_motion_data",
+      "idx": "event_motion_data_0_type",
+      "stat": "982 491"
+    },
+    {
+      "tbl": "event_motion_data",
+      "idx": "sqlite_autoindex_event_motion_data_1",
+      "stat": "982 1"
+    },
+    {
+      "tbl": "single_mode_free_shop",
+      "idx": null,
+      "stat": "11"
+    },
+    {
+      "tbl": "single_mode_difficulty_box",
+      "idx": "single_mode_difficulty_box_0_box_step",
+      "stat": "2 1"
+    },
+    {
+      "tbl": "single_mode_difficulty_box",
+      "idx": "single_mode_difficulty_box_0_box_id",
+      "stat": "2 1"
+    },
+    {
+      "tbl": "single_mode_difficulty_box",
+      "idx": "single_mode_difficulty_box_0_reward_set_id",
+      "stat": "2 2"
+    },
+    {
+      "tbl": "single_mode_difficulty_box",
+      "idx": "sqlite_autoindex_single_mode_difficulty_box_1",
+      "stat": "2 2 1"
+    },
+    {
+      "tbl": "single_mode_chara_effect",
+      "idx": null,
+      "stat": "21"
+    },
+    {
+      "tbl": "single_mode_top_bg",
+      "idx": "single_mode_top_bg_0_scenario_id",
+      "stat": "62 21"
+    },
+    {
+      "tbl": "single_mode_top_bg",
+      "idx": "single_mode_top_bg_0_month_1_scenario_id",
+      "stat": "62 5 2"
+    },
+    {
+      "tbl": "race_bgm",
+      "idx": "race_bgm_0_race_type",
+      "stat": "217 19"
+    },
+    {
+      "tbl": "fan_raid_top_data",
+      "idx": "fan_raid_top_data_0_fan_raid_id",
+      "stat": "4 4"
+    },
+    {
+      "tbl": "race_jikkyo_message",
+      "idx": "race_jikkyo_message_0_comment_group",
+      "stat": "2387 63"
+    },
+    {
+      "tbl": "race_jikkyo_message",
+      "idx": "race_jikkyo_message_0_group_id",
+      "stat": "2387 3"
+    },
+    {
+      "tbl": "race_instance",
+      "idx": "race_instance_0_race_id",
+      "stat": "1454 2"
+    },
+    {
+      "tbl": "single_mode_event_choice_reward",
+      "idx": null,
+      "stat": "35"
+    },
+    {
+      "tbl": "single_mode_reward_set",
+      "idx": "single_mode_reward_set_0_reward_set_id",
+      "stat": "734 15"
+    },
+    {
+      "tbl": "race_bib_color",
+      "idx": "sqlite_autoindex_race_bib_color_1",
+      "stat": "75 13 1"
+    },
+    {
+      "tbl": "training_challenge_total_score",
+      "idx": null,
+      "stat": "50"
+    },
+    {
+      "tbl": "campaign_single_race_add_data",
+      "idx": "campaign_single_race_add_data_0_race_additional_id",
+      "stat": "9 1"
+    },
+    {
+      "tbl": "single_mode_event_cr_priority",
+      "idx": "single_mode_event_cr_priority_0_display_id",
+      "stat": "58 2"
+    },
+    {
+      "tbl": "single_mode_team_name",
+      "idx": null,
+      "stat": "4"
+    },
+    {
+      "tbl": "single_mode_difficulty_mode",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "training_challenge_score",
+      "idx": "training_challenge_score_0_score_group_id",
+      "stat": "140 18"
+    },
+    {
+      "tbl": "training_challenge_master",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "challenge_match_race",
+      "idx": "challenge_match_race_0_race_instance_id",
+      "stat": "6 1"
+    },
+    {
+      "tbl": "challenge_match_race",
+      "idx": "challenge_match_race_0_challenge_match_id",
+      "stat": "6 6"
+    },
+    {
+      "tbl": "single_mode_scenario",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "succession_factor_effect",
+      "idx": "succession_factor_effect_0_factor_group_id_1_effect_id",
+      "stat": "1386 5 1"
+    },
+    {
+      "tbl": "succession_factor_effect",
+      "idx": "succession_factor_effect_0_factor_group_id",
+      "stat": "1386 5"
+    },
+    {
+      "tbl": "legend_race",
+      "idx": "legend_race_0_legend_race_boss_npc_id",
+      "stat": "35 1"
+    },
+    {
+      "tbl": "legend_race",
+      "idx": "legend_race_0_race_instance_id",
+      "stat": "35 1"
+    },
+    {
+      "tbl": "legend_race",
+      "idx": "legend_race_0_group_id",
+      "stat": "35 1"
+    },
+    {
+      "tbl": "story_event_mission_top_chara",
+      "idx": "story_event_mission_top_chara_0_story_event_id",
+      "stat": "24 2"
+    },
+    {
+      "tbl": "story_event_mission",
+      "idx": "story_event_mission_0_item_category",
+      "stat": "527 132"
+    },
+    {
+      "tbl": "story_event_mission",
+      "idx": "story_event_mission_0_story_event_id",
+      "stat": "527 44"
+    },
+    {
+      "tbl": "succession_relation_member",
+      "idx": "succession_relation_member_0_chara_id",
+      "stat": "1832 33"
+    },
+    {
+      "tbl": "item_exchange_top",
+      "idx": "item_exchange_top_0_item_top_category",
+      "stat": "23 8"
+    },
+    {
+      "tbl": "race_condition",
+      "idx": "race_condition_0_ground_1_weather",
+      "stat": "32 8 4"
+    },
+    {
+      "tbl": "race_condition",
+      "idx": "race_condition_0_weather_1_ground",
+      "stat": "32 8 4"
+    },
+    {
+      "tbl": "race_condition",
+      "idx": "race_condition_0_season_1_weather",
+      "stat": "32 7 2"
+    },
+    {
+      "tbl": "race_condition",
+      "idx": "race_condition_0_season_1_ground",
+      "stat": "32 7 2"
+    },
+    {
+      "tbl": "login_bonus_detail",
+      "idx": "login_bonus_detail_0_login_bonus_id",
+      "stat": "129 3"
+    },
+    {
+      "tbl": "login_bonus_detail",
+      "idx": "sqlite_autoindex_login_bonus_detail_1",
+      "stat": "129 3 1"
+    },
+    {
+      "tbl": "live_permission_data",
+      "idx": "live_permission_data_0_music_id",
+      "stat": "249 14"
+    },
+    {
+      "tbl": "live_permission_data",
+      "idx": "sqlite_autoindex_live_permission_data_1",
+      "stat": "249 14 1"
+    },
+    {
+      "tbl": "item_exchange",
+      "idx": "item_exchange_0_pay_item_id",
+      "stat": "524 30"
+    },
+    {
+      "tbl": "item_exchange",
+      "idx": "item_exchange_0_item_exchange_top_id",
+      "stat": "524 24"
+    },
+    {
+      "tbl": "single_mode_scout_chara",
+      "idx": "single_mode_scout_chara_0_chara_id",
+      "stat": "195 3"
+    },
+    {
+      "tbl": "single_mode_training",
+      "idx": "single_mode_training_0_command_id_1_command_level",
+      "stat": "36 3 1"
+    },
+    {
+      "tbl": "single_mode_training",
+      "idx": "single_mode_training_0_cutin_file_id",
+      "stat": "36 1"
+    },
+    {
+      "tbl": "single_mode_training",
+      "idx": "single_mode_training_0_command_type",
+      "stat": "36 12"
+    },
+    {
+      "tbl": "single_mode_training",
+      "idx": "single_mode_training_0_command_id",
+      "stat": "36 3"
+    },
+    {
+      "tbl": "jukebox_music_data",
+      "idx": "jukebox_music_data_0_version_type",
+      "stat": "28 14"
+    },
+    {
+      "tbl": "jukebox_music_data",
+      "idx": "sqlite_autoindex_jukebox_music_data_1",
+      "stat": "28 1"
+    },
+    {
+      "tbl": "audio_story_effect",
+      "idx": "audio_story_effect_0_effect_name",
+      "stat": "12 1"
+    },
+    {
+      "tbl": "single_mode_free_shop_item",
+      "idx": "single_mode_free_shop_item_0_item_id",
+      "stat": "53 1"
+    },
+    {
+      "tbl": "home_poster_data",
+      "idx": "home_poster_data_0_pos_index",
+      "stat": "8 3"
+    },
+    {
+      "tbl": "home_poster_data",
+      "idx": "home_poster_data_0_priority",
+      "stat": "8 3"
+    },
+    {
+      "tbl": "crane_game_hidden_odds",
+      "idx": null,
+      "stat": "33"
+    },
+    {
+      "tbl": "team_stadium_class_reward",
+      "idx": "team_stadium_class_reward_0_team_stadium_id_1_class_reward_type",
+      "stat": "17 17 5"
+    },
+    {
+      "tbl": "single_mode_npc",
+      "idx": "single_mode_npc_0_npc_group_id",
+      "stat": "1281 107"
+    },
+    {
+      "tbl": "home_prop_setting",
+      "idx": "sqlite_autoindex_home_prop_setting_1",
+      "stat": "20 5 1"
+    },
+    {
+      "tbl": "single_mode_free_shop_effect",
+      "idx": "single_mode_free_shop_effect_0_effect_group_id",
+      "stat": "64 2"
+    },
+    {
+      "tbl": "succession_relation",
+      "idx": null,
+      "stat": "944"
+    },
+    {
+      "tbl": "audience_impostor_lottery",
+      "idx": "audience_impostor_lottery_0_group_id_1_pattern",
+      "stat": "132 22 8"
+    },
+    {
+      "tbl": "race_bgm_cutin_extension_time",
+      "idx": "race_bgm_cutin_extension_time_0_cutin_category",
+      "stat": "128 43"
+    },
+    {
+      "tbl": "home_story_trigger",
+      "idx": "home_story_trigger_0_gallery_chara_id",
+      "stat": "280 6"
+    },
+    {
+      "tbl": "home_story_trigger",
+      "idx": "home_story_trigger_0_pos_id",
+      "stat": "280 24"
+    },
+    {
+      "tbl": "home_story_trigger",
+      "idx": "home_story_trigger_0_home_event_type_1_story_id",
+      "stat": "280 280 2"
+    },
+    {
+      "tbl": "home_story_trigger",
+      "idx": "sqlite_autoindex_home_story_trigger_1",
+      "stat": "280 6 1"
+    },
+    {
+      "tbl": "event_motion_plus_data",
+      "idx": "event_motion_plus_data_0_layer_index",
+      "stat": "149 75"
+    },
+    {
+      "tbl": "event_motion_plus_data",
+      "idx": "event_motion_plus_data_0_base_state_name",
+      "stat": "149 1"
+    },
+    {
+      "tbl": "single_mode_event_conclusion",
+      "idx": "sqlite_autoindex_single_mode_event_conclusion_1",
+      "stat": "232 58 1"
+    },
+    {
+      "tbl": "single_mode_rival",
+      "idx": "single_mode_rival_0_race_program_id",
+      "stat": "1479 13"
+    },
+    {
+      "tbl": "single_mode_rival",
+      "idx": "sqlite_autoindex_single_mode_rival_1",
+      "stat": "1479 28 2 2 1"
+    },
+    {
+      "tbl": "item_place",
+      "idx": "item_place_0_id",
+      "stat": "148 2"
+    },
+    {
+      "tbl": "item_place",
+      "idx": "sqlite_autoindex_item_place_1",
+      "stat": "148 2 1 1"
+    },
+    {
+      "tbl": "home_walk_group",
+      "idx": null,
+      "stat": "53"
+    },
+    {
+      "tbl": "text_data",
+      "idx": "sqlite_autoindex_text_data_1",
+      "stat": "37280 194 1"
+    },
+    {
+      "tbl": "single_mode_turn",
+      "idx": "single_mode_turn_0_turn_set_id",
+      "stat": "234 78"
+    },
+    {
+      "tbl": "single_mode_top_bg_chara",
+      "idx": "single_mode_top_bg_chara_0_bg_id_1_scenario_id",
+      "stat": "12 12 12"
+    },
+    {
+      "tbl": "race_jikkyo_trigger",
+      "idx": null,
+      "stat": "1744"
+    },
+    {
+      "tbl": "limited_exchange_reward",
+      "idx": null,
+      "stat": "221"
+    },
+    {
+      "tbl": "home_env_setting",
+      "idx": "home_env_setting_0_home_set_id_1_home_event_type_2_season_3_weather_4_timezone",
+      "stat": "96 96 32 11 4 1"
+    },
+    {
+      "tbl": "crane_game_extra_odds_condition",
+      "idx": null,
+      "stat": "1"
+    },
+    {
+      "tbl": "training_cutt_data",
+      "idx": "training_cutt_data_0_command_id_1_sub_id",
+      "stat": "72 6 6"
+    },
+    {
+      "tbl": "timezone_data",
+      "idx": null,
+      "stat": "4"
+    },
+    {
+      "tbl": "story_event_bingo_reward",
+      "idx": "story_event_bingo_reward_0_reward_set_id",
+      "stat": "200 8"
+    },
+    {
+      "tbl": "story_event_bingo_reward",
+      "idx": "sqlite_autoindex_story_event_bingo_reward_1",
+      "stat": "200 8 1"
+    },
+    {
+      "tbl": "race_trophy_reward",
+      "idx": null,
+      "stat": "182"
+    },
+    {
+      "tbl": "gacha_free_campaign",
+      "idx": null,
+      "stat": "17"
+    },
+    {
+      "tbl": "story_event_data",
+      "idx": null,
+      "stat": "12"
+    },
+    {
+      "tbl": "race_proper_ground_rate",
+      "idx": null,
+      "stat": "9"
+    },
+    {
+      "tbl": "daily_legend_race",
+      "idx": "daily_legend_race_0_race_instance_id",
+      "stat": "16 1"
+    },
+    {
+      "tbl": "daily_legend_race",
+      "idx": "daily_legend_race_0_group_id",
+      "stat": "16 1"
+    },
+    {
+      "tbl": "team_stadium",
+      "idx": null,
+      "stat": "1"
+    },
+    {
+      "tbl": "mini_motion_set",
+      "idx": "mini_motion_set_0_id",
+      "stat": "221 1"
+    },
+    {
+      "tbl": "mini_motion_set",
+      "idx": "sqlite_autoindex_mini_motion_set_1",
+      "stat": "221 1"
+    },
+    {
+      "tbl": "story_event_nickname_bonus",
+      "idx": "story_event_nickname_bonus_0_story_event_id",
+      "stat": "36 3"
+    },
+    {
+      "tbl": "story_event_nickname_bonus",
+      "idx": "sqlite_autoindex_story_event_nickname_bonus_1",
+      "stat": "36 3 1"
+    },
+    {
+      "tbl": "story_event_bonus_support_card",
+      "idx": "story_event_bonus_support_card_0_story_event_id",
+      "stat": "183 16"
+    },
+    {
+      "tbl": "story_event_bonus_support_card",
+      "idx": "sqlite_autoindex_story_event_bonus_support_card_1",
+      "stat": "183 16 3 2 1"
+    },
+    {
+      "tbl": "story_extra_data",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "single_mode_program",
+      "idx": "single_mode_program_0_month",
+      "stat": "741 62"
+    },
+    {
+      "tbl": "item_pack",
+      "idx": null,
+      "stat": "10"
+    },
+    {
+      "tbl": "daily_race_npc",
+      "idx": null,
+      "stat": "176"
+    },
+    {
+      "tbl": "note_profile",
+      "idx": "note_profile_0_chara_id",
+      "stat": "31 2"
+    },
+    {
+      "tbl": "single_mode_outing_set",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "single_mode_hint_gain",
+      "idx": "single_mode_hint_gain_0_hint_id",
+      "stat": "1603 22"
+    },
+    {
+      "tbl": "succession_initial_factor",
+      "idx": "succession_initial_factor_0_factor_type",
+      "stat": "7 4"
+    },
+    {
+      "tbl": "succession_initial_factor",
+      "idx": "succession_initial_factor_0_factor_type_1_value_1",
+      "stat": "7 4 1"
+    },
+    {
+      "tbl": "gacha_stock_campaign",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "circle_rank_data",
+      "idx": null,
+      "stat": "11"
+    },
+    {
+      "tbl": "fan_raid_data",
+      "idx": null,
+      "stat": "1"
+    },
+    {
+      "tbl": "team_stadium_support_text",
+      "idx": "team_stadium_support_text_0_type",
+      "stat": "10 5"
+    },
+    {
+      "tbl": "story_extra_story_data",
+      "idx": "story_extra_story_data_0_story_extra_id",
+      "stat": "13 7"
+    },
+    {
+      "tbl": "single_mode_conclusion_set",
+      "idx": "single_mode_conclusion_set_0_story_id",
+      "stat": "742 1"
+    },
+    {
+      "tbl": "single_mode_event_production",
+      "idx": null,
+      "stat": "63"
+    },
+    {
+      "tbl": "single_mode_evaluation",
+      "idx": "single_mode_evaluation_0_chara_id",
+      "stat": "12 4"
+    },
+    {
+      "tbl": "daily_race",
+      "idx": "daily_race_0_race_instance_id",
+      "stat": "8 1"
+    },
+    {
+      "tbl": "champions_news_win_comment",
+      "idx": "champions_news_win_comment_0_round_id",
+      "stat": "641 129"
+    },
+    {
+      "tbl": "single_mode_event_item_detail",
+      "idx": "single_mode_event_item_detail_0_event_category_id_1_item_id",
+      "stat": "16 2 1"
+    },
+    {
+      "tbl": "audience_data",
+      "idx": null,
+      "stat": "78"
+    },
+    {
+      "tbl": "mob_dress_color_set",
+      "idx": null,
+      "stat": "781"
+    },
+    {
+      "tbl": "limited_exchange_reward_odds",
+      "idx": null,
+      "stat": "20"
+    },
+    {
+      "tbl": "champions_entry_reward",
+      "idx": "champions_entry_reward_0_champions_id",
+      "stat": "2 2"
+    },
+    {
+      "tbl": "champions_entry_reward",
+      "idx": "sqlite_autoindex_champions_entry_reward_1",
+      "stat": "2 2 1"
+    },
+    {
+      "tbl": "single_mode_difficulty_box_reward",
+      "idx": "single_mode_difficulty_box_reward_0_box_id",
+      "stat": "20 10"
+    },
+    {
+      "tbl": "single_mode_route",
+      "idx": "single_mode_route_0_scenario_id_1_chara_id",
+      "stat": "60 30 2"
+    },
+    {
+      "tbl": "single_mode_route",
+      "idx": "single_mode_route_0_scenario_id",
+      "stat": "60 30"
+    },
+    {
+      "tbl": "succession_rental",
+      "idx": "succession_rental_0_rental_rank_1_rental_num",
+      "stat": "490 5 1"
+    },
+    {
+      "tbl": "champions_evaluation_rate",
+      "idx": null,
+      "stat": "16"
+    },
+    {
+      "tbl": "story_event_story_data",
+      "idx": "story_event_story_data_0_story_event_id",
+      "stat": "98 9"
+    },
+    {
+      "tbl": "story_event_story_data",
+      "idx": "story_event_story_data_0_story_event_id_1_episode_index_id",
+      "stat": "98 9 1"
+    },
+    {
+      "tbl": "champions_round_detail",
+      "idx": "champions_round_detail_0_champions_id_1_league_type",
+      "stat": "154 14 7"
+    },
+    {
+      "tbl": "mini_bg",
+      "idx": "mini_bg_0_scene_type",
+      "stat": "6 2"
+    },
+    {
+      "tbl": "jukebox_reaction_data",
+      "idx": null,
+      "stat": "239"
+    },
+    {
+      "tbl": "champions_round_schedule",
+      "idx": "champions_round_schedule_0_champions_id",
+      "stat": "66 6"
+    },
+    {
+      "tbl": "fan_raid_bonus_support_card",
+      "idx": "fan_raid_bonus_support_card_0_fan_raid_id",
+      "stat": "3 3"
+    },
+    {
+      "tbl": "transfer_event_data",
+      "idx": null,
+      "stat": "9"
+    },
+    {
+      "tbl": "race_player_camera",
+      "idx": "race_player_camera_0_category",
+      "stat": "104 35"
+    },
+    {
+      "tbl": "race_player_camera",
+      "idx": "race_player_camera_0_prefab_name",
+      "stat": "104 1"
+    },
+    {
+      "tbl": "piece_data",
+      "idx": null,
+      "stat": "75"
+    },
+    {
+      "tbl": "support_card_data",
+      "idx": "support_card_data_0_chara_id",
+      "stat": "204 3"
+    },
+    {
+      "tbl": "crane_game_prize_pattern",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "crane_game_arm_swing",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "team_stadium_rank",
+      "idx": null,
+      "stat": "30"
+    },
+    {
+      "tbl": "challenge_match_data",
+      "idx": null,
+      "stat": "1"
+    },
+    {
+      "tbl": "single_mode_member_rank",
+      "idx": "single_mode_member_rank_0_member_rank_id",
+      "stat": "8 1"
+    },
+    {
+      "tbl": "single_mode_training_se",
+      "idx": "single_mode_training_se_0_sheet_id",
+      "stat": "220 1"
+    },
+    {
+      "tbl": "card_talent_upgrade",
+      "idx": "card_talent_upgrade_0_talent_group_id_1_talent_level",
+      "stat": "300 4 1"
+    },
+    {
+      "tbl": "challenge_match_boss_npc",
+      "idx": null,
+      "stat": "6"
+    },
+    {
+      "tbl": "main_story_race_bonus",
+      "idx": "main_story_race_bonus_0_group_id",
+      "stat": "22 2"
+    },
+    {
+      "tbl": "single_mode_ao_training_plate",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "race_jikkyo_race",
+      "idx": null,
+      "stat": "596"
+    },
+    {
+      "tbl": "race_jikkyo_base",
+      "idx": "race_jikkyo_base_0_mode",
+      "stat": "3833 295"
+    },
+    {
+      "tbl": "champions_news_chara_wininfo",
+      "idx": null,
+      "stat": "52"
+    },
+    {
+      "tbl": "character_system_text",
+      "idx": "character_system_text_0_voice_id",
+      "stat": "11104 22"
+    },
+    {
+      "tbl": "character_system_text",
+      "idx": "character_system_text_0_character_id",
+      "stat": "11104 141"
+    },
+    {
+      "tbl": "character_system_text",
+      "idx": "sqlite_autoindex_character_system_text_1",
+      "stat": "11104 141 1"
+    },
+    {
+      "tbl": "story_event_roulette_bingo",
+      "idx": "story_event_roulette_bingo_0_story_event_id",
+      "stat": "48 4"
+    },
+    {
+      "tbl": "story_event_roulette_bingo",
+      "idx": "sqlite_autoindex_story_event_roulette_bingo_1",
+      "stat": "48 4 4 1"
+    },
+    {
+      "tbl": "single_mode_story_guide",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "announce_character",
+      "idx": null,
+      "stat": "38"
+    },
+    {
+      "tbl": "card_data",
+      "idx": "card_data_0_get_piece_id",
+      "stat": "74 1"
+    },
+    {
+      "tbl": "card_data",
+      "idx": "card_data_0_chara_id",
+      "stat": "74 2"
+    },
+    {
+      "tbl": "team_stadium_evaluation_rate",
+      "idx": "sqlite_autoindex_team_stadium_evaluation_rate_1",
+      "stat": "24 8 1"
+    },
+    {
+      "tbl": "honor_data",
+      "idx": null,
+      "stat": "431"
+    },
+    {
+      "tbl": "story_event_point_reward",
+      "idx": "story_event_point_reward_0_story_event_id",
+      "stat": "1180 99"
+    },
+    {
+      "tbl": "single_mode_recommend",
+      "idx": null,
+      "stat": "14"
+    },
+    {
+      "tbl": "single_mode_race_live",
+      "idx": null,
+      "stat": "125"
+    },
+    {
+      "tbl": "race_track",
+      "idx": null,
+      "stat": "11"
+    },
+    {
+      "tbl": "legend_race_boss_npc",
+      "idx": "legend_race_boss_npc_0_chara_id",
+      "stat": "40 2"
+    },
+    {
+      "tbl": "circle_stamp_data",
+      "idx": "sqlite_autoindex_circle_stamp_data_1",
+      "stat": "40 1"
+    },
+    {
+      "tbl": "banner_data",
+      "idx": "banner_data_0_group_id",
+      "stat": "180 17"
+    },
+    {
+      "tbl": "fan_raid_bonus_chara",
+      "idx": "fan_raid_bonus_chara_0_fan_raid_id",
+      "stat": "1 1"
+    },
+    {
+      "tbl": "training_challenge_exam",
+      "idx": null,
+      "stat": "8"
+    },
+    {
+      "tbl": "mini_bg_chara_motion",
+      "idx": "mini_bg_chara_motion_0_bg_id",
+      "stat": "94 16"
+    },
+    {
+      "tbl": "transfer_event_detail",
+      "idx": "transfer_event_detail_0_transfer_event_id",
+      "stat": "60 7"
+    },
+    {
+      "tbl": "single_mode_free_shop_bg",
+      "idx": null,
+      "stat": "5"
+    },
+    {
+      "tbl": "price_change",
+      "idx": "price_change_0_group_id",
+      "stat": "9 5"
+    },
+    {
+      "tbl": "chara_data",
+      "idx": null,
+      "stat": "84"
+    },
+    {
+      "tbl": "homestory_hip_offset",
+      "idx": "homestory_hip_offset_0_story_id_1_chara_id",
+      "stat": "14 1 1"
+    },
+    {
+      "tbl": "announce_data",
+      "idx": null,
+      "stat": "66"
+    },
+    {
+      "tbl": "champions_stand_motion",
+      "idx": "sqlite_autoindex_champions_stand_motion_1",
+      "stat": "18 6 1"
+    },
+    {
+      "tbl": "chara_type",
+      "idx": "chara_type_0_target_scene_1_target_cut",
+      "stat": "3320 369 111"
+    },
+    {
+      "tbl": "chara_type",
+      "idx": "sqlite_autoindex_chara_type_1",
+      "stat": "3320 1"
+    },
+    {
+      "tbl": "single_mode_race_group",
+      "idx": "single_mode_race_group_0_race_program_id",
+      "stat": "741 1"
+    },
+    {
+      "tbl": "single_mode_race_group",
+      "idx": "single_mode_race_group_0_race_group_id",
+      "stat": "741 2"
+    },
+    {
+      "tbl": "announce_support_card",
+      "idx": null,
+      "stat": "28"
+    },
+    {
+      "tbl": "champions_news_win_title",
+      "idx": null,
+      "stat": "541"
+    },
+    {
+      "tbl": "character_prop_animation",
+      "idx": "character_prop_animation_0_prop_id_1_scene_type",
+      "stat": "17 5 3"
+    },
+    {
+      "tbl": "team_stadium_raw_score",
+      "idx": "team_stadium_raw_score_0_race_score_name_id",
+      "stat": "95 14"
+    },
+    {
+      "tbl": "team_stadium_raw_score",
+      "idx": "team_stadium_raw_score_0_condition_type",
+      "stat": "95 9"
+    },
+    {
+      "tbl": "challenge_match_raw_point",
+      "idx": "challenge_match_raw_point_0_race_point_name_id",
+      "stat": "92 23"
+    },
+    {
+      "tbl": "challenge_match_raw_point",
+      "idx": "challenge_match_raw_point_0_condition_type",
+      "stat": "92 11"
+    },
+    {
+      "tbl": "story_event_bonus_card",
+      "idx": "story_event_bonus_card_0_story_event_id",
+      "stat": "75 7"
+    },
+    {
+      "tbl": "story_event_bonus_card",
+      "idx": "sqlite_autoindex_story_event_bonus_card_1",
+      "stat": "75 7 2 1"
+    },
+    {
+      "tbl": "single_mode_restrict_support",
+      "idx": "single_mode_restrict_support_0_support_card_id",
+      "stat": "1 1"
+    },
+    {
+      "tbl": "single_mode_restrict_support",
+      "idx": "single_mode_restrict_support_0_scenario_id",
+      "stat": "1 1"
+    },
+    {
+      "tbl": "single_mode_difficulty_data",
+      "idx": "single_mode_difficulty_data_0_difficulty_id_1_difficulty_index",
+      "stat": "6 3 1"
+    },
+    {
+      "tbl": "single_mode_difficulty_data",
+      "idx": "sqlite_autoindex_single_mode_difficulty_data_1",
+      "stat": "6 3 1"
+    },
+    {
+      "tbl": "single_mode_rank",
+      "idx": null,
+      "stat": "98"
+    },
+    {
+      "tbl": "audio_ignored_cue_on_highspeed",
+      "idx": "audio_ignored_cue_on_highspeed_0_cue_name_1_cue_sheet",
+      "stat": "7 1 1"
+    },
+    {
+      "tbl": "fan_raid_story_data",
+      "idx": "fan_raid_story_data_0_fan_raid_id_1_story_condition_type",
+      "stat": "2 2 1"
+    },
+    {
+      "tbl": "single_mode_free_win_point",
+      "idx": "single_mode_free_win_point_0_grade_1_order_min",
+      "stat": "66 7 2"
+    },
+    {
+      "tbl": "single_mode_free_win_point",
+      "idx": "single_mode_free_win_point_0_race_group_id_1_order_min",
+      "stat": "66 17 3"
+    },
+    {
+      "tbl": "single_mode_free_win_point",
+      "idx": "single_mode_free_win_point_0_grade",
+      "stat": "66 7"
+    },
+    {
+      "tbl": "single_mode_free_win_point",
+      "idx": "single_mode_free_win_point_0_race_group_id",
+      "stat": "66 17"
+    },
+    {
+      "tbl": "single_mode_analyze_message",
+      "idx": "single_mode_analyze_message_0_popularity",
+      "stat": "53 3"
+    },
+    {
+      "tbl": "single_mode_training_effect",
+      "idx": "single_mode_training_effect_0_command_id_1_result_state",
+      "stat": "168 12 11"
+    },
+    {
+      "tbl": "race_jikkyo_comment",
+      "idx": "race_jikkyo_comment_0_message_group",
+      "stat": "264 264"
+    },
+    {
+      "tbl": "race_jikkyo_comment",
+      "idx": "race_jikkyo_comment_0_group_id",
+      "stat": "264 2"
+    },
+    {
+      "tbl": "support_card_team_score_bonus",
+      "idx": "support_card_team_score_bonus_0_level",
+      "stat": "7 1"
+    },
+    {
+      "tbl": "support_card_level",
+      "idx": "support_card_level_0_rarity",
+      "stat": "135 45"
+    },
+    {
+      "tbl": "support_card_level",
+      "idx": "sqlite_autoindex_support_card_level_1",
+      "stat": "135 45 1"
+    },
+    {
+      "tbl": "single_mode_change_chara_route",
+      "idx": "single_mode_change_chara_route_0_route_race_group_id_1_chara_id",
+      "stat": "53 53 1"
+    },
+    {
+      "tbl": "race_proper_distance_rate",
+      "idx": null,
+      "stat": "9"
+    },
+    {
+      "tbl": "champions_bgm",
+      "idx": "champions_bgm_0_round_id_1_scene_type_2_race_number",
+      "stat": "55 10 3 1"
+    },
+    {
+      "tbl": "audio_cuesheet",
+      "idx": "audio_cuesheet_0_attribute",
+      "stat": "12 2"
+    },
+    {
+      "tbl": "character_system_lottery",
+      "idx": "character_system_lottery_0_trigger_1_param1",
+      "stat": "2898 17 2"
+    },
+    {
+      "tbl": "character_system_lottery",
+      "idx": "character_system_lottery_0_chara_id_1_trigger",
+      "stat": "2898 51 3"
+    },
+    {
+      "tbl": "character_system_lottery",
+      "idx": "character_system_lottery_0_chara_id",
+      "stat": "2898 51"
+    },
+    {
+      "tbl": "note_profile_text_type",
+      "idx": "note_profile_text_type_0_text_type",
+      "stat": "24 3"
+    },
+    {
+      "tbl": "main_story_race_bonus_condition",
+      "idx": "main_story_race_bonus_condition_0_group_id",
+      "stat": "14 1"
+    },
+    {
+      "tbl": "main_story_part",
+      "idx": null,
+      "stat": "6"
+    },
+    {
+      "tbl": "single_mode_ao_offset",
+      "idx": null,
+      "stat": "5"
+    },
+    {
+      "tbl": "single_mode_chara_program",
+      "idx": "single_mode_chara_program_0_chara_id",
+      "stat": "596 12"
+    },
+    {
+      "tbl": "item_group",
+      "idx": "item_group_0_group_id",
+      "stat": "35 18"
+    },
+    {
+      "tbl": "champions_news_trainer_wininfo",
+      "idx": "champions_news_trainer_wininfo_0_round_id",
+      "stat": "48 10"
+    },
+    {
+      "tbl": "chara_motion_act",
+      "idx": "chara_motion_act_0_chara_id",
+      "stat": "36 3"
+    },
+    {
+      "tbl": "chara_motion_act",
+      "idx": "chara_motion_act_0_chara_id_1_command_name",
+      "stat": "36 3 1"
+    },
+    {
+      "tbl": "succession_factor",
+      "idx": "succession_factor_0_factor_group_id_1_rarity",
+      "stat": "904 3 1"
+    },
+    {
+      "tbl": "race_bgm_pattern",
+      "idx": null,
+      "stat": "31"
+    },
+    {
+      "tbl": "race_env_define",
+      "idx": "race_env_define_0_race_track_id",
+      "stat": "880 80"
+    },
+    {
+      "tbl": "gacha_data",
+      "idx": null,
+      "stat": "100"
+    },
+    {
+      "tbl": "daily_race_billing",
+      "idx": null,
+      "stat": "1"
+    },
+    {
+      "tbl": "card_rarity_data",
+      "idx": "card_rarity_data_0_card_id_1_rarity",
+      "stat": "247 4 1"
+    },
+    {
+      "tbl": "card_rarity_data",
+      "idx": "card_rarity_data_0_race_dress_id",
+      "stat": "247 4"
+    },
+    {
+      "tbl": "card_rarity_data",
+      "idx": "card_rarity_data_0_card_id",
+      "stat": "247 4"
+    },
+    {
+      "tbl": "campaign_data",
+      "idx": "campaign_data_0_image_change",
+      "stat": "121 61"
+    },
+    {
+      "tbl": "campaign_data",
+      "idx": "campaign_data_0_target_type",
+      "stat": "121 18"
+    },
+    {
+      "tbl": "crane_game_prize_face",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "race_course_set_status",
+      "idx": null,
+      "stat": "9"
+    },
+    {
+      "tbl": "legend_race_billing",
+      "idx": null,
+      "stat": "1"
+    },
+    {
+      "tbl": "gacha_stock_detail",
+      "idx": "gacha_stock_detail_0_gacha_stock_id",
+      "stat": "5 3"
+    },
+    {
+      "tbl": "gacha_piece",
+      "idx": "gacha_piece_0_rarity",
+      "stat": "3 1"
+    },
+    {
+      "tbl": "skill_rarity",
+      "idx": null,
+      "stat": "5"
+    },
+    {
+      "tbl": "support_card_effect_table",
+      "idx": "support_card_effect_table_0_id",
+      "stat": "1671 9"
+    },
+    {
+      "tbl": "support_card_effect_table",
+      "idx": "sqlite_autoindex_support_card_effect_table_1",
+      "stat": "1671 9 1"
+    },
+    {
+      "tbl": "challenge_match_race_npc",
+      "idx": null,
+      "stat": "66"
+    },
+    {
+      "tbl": "single_mode_free_coin_race",
+      "idx": "single_mode_free_coin_race_0_grade_1_order_min",
+      "stat": "36 4 1"
+    },
+    {
+      "tbl": "single_mode_free_coin_race",
+      "idx": "single_mode_free_coin_race_0_grade",
+      "stat": "36 4"
+    },
+    {
+      "tbl": "race_single_mode_team_status",
+      "idx": null,
+      "stat": "6"
+    },
+    {
+      "tbl": "live_data",
+      "idx": "sqlite_autoindex_live_data_1",
+      "stat": "29 1"
+    },
+    {
+      "tbl": "legend_race_npc",
+      "idx": null,
+      "stat": "636"
+    },
+    {
+      "tbl": "face_type_data",
+      "idx": "sqlite_autoindex_face_type_data_1",
+      "stat": "114 1"
+    },
+    {
+      "tbl": "story_live_position",
+      "idx": "story_live_position_0_music_id",
+      "stat": "109 10"
+    },
+    {
+      "tbl": "story_live_position",
+      "idx": "story_live_position_0_set_id",
+      "stat": "109 10"
+    },
+    {
+      "tbl": "single_mode_member_rank_points",
+      "idx": "single_mode_member_rank_points_0_rank_id",
+      "stat": "8 1"
+    },
+    {
+      "tbl": "gacha_available",
+      "idx": "gacha_available_0_gacha_id",
+      "stat": "8764 88"
+    },
+    {
+      "tbl": "gacha_available",
+      "idx": "sqlite_autoindex_gacha_available_1",
+      "stat": "8764 88 1"
+    },
+    {
+      "tbl": "champions_news_trainer_detail",
+      "idx": null,
+      "stat": "126"
+    },
+    {
+      "tbl": "support_card_limit",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "campaign_present_bonus_detail",
+      "idx": "campaign_present_bonus_detail_0_card_id",
+      "stat": "68 1"
+    },
+    {
+      "tbl": "campaign_present_bonus_detail",
+      "idx": "sqlite_autoindex_campaign_present_bonus_detail_2",
+      "stat": "68 1"
+    },
+    {
+      "tbl": "campaign_present_bonus_detail",
+      "idx": "sqlite_autoindex_campaign_present_bonus_detail_1",
+      "stat": "68 68 1"
+    },
+    {
+      "tbl": "main_story_race_data",
+      "idx": null,
+      "stat": "24"
+    },
+    {
+      "tbl": "chara_story_data",
+      "idx": "chara_story_data_0_chara_id",
+      "stat": "371 7"
+    },
+    {
+      "tbl": "chara_story_data",
+      "idx": "chara_story_data_0_chara_id_1_episode_index",
+      "stat": "371 7 1"
+    },
+    {
+      "tbl": "chara_story_data",
+      "idx": "chara_story_data_0_story_id",
+      "stat": "371 1"
+    },
+    {
+      "tbl": "single_mode_difficulty_box_gauge",
+      "idx": "single_mode_difficulty_box_gauge_0_difficulty_id",
+      "stat": "5 5"
+    },
+    {
+      "tbl": "announce_event",
+      "idx": null,
+      "stat": "10"
+    },
+    {
+      "tbl": "support_card_unique_effect",
+      "idx": null,
+      "stat": "127"
+    },
+    {
+      "tbl": "background_data",
+      "idx": "background_data_0_bg_id_1_bg_sub",
+      "stat": "410 3 1"
+    },
+    {
+      "tbl": "jukebox_request_data",
+      "idx": null,
+      "stat": "149"
+    },
+    {
+      "tbl": "need_piece_num_data",
+      "idx": "need_piece_num_data_0_rarity",
+      "stat": "3 1"
+    },
+    {
+      "tbl": "background_offset_data",
+      "idx": "background_offset_data_0_bg_id_1_bg_sub",
+      "stat": "20 2 2"
+    },
+    {
+      "tbl": "background_offset_data",
+      "idx": "sqlite_autoindex_background_offset_data_1",
+      "stat": "20 2 2 1"
+    },
+    {
+      "tbl": "single_mode_story_data",
+      "idx": "single_mode_story_data_0_short_story_id",
+      "stat": "6561 4"
+    },
+    {
+      "tbl": "single_mode_story_data",
+      "idx": "single_mode_story_data_0_gallery_main_scenario",
+      "stat": "6561 1641"
+    },
+    {
+      "tbl": "single_mode_story_data",
+      "idx": "single_mode_story_data_0_support_chara_id",
+      "stat": "6561 85"
+    },
+    {
+      "tbl": "single_mode_story_data",
+      "idx": "single_mode_story_data_0_support_card_id",
+      "stat": "6561 53"
+    },
+    {
+      "tbl": "single_mode_story_data",
+      "idx": "single_mode_story_data_0_card_chara_id",
+      "stat": "6561 122"
+    },
+    {
+      "tbl": "single_mode_story_data",
+      "idx": "single_mode_story_data_0_card_id",
+      "stat": "6561 88"
+    },
+    {
+      "tbl": "single_mode_story_data",
+      "idx": "single_mode_story_data_0_story_id",
+      "stat": "6561 1"
+    },
+    {
+      "tbl": "race_motivation_rate",
+      "idx": null,
+      "stat": "5"
+    },
+    {
+      "tbl": "champions_news_title",
+      "idx": "champions_news_title_0_round_id",
+      "stat": "417 84"
+    },
+    {
+      "tbl": "chara_motion_set",
+      "idx": null,
+      "stat": "3989"
+    },
+    {
+      "tbl": "team_stadium_stand_motion",
+      "idx": "team_stadium_stand_motion_0_character_id_1_type",
+      "stat": "14 5 5"
+    },
+    {
+      "tbl": "single_mode_tag_card_pos",
+      "idx": "single_mode_tag_card_pos_0_support_card_id",
+      "stat": "3030 15"
+    },
+    {
+      "tbl": "single_mode_outing",
+      "idx": "single_mode_outing_0_command_group_id",
+      "stat": "3 1"
+    },
+    {
+      "tbl": "race",
+      "idx": "race_0_group",
+      "stat": "1351 104"
+    },
+    {
+      "tbl": "race",
+      "idx": "race_0_course_set",
+      "stat": "1351 15"
+    },
+    {
+      "tbl": "mission_data",
+      "idx": "mission_data_0_item_category",
+      "stat": "2742 138"
+    },
+    {
+      "tbl": "mission_data",
+      "idx": "mission_data_0_mission_type",
+      "stat": "2742 229"
+    },
+    {
+      "tbl": "skill_exp",
+      "idx": "skill_exp_0_type",
+      "stat": "10 10"
+    },
+    {
+      "tbl": "mini_mouth_type",
+      "idx": null,
+      "stat": "32"
+    },
+    {
+      "tbl": "tutorial_guide_data",
+      "idx": "tutorial_guide_data_0_group_id_1_page_index",
+      "stat": "125 3 1"
+    },
+    {
+      "tbl": "tutorial_guide_data",
+      "idx": "tutorial_guide_data_0_group_id",
+      "stat": "125 3"
+    },
+    {
+      "tbl": "transfer_event_reward",
+      "idx": "transfer_event_reward_0_transfer_detail_id",
+      "stat": "140 3"
+    },
+    {
+      "tbl": "story_event_announce_detail",
+      "idx": "story_event_announce_detail_0_announce_id",
+      "stat": "129 13"
+    },
+    {
+      "tbl": "story_event_announce_detail",
+      "idx": "sqlite_autoindex_story_event_announce_detail_1",
+      "stat": "129 13 1"
+    },
+    {
+      "tbl": "audience_impostor",
+      "idx": "audience_impostor_0_season_1_weather",
+      "stat": "32 7 2"
+    },
+    {
+      "tbl": "mob_hair_color_set",
+      "idx": null,
+      "stat": "89"
+    },
+    {
+      "tbl": "limited_exchange",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "jukebox_chara_tag_data",
+      "idx": null,
+      "stat": "229"
+    },
+    {
+      "tbl": "dress_data",
+      "idx": "dress_data_0_chara_id_1_costume_type",
+      "stat": "181 3 2"
+    },
+    {
+      "tbl": "dress_data",
+      "idx": "dress_data_0_body_type",
+      "stat": "181 11"
+    },
+    {
+      "tbl": "dress_data",
+      "idx": "dress_data_0_condition_type",
+      "stat": "181 37"
+    },
+    {
+      "tbl": "dress_data",
+      "idx": "dress_data_0_chara_id",
+      "stat": "181 3"
+    },
+    {
+      "tbl": "crane_game_prop",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "season_data",
+      "idx": "season_data_0_type",
+      "stat": "28 6"
+    },
+    {
+      "tbl": "single_mode_fan_count",
+      "idx": "single_mode_fan_count_0_fan_set_id_1_order",
+      "stat": "900 18 1"
+    },
+    {
+      "tbl": "single_mode_fan_count",
+      "idx": "single_mode_fan_count_0_fan_set_id",
+      "stat": "900 18"
+    },
+    {
+      "tbl": "champions_race_condition",
+      "idx": "sqlite_autoindex_champions_race_condition_1",
+      "stat": "77 7 1"
+    },
+    {
+      "tbl": "skill_level_value",
+      "idx": "skill_level_value_0_ability_type",
+      "stat": "231 10"
+    },
+    {
+      "tbl": "single_mode_aoharu_schedule",
+      "idx": null,
+      "stat": "5"
+    },
+    {
+      "tbl": "daily_pack",
+      "idx": "daily_pack_0_group_id",
+      "stat": "4 4"
+    },
+    {
+      "tbl": "daily_pack",
+      "idx": "sqlite_autoindex_daily_pack_1",
+      "stat": "4 4 1"
+    },
+    {
+      "tbl": "champions_reward_rate",
+      "idx": "champions_reward_rate_0_champions_id_1_round_id",
+      "stat": "528 48 10"
+    },
+    {
+      "tbl": "chara_category_motion",
+      "idx": null,
+      "stat": "53"
+    },
+    {
+      "tbl": "love_rank",
+      "idx": "love_rank_0_rank",
+      "stat": "11 1"
+    },
+    {
+      "tbl": "facial_mouth_change",
+      "idx": "facial_mouth_change_0_chara_id",
+      "stat": "14 1"
+    },
+    {
+      "tbl": "facial_mouth_change",
+      "idx": "facial_mouth_change_0_chara_id_1_before_facialname",
+      "stat": "14 1 1"
+    },
+    {
+      "tbl": "story_still",
+      "idx": "story_still_0_still_id",
+      "stat": "72 2"
+    },
+    {
+      "tbl": "single_mode_skill_need_point",
+      "idx": null,
+      "stat": "449"
+    },
+    {
+      "tbl": "race_overrun_pattern",
+      "idx": null,
+      "stat": "5"
+    },
+    {
+      "tbl": "login_bonus_data",
+      "idx": "login_bonus_data_0_type",
+      "stat": "49 17"
+    },
+    {
+      "tbl": "login_bonus_data",
+      "idx": "sqlite_autoindex_login_bonus_data_1",
+      "stat": "49 1"
+    },
+    {
+      "tbl": "item_data",
+      "idx": "item_data_0_group_id",
+      "stat": "182 61"
+    },
+    {
+      "tbl": "item_data",
+      "idx": "item_data_0_item_category",
+      "stat": "182 7"
+    },
+    {
+      "tbl": "short_episode",
+      "idx": "short_episode_0_scene",
+      "stat": "10 2"
+    },
+    {
+      "tbl": "champions_news_race",
+      "idx": "champions_news_race_0_round_id",
+      "stat": "211 43"
+    },
+    {
+      "tbl": "support_card_limit_break",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "skill_data",
+      "idx": "skill_data_0_group_id",
+      "stat": "553 2"
+    },
+    {
+      "tbl": "campaign_chara_story_schedule",
+      "idx": "campaign_chara_story_schedule_0_campaign_id",
+      "stat": "192 4"
+    },
+    {
+      "tbl": "campaign_chara_story_schedule",
+      "idx": "campaign_chara_story_schedule_0_chara_id",
+      "stat": "192 5"
+    },
+    {
+      "tbl": "single_mode_unique_chara",
+      "idx": "single_mode_unique_chara_0_partner_id_1_scenario_id",
+      "stat": "14 3 1"
+    },
+    {
+      "tbl": "single_mode_route_announce",
+      "idx": "single_mode_route_announce_0_route_race_type_1_route_race_id",
+      "stat": "18 18 1"
+    },
+    {
+      "tbl": "audience_hair_color_set",
+      "idx": null,
+      "stat": "78"
+    },
+    {
+      "tbl": "skill_set",
+      "idx": null,
+      "stat": "1120"
+    },
+    {
+      "tbl": "challenge_match_retry_bonus",
+      "idx": null,
+      "stat": "5"
+    },
+    {
+      "tbl": "single_mode_message",
+      "idx": null,
+      "stat": "26"
+    },
+    {
+      "tbl": "jukebox_comment",
+      "idx": "jukebox_comment_0_chara_id_1_comment_type",
+      "stat": "148 3 2"
+    },
+    {
+      "tbl": "jukebox_comment",
+      "idx": "jukebox_comment_0_comment_id",
+      "stat": "148 1"
+    },
+    {
+      "tbl": "card_talent_hint_upgrade",
+      "idx": "card_talent_hint_upgrade_0_rarity_1_talent_level",
+      "stat": "6 3 1"
+    },
+    {
+      "tbl": "available_skill_set",
+      "idx": "available_skill_set_0_available_skill_set_id",
+      "stat": "518 7"
+    },
+    {
+      "tbl": "team_stadium_score_bonus",
+      "idx": "team_stadium_score_bonus_0_condition_type",
+      "stat": "7 2"
+    },
+    {
+      "tbl": "gift_message",
+      "idx": null,
+      "stat": "90"
+    },
+    {
+      "tbl": "race_proper_runningstyle_rate",
+      "idx": null,
+      "stat": "9"
+    },
+    {
+      "tbl": "highlight_interpolate",
+      "idx": null,
+      "stat": "3"
+    },
+    {
+      "tbl": "single_mode_chara_grade",
+      "idx": null,
+      "stat": "10"
+    },
+    {
+      "tbl": "race_fence_set",
+      "idx": null,
+      "stat": "108"
+    },
+    {
+      "tbl": "race_course_set",
+      "idx": "race_course_set_0_race_track_id",
+      "stat": "107 10"
+    },
+    {
+      "tbl": "race_popularity_proper_value",
+      "idx": "race_popularity_proper_value_0_proper_type",
+      "stat": "16 8"
+    },
+    {
+      "tbl": "jukebox_motion_data",
+      "idx": "jukebox_motion_data_0_song_type",
+      "stat": "16 3"
+    },
+    {
+      "tbl": "home_event_schedule",
+      "idx": null,
+      "stat": "2"
+    },
+    {
+      "tbl": "home_character_type",
+      "idx": "sqlite_autoindex_home_character_type_1",
+      "stat": "23 6 1"
+    },
+    {
+      "tbl": "gacha_exchange",
+      "idx": "gacha_exchange_0_gacha_id",
+      "stat": "214 3"
+    },
+    {
+      "tbl": "gacha_exchange",
+      "idx": "sqlite_autoindex_gacha_exchange_1",
+      "stat": "214 3 1"
+    },
+    {
+      "tbl": "random_ear_tail_motion",
+      "idx": "random_ear_tail_motion_0_parts_type",
+      "stat": "27 14"
+    },
+    {
+      "tbl": "nickname",
+      "idx": "nickname_0_user_show",
+      "stat": "211 211"
+    },
+    {
+      "tbl": "single_mode_aoharu_result_cutt",
+      "idx": "single_mode_aoharu_result_cutt_0_chara_id",
+      "stat": "4 2"
+    },
+    {
+      "tbl": "race_bgm_cutin",
+      "idx": "race_bgm_cutin_0_card_id_1_bgm_group_id",
+      "stat": "2 1 1"
+    },
+    {
+      "tbl": "race_bgm_cutin",
+      "idx": "race_bgm_cutin_0_bgm_group_id",
+      "stat": "2 2"
+    },
+    {
+      "tbl": "race_bgm_cutin",
+      "idx": "race_bgm_cutin_0_card_id",
+      "stat": "2 1"
+    },
+    {
+      "tbl": "home_eat",
+      "idx": "home_eat_0_chara_id",
+      "stat": "56 4"
+    },
+    {
+      "tbl": "support_card_group",
+      "idx": "support_card_group_0_chara_id",
+      "stat": "6 1"
+    },
+    {
+      "tbl": "support_card_group",
+      "idx": "support_card_group_0_support_card_id",
+      "stat": "6 6"
+    },
+    {
+      "tbl": "main_story_data",
+      "idx": "main_story_data_0_part_id",
+      "stat": "103 18"
+    },
+    {
+      "tbl": "main_story_data",
+      "idx": "sqlite_autoindex_main_story_data_1",
+      "stat": "103 1"
+    },
+    {
+      "tbl": "single_mode_route_race",
+      "idx": "single_mode_route_race_0_race_set_id",
+      "stat": "698 12"
+    },
+    {
+      "tbl": "gacha_top_bg",
+      "idx": "gacha_top_bg_0_gacha_id",
+      "stat": "100 1"
+    },
+    {
+      "tbl": "champions_news_chara_comment",
+      "idx": "champions_news_chara_comment_0_round_id",
+      "stat": "694 139"
+    },
+    {
+      "tbl": "champions_news_chara_detail",
+      "idx": null,
+      "stat": "465"
+    },
+    {
+      "tbl": "champions_schedule",
+      "idx": null,
+      "stat": "11"
+    }
+  ]
+}

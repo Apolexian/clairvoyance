@@ -1,0 +1,2169 @@
+{
+  "table": "story_event_win_bonus",
+  "row_count": 308,
+  "columns": [
+    "id",
+    "story_event_id",
+    "min_win_count",
+    "max_win_count",
+    "bonus_point"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "story_event_id": 1001,
+      "min_win_count": 1,
+      "max_win_count": 2,
+      "bonus_point": 100
+    },
+    {
+      "id": 2,
+      "story_event_id": 1001,
+      "min_win_count": 3,
+      "max_win_count": 4,
+      "bonus_point": 200
+    },
+    {
+      "id": 3,
+      "story_event_id": 1001,
+      "min_win_count": 5,
+      "max_win_count": 9,
+      "bonus_point": 300
+    },
+    {
+      "id": 4,
+      "story_event_id": 1001,
+      "min_win_count": 10,
+      "max_win_count": 99,
+      "bonus_point": 500
+    },
+    {
+      "id": 5,
+      "story_event_id": 1002,
+      "min_win_count": 1,
+      "max_win_count": 2,
+      "bonus_point": 100
+    },
+    {
+      "id": 6,
+      "story_event_id": 1002,
+      "min_win_count": 3,
+      "max_win_count": 4,
+      "bonus_point": 200
+    },
+    {
+      "id": 7,
+      "story_event_id": 1002,
+      "min_win_count": 5,
+      "max_win_count": 9,
+      "bonus_point": 300
+    },
+    {
+      "id": 8,
+      "story_event_id": 1002,
+      "min_win_count": 10,
+      "max_win_count": 99,
+      "bonus_point": 500
+    },
+    {
+      "id": 9,
+      "story_event_id": 1003,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 10,
+      "story_event_id": 1003,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 11,
+      "story_event_id": 1003,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 12,
+      "story_event_id": 1003,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 13,
+      "story_event_id": 1003,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 14,
+      "story_event_id": 1003,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 15,
+      "story_event_id": 1003,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 16,
+      "story_event_id": 1003,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 17,
+      "story_event_id": 1003,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 18,
+      "story_event_id": 1003,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 19,
+      "story_event_id": 1003,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 20,
+      "story_event_id": 1003,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 21,
+      "story_event_id": 1003,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 22,
+      "story_event_id": 1003,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 23,
+      "story_event_id": 1003,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 24,
+      "story_event_id": 1003,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 25,
+      "story_event_id": 1003,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 26,
+      "story_event_id": 1003,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 27,
+      "story_event_id": 1003,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 28,
+      "story_event_id": 1003,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 29,
+      "story_event_id": 1003,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 30,
+      "story_event_id": 1003,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 31,
+      "story_event_id": 1003,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 32,
+      "story_event_id": 1003,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 33,
+      "story_event_id": 1003,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 34,
+      "story_event_id": 1003,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 35,
+      "story_event_id": 1003,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 36,
+      "story_event_id": 1003,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 37,
+      "story_event_id": 1003,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 38,
+      "story_event_id": 1003,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 39,
+      "story_event_id": 1004,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 40,
+      "story_event_id": 1004,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 41,
+      "story_event_id": 1004,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 42,
+      "story_event_id": 1004,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 43,
+      "story_event_id": 1004,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 44,
+      "story_event_id": 1004,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 45,
+      "story_event_id": 1004,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 46,
+      "story_event_id": 1004,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 47,
+      "story_event_id": 1004,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 48,
+      "story_event_id": 1004,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 49,
+      "story_event_id": 1004,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 50,
+      "story_event_id": 1004,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 51,
+      "story_event_id": 1004,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 52,
+      "story_event_id": 1004,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 53,
+      "story_event_id": 1004,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 54,
+      "story_event_id": 1004,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 55,
+      "story_event_id": 1004,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 56,
+      "story_event_id": 1004,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 57,
+      "story_event_id": 1004,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 58,
+      "story_event_id": 1004,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 59,
+      "story_event_id": 1004,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 60,
+      "story_event_id": 1004,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 61,
+      "story_event_id": 1004,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 62,
+      "story_event_id": 1004,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 63,
+      "story_event_id": 1004,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 64,
+      "story_event_id": 1004,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 65,
+      "story_event_id": 1004,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 66,
+      "story_event_id": 1004,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 67,
+      "story_event_id": 1004,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 68,
+      "story_event_id": 1004,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 69,
+      "story_event_id": 1005,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 70,
+      "story_event_id": 1005,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 71,
+      "story_event_id": 1005,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 72,
+      "story_event_id": 1005,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 73,
+      "story_event_id": 1005,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 74,
+      "story_event_id": 1005,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 75,
+      "story_event_id": 1005,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 76,
+      "story_event_id": 1005,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 77,
+      "story_event_id": 1005,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 78,
+      "story_event_id": 1005,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 79,
+      "story_event_id": 1005,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 80,
+      "story_event_id": 1005,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 81,
+      "story_event_id": 1005,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 82,
+      "story_event_id": 1005,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 83,
+      "story_event_id": 1005,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 84,
+      "story_event_id": 1005,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 85,
+      "story_event_id": 1005,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 86,
+      "story_event_id": 1005,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 87,
+      "story_event_id": 1005,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 88,
+      "story_event_id": 1005,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 89,
+      "story_event_id": 1005,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 90,
+      "story_event_id": 1005,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 91,
+      "story_event_id": 1005,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 92,
+      "story_event_id": 1005,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 93,
+      "story_event_id": 1005,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 94,
+      "story_event_id": 1005,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 95,
+      "story_event_id": 1005,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 96,
+      "story_event_id": 1005,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 97,
+      "story_event_id": 1005,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 98,
+      "story_event_id": 1005,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 99,
+      "story_event_id": 1006,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 100,
+      "story_event_id": 1006,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 101,
+      "story_event_id": 1006,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 102,
+      "story_event_id": 1006,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 103,
+      "story_event_id": 1006,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 104,
+      "story_event_id": 1006,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 105,
+      "story_event_id": 1006,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 106,
+      "story_event_id": 1006,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 107,
+      "story_event_id": 1006,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 108,
+      "story_event_id": 1006,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 109,
+      "story_event_id": 1006,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 110,
+      "story_event_id": 1006,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 111,
+      "story_event_id": 1006,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 112,
+      "story_event_id": 1006,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 113,
+      "story_event_id": 1006,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 114,
+      "story_event_id": 1006,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 115,
+      "story_event_id": 1006,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 116,
+      "story_event_id": 1006,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 117,
+      "story_event_id": 1006,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 118,
+      "story_event_id": 1006,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 119,
+      "story_event_id": 1006,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 120,
+      "story_event_id": 1006,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 121,
+      "story_event_id": 1006,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 122,
+      "story_event_id": 1006,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 123,
+      "story_event_id": 1006,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 124,
+      "story_event_id": 1006,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 125,
+      "story_event_id": 1006,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 126,
+      "story_event_id": 1006,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 127,
+      "story_event_id": 1006,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 128,
+      "story_event_id": 1006,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 129,
+      "story_event_id": 1007,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 130,
+      "story_event_id": 1007,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 131,
+      "story_event_id": 1007,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 132,
+      "story_event_id": 1007,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 133,
+      "story_event_id": 1007,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 134,
+      "story_event_id": 1007,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 135,
+      "story_event_id": 1007,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 136,
+      "story_event_id": 1007,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 137,
+      "story_event_id": 1007,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 138,
+      "story_event_id": 1007,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 139,
+      "story_event_id": 1007,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 140,
+      "story_event_id": 1007,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 141,
+      "story_event_id": 1007,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 142,
+      "story_event_id": 1007,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 143,
+      "story_event_id": 1007,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 144,
+      "story_event_id": 1007,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 145,
+      "story_event_id": 1007,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 146,
+      "story_event_id": 1007,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 147,
+      "story_event_id": 1007,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 148,
+      "story_event_id": 1007,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 149,
+      "story_event_id": 1007,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 150,
+      "story_event_id": 1007,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 151,
+      "story_event_id": 1007,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 152,
+      "story_event_id": 1007,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 153,
+      "story_event_id": 1007,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 154,
+      "story_event_id": 1007,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 155,
+      "story_event_id": 1007,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 156,
+      "story_event_id": 1007,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 157,
+      "story_event_id": 1007,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 158,
+      "story_event_id": 1007,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 159,
+      "story_event_id": 1008,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 160,
+      "story_event_id": 1008,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 161,
+      "story_event_id": 1008,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 162,
+      "story_event_id": 1008,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 163,
+      "story_event_id": 1008,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 164,
+      "story_event_id": 1008,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 165,
+      "story_event_id": 1008,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 166,
+      "story_event_id": 1008,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 167,
+      "story_event_id": 1008,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 168,
+      "story_event_id": 1008,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 169,
+      "story_event_id": 1008,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 170,
+      "story_event_id": 1008,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 171,
+      "story_event_id": 1008,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 172,
+      "story_event_id": 1008,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 173,
+      "story_event_id": 1008,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 174,
+      "story_event_id": 1008,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 175,
+      "story_event_id": 1008,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 176,
+      "story_event_id": 1008,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 177,
+      "story_event_id": 1008,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 178,
+      "story_event_id": 1008,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 179,
+      "story_event_id": 1008,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 180,
+      "story_event_id": 1008,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 181,
+      "story_event_id": 1008,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 182,
+      "story_event_id": 1008,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 183,
+      "story_event_id": 1008,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 184,
+      "story_event_id": 1008,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 185,
+      "story_event_id": 1008,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 186,
+      "story_event_id": 1008,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 187,
+      "story_event_id": 1008,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 188,
+      "story_event_id": 1008,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 189,
+      "story_event_id": 1009,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 190,
+      "story_event_id": 1009,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 191,
+      "story_event_id": 1009,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 192,
+      "story_event_id": 1009,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 193,
+      "story_event_id": 1009,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 194,
+      "story_event_id": 1009,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 195,
+      "story_event_id": 1009,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 196,
+      "story_event_id": 1009,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 197,
+      "story_event_id": 1009,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 198,
+      "story_event_id": 1009,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 199,
+      "story_event_id": 1009,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 200,
+      "story_event_id": 1009,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 201,
+      "story_event_id": 1009,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 202,
+      "story_event_id": 1009,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 203,
+      "story_event_id": 1009,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 204,
+      "story_event_id": 1009,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 205,
+      "story_event_id": 1009,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 206,
+      "story_event_id": 1009,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 207,
+      "story_event_id": 1009,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 208,
+      "story_event_id": 1009,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 209,
+      "story_event_id": 1009,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 210,
+      "story_event_id": 1009,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 211,
+      "story_event_id": 1009,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 212,
+      "story_event_id": 1009,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 213,
+      "story_event_id": 1009,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 214,
+      "story_event_id": 1009,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 215,
+      "story_event_id": 1009,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 216,
+      "story_event_id": 1009,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 217,
+      "story_event_id": 1009,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 218,
+      "story_event_id": 1009,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 219,
+      "story_event_id": 1010,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 220,
+      "story_event_id": 1010,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 221,
+      "story_event_id": 1010,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 222,
+      "story_event_id": 1010,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 223,
+      "story_event_id": 1010,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 224,
+      "story_event_id": 1010,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 225,
+      "story_event_id": 1010,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 226,
+      "story_event_id": 1010,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 227,
+      "story_event_id": 1010,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 228,
+      "story_event_id": 1010,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 229,
+      "story_event_id": 1010,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 230,
+      "story_event_id": 1010,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 231,
+      "story_event_id": 1010,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 232,
+      "story_event_id": 1010,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 233,
+      "story_event_id": 1010,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 234,
+      "story_event_id": 1010,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 235,
+      "story_event_id": 1010,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 236,
+      "story_event_id": 1010,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 237,
+      "story_event_id": 1010,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 238,
+      "story_event_id": 1010,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 239,
+      "story_event_id": 1010,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 240,
+      "story_event_id": 1010,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 241,
+      "story_event_id": 1010,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 242,
+      "story_event_id": 1010,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 243,
+      "story_event_id": 1010,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 244,
+      "story_event_id": 1010,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 245,
+      "story_event_id": 1010,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 246,
+      "story_event_id": 1010,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 247,
+      "story_event_id": 1010,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 248,
+      "story_event_id": 1010,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 249,
+      "story_event_id": 1011,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 250,
+      "story_event_id": 1011,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 251,
+      "story_event_id": 1011,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 252,
+      "story_event_id": 1011,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 253,
+      "story_event_id": 1011,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 254,
+      "story_event_id": 1011,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 255,
+      "story_event_id": 1011,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 256,
+      "story_event_id": 1011,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 257,
+      "story_event_id": 1011,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 258,
+      "story_event_id": 1011,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 259,
+      "story_event_id": 1011,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 260,
+      "story_event_id": 1011,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 261,
+      "story_event_id": 1011,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 262,
+      "story_event_id": 1011,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 263,
+      "story_event_id": 1011,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 264,
+      "story_event_id": 1011,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 265,
+      "story_event_id": 1011,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 266,
+      "story_event_id": 1011,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 267,
+      "story_event_id": 1011,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 268,
+      "story_event_id": 1011,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 269,
+      "story_event_id": 1011,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 270,
+      "story_event_id": 1011,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 271,
+      "story_event_id": 1011,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 272,
+      "story_event_id": 1011,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 273,
+      "story_event_id": 1011,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 274,
+      "story_event_id": 1011,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 275,
+      "story_event_id": 1011,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 276,
+      "story_event_id": 1011,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 277,
+      "story_event_id": 1011,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 278,
+      "story_event_id": 1011,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    },
+    {
+      "id": 279,
+      "story_event_id": 1012,
+      "min_win_count": 1,
+      "max_win_count": 1,
+      "bonus_point": 100
+    },
+    {
+      "id": 280,
+      "story_event_id": 1012,
+      "min_win_count": 2,
+      "max_win_count": 2,
+      "bonus_point": 150
+    },
+    {
+      "id": 281,
+      "story_event_id": 1012,
+      "min_win_count": 3,
+      "max_win_count": 3,
+      "bonus_point": 200
+    },
+    {
+      "id": 282,
+      "story_event_id": 1012,
+      "min_win_count": 4,
+      "max_win_count": 4,
+      "bonus_point": 250
+    },
+    {
+      "id": 283,
+      "story_event_id": 1012,
+      "min_win_count": 5,
+      "max_win_count": 5,
+      "bonus_point": 300
+    },
+    {
+      "id": 284,
+      "story_event_id": 1012,
+      "min_win_count": 6,
+      "max_win_count": 6,
+      "bonus_point": 340
+    },
+    {
+      "id": 285,
+      "story_event_id": 1012,
+      "min_win_count": 7,
+      "max_win_count": 7,
+      "bonus_point": 380
+    },
+    {
+      "id": 286,
+      "story_event_id": 1012,
+      "min_win_count": 8,
+      "max_win_count": 8,
+      "bonus_point": 420
+    },
+    {
+      "id": 287,
+      "story_event_id": 1012,
+      "min_win_count": 9,
+      "max_win_count": 9,
+      "bonus_point": 460
+    },
+    {
+      "id": 288,
+      "story_event_id": 1012,
+      "min_win_count": 10,
+      "max_win_count": 10,
+      "bonus_point": 500
+    },
+    {
+      "id": 289,
+      "story_event_id": 1012,
+      "min_win_count": 11,
+      "max_win_count": 11,
+      "bonus_point": 530
+    },
+    {
+      "id": 290,
+      "story_event_id": 1012,
+      "min_win_count": 12,
+      "max_win_count": 12,
+      "bonus_point": 560
+    },
+    {
+      "id": 291,
+      "story_event_id": 1012,
+      "min_win_count": 13,
+      "max_win_count": 13,
+      "bonus_point": 590
+    },
+    {
+      "id": 292,
+      "story_event_id": 1012,
+      "min_win_count": 14,
+      "max_win_count": 14,
+      "bonus_point": 620
+    },
+    {
+      "id": 293,
+      "story_event_id": 1012,
+      "min_win_count": 15,
+      "max_win_count": 15,
+      "bonus_point": 650
+    },
+    {
+      "id": 294,
+      "story_event_id": 1012,
+      "min_win_count": 16,
+      "max_win_count": 16,
+      "bonus_point": 680
+    },
+    {
+      "id": 295,
+      "story_event_id": 1012,
+      "min_win_count": 17,
+      "max_win_count": 17,
+      "bonus_point": 710
+    },
+    {
+      "id": 296,
+      "story_event_id": 1012,
+      "min_win_count": 18,
+      "max_win_count": 18,
+      "bonus_point": 740
+    },
+    {
+      "id": 297,
+      "story_event_id": 1012,
+      "min_win_count": 19,
+      "max_win_count": 19,
+      "bonus_point": 770
+    },
+    {
+      "id": 298,
+      "story_event_id": 1012,
+      "min_win_count": 20,
+      "max_win_count": 20,
+      "bonus_point": 800
+    },
+    {
+      "id": 299,
+      "story_event_id": 1012,
+      "min_win_count": 21,
+      "max_win_count": 21,
+      "bonus_point": 820
+    },
+    {
+      "id": 300,
+      "story_event_id": 1012,
+      "min_win_count": 22,
+      "max_win_count": 22,
+      "bonus_point": 840
+    },
+    {
+      "id": 301,
+      "story_event_id": 1012,
+      "min_win_count": 23,
+      "max_win_count": 23,
+      "bonus_point": 860
+    },
+    {
+      "id": 302,
+      "story_event_id": 1012,
+      "min_win_count": 24,
+      "max_win_count": 24,
+      "bonus_point": 880
+    },
+    {
+      "id": 303,
+      "story_event_id": 1012,
+      "min_win_count": 25,
+      "max_win_count": 25,
+      "bonus_point": 900
+    },
+    {
+      "id": 304,
+      "story_event_id": 1012,
+      "min_win_count": 26,
+      "max_win_count": 26,
+      "bonus_point": 920
+    },
+    {
+      "id": 305,
+      "story_event_id": 1012,
+      "min_win_count": 27,
+      "max_win_count": 27,
+      "bonus_point": 940
+    },
+    {
+      "id": 306,
+      "story_event_id": 1012,
+      "min_win_count": 28,
+      "max_win_count": 28,
+      "bonus_point": 960
+    },
+    {
+      "id": 307,
+      "story_event_id": 1012,
+      "min_win_count": 29,
+      "max_win_count": 29,
+      "bonus_point": 980
+    },
+    {
+      "id": 308,
+      "story_event_id": 1012,
+      "min_win_count": 30,
+      "max_win_count": 99,
+      "bonus_point": 1000
+    }
+  ]
+}

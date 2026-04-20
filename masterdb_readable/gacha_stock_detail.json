@@ -1,0 +1,48 @@
+{
+  "table": "gacha_stock_detail",
+  "row_count": 5,
+  "columns": [
+    "id",
+    "gacha_stock_id",
+    "gacha_id",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "gacha_stock_id": 1,
+      "gacha_id": 30060,
+      "start_date": 1769551200,
+      "end_date": 1769896799
+    },
+    {
+      "id": 2,
+      "gacha_stock_id": 1,
+      "gacha_id": 30063,
+      "start_date": 1769896800,
+      "end_date": 1770389999
+    },
+    {
+      "id": 3,
+      "gacha_stock_id": 2,
+      "gacha_id": 30074,
+      "start_date": 1773352800,
+      "end_date": 1773845999
+    },
+    {
+      "id": 4,
+      "gacha_stock_id": 2,
+      "gacha_id": 30075,
+      "start_date": 1773846000,
+      "end_date": 1774303199
+    },
+    {
+      "id": 5,
+      "gacha_stock_id": 2,
+      "gacha_id": 30077,
+      "start_date": 1774303200,
+      "end_date": 1774364399
+    }
+  ]
+}

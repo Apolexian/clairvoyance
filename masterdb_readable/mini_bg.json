@@ -1,0 +1,83 @@
+{
+  "table": "mini_bg",
+  "row_count": 6,
+  "columns": [
+    "id",
+    "scene_type",
+    "release_num",
+    "size_x",
+    "size_y",
+    "grid_offset_x",
+    "grid_offset_y",
+    "dress_id",
+    "position"
+  ],
+  "rows": [
+    {
+      "id": 10001,
+      "scene_type": 1,
+      "release_num": 1,
+      "size_x": 15,
+      "size_y": 5,
+      "grid_offset_x": "0",
+      "grid_offset_y": "0",
+      "dress_id": 2,
+      "position": ""
+    },
+    {
+      "id": 10002,
+      "scene_type": 1,
+      "release_num": 11,
+      "size_x": 15,
+      "size_y": 5,
+      "grid_offset_x": "0",
+      "grid_offset_y": "0",
+      "dress_id": 6,
+      "position": ""
+    },
+    {
+      "id": 10003,
+      "scene_type": 1,
+      "release_num": 21,
+      "size_x": 15,
+      "size_y": 7,
+      "grid_offset_x": "0",
+      "grid_offset_y": "0",
+      "dress_id": 2,
+      "position": ""
+    },
+    {
+      "id": 20001,
+      "scene_type": 2,
+      "release_num": 0,
+      "size_x": 18,
+      "size_y": 6,
+      "grid_offset_x": "0",
+      "grid_offset_y": "1.5",
+      "dress_id": 2,
+      "position": ""
+    },
+    {
+      "id": 40001,
+      "scene_type": 4,
+      "release_num": 0,
+      "size_x": 15,
+      "size_y": 9,
+      "grid_offset_x": "0",
+      "grid_offset_y": "0",
+      "dress_id": 2,
+      "position": ""
+    },
+    {
+      "id": 99001,
+      "scene_type": 99,
+      "release_num": 0,
+      "size_x": 15,
+      "size_y": 5,
+      "grid_offset_x": "0",
+      "grid_offset_y": "0",
+      "dress_id": 2,
+      "position": ""
+    }
+  ]
+}

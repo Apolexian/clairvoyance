@@ -1,0 +1,330 @@
+{
+  "table": "single_mode_change_chara_route",
+  "row_count": 53,
+  "columns": [
+    "id",
+    "route_race_group_id",
+    "chara_id",
+    "route_race_id"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "route_race_group_id": 40000,
+      "chara_id": 1001,
+      "route_race_id": 1
+    },
+    {
+      "id": 2,
+      "route_race_group_id": 40000,
+      "chara_id": 1006,
+      "route_race_id": 11
+    },
+    {
+      "id": 3,
+      "route_race_group_id": 40000,
+      "chara_id": 1009,
+      "route_race_id": 22
+    },
+    {
+      "id": 4,
+      "route_race_group_id": 40000,
+      "chara_id": 1010,
+      "route_race_id": 34
+    },
+    {
+      "id": 5,
+      "route_race_group_id": 40000,
+      "chara_id": 1013,
+      "route_race_id": 45
+    },
+    {
+      "id": 6,
+      "route_race_group_id": 40000,
+      "chara_id": 1052,
+      "route_race_id": 55
+    },
+    {
+      "id": 7,
+      "route_race_group_id": 40000,
+      "chara_id": 1030,
+      "route_race_id": 67
+    },
+    {
+      "id": 8,
+      "route_race_group_id": 40000,
+      "chara_id": 1003,
+      "route_race_id": 78
+    },
+    {
+      "id": 9,
+      "route_race_group_id": 40000,
+      "chara_id": 1056,
+      "route_race_id": 89
+    },
+    {
+      "id": 10,
+      "route_race_group_id": 40000,
+      "chara_id": 1011,
+      "route_race_id": 100
+    },
+    {
+      "id": 11,
+      "route_race_group_id": 40000,
+      "chara_id": 1002,
+      "route_race_id": 111
+    },
+    {
+      "id": 12,
+      "route_race_group_id": 40000,
+      "chara_id": 1045,
+      "route_race_id": 122
+    },
+    {
+      "id": 13,
+      "route_race_group_id": 40000,
+      "chara_id": 1027,
+      "route_race_id": 133
+    },
+    {
+      "id": 14,
+      "route_race_group_id": 40000,
+      "chara_id": 1024,
+      "route_race_id": 145
+    },
+    {
+      "id": 15,
+      "route_race_group_id": 40000,
+      "chara_id": 1060,
+      "route_race_id": 157
+    },
+    {
+      "id": 16,
+      "route_race_group_id": 40000,
+      "chara_id": 1018,
+      "route_race_id": 169
+    },
+    {
+      "id": 17,
+      "route_race_group_id": 40000,
+      "chara_id": 1032,
+      "route_race_id": 181
+    },
+    {
+      "id": 18,
+      "route_race_group_id": 40000,
+      "chara_id": 1017,
+      "route_race_id": 193
+    },
+    {
+      "id": 19,
+      "route_race_group_id": 40000,
+      "chara_id": 1061,
+      "route_race_id": 205
+    },
+    {
+      "id": 20,
+      "route_race_group_id": 40000,
+      "chara_id": 1004,
+      "route_race_id": 217
+    },
+    {
+      "id": 21,
+      "route_race_group_id": 40000,
+      "chara_id": 1041,
+      "route_race_id": 229
+    },
+    {
+      "id": 22,
+      "route_race_group_id": 40000,
+      "chara_id": 1014,
+      "route_race_id": 243
+    },
+    {
+      "id": 23,
+      "route_race_group_id": 40000,
+      "chara_id": 1008,
+      "route_race_id": 254
+    },
+    {
+      "id": 24,
+      "route_race_group_id": 40000,
+      "chara_id": 1007,
+      "route_race_id": 267
+    },
+    {
+      "id": 25,
+      "route_race_group_id": 40000,
+      "chara_id": 1035,
+      "route_race_id": 279
+    },
+    {
+      "id": 26,
+      "route_race_group_id": 40000,
+      "chara_id": 1015,
+      "route_race_id": 297
+    },
+    {
+      "id": 27,
+      "route_race_group_id": 40000,
+      "chara_id": 1026,
+      "route_race_id": 309
+    },
+    {
+      "id": 28,
+      "route_race_group_id": 40000,
+      "chara_id": 1023,
+      "route_race_id": 321
+    },
+    {
+      "id": 29,
+      "route_race_group_id": 40000,
+      "chara_id": 1038,
+      "route_race_id": 333
+    },
+    {
+      "id": 30,
+      "route_race_group_id": 40000,
+      "chara_id": 1050,
+      "route_race_id": 345
+    },
+    {
+      "id": 31,
+      "route_race_group_id": 40000,
+      "chara_id": 1046,
+      "route_race_id": 357
+    },
+    {
+      "id": 32,
+      "route_race_group_id": 40000,
+      "chara_id": 1016,
+      "route_race_id": 371
+    },
+    {
+      "id": 33,
+      "route_race_group_id": 40000,
+      "chara_id": 1020,
+      "route_race_id": 389
+    },
+    {
+      "id": 34,
+      "route_race_group_id": 40000,
+      "chara_id": 1012,
+      "route_race_id": 402
+    },
+    {
+      "id": 35,
+      "route_race_group_id": 40000,
+      "chara_id": 1005,
+      "route_race_id": 415
+    },
+    {
+      "id": 36,
+      "route_race_group_id": 40000,
+      "chara_id": 1040,
+      "route_race_id": 430
+    },
+    {
+      "id": 37,
+      "route_race_group_id": 40000,
+      "chara_id": 1058,
+      "route_race_id": 443
+    },
+    {
+      "id": 38,
+      "route_race_group_id": 40000,
+      "chara_id": 1037,
+      "route_race_id": 455
+    },
+    {
+      "id": 39,
+      "route_race_group_id": 40000,
+      "chara_id": 1028,
+      "route_race_id": 468
+    },
+    {
+      "id": 40,
+      "route_race_group_id": 40000,
+      "chara_id": 1019,
+      "route_race_id": 481
+    },
+    {
+      "id": 41,
+      "route_race_group_id": 40000,
+      "chara_id": 1039,
+      "route_race_id": 491
+    },
+    {
+      "id": 42,
+      "route_race_group_id": 40000,
+      "chara_id": 1025,
+      "route_race_id": 503
+    },
+    {
+      "id": 43,
+      "route_race_group_id": 40000,
+      "chara_id": 1048,
+      "route_race_id": 516
+    },
+    {
+      "id": 44,
+      "route_race_group_id": 40000,
+      "chara_id": 1059,
+      "route_race_id": 528
+    },
+    {
+      "id": 45,
+      "route_race_group_id": 40000,
+      "chara_id": 1022,
+      "route_race_id": 541
+    },
+    {
+      "id": 46,
+      "route_race_group_id": 40000,
+      "chara_id": 1021,
+      "route_race_id": 557
+    },
+    {
+      "id": 47,
+      "route_race_group_id": 40000,
+      "chara_id": 1069,
+      "route_race_id": 568
+    },
+    {
+      "id": 48,
+      "route_race_group_id": 40000,
+      "chara_id": 1071,
+      "route_race_id": 580
+    },
+    {
+      "id": 49,
+      "route_race_group_id": 40000,
+      "chara_id": 1033,
+      "route_race_id": 594
+    },
+    {
+      "id": 50,
+      "route_race_group_id": 40000,
+      "chara_id": 1062,
+      "route_race_id": 619
+    },
+    {
+      "id": 51,
+      "route_race_group_id": 40000,
+      "chara_id": 1068,
+      "route_race_id": 605
+    },
+    {
+      "id": 52,
+      "route_race_group_id": 40000,
+      "chara_id": 1067,
+      "route_race_id": 632
+    },
+    {
+      "id": 53,
+      "route_race_group_id": 40000,
+      "chara_id": 1074,
+      "route_race_id": 645
+    }
+  ]
+}

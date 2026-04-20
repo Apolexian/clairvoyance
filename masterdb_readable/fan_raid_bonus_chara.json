@@ -1,0 +1,18 @@
+{
+  "table": "fan_raid_bonus_chara",
+  "row_count": 1,
+  "columns": [
+    "id",
+    "fan_raid_id",
+    "chara_id",
+    "add_fan"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "fan_raid_id": 1001,
+      "chara_id": 1046,
+      "add_fan": 80000
+    }
+  ]
+}

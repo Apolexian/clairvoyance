@@ -1,0 +1,94 @@
+{
+  "table": "announce_event",
+  "row_count": 10,
+  "columns": [
+    "id",
+    "cue_name",
+    "cue_sheet_name",
+    "voice_text_asset",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "cue_name": "snd_voi_event_090004_0112",
+      "cue_sheet_name": "snd_voi_event_090004",
+      "voice_text_asset": 1,
+      "start_date": 1756072800,
+      "end_date": 1756418399
+    },
+    {
+      "id": 2,
+      "cue_name": "snd_voi_event_090002_0112",
+      "cue_sheet_name": "snd_voi_event_090002",
+      "voice_text_asset": 1,
+      "start_date": 1758146400,
+      "end_date": 1758491999
+    },
+    {
+      "id": 3,
+      "cue_name": "snd_voi_event_090005_0111",
+      "cue_sheet_name": "snd_voi_event_090005",
+      "voice_text_asset": 1,
+      "start_date": 1760133600,
+      "end_date": 1760479199
+    },
+    {
+      "id": 4,
+      "cue_name": "snd_voi_event_090006_0113",
+      "cue_sheet_name": "snd_voi_event_090006",
+      "voice_text_asset": 2,
+      "start_date": 1763676000,
+      "end_date": 1764021599
+    },
+    {
+      "id": 5,
+      "cue_name": "snd_voi_event_090007_0114",
+      "cue_sheet_name": "snd_voi_event_090007",
+      "voice_text_asset": 3,
+      "start_date": 1765404000,
+      "end_date": 1765749599
+    },
+    {
+      "id": 6,
+      "cue_name": "snd_voi_event_090008_0114",
+      "cue_sheet_name": "snd_voi_event_090008",
+      "voice_text_asset": 4,
+      "start_date": 1767304800,
+      "end_date": 1767650399
+    },
+    {
+      "id": 9,
+      "cue_name": "snd_voi_event_090009_0109",
+      "cue_sheet_name": "snd_voi_event_090009",
+      "voice_text_asset": 5,
+      "start_date": 1769378400,
+      "end_date": 1769723999
+    },
+    {
+      "id": 10,
+      "cue_name": "snd_voi_event_090010_0116",
+      "cue_sheet_name": "snd_voi_event_090010",
+      "voice_text_asset": 6,
+      "start_date": 1771106400,
+      "end_date": 1771451999
+    },
+    {
+      "id": 11,
+      "cue_name": "snd_voi_event_090011_0112",
+      "cue_sheet_name": "snd_voi_event_090011",
+      "voice_text_asset": 11,
+      "start_date": 1773007200,
+      "end_date": 1773352799
+    },
+    {
+      "id": 12,
+      "cue_name": "snd_voi_event_090012_0116",
+      "cue_sheet_name": "snd_voi_event_090012",
+      "voice_text_asset": 12,
+      "start_date": 1775080800,
+      "end_date": 1649195999
+    }
+  ]
+}

@@ -1,0 +1,1616 @@
+{
+  "table": "jukebox_chara_tag_data",
+  "row_count": 229,
+  "columns": [
+    "id",
+    "chara_id",
+    "tag",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "chara_id": 1001,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 2,
+      "chara_id": 1001,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 3,
+      "chara_id": 1001,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 4,
+      "chara_id": 1001,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 5,
+      "chara_id": 1001,
+      "tag": 3301,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 6,
+      "chara_id": 1001,
+      "tag": 3304,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 7,
+      "chara_id": 1001,
+      "tag": 3201,
+      "start_date": 1762207200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 8,
+      "chara_id": 1001,
+      "tag": 3307,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 10,
+      "chara_id": 1002,
+      "tag": 1004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 11,
+      "chara_id": 1002,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 12,
+      "chara_id": 1002,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 13,
+      "chara_id": 1002,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 14,
+      "chara_id": 1002,
+      "tag": 3301,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 16,
+      "chara_id": 1002,
+      "tag": 3201,
+      "start_date": 1762207200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 17,
+      "chara_id": 1002,
+      "tag": 3105,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 19,
+      "chara_id": 1003,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 20,
+      "chara_id": 1003,
+      "tag": 1005,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 21,
+      "chara_id": 1003,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 22,
+      "chara_id": 1003,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 23,
+      "chara_id": 1003,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 24,
+      "chara_id": 1003,
+      "tag": 3301,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 25,
+      "chara_id": 1003,
+      "tag": 3302,
+      "start_date": 1752703200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 26,
+      "chara_id": 1003,
+      "tag": 3303,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 28,
+      "chara_id": 1003,
+      "tag": 3201,
+      "start_date": 1762207200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 29,
+      "chara_id": 1003,
+      "tag": 3307,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 31,
+      "chara_id": 1004,
+      "tag": 1004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 32,
+      "chara_id": 1004,
+      "tag": 2001,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 34,
+      "chara_id": 1004,
+      "tag": 3402,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 35,
+      "chara_id": 1005,
+      "tag": 1004,
+      "start_date": 1759442400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 36,
+      "chara_id": 1005,
+      "tag": 1006,
+      "start_date": 1759442400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 37,
+      "chara_id": 1005,
+      "tag": 2001,
+      "start_date": 1759442400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 39,
+      "chara_id": 1005,
+      "tag": 3402,
+      "start_date": 1759442400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 40,
+      "chara_id": 1006,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 41,
+      "chara_id": 1006,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 42,
+      "chara_id": 1006,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 43,
+      "chara_id": 1006,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 44,
+      "chara_id": 1006,
+      "tag": 2006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 45,
+      "chara_id": 1006,
+      "tag": 3402,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 46,
+      "chara_id": 1007,
+      "tag": 1003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 47,
+      "chara_id": 1007,
+      "tag": 1005,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 48,
+      "chara_id": 1007,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 49,
+      "chara_id": 1007,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 50,
+      "chara_id": 1007,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 51,
+      "chara_id": 1007,
+      "tag": 3301,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 52,
+      "chara_id": 1007,
+      "tag": 3403,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 53,
+      "chara_id": 1008,
+      "tag": 1003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 54,
+      "chara_id": 1008,
+      "tag": 1004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 55,
+      "chara_id": 1008,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 56,
+      "chara_id": 1008,
+      "tag": 2002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 57,
+      "chara_id": 1008,
+      "tag": 2006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 58,
+      "chara_id": 1008,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 59,
+      "chara_id": 1008,
+      "tag": 3301,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 60,
+      "chara_id": 1008,
+      "tag": 3403,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 61,
+      "chara_id": 1009,
+      "tag": 1001,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 62,
+      "chara_id": 1009,
+      "tag": 2002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 63,
+      "chara_id": 1009,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 64,
+      "chara_id": 1009,
+      "tag": 3301,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 65,
+      "chara_id": 1009,
+      "tag": 3403,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 66,
+      "chara_id": 1010,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 67,
+      "chara_id": 1010,
+      "tag": 1005,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 68,
+      "chara_id": 1010,
+      "tag": 2006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 69,
+      "chara_id": 1010,
+      "tag": 3002,
+      "start_date": 1762466400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 71,
+      "chara_id": 1011,
+      "tag": 1003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 72,
+      "chara_id": 1011,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 73,
+      "chara_id": 1011,
+      "tag": 2001,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 74,
+      "chara_id": 1011,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 75,
+      "chara_id": 1011,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 76,
+      "chara_id": 1011,
+      "tag": 3304,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 78,
+      "chara_id": 1012,
+      "tag": 1003,
+      "start_date": 1758146400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 79,
+      "chara_id": 1012,
+      "tag": 2001,
+      "start_date": 1758146400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 82,
+      "chara_id": 1013,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 83,
+      "chara_id": 1013,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 84,
+      "chara_id": 1013,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 85,
+      "chara_id": 1013,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 86,
+      "chara_id": 1013,
+      "tag": 3301,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 87,
+      "chara_id": 1013,
+      "tag": 3302,
+      "start_date": 1752703200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 88,
+      "chara_id": 1013,
+      "tag": 3303,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 89,
+      "chara_id": 1013,
+      "tag": 3101,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 90,
+      "chara_id": 1013,
+      "tag": 3307,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 92,
+      "chara_id": 1014,
+      "tag": 1003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 93,
+      "chara_id": 1014,
+      "tag": 2006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 94,
+      "chara_id": 1014,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 95,
+      "chara_id": 1014,
+      "tag": 3304,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 97,
+      "chara_id": 1015,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 98,
+      "chara_id": 1015,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 99,
+      "chara_id": 1015,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 100,
+      "chara_id": 1015,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 102,
+      "chara_id": 1016,
+      "tag": 1003,
+      "start_date": 1755727200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 103,
+      "chara_id": 1016,
+      "tag": 2003,
+      "start_date": 1755727200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 104,
+      "chara_id": 1016,
+      "tag": 2004,
+      "start_date": 1755727200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 106,
+      "chara_id": 1016,
+      "tag": 3104,
+      "start_date": 1759874400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 107,
+      "chara_id": 1017,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 108,
+      "chara_id": 1017,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 109,
+      "chara_id": 1017,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 110,
+      "chara_id": 1017,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 113,
+      "chara_id": 1018,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 114,
+      "chara_id": 1018,
+      "tag": 2002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 115,
+      "chara_id": 1018,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 118,
+      "chara_id": 1019,
+      "tag": 1001,
+      "start_date": 1763589600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 119,
+      "chara_id": 1019,
+      "tag": 1005,
+      "start_date": 1763589600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 120,
+      "chara_id": 1019,
+      "tag": 2004,
+      "start_date": 1763589600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 121,
+      "chara_id": 1019,
+      "tag": 2005,
+      "start_date": 1763589600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 122,
+      "chara_id": 1019,
+      "tag": 2006,
+      "start_date": 1763589600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 123,
+      "chara_id": 1020,
+      "tag": 1006,
+      "start_date": 1757282400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 124,
+      "chara_id": 1020,
+      "tag": 2003,
+      "start_date": 1757282400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 125,
+      "chara_id": 1020,
+      "tag": 3304,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 127,
+      "chara_id": 1023,
+      "tag": 1004,
+      "start_date": 1752184800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 128,
+      "chara_id": 1023,
+      "tag": 2003,
+      "start_date": 1752184800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 129,
+      "chara_id": 1023,
+      "tag": 2004,
+      "start_date": 1752184800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 130,
+      "chara_id": 1023,
+      "tag": 2007,
+      "start_date": 1752184800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 131,
+      "chara_id": 1023,
+      "tag": 3103,
+      "start_date": 1754258400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 132,
+      "chara_id": 1023,
+      "tag": 3104,
+      "start_date": 1759874400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 134,
+      "chara_id": 1024,
+      "tag": 1001,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 135,
+      "chara_id": 1024,
+      "tag": 1005,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 136,
+      "chara_id": 1024,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 137,
+      "chara_id": 1024,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 138,
+      "chara_id": 1024,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 139,
+      "chara_id": 1025,
+      "tag": 1006,
+      "start_date": 1765231200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 140,
+      "chara_id": 1025,
+      "tag": 2003,
+      "start_date": 1765231200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 141,
+      "chara_id": 1025,
+      "tag": 2004,
+      "start_date": 1765231200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 142,
+      "chara_id": 1025,
+      "tag": 3412,
+      "start_date": 1765231200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 143,
+      "chara_id": 1026,
+      "tag": 1004,
+      "start_date": 1751493600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 144,
+      "chara_id": 1026,
+      "tag": 2003,
+      "start_date": 1751493600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 145,
+      "chara_id": 1026,
+      "tag": 2001,
+      "start_date": 1751493600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 146,
+      "chara_id": 1026,
+      "tag": 3102,
+      "start_date": 1751493600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 148,
+      "chara_id": 1026,
+      "tag": 3302,
+      "start_date": 1752703200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 149,
+      "chara_id": 1027,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 150,
+      "chara_id": 1027,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 151,
+      "chara_id": 1027,
+      "tag": 3409,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 152,
+      "chara_id": 1028,
+      "tag": 1001,
+      "start_date": 1762898400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 153,
+      "chara_id": 1028,
+      "tag": 2006,
+      "start_date": 1762898400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 154,
+      "chara_id": 1030,
+      "tag": 1001,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 155,
+      "chara_id": 1030,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 156,
+      "chara_id": 1030,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 157,
+      "chara_id": 1030,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 158,
+      "chara_id": 1030,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 159,
+      "chara_id": 1030,
+      "tag": 3102,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 160,
+      "chara_id": 1030,
+      "tag": 3002,
+      "start_date": 1762466400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 161,
+      "chara_id": 1030,
+      "tag": 3302,
+      "start_date": 1752703200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 162,
+      "chara_id": 1032,
+      "tag": 1004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 163,
+      "chara_id": 1032,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 164,
+      "chara_id": 1032,
+      "tag": 3105,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 165,
+      "chara_id": 1035,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 166,
+      "chara_id": 1035,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 167,
+      "chara_id": 1035,
+      "tag": 3103,
+      "start_date": 1754258400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 169,
+      "chara_id": 1037,
+      "tag": 1006,
+      "start_date": 1761861600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 170,
+      "chara_id": 1037,
+      "tag": 2004,
+      "start_date": 1761861600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 171,
+      "chara_id": 1037,
+      "tag": 2003,
+      "start_date": 1761861600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 172,
+      "chara_id": 1038,
+      "tag": 1001,
+      "start_date": 1753653600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 173,
+      "chara_id": 1038,
+      "tag": 1005,
+      "start_date": 1753653600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 174,
+      "chara_id": 1038,
+      "tag": 2006,
+      "start_date": 1753653600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 175,
+      "chara_id": 1039,
+      "tag": 1001,
+      "start_date": 1764626400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 176,
+      "chara_id": 1039,
+      "tag": 2002,
+      "start_date": 1764626400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 177,
+      "chara_id": 1040,
+      "tag": 1003,
+      "start_date": 1759874400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 178,
+      "chara_id": 1040,
+      "tag": 1006,
+      "start_date": 1759874400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 179,
+      "chara_id": 1040,
+      "tag": 2001,
+      "start_date": 1759874400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 181,
+      "chara_id": 1041,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 182,
+      "chara_id": 1041,
+      "tag": 1005,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 183,
+      "chara_id": 1041,
+      "tag": 2006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 184,
+      "chara_id": 1041,
+      "tag": 3307,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 186,
+      "chara_id": 1045,
+      "tag": 1001,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 187,
+      "chara_id": 1045,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 188,
+      "chara_id": 1045,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 189,
+      "chara_id": 1045,
+      "tag": 2007,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 190,
+      "chara_id": 1045,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 192,
+      "chara_id": 1046,
+      "tag": 1001,
+      "start_date": 1754949600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 193,
+      "chara_id": 1046,
+      "tag": 1005,
+      "start_date": 1754949600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 194,
+      "chara_id": 1046,
+      "tag": 2005,
+      "start_date": 1754949600,
+      "end_date": 4102444799
+    },
+    {
+      "id": 196,
+      "chara_id": 1046,
+      "tag": 3409,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 197,
+      "chara_id": 1048,
+      "tag": 1002,
+      "start_date": 1766095200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 198,
+      "chara_id": 1048,
+      "tag": 2004,
+      "start_date": 1766095200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 199,
+      "chara_id": 1048,
+      "tag": 2001,
+      "start_date": 1766095200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 200,
+      "chara_id": 1050,
+      "tag": 1004,
+      "start_date": 1754258400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 201,
+      "chara_id": 1050,
+      "tag": 2003,
+      "start_date": 1754258400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 202,
+      "chara_id": 1050,
+      "tag": 3103,
+      "start_date": 1754258400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 204,
+      "chara_id": 1052,
+      "tag": 1001,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 205,
+      "chara_id": 1052,
+      "tag": 1005,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 206,
+      "chara_id": 1052,
+      "tag": 2005,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 207,
+      "chara_id": 1052,
+      "tag": 3002,
+      "start_date": 1762466400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 209,
+      "chara_id": 1056,
+      "tag": 1005,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 210,
+      "chara_id": 1056,
+      "tag": 2003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 211,
+      "chara_id": 1056,
+      "tag": 3002,
+      "start_date": 1762466400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 213,
+      "chara_id": 1058,
+      "tag": 1002,
+      "start_date": 1761084000,
+      "end_date": 4102444799
+    },
+    {
+      "id": 214,
+      "chara_id": 1058,
+      "tag": 1005,
+      "start_date": 1761084000,
+      "end_date": 4102444799
+    },
+    {
+      "id": 215,
+      "chara_id": 1058,
+      "tag": 2007,
+      "start_date": 1761084000,
+      "end_date": 4102444799
+    },
+    {
+      "id": 216,
+      "chara_id": 1060,
+      "tag": 1002,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 217,
+      "chara_id": 1060,
+      "tag": 2004,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 218,
+      "chara_id": 1060,
+      "tag": 3302,
+      "start_date": 1752703200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 219,
+      "chara_id": 1060,
+      "tag": 3412,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 220,
+      "chara_id": 1061,
+      "tag": 1003,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 221,
+      "chara_id": 1061,
+      "tag": 1006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 222,
+      "chara_id": 1061,
+      "tag": 2006,
+      "start_date": 1561993200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 223,
+      "chara_id": 1061,
+      "tag": 3304,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 224,
+      "chara_id": 1059,
+      "tag": 1002,
+      "start_date": 1766959200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 225,
+      "chara_id": 1059,
+      "tag": 1006,
+      "start_date": 1766959200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 226,
+      "chara_id": 1059,
+      "tag": 2002,
+      "start_date": 1766959200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 227,
+      "chara_id": 1059,
+      "tag": 2007,
+      "start_date": 1766959200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 228,
+      "chara_id": 1022,
+      "tag": 1001,
+      "start_date": 1768514400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 229,
+      "chara_id": 1022,
+      "tag": 2002,
+      "start_date": 1768514400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 230,
+      "chara_id": 1022,
+      "tag": 3409,
+      "start_date": 1774303200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 231,
+      "chara_id": 1021,
+      "tag": 1003,
+      "start_date": 1769119200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 232,
+      "chara_id": 1021,
+      "tag": 2004,
+      "start_date": 1769119200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 233,
+      "chara_id": 1021,
+      "tag": 2007,
+      "start_date": 1769119200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 235,
+      "chara_id": 1069,
+      "tag": 1001,
+      "start_date": 1770847200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 236,
+      "chara_id": 1069,
+      "tag": 2003,
+      "start_date": 1770847200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 237,
+      "chara_id": 1069,
+      "tag": 2001,
+      "start_date": 1770847200,
+      "end_date": 4102444799
+    },
+    {
+      "id": 238,
+      "chara_id": 1071,
+      "tag": 1006,
+      "start_date": 1772056800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 239,
+      "chara_id": 1033,
+      "tag": 1006,
+      "start_date": 1772748000,
+      "end_date": 4102444799
+    },
+    {
+      "id": 240,
+      "chara_id": 1033,
+      "tag": 2003,
+      "start_date": 1772748000,
+      "end_date": 4102444799
+    },
+    {
+      "id": 241,
+      "chara_id": 1068,
+      "tag": 1003,
+      "start_date": 1773352800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 242,
+      "chara_id": 1068,
+      "tag": 2003,
+      "start_date": 1773352800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 243,
+      "chara_id": 1068,
+      "tag": 2004,
+      "start_date": 1773352800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 244,
+      "chara_id": 1068,
+      "tag": 2007,
+      "start_date": 1773352800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 245,
+      "chara_id": 1068,
+      "tag": 3302,
+      "start_date": 1773352800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 246,
+      "chara_id": 1062,
+      "tag": 1001,
+      "start_date": 1773352800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 247,
+      "chara_id": 1062,
+      "tag": 2004,
+      "start_date": 1773352800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 248,
+      "chara_id": 1062,
+      "tag": 3302,
+      "start_date": 1773352800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 249,
+      "chara_id": 1067,
+      "tag": 1001,
+      "start_date": 1774216800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 250,
+      "chara_id": 1067,
+      "tag": 1006,
+      "start_date": 1774216800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 251,
+      "chara_id": 1067,
+      "tag": 2003,
+      "start_date": 1774216800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 252,
+      "chara_id": 1067,
+      "tag": 2004,
+      "start_date": 1774216800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 253,
+      "chara_id": 1067,
+      "tag": 3302,
+      "start_date": 1774216800,
+      "end_date": 4102444799
+    },
+    {
+      "id": 254,
+      "chara_id": 1074,
+      "tag": 1001,
+      "start_date": 1774562400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 255,
+      "chara_id": 1074,
+      "tag": 2004,
+      "start_date": 1774562400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 256,
+      "chara_id": 1013,
+      "tag": 3308,
+      "start_date": 1775516400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 257,
+      "chara_id": 1027,
+      "tag": 3308,
+      "start_date": 1775516400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 258,
+      "chara_id": 1074,
+      "tag": 3308,
+      "start_date": 1775516400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 259,
+      "chara_id": 1059,
+      "tag": 3308,
+      "start_date": 1775516400,
+      "end_date": 4102444799
+    },
+    {
+      "id": 260,
+      "chara_id": 1071,
+      "tag": 3308,
+      "start_date": 1775516400,
+      "end_date": 4102444799
+    }
+  ]
+}

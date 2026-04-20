@@ -1,0 +1,76 @@
+{
+  "table": "campaign_single_race_add_data",
+  "row_count": 9,
+  "columns": [
+    "id",
+    "race_additional_id",
+    "race_program_id",
+    "race_additional_reward_id",
+    "reward_limit"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "race_additional_id": 1,
+      "race_program_id": 623,
+      "race_additional_reward_id": 1,
+      "reward_limit": 1
+    },
+    {
+      "id": 2,
+      "race_additional_id": 2,
+      "race_program_id": 624,
+      "race_additional_reward_id": 2,
+      "reward_limit": 1
+    },
+    {
+      "id": 3,
+      "race_additional_id": 3,
+      "race_program_id": 81,
+      "race_additional_reward_id": 3,
+      "reward_limit": 1
+    },
+    {
+      "id": 4,
+      "race_additional_id": 4,
+      "race_program_id": 625,
+      "race_additional_reward_id": 4,
+      "reward_limit": 1
+    },
+    {
+      "id": 5,
+      "race_additional_id": 5,
+      "race_program_id": 1,
+      "race_additional_reward_id": 5,
+      "reward_limit": 1
+    },
+    {
+      "id": 6,
+      "race_additional_id": 6,
+      "race_program_id": 2,
+      "race_additional_reward_id": 6,
+      "reward_limit": 1
+    },
+    {
+      "id": 7,
+      "race_additional_id": 7,
+      "race_program_id": 3,
+      "race_additional_reward_id": 7,
+      "reward_limit": 1
+    },
+    {
+      "id": 8,
+      "race_additional_id": 8,
+      "race_program_id": 162,
+      "race_additional_reward_id": 8,
+      "reward_limit": 1
+    },
+    {
+      "id": 9,
+      "race_additional_id": 9,
+      "race_program_id": 163,
+      "race_additional_reward_id": 9,
+      "reward_limit": 1
+    }
+  ]
+}

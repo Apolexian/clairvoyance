@@ -1,0 +1,28 @@
+{
+  "table": "challenge_match_data",
+  "row_count": 1,
+  "columns": [
+    "challenge_match_id",
+    "announce_id",
+    "bonus_skill_id",
+    "bonus_factor_id",
+    "item_exchange_top_id",
+    "notice_date",
+    "start_date",
+    "ending_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "challenge_match_id": 1,
+      "announce_id": 0,
+      "bonus_skill_id": 1000011,
+      "bonus_factor_id": 4000101,
+      "item_exchange_top_id": 20001,
+      "notice_date": 1769983200,
+      "start_date": 1770328800,
+      "ending_date": 1770933599,
+      "end_date": 1771192799
+    }
+  ]
+}

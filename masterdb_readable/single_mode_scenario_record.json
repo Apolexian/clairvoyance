@@ -1,0 +1,230 @@
+{
+  "table": "single_mode_scenario_record",
+  "row_count": 27,
+  "columns": [
+    "id",
+    "scenario_id",
+    "need_record_min",
+    "reward_item_category",
+    "reward_item_id",
+    "reward_num"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "scenario_id": 1,
+      "need_record_min": 4000,
+      "reward_item_category": 30,
+      "reward_item_id": 110,
+      "reward_num": 10000
+    },
+    {
+      "id": 2,
+      "scenario_id": 1,
+      "need_record_min": 5000,
+      "reward_item_category": 91,
+      "reward_item_id": 59,
+      "reward_num": 20000
+    },
+    {
+      "id": 3,
+      "scenario_id": 1,
+      "need_record_min": 6000,
+      "reward_item_category": 40,
+      "reward_item_id": 41,
+      "reward_num": 1
+    },
+    {
+      "id": 4,
+      "scenario_id": 1,
+      "need_record_min": 7000,
+      "reward_item_category": 40,
+      "reward_item_id": 111,
+      "reward_num": 1
+    },
+    {
+      "id": 5,
+      "scenario_id": 1,
+      "need_record_min": 8000,
+      "reward_item_category": 97,
+      "reward_item_id": 115,
+      "reward_num": 10
+    },
+    {
+      "id": 6,
+      "scenario_id": 1,
+      "need_record_min": 10000,
+      "reward_item_category": 90,
+      "reward_item_id": 43,
+      "reward_num": 300
+    },
+    {
+      "id": 7,
+      "scenario_id": 1,
+      "need_record_min": 12000,
+      "reward_item_category": 40,
+      "reward_item_id": 136,
+      "reward_num": 1
+    },
+    {
+      "id": 8,
+      "scenario_id": 1,
+      "need_record_min": 14000,
+      "reward_item_category": 93,
+      "reward_item_id": 44,
+      "reward_num": 6
+    },
+    {
+      "id": 9,
+      "scenario_id": 1,
+      "need_record_min": 16000,
+      "reward_item_category": 55,
+      "reward_item_id": 501101,
+      "reward_num": 1
+    },
+    {
+      "id": 10,
+      "scenario_id": 2,
+      "need_record_min": 4000,
+      "reward_item_category": 30,
+      "reward_item_id": 110,
+      "reward_num": 10000
+    },
+    {
+      "id": 11,
+      "scenario_id": 2,
+      "need_record_min": 5000,
+      "reward_item_category": 91,
+      "reward_item_id": 59,
+      "reward_num": 20000
+    },
+    {
+      "id": 12,
+      "scenario_id": 2,
+      "need_record_min": 6000,
+      "reward_item_category": 40,
+      "reward_item_id": 41,
+      "reward_num": 1
+    },
+    {
+      "id": 13,
+      "scenario_id": 2,
+      "need_record_min": 7000,
+      "reward_item_category": 40,
+      "reward_item_id": 111,
+      "reward_num": 1
+    },
+    {
+      "id": 14,
+      "scenario_id": 2,
+      "need_record_min": 8000,
+      "reward_item_category": 97,
+      "reward_item_id": 115,
+      "reward_num": 10
+    },
+    {
+      "id": 15,
+      "scenario_id": 2,
+      "need_record_min": 10000,
+      "reward_item_category": 90,
+      "reward_item_id": 43,
+      "reward_num": 300
+    },
+    {
+      "id": 16,
+      "scenario_id": 2,
+      "need_record_min": 12000,
+      "reward_item_category": 40,
+      "reward_item_id": 136,
+      "reward_num": 1
+    },
+    {
+      "id": 17,
+      "scenario_id": 2,
+      "need_record_min": 14000,
+      "reward_item_category": 93,
+      "reward_item_id": 44,
+      "reward_num": 6
+    },
+    {
+      "id": 18,
+      "scenario_id": 2,
+      "need_record_min": 16000,
+      "reward_item_category": 55,
+      "reward_item_id": 502101,
+      "reward_num": 1
+    },
+    {
+      "id": 19,
+      "scenario_id": 4,
+      "need_record_min": 4000,
+      "reward_item_category": 30,
+      "reward_item_id": 110,
+      "reward_num": 10000
+    },
+    {
+      "id": 20,
+      "scenario_id": 4,
+      "need_record_min": 5000,
+      "reward_item_category": 91,
+      "reward_item_id": 59,
+      "reward_num": 20000
+    },
+    {
+      "id": 21,
+      "scenario_id": 4,
+      "need_record_min": 6000,
+      "reward_item_category": 40,
+      "reward_item_id": 41,
+      "reward_num": 1
+    },
+    {
+      "id": 22,
+      "scenario_id": 4,
+      "need_record_min": 7000,
+      "reward_item_category": 40,
+      "reward_item_id": 111,
+      "reward_num": 1
+    },
+    {
+      "id": 23,
+      "scenario_id": 4,
+      "need_record_min": 8000,
+      "reward_item_category": 97,
+      "reward_item_id": 115,
+      "reward_num": 10
+    },
+    {
+      "id": 24,
+      "scenario_id": 4,
+      "need_record_min": 10000,
+      "reward_item_category": 90,
+      "reward_item_id": 43,
+      "reward_num": 300
+    },
+    {
+      "id": 25,
+      "scenario_id": 4,
+      "need_record_min": 12000,
+      "reward_item_category": 40,
+      "reward_item_id": 136,
+      "reward_num": 1
+    },
+    {
+      "id": 26,
+      "scenario_id": 4,
+      "need_record_min": 14000,
+      "reward_item_category": 93,
+      "reward_item_id": 44,
+      "reward_num": 6
+    },
+    {
+      "id": 27,
+      "scenario_id": 4,
+      "need_record_min": 16000,
+      "reward_item_category": 55,
+      "reward_item_id": 504101,
+      "reward_num": 1
+    }
+  ]
+}

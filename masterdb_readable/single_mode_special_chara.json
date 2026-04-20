@@ -1,0 +1,41 @@
+{
+  "table": "single_mode_special_chara",
+  "row_count": 6,
+  "columns": [
+    "id",
+    "scenario_id",
+    "chara_id"
+  ],
+  "rows": [
+    {
+      "id": 11,
+      "scenario_id": 1,
+      "chara_id": 9004
+    },
+    {
+      "id": 21,
+      "scenario_id": 2,
+      "chara_id": 1010
+    },
+    {
+      "id": 22,
+      "scenario_id": 2,
+      "chara_id": 1030
+    },
+    {
+      "id": 23,
+      "scenario_id": 2,
+      "chara_id": 1052
+    },
+    {
+      "id": 24,
+      "scenario_id": 2,
+      "chara_id": 1056
+    },
+    {
+      "id": 25,
+      "scenario_id": 2,
+      "chara_id": 9006
+    }
+  ]
+}

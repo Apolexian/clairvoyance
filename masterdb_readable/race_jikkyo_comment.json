@@ -1,0 +1,2391 @@
+{
+  "table": "race_jikkyo_comment",
+  "row_count": 264,
+  "columns": [
+    "id",
+    "group_id",
+    "message",
+    "voice",
+    "per",
+    "message_group",
+    "omit_tag"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "group_id": 100000,
+      "message": "The stage is set for a memorable race.",
+      "voice": "%w_0.3|1000101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2,
+      "group_id": 0,
+      "message": "The track is dry, so they may need to watch\\ntheir feet.",
+      "voice": "1000201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3,
+      "group_id": 100002,
+      "message": "But there are some Umamusume who prefer the\\ntrack like this.",
+      "voice": "1000301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 4,
+      "group_id": 100003,
+      "message": "When the ground is as tightly packed as it is\\ntoday, it's easier to build up speed.",
+      "voice": "1000401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 5,
+      "group_id": 100004,
+      "message": "I hope the weather holds out for us.",
+      "voice": "%w_0.3|1000501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 6,
+      "group_id": 100005,
+      "message": "Japanese tracks do have good drainage.",
+      "voice": "1000601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 7,
+      "group_id": 100006,
+      "message": "If the rain gets bad, it could prove to be a\\nrather difficult race.",
+      "voice": "%w_0.3|1000701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 8,
+      "group_id": 100007,
+      "message": "It may be easier to build speed, but I'm worried\\nabout the strain on their legs.",
+      "voice": "%w_0.3|1000801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9,
+      "group_id": 100008,
+      "message": "When the track is this soft, it all depends on\\nwhether or not you're good at handling it.",
+      "voice": "%w_0.3|1000901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 10,
+      "group_id": 100009,
+      "message": "The track is going to be fairly treacherous\\ntoday. Positioning is going to play an important\\nrole.",
+      "voice": "1001001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 11,
+      "group_id": 100010,
+      "message": "When the track is this rough, it's impossible to\\nguess how things will turn out.",
+      "voice": "%w_0.1|1001101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 12,
+      "group_id": 100011,
+      "message": "These are less than ideal track conditions, to\\nbe sure.",
+      "voice": "1001201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 13,
+      "group_id": 100012,
+      "message": "I'm concerned about how much the snow will\\naffect today's race.",
+      "voice": "1001301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 14,
+      "group_id": 100013,
+      "message": "They can't run without taking the snow into\\naccount.",
+      "voice": "1001401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 15,
+      "group_id": 100014,
+      "message": "A snowy winter wonderland might sound nice,\\nbut it's no good for running on.",
+      "voice": "1001501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 16,
+      "group_id": 100015,
+      "message": "We'll find out today who likes the snow and\\nwho doesn't.",
+      "voice": "1001601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 18,
+      "group_id": 100016,
+      "message": "What a presence! Look at that spirit!",
+      "voice": "1001801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 19,
+      "group_id": 100016,
+      "message": "Let's hope for a dead heat. That's when the\\nsparks fly.",
+      "voice": "1001901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 20,
+      "group_id": 100016,
+      "message": "I just hope the Umamusume I'm rooting for\\ngives it her all today!",
+      "voice": "1002001|1002002",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 22,
+      "group_id": 100021,
+      "message": "Those two certainly know how to make a great\\nstart.",
+      "voice": "1002201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 23,
+      "group_id": 100022,
+      "message": "She's the master of making a good start.",
+      "voice": "1002301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 24,
+      "group_id": 100022,
+      "message": "That was a perfect start.",
+      "voice": "1002401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 25,
+      "group_id": 100024,
+      "message": "They might have been waiting to see how\\neveryone else would move.",
+      "voice": "1002501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 26,
+      "group_id": 100025,
+      "message": "They all seem to be in the zone. This should be\\na good race.",
+      "voice": "1002601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 28,
+      "group_id": 100027,
+      "message": "Let's hope that those who made a late start can\\ncatch up.",
+      "voice": "1002801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 43,
+      "group_id": 100043,
+      "message": "%h_player is running smoothly.",
+      "voice": "%h_player|1004001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 44,
+      "group_id": 100043,
+      "message": "%h_player is skipping right along.",
+      "voice": "%h_player|1004101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 45,
+      "group_id": 100044,
+      "message": "They should make good rivals.",
+      "voice": "1004201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 59,
+      "group_id": 100059,
+      "message": "We're only just getting started. I hope she\\nstays motivated!",
+      "voice": "1004601|1004602",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 60,
+      "group_id": 100059,
+      "message": "She's in a difficult position, but we can still\\nhope for a comeback.",
+      "voice": "1004603|1004604",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 61,
+      "group_id": 100059,
+      "message": "We're only just getting started. We can still\\nhope for a comeback.",
+      "voice": "1004601|1004604",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 62,
+      "group_id": 100059,
+      "message": "She's in a difficult position, but I hope she\\nstays motivated!",
+      "voice": "1004603|1004602",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 67,
+      "group_id": 100066,
+      "message": "They certainly are keeping each other in check.\\nIt'll all depend on when they make their move.",
+      "voice": "1004801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 68,
+      "group_id": 100067,
+      "message": "Things are getting tense now, but they might\\nwant to focus on their pace.",
+      "voice": "1004901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 70,
+      "group_id": 100069,
+      "message": "What a bold strategy! This is completely\\nunexpected!",
+      "voice": "1005003|1005004",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 72,
+      "group_id": 100069,
+      "message": "What a bold strategy! This should be an\\neventful race!",
+      "voice": "1005003|1005002",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 73,
+      "group_id": 100072,
+      "message": "This really suits\\n%h_rank1's running style.",
+      "voice": "%h_rank1|1005101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 75,
+      "group_id": 100074,
+      "message": "From that position, she can easily see what's\\ngoing on around her. She's proceeding\\nsmoothly.",
+      "voice": "1005301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 76,
+      "group_id": 100075,
+      "message": "This must be her strategy. Her final burst's\\ngoing to be a sight to behold.",
+      "voice": "1005401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 78,
+      "group_id": 100077,
+      "message": "Apparently, praying at the nearby shrine for\\ngood luck with romance is all the rage these\\ndays.",
+      "voice": "1005601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 79,
+      "group_id": 100078,
+      "message": "It's almost like she's checking the condition of\\nthe track as she runs. She's not putting her all\\ninto it yet.",
+      "voice": "1005701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 84,
+      "group_id": 100083,
+      "message": "She seems to be a little rushed. I hope she can\\nget a chance to breathe.",
+      "voice": "1005901|1005902",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 85,
+      "group_id": 100083,
+      "message": "She might be feeling rushed. I hope she finds\\ntime to catch her breath.",
+      "voice": "1005903|1005904",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 86,
+      "group_id": 100083,
+      "message": "She seems to be a little rushed. I hope she\\nfinds time to catch her breath.",
+      "voice": "1005901|1005904",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 87,
+      "group_id": 100083,
+      "message": "She might be feeling rushed. I hope she can\\nget a chance to breathe.",
+      "voice": "1005903|1005902",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 88,
+      "group_id": 100087,
+      "message": "She looks a little strained, but it's fine. She's\\nabout to start showing her real skills!",
+      "voice": "%w_0.05|1006001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 89,
+      "group_id": 100088,
+      "message": "It might become a little confusing with all of\\nthem packed together like this.",
+      "voice": "1006101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 90,
+      "group_id": 100089,
+      "message": "They might have a hard time deciding when to\\nmake their move in this race.",
+      "voice": "1006201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 121,
+      "group_id": 100120,
+      "message": "She seems to be panicking. Is she worried\\nabout the distance in front of her?",
+      "voice": "2008701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 222,
+      "group_id": 100221,
+      "message": "It's time to put it all on the table! They're\\napproaching the decisive final stretch!",
+      "voice": "1017601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 256,
+      "group_id": 100276,
+      "message": "She's pulled ahead a little.",
+      "voice": "2021001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1040,
+      "group_id": 100000,
+      "message": "This should be a good race for our racers to test their mettle.",
+      "voice": "%w_0.1|1008201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1041,
+      "group_id": 100000,
+      "message": "We can expect a good run from each of these\\nUmamusume.",
+      "voice": "%w_0.1|1008301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1042,
+      "group_id": 100001,
+      "message": "The track is dry and sandy, so this race could\\nrequire a bit more strength.",
+      "voice": "1008401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1043,
+      "group_id": 100001,
+      "message": "As an expert on the dirt, she should be able to\\nshow off her full skill today.",
+      "voice": "1008501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1044,
+      "group_id": 100021,
+      "message": "I'm definitely interested in seeing how these\\ntwo race today.",
+      "voice": "1008601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1045,
+      "group_id": 100021,
+      "message": "How will those in the rear respond to the pace\\nset by these two?",
+      "voice": "1008701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1046,
+      "group_id": 100025,
+      "message": "The battle for a good position should be fierce\\ntoday.",
+      "voice": "1008801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1047,
+      "group_id": 100025,
+      "message": "Let's see who takes the lead first.",
+      "voice": "1008901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1050,
+      "group_id": 100044,
+      "message": "These two should make for a good race.",
+      "voice": "1009301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1051,
+      "group_id": 100044,
+      "message": "I can see this race ramping up quickly.",
+      "voice": "1009401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1052,
+      "group_id": 100075,
+      "message": "I think she's betting on a showdown during the\\nfinal stretch. I'm looking forward to it!",
+      "voice": "1009501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1053,
+      "group_id": 100088,
+      "message": "Making it to the front doesn't look like an easy\\ntask.",
+      "voice": "1009601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1054,
+      "group_id": 100088,
+      "message": "It looks like they're keeping each other in\\ncheck.",
+      "voice": "1009701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1055,
+      "group_id": 100089,
+      "message": "Everyone seems to be maintaining their own\\npace.",
+      "voice": "%w_0.1|1009801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1056,
+      "group_id": 100089,
+      "message": "I'm curious as to whether the runners in the rear\\nwill make it to the front.",
+      "voice": "1009901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1057,
+      "group_id": 100221,
+      "message": "Will she come from the inside or the outside?!\\nWe're in the final phase now!",
+      "voice": "1010001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1058,
+      "group_id": 100221,
+      "message": "I can't look away! What are these Umamusume\\ngoing to do?!",
+      "voice": "1010101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1059,
+      "group_id": 100221,
+      "message": "Here comes the last spurt! The race is really\\nheating up now!",
+      "voice": "1010201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1060,
+      "group_id": 100276,
+      "message": "I'm worried that she'll run out of stamina.",
+      "voice": "1010301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1061,
+      "group_id": 100276,
+      "message": "I hope she can regain her composure.",
+      "voice": "1010401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1062,
+      "group_id": 112592,
+      "message": "It might become a little confusing with all of\\nthem packed together like this.",
+      "voice": "1006101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 1063,
+      "group_id": 112592,
+      "message": "Making it to the front doesn't look like an easy\\ntask.",
+      "voice": "1009601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2001,
+      "group_id": 150001,
+      "message": "I'm hoping for the birth of a star on the dirt\\nhere today.",
+      "voice": "%w_0.3|0000001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2002,
+      "group_id": 150002,
+      "message": "She's definitely a top contender to be spring\\nstar of the sprint.",
+      "voice": "%w_0.3|0000002",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2003,
+      "group_id": 150003,
+      "message": "I'd love to see her prove her skills by winning\\nthe first leg of the Spring Triple Crown.",
+      "voice": "%w_0.3|0000003",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2004,
+      "group_id": 150004,
+      "message": "I'd love to see her win the first Triple Tiara race\\nand be crowned the queen of the cherry\\nblossoms.",
+      "voice": "%w_0.3|0000004",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2005,
+      "group_id": 150005,
+      "message": "If it's sheer speed that wins the Classic Triple\\nCrown, then it might just be her.",
+      "voice": "%w_0.3|0000005",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2006,
+      "group_id": 150006,
+      "message": "I'd love to see her show off her unbelievable\\nskills and win the spring Tenno Sho.",
+      "voice": "%w_0.3|0000006",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2007,
+      "group_id": 150007,
+      "message": "I'd love to see her become the new ruler of the\\nmile amongst the greenery in Fuchu.",
+      "voice": "%w_0.3|0000007",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2008,
+      "group_id": 150008,
+      "message": "I'd love to see her give a run that amazes even\\nthe goddess of victory.",
+      "voice": "%w_0.3|0000008",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2009,
+      "group_id": 150009,
+      "message": "I'd love to see her win the second Triple Tiara\\nrace and be crowned the queen of the oaks.",
+      "voice": "%w_0.3|0000009",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2010,
+      "group_id": 150010,
+      "message": "I'd love to see her realize her dreams and\\nbecome the Derby champion.",
+      "voice": "%w_0.3|0000010",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2011,
+      "group_id": 150011,
+      "message": "I'd love to see her show off her speed and\\nshine as the spring ruler of the mile.",
+      "voice": "%w_0.3|0000011",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2012,
+      "group_id": 150012,
+      "message": "She carries the dreams of the most fans on her\\nshoulders today. I'd love to see her shine as\\ngrand prix champion.",
+      "voice": "%w_0.3|0000012",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2013,
+      "group_id": 150013,
+      "message": "With her popularity, I'd love to see her\\ncrowned as the fall star of the sprint.",
+      "voice": "%w_0.3|0000013",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2014,
+      "group_id": 150014,
+      "message": "I'd love to see her amazing stride win her the\\nthird Triple Tiara race.",
+      "voice": "%w_0.3|0000014",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2015,
+      "group_id": 150015,
+      "message": "I'd love to see her prove she's the greatest of\\nher generation by winning the last race of the\\nClassic Triple Crown tour.",
+      "voice": "%w_0.3|0000015",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2016,
+      "group_id": 150016,
+      "message": "I'd love to see her run at the top of the\\nmedium-distance races and win the autumn\\nTenno Sho.",
+      "voice": "%w_0.3|0000016",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2017,
+      "group_id": 150017,
+      "message": "She has enough skill to take the queen's crown\\nfor herself.",
+      "voice": "%w_0.3|0000017",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2018,
+      "group_id": 150018,
+      "message": "I'd love to see her shine as the ruler of the mile\\nwith her overwhelming speed.",
+      "voice": "%w_0.3|0000018",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2019,
+      "group_id": 150019,
+      "message": "I'd love to see her show off the stunning stride\\nthat makes her the representative of Japan.",
+      "voice": "%w_0.3|0000019",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2020,
+      "group_id": 150020,
+      "message": "Her speed is incredible on the dirt. I'd love to\\nsee her shine as the champion.",
+      "voice": "%w_0.3|0000020",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2021,
+      "group_id": 150021,
+      "message": "I'm hoping to see her crowned as the new\\nqueen for next year's Tiara tour.",
+      "voice": "%w_0.3|0000021",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2022,
+      "group_id": 150022,
+      "message": "I'd love for her to show her strength and aim\\nfor next year's Classics.",
+      "voice": "%w_0.3|0000022",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2023,
+      "group_id": 150023,
+      "message": "I'd love to see her win the last race of the year\\nand live up to her name of greatest grand prix\\nchampion.",
+      "voice": "%w_0.3|0000023",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2024,
+      "group_id": 150024,
+      "message": "I'd love to see her take this big step toward the\\nClassics.",
+      "voice": "%w_0.3|0000024",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2025,
+      "group_id": 150025,
+      "message": "I'd love to see her run like the true champion\\nof the first half of this season's dirt tour.",
+      "voice": "%w_0.3|0000025",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2026,
+      "group_id": 150026,
+      "message": "I'm hoping for the birth of a star on the dirt\\nhere today in Oi.",
+      "voice": "%w_0.3|0000026",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2027,
+      "group_id": 150027,
+      "message": "I'd love to see her shine as the heroine of the\\ndirt with some amazing running.",
+      "voice": "%w_0.3|0000027",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2028,
+      "group_id": 150028,
+      "message": "I'd love to see her show off her skills as the\\nfastest Umamusume in the dirt racing world.",
+      "voice": "%w_0.3|0000028",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2029,
+      "group_id": 150029,
+      "message": "I'd love to see her prove her dominance as the\\ngreatest Umamusume on the dirt tour.",
+      "voice": "%w_0.3|0000029",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2030,
+      "group_id": 150030,
+      "message": "As the sun sets here in Oi, I'm hoping to see\\nsome great running to finish off the dirt tour.",
+      "voice": "%w_0.3|0000030",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2031,
+      "group_id": 150031,
+      "message": "She looks like she's in perfect shape.",
+      "voice": "%w_0.3|0000031",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2032,
+      "group_id": 150032,
+      "message": "She seems to be in a great mood.",
+      "voice": "%w_0.3|0000032",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2033,
+      "group_id": 150033,
+      "message": "She's not looking on top of her game today.",
+      "voice": "%w_0.3|0000033",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2034,
+      "group_id": 150034,
+      "message": "She seems a little halfhearted.",
+      "voice": "%w_0.3|0000034",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2035,
+      "group_id": 150035,
+      "message": "It doesn't look like she's in the mood to race.",
+      "voice": "%w_0.3|0000035",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2036,
+      "group_id": 150036,
+      "message": "She should be able to show what she's fully\\ncapable of on this turf.",
+      "voice": "%w_0.3|0000036",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2037,
+      "group_id": 150037,
+      "message": "I'm looking forward to seeing some powerful\\nrunning on the dirt.",
+      "voice": "%w_0.3|0000037",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2038,
+      "group_id": 150038,
+      "message": "I'm a little worried as to whether or not she can\\nshow her full potential on this turf.",
+      "voice": "%w_0.3|0000038",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2039,
+      "group_id": 150039,
+      "message": "I wonder how she'll handle this dirt track.",
+      "voice": "%w_0.3|0000039",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2040,
+      "group_id": 150040,
+      "message": "This will be a great opportunity for her to show\\noff her endurance.",
+      "voice": "%w_0.3|0000040",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2041,
+      "group_id": 150041,
+      "message": "We can expect a good run from her on a\\ndistance like this.",
+      "voice": "%w_0.3|0000041",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2042,
+      "group_id": 150042,
+      "message": "Considering her great affinity for mile races,\\nI'm hoping to see some amazing running from\\nher.",
+      "voice": "%w_0.3|0000042",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2043,
+      "group_id": 150043,
+      "message": "Her explosive power is perfect for sprints.",
+      "voice": "%w_0.3|0000043",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2044,
+      "group_id": 150044,
+      "message": "She'll find this race challenging given the\\ndistance.",
+      "voice": "%w_0.3|0000044",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2045,
+      "group_id": 150045,
+      "message": "I wonder if she'll be able to adjust to the pace\\nof this medium-distance race.",
+      "voice": "%w_0.3|0000045",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2046,
+      "group_id": 150046,
+      "message": "I'm worried about whether her pace will suit\\nthis mile race.",
+      "voice": "%w_0.3|0000046",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2047,
+      "group_id": 150047,
+      "message": "Will the split-second dynamics of a sprint suit\\nher?",
+      "voice": "%w_0.3|0000047",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2048,
+      "group_id": 150048,
+      "message": "I'd love to see her make a dramatic late charge\\nfrom the back.",
+      "voice": "%w_0.3|0000048",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2049,
+      "group_id": 150049,
+      "message": "I'm hoping to see her make an explosive late\\nsurge.",
+      "voice": "%w_0.3|0000049",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2050,
+      "group_id": 150050,
+      "message": "I'd love to see her stick just behind the leader\\nand seize victory at the end.",
+      "voice": "%w_0.3|0000050",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2051,
+      "group_id": 150051,
+      "message": "If she can take the lead and dictate the pace,\\nshe'll be hard to catch.",
+      "voice": "%w_0.3|0000051",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2052,
+      "group_id": 150052,
+      "message": "If she hangs in the back, she might not make it\\nin time.",
+      "voice": "%w_0.3|0000052",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2053,
+      "group_id": 150053,
+      "message": "She doesn't have the turn of foot to make a\\nbreak for it at the end, so I'm not sure this is\\nthe strategy for her.",
+      "voice": "%w_0.3|0000053",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2054,
+      "group_id": 150054,
+      "message": "She's not the best at staying in the front, so I'm\\na little worried.",
+      "voice": "%w_0.3|0000054",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2055,
+      "group_id": 150055,
+      "message": "I'm worried about whether she can stay calm\\nafter taking the lead.",
+      "voice": "%w_0.3|0000055",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2056,
+      "group_id": 150056,
+      "message": "Her ability is definitely top class. You can feel\\nthe presence radiating from her.",
+      "voice": "%w_0.3|0000056",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2057,
+      "group_id": 150057,
+      "message": "With both popularity and power, this runner is\\nmy personal favorite.",
+      "voice": "%w_0.3|0000057",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2058,
+      "group_id": 150058,
+      "message": "She has such good form that she's even\\ndrawing attention in the paddock.",
+      "voice": "%w_0.3|0000058",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2059,
+      "group_id": 150059,
+      "message": "She may not be the favorite, but she's equal in\\ntalent.",
+      "voice": "%w_0.3|0000059",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2060,
+      "group_id": 150060,
+      "message": "What a magnificent presence. This runner is my\\npersonal favorite.",
+      "voice": "%w_0.3|0000060",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2061,
+      "group_id": 150061,
+      "message": "She's in just as good shape as the favorite.",
+      "voice": "%w_0.3|0000061",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2062,
+      "group_id": 150062,
+      "message": "She may be third favorite, but she's skilled\\nenough to surprise everyone.",
+      "voice": "%w_0.3|0000062",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2063,
+      "group_id": 150063,
+      "message": "There's something about her that just shines.\\nThis runner is my personal favorite.",
+      "voice": "%w_0.3|0000063",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2064,
+      "group_id": 150064,
+      "message": "She certainly looks as ready as the rest of the\\ngroup.",
+      "voice": "%w_0.3|0000064",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2065,
+      "group_id": 150065,
+      "message": "Her rivals are strong, but I'm hoping for a good\\nrun regardless.",
+      "voice": "%w_0.3|0000065",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2066,
+      "group_id": 150066,
+      "message": "This is a somewhat difficult matchup, but I'm\\nhoping she does her best.",
+      "voice": "%w_0.3|0000066",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2067,
+      "group_id": 150067,
+      "message": "It may be difficult for her to place high, but I'd\\nlove to see her benefit from the experience.",
+      "voice": "%w_0.3|0000067",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2068,
+      "group_id": 150068,
+      "message": "She has both incredible speed and explosive\\npower.",
+      "voice": "%w_0.3|0000068",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2069,
+      "group_id": 150069,
+      "message": "She's running to the best of her ability, but I'd\\nlike to see some more speed and power from\\nher.",
+      "voice": "%w_0.3|0000069",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2070,
+      "group_id": 150070,
+      "message": "One of her best qualities is her extraordinary\\nendurance, which allows her to make use of her\\nspeed for longer.",
+      "voice": "%w_0.3|0000070",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2071,
+      "group_id": 150071,
+      "message": "She needs to find a balance between her\\nacceleration and endurance.",
+      "voice": "%w_0.3|0000071",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2072,
+      "group_id": 150072,
+      "message": "Her persistence on the final stretch is really\\nnoteworthy.",
+      "voice": "%w_0.3|0000072",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 2073,
+      "group_id": 150073,
+      "message": "She needs to be careful with her pacing. I'd\\nlike to see her focus on the mental game.",
+      "voice": "%w_0.3|0000073",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3000,
+      "group_id": 160001,
+      "message": "She's in good shape for this race. All that training has her fit and fearless.",
+      "voice": "0000082",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3001,
+      "group_id": 160002,
+      "message": "Her legs seem to be in excellent shape. I think we'll see a good performance.",
+      "voice": "0000083",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3002,
+      "group_id": 160003,
+      "message": "While she's not the favorite, I'm seeing a promising flexibility in her form.",
+      "voice": "0000084",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3003,
+      "group_id": 160004,
+      "message": "We've got a strong lineup, so I'm hard-pressed to pick a favorite. If I had to say though, I think I'll be keeping my eyes on this one.",
+      "voice": "0000085",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3004,
+      "group_id": 160005,
+      "message": "While she hasn't gotten much attention, I've got a suspicion this one's going to be a sleeper hit. I'm certainly rooting for her.",
+      "voice": "0000086",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3005,
+      "group_id": 160006,
+      "message": "I want to see her fly across the turf like a star shoots through the sky—and show us a beautiful burst of pure speed.",
+      "voice": "0000087",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3006,
+      "group_id": 160007,
+      "message": "This racer's got both power and speed—she's undeniably the star of the mile.",
+      "voice": "0000088",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3007,
+      "group_id": 160008,
+      "message": "I'd love to see this racer topple legends and become a true star on the turf.",
+      "voice": "0000089",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3008,
+      "group_id": 160009,
+      "message": "This racer's got plenty of stamina. I'm looking forward to seeing her shine—eternal as starlight.",
+      "voice": "0000090",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3009,
+      "group_id": 160010,
+      "message": "Like a star on a clear desert night, this racer's sure to shower fans with hope.",
+      "voice": "0000091",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3010,
+      "group_id": 160011,
+      "message": "I'm seeing lots of confident faces!",
+      "voice": "1010501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3011,
+      "group_id": 160011,
+      "message": "They're in the gates—and everyone is looking sharp.",
+      "voice": "1010601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3012,
+      "group_id": 160011,
+      "message": "With such an electric atmosphere, it seems like we're in for a special race today!",
+      "voice": "1010701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3013,
+      "group_id": 160011,
+      "message": "With our racers looking cool and calm at the gates, we're surely in store for an impressive race!",
+      "voice": "1010801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3014,
+      "group_id": 160013,
+      "message": "This racer's got an air of determination about her. Keep your eyes peeled!",
+      "voice": "1010901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3015,
+      "group_id": 160014,
+      "message": "Which runner will shine the brightest? We'll find out in the Twinkle Star Climax—starting now!",
+      "voice": "1011001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3016,
+      "group_id": 160014,
+      "message": "With all these talented runners competing today, we won't have a second to blink!",
+      "voice": "1011101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3017,
+      "group_id": 160014,
+      "message": "Which of these racers will be first across the finish line? It's about time to get started!",
+      "voice": "1011201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3018,
+      "group_id": 160015,
+      "message": "Glory lies ahead for the fastest... and our competitors are on their way!",
+      "voice": "1011301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3019,
+      "group_id": 160015,
+      "message": "With the brilliance of shooting stars, our runners charge around the final corner!",
+      "voice": "1011401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3020,
+      "group_id": 160015,
+      "message": "Will the front-runners keep their lead? Or will the late surgers who saved their strength blast ahead? It's the moment of truth!",
+      "voice": "1011501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3021,
+      "group_id": 161000,
+      "message": "She's done it! At the pivotal moment, she's proven herself the brightest star on the track!",
+      "voice": "1100001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3022,
+      "group_id": 161001,
+      "message": "Special Week! That was certainly a run befitting the Ruler of Japan!",
+      "voice": "1100101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3023,
+      "group_id": 161002,
+      "message": "Silence Suzuka! It's clear just why she's known as the Otherworldly Front-Runner—that lead was <i>hers!</i>",
+      "voice": "1100201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3024,
+      "group_id": 161003,
+      "message": "Tokai Teio! This miraculous runner could surpass even the Emperor herself!",
+      "voice": "1100301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3025,
+      "group_id": 161004,
+      "message": "Maruzensky! This hot rod cruised down the track, handily leaving everyone else in her dust!",
+      "voice": "1100401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3026,
+      "group_id": 161005,
+      "message": "Fuji Kiseki! What a gem of a runner she is, dazzling and inspiring us all!",
+      "voice": "1100501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3027,
+      "group_id": 161006,
+      "message": "Oguri Cap! Not only is she the crowd's beloved idol, she's also the strongest runner on this track!",
+      "voice": "1100601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3028,
+      "group_id": 161007,
+      "message": "Gold Ship! The battleship has once again proven she's unsinkable! Another splendid performance by this golden racer!",
+      "voice": "1100701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3029,
+      "group_id": 161008,
+      "message": "Vodka! The Extraordinary Empress does as she pleases, striking a bold path uniquely her own!",
+      "voice": "1100801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3030,
+      "group_id": 161009,
+      "message": "Daiwa Scarlet! With another perfect run, she's proven herself number one to us all!",
+      "voice": "1100901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3031,
+      "group_id": 161010,
+      "message": "Taiki Shuttle! With speed and power alike, she's shown the crowd a rootin' tootin' good run!",
+      "voice": "1101001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3032,
+      "group_id": 161011,
+      "message": "Grass Wonder! With refined steps, this runner of pure virtue mastered today's track, politely collecting a resounding victory.",
+      "voice": "1101101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3033,
+      "group_id": 161012,
+      "message": "Hishi Amazon! Her unfaltering power and prestige is truly befitting of the title \"Queen of the Amazons!\"",
+      "voice": "1101201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3034,
+      "group_id": 161013,
+      "message": "Mejiro McQueen! She's making a name for herself with elegant, unstoppable strides, never shying away from the prestige her family holds!",
+      "voice": "1101301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3035,
+      "group_id": 161014,
+      "message": "El Condor Pasa! The Phantom Bird snatches the lead with a run that will carry her across the seas and skies!",
+      "voice": "1101401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3036,
+      "group_id": 161015,
+      "message": "T.M. Opera O! The Centurial Overlord plays the lead role in yet another dramatic race. Can no one stop her?!",
+      "voice": "1101501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3037,
+      "group_id": 161016,
+      "message": "Narita Brian! She dominated the race with strength that can only be described as ferocious. What a beast!",
+      "voice": "1101601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3038,
+      "group_id": 161017,
+      "message": "Symboli Rudolf! The Emperor honors her title with dignity, bestowing unto us another stunning race!",
+      "voice": "1101701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3039,
+      "group_id": 161018,
+      "message": "Air Groove! The Empress treated us to a breathtaking display of her abilities, showing how she aims for the highest of standards!",
+      "voice": "1101801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3040,
+      "group_id": 161019,
+      "message": "Agnes Digital! Just as a hero is always there for you, Agnes Digital never backs down from a race!",
+      "voice": "1101901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3041,
+      "group_id": 161020,
+      "message": "Seiun Sky! The elusive, cloud-like Trickster has once again fooled us all with her shrewd tactics!",
+      "voice": "1102001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3042,
+      "group_id": 161021,
+      "message": "Tamamo Cross! Like a flash of lightning, she struck the goal with blinding speed!",
+      "voice": "1102101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3043,
+      "group_id": 161022,
+      "message": "Fine Motion! She couldn't resist the call of victory—the glory she seized today is priceless!",
+      "voice": "1102201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3044,
+      "group_id": 161023,
+      "message": "Biwa Hayahide! She put her winning equation in motion and showed just why she's heralded as the strongest of her generation!",
+      "voice": "1102301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3045,
+      "group_id": 161024,
+      "message": "Mayano Top Gun! She's got talent like no other and knows just how to show it off on the track!",
+      "voice": "1102401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3046,
+      "group_id": 161025,
+      "message": "Manhattan Cafe! Cutting through the darkness, she rises above all else as a skyscraper of victory!",
+      "voice": "1102501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3047,
+      "group_id": 161026,
+      "message": "Mihono Bourbon! She saw her mission through and achieved perfect victory with the calculated precision of a cyborg!",
+      "voice": "1102601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3048,
+      "group_id": 161027,
+      "message": "Mejiro Ryan! Demonstrating the fruits of her steadfast training, she's done her family name proud!",
+      "voice": "1102701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3049,
+      "group_id": 161028,
+      "message": "Hishi Akebono! She's always taking big steps to her goals, and savored an extra big win today!",
+      "voice": "1102801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3051,
+      "group_id": 161030,
+      "message": "Rice Shower! No matter how fearsome the race, she stays true to herself—just like a storybook hero!",
+      "voice": "1103001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3052,
+      "group_id": 161031,
+      "message": "Ines Fujin! She stormed through like a raging wind and seized the crown!",
+      "voice": "1103101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3053,
+      "group_id": 161032,
+      "message": "Agnes Tachyon! She looked faster than light out there! What a spectacle to see our dreams brought to life!",
+      "voice": "1103201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3054,
+      "group_id": 161033,
+      "message": "Admire Vega! Her resolve is second to none. She showed a determination that shined brighter than any other star in the sky!",
+      "voice": "1103301",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3055,
+      "group_id": 161034,
+      "message": "Inari One! Her sleek, refined running has shown everyone why she's the greatest there is!",
+      "voice": "1103401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3056,
+      "group_id": 161035,
+      "message": "Winning Ticket! Placing her hopes on this race, she showed us a run worthy of leading a new generation!",
+      "voice": "1103501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3057,
+      "group_id": 161036,
+      "message": "Air Shakur! Using a logic all her own, she's proven to be the undisputed best on the track!",
+      "voice": "1103601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3058,
+      "group_id": 161037,
+      "message": "Eishin Flash! She truly demonstrated her perfectionism out there with all the pride and resolve in her heart!",
+      "voice": "1103701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3059,
+      "group_id": 161038,
+      "message": "Curren Chan! She stole countless hearts today with that absolutely dazzling run!",
+      "voice": "1103801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3060,
+      "group_id": 161039,
+      "message": "Kawakami Princess! She overcame the rivals around her and fought her way to the front like a true princess!",
+      "voice": "1103901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3061,
+      "group_id": 161040,
+      "message": "Gold City! She ran with her whole soul on the line, proving her resolve is unyielding!",
+      "voice": "1104001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3062,
+      "group_id": 161041,
+      "message": "Sakura Bakushin O! No fuss or frills—just pure, straightforward speed from the Bakushin King!",
+      "voice": "1104101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3065,
+      "group_id": 161044,
+      "message": "Sweep Tosho! With that swift explosion of speed, her run was truly magical!",
+      "voice": "1104401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3066,
+      "group_id": 161045,
+      "message": "Super Creek! She set a leading example for her peers with her sound abilities and judgment!",
+      "voice": "1104501",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3067,
+      "group_id": 161046,
+      "message": "Smart Falcon! All eyes were on her for this race! She's a true top Umadol!",
+      "voice": "1104601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3069,
+      "group_id": 161048,
+      "message": "Tosen Jordan! She ran today with indestructible form, proving she won't let anyone break her gutsy spirit!",
+      "voice": "1104801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3071,
+      "group_id": 161050,
+      "message": "Narita Taishin! This runner's the fastest of her generation and her big win today further proves it!",
+      "voice": "1105001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3072,
+      "group_id": 161051,
+      "message": "Nishino Flower! With a run both beautiful and inspiring, she bloomed into a champion today!",
+      "voice": "1105101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3073,
+      "group_id": 161052,
+      "message": "Haru Urara! She took first place with indomitable determination, like a beautiful spring ending a long, bitter winter!",
+      "voice": "1105201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3077,
+      "group_id": 161056,
+      "message": "Matikanefukukitaru! You can tell how much faith she has in herself—true to her name, she brought fortune home today!",
+      "voice": "1105601",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3079,
+      "group_id": 161058,
+      "message": "Meisho Doto! Her budding confidence blossoms further with each race. Not even the Overlord can stop her!",
+      "voice": "1105801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3080,
+      "group_id": 161059,
+      "message": "Mejiro Dober! She has conviction befitting the Mejiro name. What an impressive run!",
+      "voice": "1105901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3081,
+      "group_id": 161060,
+      "message": "Nice Nature! All her growth has culminated in this first-place win—the crowd is going wild!",
+      "voice": "1106001",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3082,
+      "group_id": 161061,
+      "message": "King Halo! The King crushes fearsome opposition to seize her gloried throne!",
+      "voice": "1106101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3083,
+      "group_id": 161062,
+      "message": "Matikanetannhauser! With her mind set on winning, this bright, eager runner heard her fans' cheers and responded in kind!",
+      "voice": "1106201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3085,
+      "group_id": 161064,
+      "message": "Mejiro Palmer! Her prestigious lineage can't constrain her! She showed us what running free truly means!",
+      "voice": "1106401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3088,
+      "group_id": 161067,
+      "message": "Satono Diamond! What an amazing success! She carried all the hopes and wishes entrusted to her and blazed her own path to victory!",
+      "voice": "1106701",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3089,
+      "group_id": 161068,
+      "message": "Kitasan Black! She accepted everyone's expectations with open arms and brought joy and confidence to us all with her victory!",
+      "voice": "1106801",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3090,
+      "group_id": 161069,
+      "message": "Sakura Chiyono O! By her earnest efforts, this bud has opened into a radiant blossom!",
+      "voice": "1106901",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3092,
+      "group_id": 161071,
+      "message": "Mejiro Ardan! In this brief, fleeting time, she's shown everyone a beautiful, blindingly powerful run!",
+      "voice": "1107101",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3093,
+      "group_id": 161072,
+      "message": "Yaeno Muteki! With courage and spirit honed through intense discipline, she gallantly triumphed over her rivals!",
+      "voice": "1107201",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 3094,
+      "group_id": 161074,
+      "message": "Mejiro Bright! Inheriting the prestige of a noble family, she secured victory against the greatest challengers around!",
+      "voice": "1107401",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9000,
+      "group_id": 900000,
+      "message": "%h_rank1、%h_rank_l1、%h_rank_no1、%h_rank_to1、%h_rank_ta1、%h_rank_a1",
+      "voice": "%h_rank1|%w_0.2|%h_rank_l1|%w_0.2|%h_rank_no1|%w_0.2|%h_rank_to1|%w_0.2|%h_rank_ta1|%w_0.2|%h_rank_a1",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9001,
+      "group_id": 900001,
+      "message": "%h_rank2、%h_rank_l2、%h_rank_no2、%h_rank_to2、%h_rank_ta2、%h_rank_a2",
+      "voice": "%h_rank2|%w_0.2|%h_rank_l2|%w_0.2|%h_rank_no2|%w_0.2|%h_rank_to2|%w_0.2|%h_rank_ta2|%w_0.2|%h_rank_a2",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9002,
+      "group_id": 900002,
+      "message": "%h_rank3、%h_rank_l3、%h_rank_no3、%h_rank_to3、%h_rank_ta3、%h_rank_a3",
+      "voice": "%h_rank3|%w_0.2|%h_rank_l3|%w_0.2|%h_rank_no3|%w_0.2|%h_rank_to3|%w_0.2|%h_rank_ta3|%w_0.2|%h_rank_a3",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9003,
+      "group_id": 900003,
+      "message": "%h_rank4、%h_rank_l4、%h_rank_no4、%h_rank_to4、%h_rank_ta4、%h_rank_a4",
+      "voice": "%h_rank4|%w_0.2|%h_rank_l4|%w_0.2|%h_rank_no4|%w_0.2|%h_rank_to4|%w_0.2|%h_rank_ta4|%w_0.2|%h_rank_a4",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9004,
+      "group_id": 900004,
+      "message": "%h_rank5、%h_rank_l5、%h_rank_no5、%h_rank_to5、%h_rank_ta5、%h_rank_a5",
+      "voice": "%h_rank5|%w_0.2|%h_rank_l5|%w_0.2|%h_rank_no5|%w_0.2|%h_rank_to5|%w_0.2|%h_rank_ta5|%w_0.2|%h_rank_a5",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9005,
+      "group_id": 900005,
+      "message": "%h_rank6、%h_rank_l6、%h_rank_no6、%h_rank_to6、%h_rank_ta6、%h_rank_a6",
+      "voice": "%h_rank6|%w_0.2|%h_rank_l6|%w_0.2|%h_rank_no6|%w_0.2|%h_rank_to6|%w_0.2|%h_rank_ta6|%w_0.2|%h_rank_a6",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9006,
+      "group_id": 900006,
+      "message": "%h_rank7、%h_rank_l7、%h_rank_no7、%h_rank_to7、%h_rank_ta7、%h_rank_a7",
+      "voice": "%h_rank7|%w_0.2|%h_rank_l7|%w_0.2|%h_rank_no7|%w_0.2|%h_rank_to7|%w_0.2|%h_rank_ta7|%w_0.2|%h_rank_a7",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9007,
+      "group_id": 900007,
+      "message": "%h_rank8、%h_rank_l8、%h_rank_no8、%h_rank_to8、%h_rank_ta8、%h_rank_a8",
+      "voice": "%h_rank8|%w_0.2|%h_rank_l8|%w_0.2|%h_rank_no8|%w_0.2|%h_rank_to8|%w_0.2|%h_rank_ta8|%w_0.2|%h_rank_a8",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9008,
+      "group_id": 900008,
+      "message": "%h_rank9、%h_rank_l9、%h_rank_no9、%h_rank_to9、%h_rank_ta9、%h_rank_a9",
+      "voice": "%h_rank9|%w_0.2|%h_rank_l9|%w_0.2|%h_rank_no9|%w_0.2|%h_rank_to9|%w_0.2|%h_rank_ta9|%w_0.2|%h_rank_a9",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9009,
+      "group_id": 900009,
+      "message": "%h_rank10、%h_rank_l10、%h_rank_no10、%h_rank_to10、%h_rank_ta10、%h_rank_a10",
+      "voice": "%h_rank10|%w_0.2|%h_rank_l10|%w_0.2|%h_rank_no10|%w_0.2|%h_rank_to10|%w_0.2|%h_rank_ta10|%w_0.2|%h_rank_a10",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9010,
+      "group_id": 900010,
+      "message": "%h_rank11、%h_rank_l11、%h_rank_no11、%h_rank_to11、%h_rank_ta11、%h_rank_a11",
+      "voice": "%h_rank11|%w_0.2|%h_rank_l11|%w_0.2|%h_rank_no11|%w_0.2|%h_rank_to11|%w_0.2|%h_rank_ta11|%w_0.2|%h_rank_a11",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9011,
+      "group_id": 900011,
+      "message": "%h_rank12、%h_rank_l12、%h_rank_no12、%h_rank_to12、%h_rank_ta12、%h_rank_a12",
+      "voice": "%h_rank12|%w_0.2|%h_rank_l12|%w_0.2|%h_rank_no12|%w_0.2|%h_rank_to12|%w_0.2|%h_rank_ta12|%w_0.2|%h_rank_a12",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9012,
+      "group_id": 900012,
+      "message": "%h_rank13、%h_rank_l13、%h_rank_no13、%h_rank_to13、%h_rank_ta13、%h_rank_a13",
+      "voice": "%h_rank13|%w_0.2|%h_rank_l13|%w_0.2|%h_rank_no13|%w_0.2|%h_rank_to13|%w_0.2|%h_rank_ta13|%w_0.2|%h_rank_a13",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9013,
+      "group_id": 900013,
+      "message": "%h_rank14、%h_rank_l14、%h_rank_no14、%h_rank_to14、%h_rank_ta14、%h_rank_a14",
+      "voice": "%h_rank14|%w_0.2|%h_rank_l14|%w_0.2|%h_rank_no14|%w_0.2|%h_rank_to14|%w_0.2|%h_rank_ta14|%w_0.2|%h_rank_a14",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9014,
+      "group_id": 900014,
+      "message": "%h_rank15、%h_rank_l15、%h_rank_no15、%h_rank_to15、%h_rank_ta15、%h_rank_a15",
+      "voice": "%h_rank15|%w_0.2|%h_rank_l15|%w_0.2|%h_rank_no15|%w_0.2|%h_rank_to15|%w_0.2|%h_rank_ta15|%w_0.2|%h_rank_a15",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9015,
+      "group_id": 900015,
+      "message": "%h_rank16、%h_rank_l16、%h_rank_no16、%h_rank_to16、%h_rank_ta16、%h_rank_a16",
+      "voice": "%h_rank16|%w_0.2|%h_rank_l16|%w_0.2|%h_rank_no16|%w_0.2|%h_rank_to16|%w_0.2|%h_rank_ta16|%w_0.2|%h_rank_a16",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9016,
+      "group_id": 900016,
+      "message": "%h_rank17、%h_rank_l17、%h_rank_no17、%h_rank_to17、%h_rank_ta17、%h_rank_a17",
+      "voice": "%h_rank17|%w_0.2|%h_rank_l17|%w_0.2|%h_rank_no17|%w_0.2|%h_rank_to17|%w_0.2|%h_rank_ta17|%w_0.2|%h_rank_a17",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9017,
+      "group_id": 900017,
+      "message": "%h_rank18、%h_rank_l18、%h_rank_no18、%h_rank_to18、%h_rank_ta18、%h_rank_a18",
+      "voice": "%h_rank18|%w_0.2|%h_rank_l18|%w_0.2|%h_rank_no18|%w_0.2|%h_rank_to18|%w_0.2|%h_rank_ta18|%w_0.2|%h_rank_a18",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9018,
+      "group_id": 900018,
+      "message": "%h_rank1、%h_rank_no1、%h_rank_to1、%h_rank_ta1、%h_rank_a1",
+      "voice": "%h_rank1|%w_0.2|%h_rank_no1|%w_0.2|%h_rank_to1|%w_0.2|%h_rank_ta1|%w_0.2|%h_rank_a1",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9019,
+      "group_id": 900019,
+      "message": "%h_rank2、%h_rank_no2、%h_rank_to2、%h_rank_ta2、%h_rank_a2",
+      "voice": "%h_rank2|%w_0.2|%h_rank_no2|%w_0.2|%h_rank_to2|%w_0.2|%h_rank_ta2|%w_0.2|%h_rank_a2",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9020,
+      "group_id": 900020,
+      "message": "%h_rank3、%h_rank_no3、%h_rank_to3、%h_rank_ta3、%h_rank_a3",
+      "voice": "%h_rank3|%w_0.2|%h_rank_no3|%w_0.2|%h_rank_to3|%w_0.2|%h_rank_ta3|%w_0.2|%h_rank_a3",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9021,
+      "group_id": 900021,
+      "message": "%h_rank4、%h_rank_no4、%h_rank_to4、%h_rank_ta4、%h_rank_a4",
+      "voice": "%h_rank4|%w_0.2|%h_rank_no4|%w_0.2|%h_rank_to4|%w_0.2|%h_rank_ta4|%w_0.2|%h_rank_a4",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9022,
+      "group_id": 900022,
+      "message": "%h_rank5、%h_rank_no5、%h_rank_to5、%h_rank_ta5、%h_rank_a5",
+      "voice": "%h_rank5|%w_0.2|%h_rank_no5|%w_0.2|%h_rank_to5|%w_0.2|%h_rank_ta5|%w_0.2|%h_rank_a5",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9023,
+      "group_id": 900023,
+      "message": "%h_rank6、%h_rank_no6、%h_rank_to6、%h_rank_ta6、%h_rank_a6",
+      "voice": "%h_rank6|%w_0.2|%h_rank_no6|%w_0.2|%h_rank_to6|%w_0.2|%h_rank_ta6|%w_0.2|%h_rank_a6",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9024,
+      "group_id": 900024,
+      "message": "%h_rank7、%h_rank_no7、%h_rank_to7、%h_rank_ta7、%h_rank_a7",
+      "voice": "%h_rank7|%w_0.2|%h_rank_no7|%w_0.2|%h_rank_to7|%w_0.2|%h_rank_ta7|%w_0.2|%h_rank_a7",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9025,
+      "group_id": 900025,
+      "message": "%h_rank8、%h_rank_no8、%h_rank_to8、%h_rank_ta8、%h_rank_a8",
+      "voice": "%h_rank8|%w_0.2|%h_rank_no8|%w_0.2|%h_rank_to8|%w_0.2|%h_rank_ta8|%w_0.2|%h_rank_a8",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9026,
+      "group_id": 900026,
+      "message": "%h_rank9、%h_rank_no9、%h_rank_to9、%h_rank_ta9、%h_rank_a9",
+      "voice": "%h_rank9|%w_0.2|%h_rank_no9|%w_0.2|%h_rank_to9|%w_0.2|%h_rank_ta9|%w_0.2|%h_rank_a9",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9027,
+      "group_id": 900027,
+      "message": "%h_rank10、%h_rank_no10、%h_rank_to10、%h_rank_ta10、%h_rank_a10",
+      "voice": "%h_rank10|%w_0.2|%h_rank_no10|%w_0.2|%h_rank_to10|%w_0.2|%h_rank_ta10|%w_0.2|%h_rank_a10",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9028,
+      "group_id": 900028,
+      "message": "%h_rank11、%h_rank_no11、%h_rank_to11、%h_rank_ta11、%h_rank_a11",
+      "voice": "%h_rank11|%w_0.2|%h_rank_no11|%w_0.2|%h_rank_to11|%w_0.2|%h_rank_ta11|%w_0.2|%h_rank_a11",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9029,
+      "group_id": 900029,
+      "message": "%h_rank12、%h_rank_no12、%h_rank_to12、%h_rank_ta12、%h_rank_a12",
+      "voice": "%h_rank12|%w_0.2|%h_rank_no12|%w_0.2|%h_rank_to12|%w_0.2|%h_rank_ta12|%w_0.2|%h_rank_a12",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9030,
+      "group_id": 900030,
+      "message": "%h_rank13、%h_rank_no13、%h_rank_to13、%h_rank_ta13、%h_rank_a13",
+      "voice": "%h_rank13|%w_0.2|%h_rank_no13|%w_0.2|%h_rank_to13|%w_0.2|%h_rank_ta13|%w_0.2|%h_rank_a13",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9031,
+      "group_id": 900031,
+      "message": "%h_rank14、%h_rank_no14、%h_rank_to14、%h_rank_ta14、%h_rank_a14",
+      "voice": "%h_rank14|%w_0.2|%h_rank_no14|%w_0.2|%h_rank_to14|%w_0.2|%h_rank_ta14|%w_0.2|%h_rank_a14",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9032,
+      "group_id": 900032,
+      "message": "%h_rank15、%h_rank_no15、%h_rank_to15、%h_rank_ta15、%h_rank_a15",
+      "voice": "%h_rank15|%w_0.2|%h_rank_no15|%w_0.2|%h_rank_to15|%w_0.2|%h_rank_ta15|%w_0.2|%h_rank_a15",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9033,
+      "group_id": 900033,
+      "message": "%h_rank16、%h_rank_no16、%h_rank_to16、%h_rank_ta16、%h_rank_a16",
+      "voice": "%h_rank16|%w_0.2|%h_rank_no16|%w_0.2|%h_rank_to16|%w_0.2|%h_rank_ta16|%w_0.2|%h_rank_a16",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9034,
+      "group_id": 900034,
+      "message": "%h_rank17、%h_rank_no17、%h_rank_to17、%h_rank_ta17、%h_rank_a17",
+      "voice": "%h_rank17|%w_0.2|%h_rank_no17|%w_0.2|%h_rank_to17|%w_0.2|%h_rank_ta17|%w_0.2|%h_rank_a17",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    },
+    {
+      "id": 9035,
+      "group_id": 900035,
+      "message": "%h_rank18、%h_rank_no18、%h_rank_to18、%h_rank_ta18、%h_rank_a18",
+      "voice": "%h_rank18|%w_0.2|%h_rank_no18|%w_0.2|%h_rank_to18|%w_0.2|%h_rank_ta18|%w_0.2|%h_rank_a18",
+      "per": 100,
+      "message_group": 0,
+      "omit_tag": 0
+    }
+  ]
+}

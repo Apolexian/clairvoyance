@@ -1,0 +1,66 @@
+{
+  "table": "fan_raid_top_data",
+  "row_count": 4,
+  "columns": [
+    "id",
+    "fan_raid_id",
+    "bg_id",
+    "bg_sub_id",
+    "bgm_cue_name",
+    "bgm_cuesheet_name",
+    "env_cue_name",
+    "env_cuesheet_name",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "fan_raid_id": 1001,
+      "bg_id": 187,
+      "bg_sub_id": 0,
+      "bgm_cue_name": "snd_bgm_CS012_sys",
+      "bgm_cuesheet_name": "snd_bgm_CS012",
+      "env_cue_name": "snd_sfx_atmos_gym",
+      "env_cuesheet_name": "snd_sfx_atmos_gym",
+      "start_date": 1775512800,
+      "end_date": 1775599199
+    },
+    {
+      "id": 2,
+      "fan_raid_id": 1001,
+      "bg_id": 187,
+      "bg_sub_id": 1,
+      "bgm_cue_name": "snd_bgm_CS012_sys",
+      "bgm_cuesheet_name": "snd_bgm_CS012",
+      "env_cue_name": "snd_sfx_atmos_hiroba_d",
+      "env_cuesheet_name": "snd_sfx_atmos_hiroba_d",
+      "start_date": 1775599200,
+      "end_date": 1775685599
+    },
+    {
+      "id": 3,
+      "fan_raid_id": 1001,
+      "bg_id": 187,
+      "bg_sub_id": 2,
+      "bgm_cue_name": "snd_bgm_CS012_sys",
+      "bgm_cuesheet_name": "snd_bgm_CS012",
+      "env_cue_name": "snd_sfx_atmos_room_d_noext",
+      "env_cuesheet_name": "snd_sfx_atmos_room_d_noext",
+      "start_date": 1775685600,
+      "end_date": 1775771999
+    },
+    {
+      "id": 4,
+      "fan_raid_id": 1001,
+      "bg_id": 187,
+      "bg_sub_id": 3,
+      "bgm_cue_name": "snd_bgm_CS014_sys",
+      "bgm_cuesheet_name": "snd_bgm_CS014",
+      "env_cue_name": "snd_sfx_atmos_aozora_c",
+      "env_cuesheet_name": "snd_sfx_atmos_aozora_c",
+      "start_date": 1775772000,
+      "end_date": 1776081599
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "table": "single_mode_ao_training_plate",
+  "row_count": 3,
+  "columns": [
+    "id",
+    "value_min",
+    "value_max"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "value_min": 1,
+      "value_max": 5
+    },
+    {
+      "id": 2,
+      "value_min": 6,
+      "value_max": 19
+    },
+    {
+      "id": 3,
+      "value_min": 20,
+      "value_max": 999
+    }
+  ]
+}

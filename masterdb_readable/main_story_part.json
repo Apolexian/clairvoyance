@@ -1,0 +1,41 @@
+{
+  "table": "main_story_part",
+  "row_count": 6,
+  "columns": [
+    "id",
+    "start_date",
+    "ui_color"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "start_date": 1483228800,
+      "ui_color": "019DB0"
+    },
+    {
+      "id": 2,
+      "start_date": 1483228800,
+      "ui_color": "2F4899"
+    },
+    {
+      "id": 3,
+      "start_date": 1754258400,
+      "ui_color": "AF2E47"
+    },
+    {
+      "id": 4,
+      "start_date": 1759874400,
+      "ui_color": "78398F"
+    },
+    {
+      "id": 5,
+      "start_date": 1769119200,
+      "ui_color": "248a64"
+    },
+    {
+      "id": 6,
+      "start_date": 1774562400,
+      "ui_color": "a34490"
+    }
+  ]
+}

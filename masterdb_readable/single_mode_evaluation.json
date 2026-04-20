@@ -1,0 +1,71 @@
+{
+  "table": "single_mode_evaluation",
+  "row_count": 12,
+  "columns": [
+    "id",
+    "evaluation",
+    "chara_id"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "evaluation": 90,
+      "chara_id": 9002
+    },
+    {
+      "id": 2,
+      "evaluation": 70,
+      "chara_id": 9002
+    },
+    {
+      "id": 3,
+      "evaluation": 40,
+      "chara_id": 9002
+    },
+    {
+      "id": 4,
+      "evaluation": 0,
+      "chara_id": 9002
+    },
+    {
+      "id": 5,
+      "evaluation": 90,
+      "chara_id": 9003
+    },
+    {
+      "id": 6,
+      "evaluation": 70,
+      "chara_id": 9003
+    },
+    {
+      "id": 7,
+      "evaluation": 40,
+      "chara_id": 9003
+    },
+    {
+      "id": 8,
+      "evaluation": 0,
+      "chara_id": 9003
+    },
+    {
+      "id": 9,
+      "evaluation": 90,
+      "chara_id": 9006
+    },
+    {
+      "id": 10,
+      "evaluation": 70,
+      "chara_id": 9006
+    },
+    {
+      "id": 11,
+      "evaluation": 40,
+      "chara_id": 9006
+    },
+    {
+      "id": 12,
+      "evaluation": 0,
+      "chara_id": 9006
+    }
+  ]
+}

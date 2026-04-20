@@ -1,0 +1,430 @@
+{
+  "table": "champions_news_chara_wininfo",
+  "row_count": 52,
+  "columns": [
+    "id",
+    "round_id",
+    "race_count_type",
+    "win_min",
+    "win_max",
+    "chara_text_group"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "round_id": 1,
+      "race_count_type": 1,
+      "win_min": 0,
+      "win_max": 10000,
+      "chara_text_group": 1
+    },
+    {
+      "id": 2,
+      "round_id": 1,
+      "race_count_type": 2,
+      "win_min": 0,
+      "win_max": 0,
+      "chara_text_group": 10
+    },
+    {
+      "id": 3,
+      "round_id": 1,
+      "race_count_type": 2,
+      "win_min": 1,
+      "win_max": 2500,
+      "chara_text_group": 20
+    },
+    {
+      "id": 4,
+      "round_id": 1,
+      "race_count_type": 2,
+      "win_min": 2501,
+      "win_max": 4999,
+      "chara_text_group": 30
+    },
+    {
+      "id": 5,
+      "round_id": 1,
+      "race_count_type": 2,
+      "win_min": 5000,
+      "win_max": 6599,
+      "chara_text_group": 40
+    },
+    {
+      "id": 6,
+      "round_id": 1,
+      "race_count_type": 2,
+      "win_min": 6600,
+      "win_max": 7499,
+      "chara_text_group": 50
+    },
+    {
+      "id": 7,
+      "round_id": 1,
+      "race_count_type": 2,
+      "win_min": 7500,
+      "win_max": 9999,
+      "chara_text_group": 60
+    },
+    {
+      "id": 8,
+      "round_id": 1,
+      "race_count_type": 2,
+      "win_min": 10000,
+      "win_max": 10000,
+      "chara_text_group": 70
+    },
+    {
+      "id": 9,
+      "round_id": 1,
+      "race_count_type": 3,
+      "win_min": 0,
+      "win_max": 1999,
+      "chara_text_group": 100
+    },
+    {
+      "id": 10,
+      "round_id": 1,
+      "race_count_type": 3,
+      "win_min": 2000,
+      "win_max": 3999,
+      "chara_text_group": 110
+    },
+    {
+      "id": 11,
+      "round_id": 1,
+      "race_count_type": 3,
+      "win_min": 4000,
+      "win_max": 5999,
+      "chara_text_group": 120
+    },
+    {
+      "id": 12,
+      "round_id": 1,
+      "race_count_type": 3,
+      "win_min": 6000,
+      "win_max": 7999,
+      "chara_text_group": 130
+    },
+    {
+      "id": 13,
+      "round_id": 1,
+      "race_count_type": 3,
+      "win_min": 8000,
+      "win_max": 9999,
+      "chara_text_group": 140
+    },
+    {
+      "id": 14,
+      "round_id": 1,
+      "race_count_type": 3,
+      "win_min": 10000,
+      "win_max": 10000,
+      "chara_text_group": 150
+    },
+    {
+      "id": 15,
+      "round_id": 2,
+      "race_count_type": 1,
+      "win_min": 0,
+      "win_max": 10000,
+      "chara_text_group": 1
+    },
+    {
+      "id": 16,
+      "round_id": 2,
+      "race_count_type": 2,
+      "win_min": 0,
+      "win_max": 0,
+      "chara_text_group": 10
+    },
+    {
+      "id": 17,
+      "round_id": 2,
+      "race_count_type": 2,
+      "win_min": 1,
+      "win_max": 2500,
+      "chara_text_group": 20
+    },
+    {
+      "id": 18,
+      "round_id": 2,
+      "race_count_type": 2,
+      "win_min": 2501,
+      "win_max": 4999,
+      "chara_text_group": 30
+    },
+    {
+      "id": 19,
+      "round_id": 2,
+      "race_count_type": 2,
+      "win_min": 5000,
+      "win_max": 6599,
+      "chara_text_group": 40
+    },
+    {
+      "id": 20,
+      "round_id": 2,
+      "race_count_type": 2,
+      "win_min": 6600,
+      "win_max": 7499,
+      "chara_text_group": 50
+    },
+    {
+      "id": 21,
+      "round_id": 2,
+      "race_count_type": 2,
+      "win_min": 7500,
+      "win_max": 9999,
+      "chara_text_group": 60
+    },
+    {
+      "id": 22,
+      "round_id": 2,
+      "race_count_type": 2,
+      "win_min": 10000,
+      "win_max": 10000,
+      "chara_text_group": 70
+    },
+    {
+      "id": 23,
+      "round_id": 2,
+      "race_count_type": 3,
+      "win_min": 0,
+      "win_max": 1999,
+      "chara_text_group": 100
+    },
+    {
+      "id": 24,
+      "round_id": 2,
+      "race_count_type": 3,
+      "win_min": 2000,
+      "win_max": 3999,
+      "chara_text_group": 110
+    },
+    {
+      "id": 25,
+      "round_id": 2,
+      "race_count_type": 3,
+      "win_min": 4000,
+      "win_max": 5999,
+      "chara_text_group": 120
+    },
+    {
+      "id": 26,
+      "round_id": 2,
+      "race_count_type": 3,
+      "win_min": 6000,
+      "win_max": 7999,
+      "chara_text_group": 130
+    },
+    {
+      "id": 27,
+      "round_id": 2,
+      "race_count_type": 3,
+      "win_min": 8000,
+      "win_max": 9999,
+      "chara_text_group": 140
+    },
+    {
+      "id": 28,
+      "round_id": 2,
+      "race_count_type": 3,
+      "win_min": 10000,
+      "win_max": 10000,
+      "chara_text_group": 150
+    },
+    {
+      "id": 29,
+      "round_id": 3,
+      "race_count_type": 1,
+      "win_min": 0,
+      "win_max": 10000,
+      "chara_text_group": 1
+    },
+    {
+      "id": 30,
+      "round_id": 3,
+      "race_count_type": 2,
+      "win_min": 0,
+      "win_max": 0,
+      "chara_text_group": 10
+    },
+    {
+      "id": 31,
+      "round_id": 3,
+      "race_count_type": 2,
+      "win_min": 1,
+      "win_max": 2500,
+      "chara_text_group": 20
+    },
+    {
+      "id": 32,
+      "round_id": 3,
+      "race_count_type": 2,
+      "win_min": 2501,
+      "win_max": 4999,
+      "chara_text_group": 30
+    },
+    {
+      "id": 33,
+      "round_id": 3,
+      "race_count_type": 2,
+      "win_min": 5000,
+      "win_max": 6599,
+      "chara_text_group": 40
+    },
+    {
+      "id": 34,
+      "round_id": 3,
+      "race_count_type": 2,
+      "win_min": 6600,
+      "win_max": 7499,
+      "chara_text_group": 50
+    },
+    {
+      "id": 35,
+      "round_id": 3,
+      "race_count_type": 2,
+      "win_min": 7500,
+      "win_max": 9999,
+      "chara_text_group": 60
+    },
+    {
+      "id": 36,
+      "round_id": 3,
+      "race_count_type": 2,
+      "win_min": 10000,
+      "win_max": 10000,
+      "chara_text_group": 70
+    },
+    {
+      "id": 37,
+      "round_id": 3,
+      "race_count_type": 3,
+      "win_min": 0,
+      "win_max": 1999,
+      "chara_text_group": 100
+    },
+    {
+      "id": 38,
+      "round_id": 3,
+      "race_count_type": 3,
+      "win_min": 2000,
+      "win_max": 3999,
+      "chara_text_group": 110
+    },
+    {
+      "id": 39,
+      "round_id": 3,
+      "race_count_type": 3,
+      "win_min": 4000,
+      "win_max": 5999,
+      "chara_text_group": 120
+    },
+    {
+      "id": 40,
+      "round_id": 3,
+      "race_count_type": 3,
+      "win_min": 6000,
+      "win_max": 7999,
+      "chara_text_group": 130
+    },
+    {
+      "id": 41,
+      "round_id": 3,
+      "race_count_type": 3,
+      "win_min": 8000,
+      "win_max": 9999,
+      "chara_text_group": 140
+    },
+    {
+      "id": 42,
+      "round_id": 3,
+      "race_count_type": 3,
+      "win_min": 10000,
+      "win_max": 10000,
+      "chara_text_group": 150
+    },
+    {
+      "id": 43,
+      "round_id": 4,
+      "race_count_type": 1,
+      "win_min": 0,
+      "win_max": 10000,
+      "chara_text_group": 1000
+    },
+    {
+      "id": 44,
+      "round_id": 4,
+      "race_count_type": 4,
+      "win_min": 0,
+      "win_max": 0,
+      "chara_text_group": 1100
+    },
+    {
+      "id": 45,
+      "round_id": 4,
+      "race_count_type": 4,
+      "win_min": 1,
+      "win_max": 4999,
+      "chara_text_group": 1200
+    },
+    {
+      "id": 46,
+      "round_id": 4,
+      "race_count_type": 4,
+      "win_min": 5000,
+      "win_max": 9999,
+      "chara_text_group": 1300
+    },
+    {
+      "id": 47,
+      "round_id": 4,
+      "race_count_type": 4,
+      "win_min": 10000,
+      "win_max": 10000,
+      "chara_text_group": 1400
+    },
+    {
+      "id": 48,
+      "round_id": 5,
+      "race_count_type": 1,
+      "win_min": 0,
+      "win_max": 10000,
+      "chara_text_group": 1000
+    },
+    {
+      "id": 49,
+      "round_id": 5,
+      "race_count_type": 4,
+      "win_min": 0,
+      "win_max": 0,
+      "chara_text_group": 1100
+    },
+    {
+      "id": 50,
+      "round_id": 5,
+      "race_count_type": 4,
+      "win_min": 1,
+      "win_max": 4999,
+      "chara_text_group": 1200
+    },
+    {
+      "id": 51,
+      "round_id": 5,
+      "race_count_type": 4,
+      "win_min": 5000,
+      "win_max": 9999,
+      "chara_text_group": 1300
+    },
+    {
+      "id": 52,
+      "round_id": 5,
+      "race_count_type": 4,
+      "win_min": 10000,
+      "win_max": 10000,
+      "chara_text_group": 1400
+    }
+  ]
+}

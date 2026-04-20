@@ -1,0 +1,153 @@
+{
+  "table": "limited_exchange_reward_odds",
+  "row_count": 20,
+  "columns": [
+    "id",
+    "odds_id",
+    "group_id",
+    "disp_order",
+    "odds"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "odds_id": 1000,
+      "group_id": 101,
+      "disp_order": 3,
+      "odds": 1000000
+    },
+    {
+      "id": 2,
+      "odds_id": 1000,
+      "group_id": 102,
+      "disp_order": 4,
+      "odds": 1000000
+    },
+    {
+      "id": 3,
+      "odds_id": 1000,
+      "group_id": 103,
+      "disp_order": 5,
+      "odds": 1000000
+    },
+    {
+      "id": 4,
+      "odds_id": 1000,
+      "group_id": 104,
+      "disp_order": 6,
+      "odds": 1000000
+    },
+    {
+      "id": 5,
+      "odds_id": 1000,
+      "group_id": 105,
+      "disp_order": 1,
+      "odds": 1000000
+    },
+    {
+      "id": 6,
+      "odds_id": 1000,
+      "group_id": 106,
+      "disp_order": 2,
+      "odds": 1000000
+    },
+    {
+      "id": 7,
+      "odds_id": 1001,
+      "group_id": 111,
+      "disp_order": 3,
+      "odds": 1000000
+    },
+    {
+      "id": 8,
+      "odds_id": 1001,
+      "group_id": 112,
+      "disp_order": 4,
+      "odds": 1000000
+    },
+    {
+      "id": 9,
+      "odds_id": 1001,
+      "group_id": 113,
+      "disp_order": 5,
+      "odds": 1000000
+    },
+    {
+      "id": 10,
+      "odds_id": 1001,
+      "group_id": 114,
+      "disp_order": 6,
+      "odds": 1000000
+    },
+    {
+      "id": 11,
+      "odds_id": 1001,
+      "group_id": 115,
+      "disp_order": 1,
+      "odds": 1000000
+    },
+    {
+      "id": 12,
+      "odds_id": 1001,
+      "group_id": 116,
+      "disp_order": 2,
+      "odds": 1000000
+    },
+    {
+      "id": 13,
+      "odds_id": 1001,
+      "group_id": 117,
+      "disp_order": 7,
+      "odds": 1000000
+    },
+    {
+      "id": 14,
+      "odds_id": 1002,
+      "group_id": 121,
+      "disp_order": 3,
+      "odds": 1000000
+    },
+    {
+      "id": 15,
+      "odds_id": 1002,
+      "group_id": 122,
+      "disp_order": 4,
+      "odds": 1000000
+    },
+    {
+      "id": 16,
+      "odds_id": 1002,
+      "group_id": 123,
+      "disp_order": 5,
+      "odds": 1000000
+    },
+    {
+      "id": 17,
+      "odds_id": 1002,
+      "group_id": 124,
+      "disp_order": 6,
+      "odds": 1000000
+    },
+    {
+      "id": 18,
+      "odds_id": 1002,
+      "group_id": 125,
+      "disp_order": 1,
+      "odds": 1000000
+    },
+    {
+      "id": 19,
+      "odds_id": 1002,
+      "group_id": 126,
+      "disp_order": 2,
+      "odds": 1000000
+    },
+    {
+      "id": 20,
+      "odds_id": 1002,
+      "group_id": 127,
+      "disp_order": 7,
+      "odds": 1000000
+    }
+  ]
+}

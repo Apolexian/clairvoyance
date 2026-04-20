@@ -1,0 +1,72 @@
+{
+  "table": "single_mode_difficulty_box_gauge",
+  "row_count": 5,
+  "columns": [
+    "id",
+    "scenario_id",
+    "difficulty_id",
+    "result_min",
+    "result_max",
+    "gauge_rate",
+    "add_condition_type",
+    "add_condition_min",
+    "add_condition_max"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "scenario_id": 0,
+      "difficulty_id": 1001,
+      "result_min": 0,
+      "result_max": 25,
+      "gauge_rate": 10,
+      "add_condition_type": 0,
+      "add_condition_min": 0,
+      "add_condition_max": 0
+    },
+    {
+      "id": 2,
+      "scenario_id": 0,
+      "difficulty_id": 1001,
+      "result_min": 26,
+      "result_max": 50,
+      "gauge_rate": 25,
+      "add_condition_type": 0,
+      "add_condition_min": 0,
+      "add_condition_max": 0
+    },
+    {
+      "id": 3,
+      "scenario_id": 0,
+      "difficulty_id": 1001,
+      "result_min": 51,
+      "result_max": 80,
+      "gauge_rate": 50,
+      "add_condition_type": 0,
+      "add_condition_min": 0,
+      "add_condition_max": 0
+    },
+    {
+      "id": 4,
+      "scenario_id": 0,
+      "difficulty_id": 1001,
+      "result_min": 81,
+      "result_max": 99,
+      "gauge_rate": 75,
+      "add_condition_type": 0,
+      "add_condition_min": 0,
+      "add_condition_max": 0
+    },
+    {
+      "id": 5,
+      "scenario_id": 0,
+      "difficulty_id": 1001,
+      "result_min": 100,
+      "result_max": 100,
+      "gauge_rate": 100,
+      "add_condition_type": 0,
+      "add_condition_min": 0,
+      "add_condition_max": 0
+    }
+  ]
+}

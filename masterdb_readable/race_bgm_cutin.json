@@ -1,0 +1,39 @@
+{
+  "table": "race_bgm_cutin",
+  "row_count": 2,
+  "columns": [
+    "id",
+    "card_id",
+    "bgm_group_id",
+    "fadeout_time",
+    "exclusive_control",
+    "short_cutin_bgm_cue_name",
+    "short_cutin_bgm_cuesheet_name",
+    "long_cutin_bgm_cue_name",
+    "long_cutin_bgm_cuesheet_name"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "card_id": 100302,
+      "bgm_group_id": 1,
+      "fadeout_time": 140000,
+      "exclusive_control": 1,
+      "short_cutin_bgm_cue_name": "snd_bgm_CS1032_race_short",
+      "short_cutin_bgm_cuesheet_name": "snd_bgm_CS1032_race",
+      "long_cutin_bgm_cue_name": "snd_bgm_CS1032_race_long",
+      "long_cutin_bgm_cuesheet_name": "snd_bgm_CS1032_race"
+    },
+    {
+      "id": 2,
+      "card_id": 101302,
+      "bgm_group_id": 1,
+      "fadeout_time": 140000,
+      "exclusive_control": 1,
+      "short_cutin_bgm_cue_name": "snd_bgm_CS1032_race_short",
+      "short_cutin_bgm_cuesheet_name": "snd_bgm_CS1032_race",
+      "long_cutin_bgm_cue_name": "snd_bgm_CS1032_race_long",
+      "long_cutin_bgm_cuesheet_name": "snd_bgm_CS1032_race"
+    }
+  ]
+}

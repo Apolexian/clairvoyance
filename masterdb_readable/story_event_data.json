@@ -1,0 +1,162 @@
+{
+  "table": "story_event_data",
+  "row_count": 12,
+  "columns": [
+    "story_event_id",
+    "announce_id",
+    "consume_tp_ratio",
+    "bonus_reward_ratio",
+    "notice_date",
+    "start_date",
+    "middle_date_01",
+    "middle_date_02",
+    "ending_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "story_event_id": 1001,
+      "announce_id": 0,
+      "consume_tp_ratio": 0,
+      "bonus_reward_ratio": 0,
+      "notice_date": 1610712000,
+      "start_date": 1750897800,
+      "middle_date_01": 1751234400,
+      "middle_date_02": 1751666400,
+      "ending_date": 1752098399,
+      "end_date": 1752357599
+    },
+    {
+      "story_event_id": 1002,
+      "announce_id": 0,
+      "consume_tp_ratio": 0,
+      "bonus_reward_ratio": 0,
+      "notice_date": 1752357600,
+      "start_date": 1752703200,
+      "middle_date_01": 1753221600,
+      "middle_date_02": 1753740000,
+      "ending_date": 1754085599,
+      "end_date": 1754344799
+    },
+    {
+      "story_event_id": 1003,
+      "announce_id": 1,
+      "consume_tp_ratio": 0,
+      "bonus_reward_ratio": 0,
+      "notice_date": 1756072800,
+      "start_date": 1756418400,
+      "middle_date_01": 1756936800,
+      "middle_date_02": 1757455200,
+      "ending_date": 1757541599,
+      "end_date": 1757800799
+    },
+    {
+      "story_event_id": 1004,
+      "announce_id": 2,
+      "consume_tp_ratio": 0,
+      "bonus_reward_ratio": 0,
+      "notice_date": 1758146400,
+      "start_date": 1758492000,
+      "middle_date_01": 1759096800,
+      "middle_date_02": 1759356000,
+      "ending_date": 1759615199,
+      "end_date": 1759874399
+    },
+    {
+      "story_event_id": 1005,
+      "announce_id": 3,
+      "consume_tp_ratio": 0,
+      "bonus_reward_ratio": 0,
+      "notice_date": 1760133600,
+      "start_date": 1760479200,
+      "middle_date_01": 1761084000,
+      "middle_date_02": 1761343200,
+      "ending_date": 1761602399,
+      "end_date": 1761861599
+    },
+    {
+      "story_event_id": 1006,
+      "announce_id": 4,
+      "consume_tp_ratio": 20000,
+      "bonus_reward_ratio": 20000,
+      "notice_date": 1763676000,
+      "start_date": 1764021600,
+      "middle_date_01": 1764626400,
+      "middle_date_02": 1764885600,
+      "ending_date": 1765058399,
+      "end_date": 1765317599
+    },
+    {
+      "story_event_id": 1007,
+      "announce_id": 5,
+      "consume_tp_ratio": 20000,
+      "bonus_reward_ratio": 20000,
+      "notice_date": 1765404000,
+      "start_date": 1765749600,
+      "middle_date_01": 1766181600,
+      "middle_date_02": 1766440800,
+      "ending_date": 1766699999,
+      "end_date": 1766959199
+    },
+    {
+      "story_event_id": 1008,
+      "announce_id": 6,
+      "consume_tp_ratio": 20000,
+      "bonus_reward_ratio": 20000,
+      "notice_date": 1767304800,
+      "start_date": 1767650400,
+      "middle_date_01": 1767996000,
+      "middle_date_02": 1768255200,
+      "ending_date": 1768946399,
+      "end_date": 1769205599
+    },
+    {
+      "story_event_id": 1009,
+      "announce_id": 9,
+      "consume_tp_ratio": 20000,
+      "bonus_reward_ratio": 20000,
+      "notice_date": 1769378400,
+      "start_date": 1769724000,
+      "middle_date_01": 1769810400,
+      "middle_date_02": 1770156000,
+      "ending_date": 1770674399,
+      "end_date": 1770933599
+    },
+    {
+      "story_event_id": 1010,
+      "announce_id": 10,
+      "consume_tp_ratio": 20000,
+      "bonus_reward_ratio": 20000,
+      "notice_date": 1771106400,
+      "start_date": 1771452000,
+      "middle_date_01": 1771538400,
+      "middle_date_02": 1771797600,
+      "ending_date": 1772402399,
+      "end_date": 1772661599
+    },
+    {
+      "story_event_id": 1011,
+      "announce_id": 11,
+      "consume_tp_ratio": 20000,
+      "bonus_reward_ratio": 20000,
+      "notice_date": 1773007200,
+      "start_date": 1773352800,
+      "middle_date_01": 1773439200,
+      "middle_date_02": 1773612000,
+      "ending_date": 1774303199,
+      "end_date": 1774562399
+    },
+    {
+      "story_event_id": 1012,
+      "announce_id": 12,
+      "consume_tp_ratio": 20000,
+      "bonus_reward_ratio": 20000,
+      "notice_date": 1775080800,
+      "start_date": 1775426400,
+      "middle_date_01": 1775512800,
+      "middle_date_02": 1775858400,
+      "ending_date": 1776549599,
+      "end_date": 1776808799
+    }
+  ]
+}

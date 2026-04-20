@@ -1,0 +1,751 @@
+{
+  "table": "item_place",
+  "row_count": 148,
+  "columns": [
+    "id",
+    "transition_type",
+    "transition_value"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 4,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 7,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 10,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 13,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 44,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 44,
+      "transition_type": 2,
+      "transition_value": 7000
+    },
+    {
+      "id": 44,
+      "transition_type": 2,
+      "transition_value": 7001
+    },
+    {
+      "id": 69,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 69,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 70,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 70,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 71,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 71,
+      "transition_type": 2,
+      "transition_value": 8000
+    },
+    {
+      "id": 72,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 72,
+      "transition_type": 2,
+      "transition_value": 4000
+    },
+    {
+      "id": 73,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 73,
+      "transition_type": 2,
+      "transition_value": 7002
+    },
+    {
+      "id": 74,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 74,
+      "transition_type": 2,
+      "transition_value": 4000
+    },
+    {
+      "id": 75,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 75,
+      "transition_type": 2,
+      "transition_value": 7002
+    },
+    {
+      "id": 76,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 76,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 77,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 77,
+      "transition_type": 2,
+      "transition_value": 4000
+    },
+    {
+      "id": 78,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 78,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 79,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 79,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 80,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 80,
+      "transition_type": 2,
+      "transition_value": 8000
+    },
+    {
+      "id": 81,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 81,
+      "transition_type": 2,
+      "transition_value": 8000
+    },
+    {
+      "id": 82,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 82,
+      "transition_type": 2,
+      "transition_value": 4000
+    },
+    {
+      "id": 83,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 83,
+      "transition_type": 2,
+      "transition_value": 7000
+    },
+    {
+      "id": 83,
+      "transition_type": 2,
+      "transition_value": 7001
+    },
+    {
+      "id": 84,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 84,
+      "transition_type": 2,
+      "transition_value": 4000
+    },
+    {
+      "id": 85,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 85,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 86,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 86,
+      "transition_type": 2,
+      "transition_value": 7002
+    },
+    {
+      "id": 87,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 87,
+      "transition_type": 2,
+      "transition_value": 7002
+    },
+    {
+      "id": 88,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 88,
+      "transition_type": 2,
+      "transition_value": 4000
+    },
+    {
+      "id": 89,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 89,
+      "transition_type": 2,
+      "transition_value": 7002
+    },
+    {
+      "id": 90,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 90,
+      "transition_type": 2,
+      "transition_value": 8000
+    },
+    {
+      "id": 91,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 91,
+      "transition_type": 2,
+      "transition_value": 7000
+    },
+    {
+      "id": 91,
+      "transition_type": 2,
+      "transition_value": 7001
+    },
+    {
+      "id": 92,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 92,
+      "transition_type": 2,
+      "transition_value": 7002
+    },
+    {
+      "id": 101,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 102,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 102,
+      "transition_type": 2,
+      "transition_value": 8000
+    },
+    {
+      "id": 103,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 104,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 104,
+      "transition_type": 2,
+      "transition_value": 7002
+    },
+    {
+      "id": 105,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 106,
+      "transition_type": 1,
+      "transition_value": 0
+    },
+    {
+      "id": 144,
+      "transition_type": 2,
+      "transition_value": 10000
+    },
+    {
+      "id": 145,
+      "transition_type": 2,
+      "transition_value": 10001
+    },
+    {
+      "id": 156,
+      "transition_type": 2,
+      "transition_value": 11000
+    },
+    {
+      "id": 160,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 161,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 162,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 163,
+      "transition_type": 2,
+      "transition_value": 2000
+    },
+    {
+      "id": 100101,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100201,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100301,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100401,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100601,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100701,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100801,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100901,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101001,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101101,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101301,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101401,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101701,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101801,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102401,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102701,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103001,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103201,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103501,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 104101,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 104501,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 105201,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 105601,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 106001,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 106101,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101501,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102601,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102301,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100302,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101302,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103801,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 105001,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 104601,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101601,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101802,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102402,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102001,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101201,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101102,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101402,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100501,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 104001,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100102,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100402,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 105801,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103701,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 105602,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102801,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101901,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103002,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 104502,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103901,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102501,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101702,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 104002,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 104801,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 105901,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 100602,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102302,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102201,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102101,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 101502,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 105202,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 106901,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102602,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103702,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 107101,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 103301,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 106201,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 106801,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 106701,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 107401,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 800000,
+      "transition_type": 5,
+      "transition_value": 0
+    },
+    {
+      "id": 100502,
+      "transition_type": 2,
+      "transition_value": 3000
+    },
+    {
+      "id": 102002,
+      "transition_type": 2,
+      "transition_value": 3000
+    }
+  ]
+}

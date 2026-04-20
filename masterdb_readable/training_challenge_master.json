@@ -1,0 +1,57 @@
+{
+  "table": "training_challenge_master",
+  "row_count": 2,
+  "columns": [
+    "id",
+    "target_main_scenario",
+    "exam_id_1",
+    "exam_id_2",
+    "exam_id_3",
+    "exam_id_4",
+    "exam_id_5",
+    "ex_exam_id",
+    "free_exam_id",
+    "shop_id",
+    "notice_date",
+    "start_date",
+    "end_date",
+    "start_result_date",
+    "end_result_date"
+  ],
+  "rows": [
+    {
+      "id": 2001,
+      "target_main_scenario": 2,
+      "exam_id_1": 1,
+      "exam_id_2": 2,
+      "exam_id_3": 3,
+      "exam_id_4": 4,
+      "exam_id_5": 5,
+      "ex_exam_id": 6,
+      "free_exam_id": 7,
+      "shop_id": 11000,
+      "notice_date": 1768428000,
+      "start_date": 1768514400,
+      "end_date": 1769205599,
+      "start_result_date": 1769205600,
+      "end_result_date": 1769464799
+    },
+    {
+      "id": 4001,
+      "target_main_scenario": 4,
+      "exam_id_1": 0,
+      "exam_id_2": 0,
+      "exam_id_3": 0,
+      "exam_id_4": 0,
+      "exam_id_5": 0,
+      "ex_exam_id": 0,
+      "free_exam_id": 8,
+      "shop_id": 11001,
+      "notice_date": 1774735200,
+      "start_date": 1774821600,
+      "end_date": 1775253599,
+      "start_result_date": 1775253600,
+      "end_result_date": 1775512799
+    }
+  ]
+}

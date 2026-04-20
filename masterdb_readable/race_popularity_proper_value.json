@@ -1,0 +1,108 @@
+{
+  "table": "race_popularity_proper_value",
+  "row_count": 16,
+  "columns": [
+    "id",
+    "proper_type",
+    "proper_grade",
+    "value"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "proper_type": 1,
+      "proper_grade": 8,
+      "value": 50
+    },
+    {
+      "id": 2,
+      "proper_type": 1,
+      "proper_grade": 7,
+      "value": 45
+    },
+    {
+      "id": 3,
+      "proper_type": 1,
+      "proper_grade": 6,
+      "value": 40
+    },
+    {
+      "id": 4,
+      "proper_type": 1,
+      "proper_grade": 5,
+      "value": 35
+    },
+    {
+      "id": 5,
+      "proper_type": 1,
+      "proper_grade": 4,
+      "value": 20
+    },
+    {
+      "id": 6,
+      "proper_type": 1,
+      "proper_grade": 3,
+      "value": 15
+    },
+    {
+      "id": 7,
+      "proper_type": 1,
+      "proper_grade": 2,
+      "value": 10
+    },
+    {
+      "id": 8,
+      "proper_type": 1,
+      "proper_grade": 1,
+      "value": 5
+    },
+    {
+      "id": 9,
+      "proper_type": 2,
+      "proper_grade": 8,
+      "value": 50
+    },
+    {
+      "id": 10,
+      "proper_type": 2,
+      "proper_grade": 7,
+      "value": 45
+    },
+    {
+      "id": 11,
+      "proper_type": 2,
+      "proper_grade": 6,
+      "value": 40
+    },
+    {
+      "id": 12,
+      "proper_type": 2,
+      "proper_grade": 5,
+      "value": 35
+    },
+    {
+      "id": 13,
+      "proper_type": 2,
+      "proper_grade": 4,
+      "value": 20
+    },
+    {
+      "id": 14,
+      "proper_type": 2,
+      "proper_grade": 3,
+      "value": 15
+    },
+    {
+      "id": 15,
+      "proper_type": 2,
+      "proper_grade": 2,
+      "value": 10
+    },
+    {
+      "id": 16,
+      "proper_type": 2,
+      "proper_grade": 1,
+      "value": 5
+    }
+  ]
+}

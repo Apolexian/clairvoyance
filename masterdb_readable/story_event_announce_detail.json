@@ -1,0 +1,916 @@
+{
+  "table": "story_event_announce_detail",
+  "row_count": 129,
+  "columns": [
+    "id",
+    "announce_id",
+    "order",
+    "cue_name",
+    "text_message"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "announce_id": 1,
+      "order": 1,
+      "cue_name": "snd_voi_event_090004_0100",
+      "text_message": "That bride just now was so beautiful!"
+    },
+    {
+      "id": 2,
+      "announce_id": 1,
+      "order": 2,
+      "cue_name": "snd_voi_event_090004_0101",
+      "text_message": "Aw, I'm jealous! I wanna wear a dress like that!"
+    },
+    {
+      "id": 3,
+      "announce_id": 1,
+      "order": 3,
+      "cue_name": "snd_voi_event_090004_0102",
+      "text_message": "A wedding dress, huh? The elegant design is rather captivating..."
+    },
+    {
+      "id": 4,
+      "announce_id": 1,
+      "order": 4,
+      "cue_name": "snd_voi_event_090004_0103",
+      "text_message": "Riiight? ♪ You would look so good in one, Air Groove!"
+    },
+    {
+      "id": 5,
+      "announce_id": 1,
+      "order": 5,
+      "cue_name": "snd_voi_event_090004_0104",
+      "text_message": "What do you say to bewitching everyone?"
+    },
+    {
+      "id": 6,
+      "announce_id": 1,
+      "order": 6,
+      "cue_name": "snd_voi_event_090004_0105",
+      "text_message": "What kind of outfit are you planning on making me wear?"
+    },
+    {
+      "id": 7,
+      "announce_id": 1,
+      "order": 7,
+      "cue_name": "snd_voi_event_090004_0106",
+      "text_message": "I'm sure there are others who would look good in a wedding dress too. For example, hm... how about Dober?"
+    },
+    {
+      "id": 8,
+      "announce_id": 1,
+      "order": 8,
+      "cue_name": "snd_voi_event_090004_0107",
+      "text_message": "Yeah, true! But you know, I bet everyone would look good in one! ♪ There are so many different kinds of wedding dresses, after all!"
+    },
+    {
+      "id": 9,
+      "announce_id": 1,
+      "order": 9,
+      "cue_name": "snd_voi_event_090004_0108",
+      "text_message": "Some look fit for a princess, and some are biiiig and poofy. ♪ I wonder who from the academy they'd suit?"
+    },
+    {
+      "id": 10,
+      "announce_id": 1,
+      "order": 10,
+      "cue_name": "snd_voi_event_090004_0109",
+      "text_message": "...Stop letting your weird imagination run wild."
+    },
+    {
+      "id": 11,
+      "announce_id": 1,
+      "order": 11,
+      "cue_name": "snd_voi_event_090004_0110",
+      "text_message": "Stay tuned for Umamusume: Pretty Derby's newest story event—Racing Hearts Beauty in Bloom."
+    },
+    {
+      "id": 12,
+      "announce_id": 1,
+      "order": 12,
+      "cue_name": "snd_voi_event_090004_0111",
+      "text_message": "Take off in a twinkly dress. ☆"
+    },
+    {
+      "id": 13,
+      "announce_id": 2,
+      "order": 1,
+      "cue_name": "snd_voi_event_090002_0100",
+      "text_message": "Check out the world's strongest racer! I'm peak! I'm power! I'm El—star of the Umamusume world!"
+    },
+    {
+      "id": 14,
+      "announce_id": 2,
+      "order": 2,
+      "cue_name": "snd_voi_event_090002_0101",
+      "text_message": "You appear to be in good spirits, El. But being the star of one world doesn't necessarily mean you'd excel in others."
+    },
+    {
+      "id": 15,
+      "announce_id": 2,
+      "order": 3,
+      "cue_name": "snd_voi_event_090002_0102",
+      "text_message": "Qué?! Other what? Are you sayin' there are other <i>worlds</i> out there?!"
+    },
+    {
+      "id": 16,
+      "announce_id": 2,
+      "order": 4,
+      "cue_name": "snd_voi_event_090002_0103",
+      "text_message": "No, not quite. I've heard that Tracen Academy has new machines that let you experience games in virtual reality."
+    },
+    {
+      "id": 17,
+      "announce_id": 2,
+      "order": 5,
+      "cue_name": "snd_voi_event_090002_0104",
+      "text_message": "For example... you could enter a kingdom of swords and sorcery."
+    },
+    {
+      "id": 18,
+      "announce_id": 2,
+      "order": 6,
+      "cue_name": "snd_voi_event_090002_0105",
+      "text_message": "Imagine exploring a fantasy world, with your own Umamusume body and abilities..."
+    },
+    {
+      "id": 19,
+      "announce_id": 2,
+      "order": 7,
+      "cue_name": "snd_voi_event_090002_0106",
+      "text_message": "Oooooh! Kinda like an Umamusume isekai!"
+    },
+    {
+      "id": 20,
+      "announce_id": 2,
+      "order": 8,
+      "cue_name": "snd_voi_event_090002_0107",
+      "text_message": "If I got isekai'd into a game world, I'd definitely be the Eternal Champion— the hero of the El-ell Saga!"
+    },
+    {
+      "id": 21,
+      "announce_id": 2,
+      "order": 9,
+      "cue_name": "snd_voi_event_090002_0108",
+      "text_message": "C'mon Grass, we've gotta go check it out! It'll be like a mini vacation, and we can brawl our way to video game glory!"
+    },
+    {
+      "id": 22,
+      "announce_id": 2,
+      "order": 10,
+      "cue_name": "snd_voi_event_090002_0109",
+      "text_message": "Oh, fine. I guess I'll have to go with you. I'd be too worried letting you go all on your own."
+    },
+    {
+      "id": 23,
+      "announce_id": 2,
+      "order": 11,
+      "cue_name": "snd_voi_event_090002_0110",
+      "text_message": "Next time on Umamusume: Pretty Derby—\"Uma Quest: Epic Odyssey\"!"
+    },
+    {
+      "id": 24,
+      "announce_id": 2,
+      "order": 12,
+      "cue_name": "snd_voi_event_090002_0111",
+      "text_message": "Stay tuned for El's Condor punches and my healing magic! ♪"
+    },
+    {
+      "id": 25,
+      "announce_id": 3,
+      "order": 1,
+      "cue_name": "snd_voi_event_090005_0100",
+      "text_message": "Hmm. There are so many different kinds of swimsuits nowadays."
+    },
+    {
+      "id": 26,
+      "announce_id": 3,
+      "order": 2,
+      "cue_name": "snd_voi_event_090005_0101",
+      "text_message": "No kidding! That orange one is so cute."
+    },
+    {
+      "id": 27,
+      "announce_id": 3,
+      "order": 3,
+      "cue_name": "snd_voi_event_090005_0102",
+      "text_message": "They have everything from sporty ones to the classic two-piece designs."
+    },
+    {
+      "id": 28,
+      "announce_id": 3,
+      "order": 4,
+      "cue_name": "snd_voi_event_090005_0103",
+      "text_message": "Ah, I love that one with the ribbons..."
+    },
+    {
+      "id": 29,
+      "announce_id": 3,
+      "order": 5,
+      "cue_name": "snd_voi_event_090005_0104",
+      "text_message": "That one's nice! I bet you would look great in it!"
+    },
+    {
+      "id": 30,
+      "announce_id": 3,
+      "order": 6,
+      "cue_name": "snd_voi_event_090005_0105",
+      "text_message": "You know, I think I saw someone picking out a new swimsuit from a magazine the other day..."
+    },
+    {
+      "id": 31,
+      "announce_id": 3,
+      "order": 7,
+      "cue_name": "snd_voi_event_090005_0106",
+      "text_message": "I guess it's already swimsuit season, huh?"
+    },
+    {
+      "id": 32,
+      "announce_id": 3,
+      "order": 8,
+      "cue_name": "snd_voi_event_090005_0107",
+      "text_message": "So it is. Come to think of it, I don't have anything fun planned for the summer."
+    },
+    {
+      "id": 33,
+      "announce_id": 3,
+      "order": 9,
+      "cue_name": "snd_voi_event_090005_0108",
+      "text_message": "Haha. Me neither. My training schedule is too packed for anything like that..."
+    },
+    {
+      "id": 34,
+      "announce_id": 3,
+      "order": 10,
+      "cue_name": "snd_voi_event_090005_0109",
+      "text_message": "Next time on Umamusume: Pretty Derby—Beaches, Bathing Suits & Blazing Trails."
+    },
+    {
+      "id": 35,
+      "announce_id": 3,
+      "order": 11,
+      "cue_name": "snd_voi_event_090005_0110",
+      "text_message": "There'll be swimsuits, pools, and disco fever! ...Wait, disco fever?"
+    },
+    {
+      "id": 36,
+      "announce_id": 4,
+      "order": 1,
+      "cue_name": "snd_voi_event_090006_0100",
+      "text_message": ""
+    },
+    {
+      "id": 37,
+      "announce_id": 4,
+      "order": 2,
+      "cue_name": "snd_voi_event_090006_0101",
+      "text_message": ""
+    },
+    {
+      "id": 38,
+      "announce_id": 4,
+      "order": 3,
+      "cue_name": "snd_voi_event_090006_0102",
+      "text_message": ""
+    },
+    {
+      "id": 39,
+      "announce_id": 4,
+      "order": 4,
+      "cue_name": "snd_voi_event_090006_0103",
+      "text_message": ""
+    },
+    {
+      "id": 40,
+      "announce_id": 4,
+      "order": 5,
+      "cue_name": "snd_voi_event_090006_0104",
+      "text_message": ""
+    },
+    {
+      "id": 41,
+      "announce_id": 4,
+      "order": 6,
+      "cue_name": "snd_voi_event_090006_0105",
+      "text_message": ""
+    },
+    {
+      "id": 42,
+      "announce_id": 4,
+      "order": 7,
+      "cue_name": "snd_voi_event_090006_0106",
+      "text_message": ""
+    },
+    {
+      "id": 43,
+      "announce_id": 4,
+      "order": 8,
+      "cue_name": "snd_voi_event_090006_0107",
+      "text_message": ""
+    },
+    {
+      "id": 44,
+      "announce_id": 4,
+      "order": 9,
+      "cue_name": "snd_voi_event_090006_0108",
+      "text_message": ""
+    },
+    {
+      "id": 45,
+      "announce_id": 4,
+      "order": 10,
+      "cue_name": "snd_voi_event_090006_0109",
+      "text_message": ""
+    },
+    {
+      "id": 46,
+      "announce_id": 4,
+      "order": 11,
+      "cue_name": "snd_voi_event_090006_0110",
+      "text_message": ""
+    },
+    {
+      "id": 47,
+      "announce_id": 4,
+      "order": 12,
+      "cue_name": "snd_voi_event_090006_0111",
+      "text_message": ""
+    },
+    {
+      "id": 48,
+      "announce_id": 4,
+      "order": 13,
+      "cue_name": "snd_voi_event_090006_0112",
+      "text_message": ""
+    },
+    {
+      "id": 49,
+      "announce_id": 5,
+      "order": 1,
+      "cue_name": "snd_voi_event_090007_0100",
+      "text_message": ""
+    },
+    {
+      "id": 50,
+      "announce_id": 5,
+      "order": 2,
+      "cue_name": "snd_voi_event_090007_0101",
+      "text_message": ""
+    },
+    {
+      "id": 51,
+      "announce_id": 5,
+      "order": 3,
+      "cue_name": "snd_voi_event_090007_0102",
+      "text_message": ""
+    },
+    {
+      "id": 52,
+      "announce_id": 5,
+      "order": 4,
+      "cue_name": "snd_voi_event_090007_0103",
+      "text_message": ""
+    },
+    {
+      "id": 53,
+      "announce_id": 5,
+      "order": 5,
+      "cue_name": "snd_voi_event_090007_0104",
+      "text_message": ""
+    },
+    {
+      "id": 54,
+      "announce_id": 5,
+      "order": 6,
+      "cue_name": "snd_voi_event_090007_0105",
+      "text_message": ""
+    },
+    {
+      "id": 55,
+      "announce_id": 5,
+      "order": 7,
+      "cue_name": "snd_voi_event_090007_0106",
+      "text_message": ""
+    },
+    {
+      "id": 56,
+      "announce_id": 5,
+      "order": 8,
+      "cue_name": "snd_voi_event_090007_0107",
+      "text_message": ""
+    },
+    {
+      "id": 57,
+      "announce_id": 5,
+      "order": 9,
+      "cue_name": "snd_voi_event_090007_0108",
+      "text_message": ""
+    },
+    {
+      "id": 58,
+      "announce_id": 5,
+      "order": 10,
+      "cue_name": "snd_voi_event_090007_0109",
+      "text_message": ""
+    },
+    {
+      "id": 59,
+      "announce_id": 5,
+      "order": 11,
+      "cue_name": "snd_voi_event_090007_0110",
+      "text_message": ""
+    },
+    {
+      "id": 60,
+      "announce_id": 5,
+      "order": 12,
+      "cue_name": "snd_voi_event_090007_0111",
+      "text_message": ""
+    },
+    {
+      "id": 61,
+      "announce_id": 5,
+      "order": 13,
+      "cue_name": "snd_voi_event_090007_0112",
+      "text_message": ""
+    },
+    {
+      "id": 62,
+      "announce_id": 5,
+      "order": 14,
+      "cue_name": "snd_voi_event_090007_0113",
+      "text_message": ""
+    },
+    {
+      "id": 63,
+      "announce_id": 6,
+      "order": 1,
+      "cue_name": "snd_voi_event_090008_0100",
+      "text_message": ""
+    },
+    {
+      "id": 64,
+      "announce_id": 6,
+      "order": 2,
+      "cue_name": "snd_voi_event_090008_0101",
+      "text_message": ""
+    },
+    {
+      "id": 65,
+      "announce_id": 6,
+      "order": 3,
+      "cue_name": "snd_voi_event_090008_0102",
+      "text_message": ""
+    },
+    {
+      "id": 66,
+      "announce_id": 6,
+      "order": 4,
+      "cue_name": "snd_voi_event_090008_0103",
+      "text_message": ""
+    },
+    {
+      "id": 67,
+      "announce_id": 6,
+      "order": 5,
+      "cue_name": "snd_voi_event_090008_0104",
+      "text_message": ""
+    },
+    {
+      "id": 68,
+      "announce_id": 6,
+      "order": 6,
+      "cue_name": "snd_voi_event_090008_0105",
+      "text_message": ""
+    },
+    {
+      "id": 69,
+      "announce_id": 6,
+      "order": 7,
+      "cue_name": "snd_voi_event_090008_0106",
+      "text_message": ""
+    },
+    {
+      "id": 70,
+      "announce_id": 6,
+      "order": 8,
+      "cue_name": "snd_voi_event_090008_0107",
+      "text_message": ""
+    },
+    {
+      "id": 71,
+      "announce_id": 6,
+      "order": 9,
+      "cue_name": "snd_voi_event_090008_0108",
+      "text_message": ""
+    },
+    {
+      "id": 72,
+      "announce_id": 6,
+      "order": 10,
+      "cue_name": "snd_voi_event_090008_0109",
+      "text_message": ""
+    },
+    {
+      "id": 73,
+      "announce_id": 6,
+      "order": 11,
+      "cue_name": "snd_voi_event_090008_0110",
+      "text_message": ""
+    },
+    {
+      "id": 74,
+      "announce_id": 6,
+      "order": 12,
+      "cue_name": "snd_voi_event_090008_0111",
+      "text_message": ""
+    },
+    {
+      "id": 75,
+      "announce_id": 6,
+      "order": 13,
+      "cue_name": "snd_voi_event_090008_0112",
+      "text_message": ""
+    },
+    {
+      "id": 76,
+      "announce_id": 6,
+      "order": 14,
+      "cue_name": "snd_voi_event_090008_0113",
+      "text_message": ""
+    },
+    {
+      "id": 77,
+      "announce_id": 9,
+      "order": 1,
+      "cue_name": "snd_voi_event_090009_0100",
+      "text_message": ""
+    },
+    {
+      "id": 78,
+      "announce_id": 9,
+      "order": 2,
+      "cue_name": "snd_voi_event_090009_0101",
+      "text_message": ""
+    },
+    {
+      "id": 79,
+      "announce_id": 9,
+      "order": 3,
+      "cue_name": "snd_voi_event_090009_0102",
+      "text_message": ""
+    },
+    {
+      "id": 80,
+      "announce_id": 9,
+      "order": 4,
+      "cue_name": "snd_voi_event_090009_0103",
+      "text_message": ""
+    },
+    {
+      "id": 81,
+      "announce_id": 9,
+      "order": 5,
+      "cue_name": "snd_voi_event_090009_0104",
+      "text_message": ""
+    },
+    {
+      "id": 82,
+      "announce_id": 9,
+      "order": 6,
+      "cue_name": "snd_voi_event_090009_0105",
+      "text_message": ""
+    },
+    {
+      "id": 83,
+      "announce_id": 9,
+      "order": 7,
+      "cue_name": "snd_voi_event_090009_0106",
+      "text_message": ""
+    },
+    {
+      "id": 84,
+      "announce_id": 9,
+      "order": 8,
+      "cue_name": "snd_voi_event_090009_0107",
+      "text_message": ""
+    },
+    {
+      "id": 85,
+      "announce_id": 9,
+      "order": 9,
+      "cue_name": "snd_voi_event_090009_0108",
+      "text_message": ""
+    },
+    {
+      "id": 86,
+      "announce_id": 10,
+      "order": 1,
+      "cue_name": "snd_voi_event_090010_0100",
+      "text_message": ""
+    },
+    {
+      "id": 87,
+      "announce_id": 10,
+      "order": 2,
+      "cue_name": "snd_voi_event_090010_0101",
+      "text_message": ""
+    },
+    {
+      "id": 88,
+      "announce_id": 10,
+      "order": 3,
+      "cue_name": "snd_voi_event_090010_0102",
+      "text_message": ""
+    },
+    {
+      "id": 89,
+      "announce_id": 10,
+      "order": 4,
+      "cue_name": "snd_voi_event_090010_0103",
+      "text_message": ""
+    },
+    {
+      "id": 90,
+      "announce_id": 10,
+      "order": 5,
+      "cue_name": "snd_voi_event_090010_0104",
+      "text_message": ""
+    },
+    {
+      "id": 91,
+      "announce_id": 10,
+      "order": 6,
+      "cue_name": "snd_voi_event_090010_0105",
+      "text_message": ""
+    },
+    {
+      "id": 92,
+      "announce_id": 10,
+      "order": 7,
+      "cue_name": "snd_voi_event_090010_0106",
+      "text_message": ""
+    },
+    {
+      "id": 93,
+      "announce_id": 10,
+      "order": 8,
+      "cue_name": "snd_voi_event_090010_0107",
+      "text_message": ""
+    },
+    {
+      "id": 94,
+      "announce_id": 10,
+      "order": 9,
+      "cue_name": "snd_voi_event_090010_0108",
+      "text_message": ""
+    },
+    {
+      "id": 95,
+      "announce_id": 10,
+      "order": 10,
+      "cue_name": "snd_voi_event_090010_0109",
+      "text_message": ""
+    },
+    {
+      "id": 96,
+      "announce_id": 10,
+      "order": 11,
+      "cue_name": "snd_voi_event_090010_0110",
+      "text_message": ""
+    },
+    {
+      "id": 97,
+      "announce_id": 10,
+      "order": 12,
+      "cue_name": "snd_voi_event_090010_0111",
+      "text_message": ""
+    },
+    {
+      "id": 98,
+      "announce_id": 10,
+      "order": 13,
+      "cue_name": "snd_voi_event_090010_0112",
+      "text_message": ""
+    },
+    {
+      "id": 99,
+      "announce_id": 10,
+      "order": 14,
+      "cue_name": "snd_voi_event_090010_0113",
+      "text_message": ""
+    },
+    {
+      "id": 100,
+      "announce_id": 10,
+      "order": 15,
+      "cue_name": "snd_voi_event_090010_0114",
+      "text_message": ""
+    },
+    {
+      "id": 101,
+      "announce_id": 10,
+      "order": 16,
+      "cue_name": "snd_voi_event_090010_0115",
+      "text_message": ""
+    },
+    {
+      "id": 102,
+      "announce_id": 11,
+      "order": 1,
+      "cue_name": "snd_voi_event_090011_0100",
+      "text_message": ""
+    },
+    {
+      "id": 103,
+      "announce_id": 11,
+      "order": 2,
+      "cue_name": "snd_voi_event_090011_0101",
+      "text_message": ""
+    },
+    {
+      "id": 104,
+      "announce_id": 11,
+      "order": 3,
+      "cue_name": "snd_voi_event_090011_0102",
+      "text_message": ""
+    },
+    {
+      "id": 105,
+      "announce_id": 11,
+      "order": 4,
+      "cue_name": "snd_voi_event_090011_0103",
+      "text_message": ""
+    },
+    {
+      "id": 106,
+      "announce_id": 11,
+      "order": 5,
+      "cue_name": "snd_voi_event_090011_0104",
+      "text_message": ""
+    },
+    {
+      "id": 107,
+      "announce_id": 11,
+      "order": 6,
+      "cue_name": "snd_voi_event_090011_0105",
+      "text_message": ""
+    },
+    {
+      "id": 108,
+      "announce_id": 11,
+      "order": 7,
+      "cue_name": "snd_voi_event_090011_0106",
+      "text_message": ""
+    },
+    {
+      "id": 109,
+      "announce_id": 11,
+      "order": 8,
+      "cue_name": "snd_voi_event_090011_0107",
+      "text_message": ""
+    },
+    {
+      "id": 110,
+      "announce_id": 11,
+      "order": 9,
+      "cue_name": "snd_voi_event_090011_0108",
+      "text_message": ""
+    },
+    {
+      "id": 111,
+      "announce_id": 11,
+      "order": 10,
+      "cue_name": "snd_voi_event_090011_0109",
+      "text_message": ""
+    },
+    {
+      "id": 112,
+      "announce_id": 11,
+      "order": 11,
+      "cue_name": "snd_voi_event_090011_0110",
+      "text_message": ""
+    },
+    {
+      "id": 113,
+      "announce_id": 11,
+      "order": 12,
+      "cue_name": "snd_voi_event_090011_0111",
+      "text_message": ""
+    },
+    {
+      "id": 114,
+      "announce_id": 12,
+      "order": 1,
+      "cue_name": "snd_voi_event_090012_0100",
+      "text_message": ""
+    },
+    {
+      "id": 115,
+      "announce_id": 12,
+      "order": 2,
+      "cue_name": "snd_voi_event_090012_0101",
+      "text_message": ""
+    },
+    {
+      "id": 116,
+      "announce_id": 12,
+      "order": 3,
+      "cue_name": "snd_voi_event_090012_0102",
+      "text_message": ""
+    },
+    {
+      "id": 117,
+      "announce_id": 12,
+      "order": 4,
+      "cue_name": "snd_voi_event_090012_0103",
+      "text_message": ""
+    },
+    {
+      "id": 118,
+      "announce_id": 12,
+      "order": 5,
+      "cue_name": "snd_voi_event_090012_0104",
+      "text_message": ""
+    },
+    {
+      "id": 119,
+      "announce_id": 12,
+      "order": 6,
+      "cue_name": "snd_voi_event_090012_0105",
+      "text_message": ""
+    },
+    {
+      "id": 120,
+      "announce_id": 12,
+      "order": 7,
+      "cue_name": "snd_voi_event_090012_0106",
+      "text_message": ""
+    },
+    {
+      "id": 121,
+      "announce_id": 12,
+      "order": 8,
+      "cue_name": "snd_voi_event_090012_0107",
+      "text_message": ""
+    },
+    {
+      "id": 122,
+      "announce_id": 12,
+      "order": 9,
+      "cue_name": "snd_voi_event_090012_0108",
+      "text_message": ""
+    },
+    {
+      "id": 123,
+      "announce_id": 12,
+      "order": 10,
+      "cue_name": "snd_voi_event_090012_0109",
+      "text_message": ""
+    },
+    {
+      "id": 124,
+      "announce_id": 12,
+      "order": 11,
+      "cue_name": "snd_voi_event_090012_0110",
+      "text_message": ""
+    },
+    {
+      "id": 125,
+      "announce_id": 12,
+      "order": 12,
+      "cue_name": "snd_voi_event_090012_0111",
+      "text_message": ""
+    },
+    {
+      "id": 126,
+      "announce_id": 12,
+      "order": 13,
+      "cue_name": "snd_voi_event_090012_0112",
+      "text_message": ""
+    },
+    {
+      "id": 127,
+      "announce_id": 12,
+      "order": 14,
+      "cue_name": "snd_voi_event_090012_0113",
+      "text_message": ""
+    },
+    {
+      "id": 128,
+      "announce_id": 12,
+      "order": 15,
+      "cue_name": "snd_voi_event_090012_0114",
+      "text_message": ""
+    },
+    {
+      "id": 129,
+      "announce_id": 12,
+      "order": 16,
+      "cue_name": "snd_voi_event_090012_0115",
+      "text_message": ""
+    }
+  ]
+}

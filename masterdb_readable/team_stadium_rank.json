@@ -1,0 +1,316 @@
+{
+  "table": "team_stadium_rank",
+  "row_count": 30,
+  "columns": [
+    "id",
+    "team_rank",
+    "team_rank_group",
+    "team_min_value",
+    "team_max_value",
+    "item_category",
+    "item_id",
+    "item_num"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "team_rank": 1,
+      "team_rank_group": 1,
+      "team_min_value": 1,
+      "team_max_value": 2999,
+      "item_category": 0,
+      "item_id": 0,
+      "item_num": 0
+    },
+    {
+      "id": 2,
+      "team_rank": 2,
+      "team_rank_group": 2,
+      "team_min_value": 3000,
+      "team_max_value": 6999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 50
+    },
+    {
+      "id": 3,
+      "team_rank": 3,
+      "team_rank_group": 2,
+      "team_min_value": 7000,
+      "team_max_value": 12499,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 50
+    },
+    {
+      "id": 4,
+      "team_rank": 4,
+      "team_rank_group": 2,
+      "team_min_value": 12500,
+      "team_max_value": 19999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 50
+    },
+    {
+      "id": 5,
+      "team_rank": 5,
+      "team_rank_group": 2,
+      "team_min_value": 20000,
+      "team_max_value": 27499,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 50
+    },
+    {
+      "id": 6,
+      "team_rank": 6,
+      "team_rank_group": 3,
+      "team_min_value": 27500,
+      "team_max_value": 34999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 100
+    },
+    {
+      "id": 7,
+      "team_rank": 7,
+      "team_rank_group": 3,
+      "team_min_value": 35000,
+      "team_max_value": 42499,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 100
+    },
+    {
+      "id": 8,
+      "team_rank": 8,
+      "team_rank_group": 3,
+      "team_min_value": 42500,
+      "team_max_value": 49999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 100
+    },
+    {
+      "id": 9,
+      "team_rank": 9,
+      "team_rank_group": 3,
+      "team_min_value": 50000,
+      "team_max_value": 59999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 100
+    },
+    {
+      "id": 10,
+      "team_rank": 10,
+      "team_rank_group": 4,
+      "team_min_value": 60000,
+      "team_max_value": 69999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 150
+    },
+    {
+      "id": 11,
+      "team_rank": 11,
+      "team_rank_group": 4,
+      "team_min_value": 70000,
+      "team_max_value": 79999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 150
+    },
+    {
+      "id": 12,
+      "team_rank": 12,
+      "team_rank_group": 4,
+      "team_min_value": 80000,
+      "team_max_value": 89999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 150
+    },
+    {
+      "id": 13,
+      "team_rank": 13,
+      "team_rank_group": 4,
+      "team_min_value": 90000,
+      "team_max_value": 99999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 150
+    },
+    {
+      "id": 14,
+      "team_rank": 14,
+      "team_rank_group": 5,
+      "team_min_value": 100000,
+      "team_max_value": 114999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 200
+    },
+    {
+      "id": 15,
+      "team_rank": 15,
+      "team_rank_group": 5,
+      "team_min_value": 115000,
+      "team_max_value": 129999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 200
+    },
+    {
+      "id": 16,
+      "team_rank": 16,
+      "team_rank_group": 5,
+      "team_min_value": 130000,
+      "team_max_value": 144999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 200
+    },
+    {
+      "id": 17,
+      "team_rank": 17,
+      "team_rank_group": 5,
+      "team_min_value": 145000,
+      "team_max_value": 159999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 200
+    },
+    {
+      "id": 18,
+      "team_rank": 18,
+      "team_rank_group": 6,
+      "team_min_value": 160000,
+      "team_max_value": 169999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 250
+    },
+    {
+      "id": 19,
+      "team_rank": 19,
+      "team_rank_group": 6,
+      "team_min_value": 170000,
+      "team_max_value": 179999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 250
+    },
+    {
+      "id": 20,
+      "team_rank": 20,
+      "team_rank_group": 6,
+      "team_min_value": 180000,
+      "team_max_value": 189999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 250
+    },
+    {
+      "id": 21,
+      "team_rank": 21,
+      "team_rank_group": 6,
+      "team_min_value": 190000,
+      "team_max_value": 199999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 250
+    },
+    {
+      "id": 22,
+      "team_rank": 22,
+      "team_rank_group": 6,
+      "team_min_value": 200000,
+      "team_max_value": 209999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 250
+    },
+    {
+      "id": 23,
+      "team_rank": 23,
+      "team_rank_group": 6,
+      "team_min_value": 210000,
+      "team_max_value": 219999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 250
+    },
+    {
+      "id": 24,
+      "team_rank": 24,
+      "team_rank_group": 7,
+      "team_min_value": 220000,
+      "team_max_value": 229999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 300
+    },
+    {
+      "id": 25,
+      "team_rank": 25,
+      "team_rank_group": 7,
+      "team_min_value": 230000,
+      "team_max_value": 239999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 300
+    },
+    {
+      "id": 26,
+      "team_rank": 26,
+      "team_rank_group": 7,
+      "team_min_value": 240000,
+      "team_max_value": 249999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 300
+    },
+    {
+      "id": 27,
+      "team_rank": 27,
+      "team_rank_group": 7,
+      "team_min_value": 250000,
+      "team_max_value": 254999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 300
+    },
+    {
+      "id": 28,
+      "team_rank": 28,
+      "team_rank_group": 7,
+      "team_min_value": 255000,
+      "team_max_value": 259999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 300
+    },
+    {
+      "id": 29,
+      "team_rank": 29,
+      "team_rank_group": 7,
+      "team_min_value": 260000,
+      "team_max_value": 264999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 300
+    },
+    {
+      "id": 30,
+      "team_rank": 30,
+      "team_rank_group": 8,
+      "team_min_value": 265000,
+      "team_max_value": 99999999,
+      "item_category": 90,
+      "item_id": 43,
+      "item_num": 500
+    }
+  ]
+}

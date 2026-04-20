@@ -1,0 +1,238 @@
+{
+  "table": "announce_support_card",
+  "row_count": 28,
+  "columns": [
+    "id",
+    "type",
+    "cuts_pattern",
+    "support_card_id_a",
+    "support_card_id_b",
+    "support_card_id_c"
+  ],
+  "rows": [
+    {
+      "id": 501,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30024,
+      "support_card_id_b": 20023,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 502,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30026,
+      "support_card_id_b": 20024,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 503,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30027,
+      "support_card_id_b": 20025,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 504,
+      "type": 3,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30028,
+      "support_card_id_b": 30029,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 505,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30031,
+      "support_card_id_b": 20027,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 506,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30032,
+      "support_card_id_b": 20028,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 507,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30038,
+      "support_card_id_b": 20029,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 508,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30039,
+      "support_card_id_b": 30040,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 509,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30042,
+      "support_card_id_b": 20031,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 510,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30055,
+      "support_card_id_b": 30056,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 511,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30048,
+      "support_card_id_b": 20034,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 512,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30045,
+      "support_card_id_b": 30046,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 513,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30054,
+      "support_card_id_b": 20035,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 514,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30034,
+      "support_card_id_b": 30036,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 515,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30063,
+      "support_card_id_b": 20037,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 516,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30064,
+      "support_card_id_b": 30065,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 517,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30043,
+      "support_card_id_b": 20038,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 518,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30068,
+      "support_card_id_b": 30069,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 519,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30071,
+      "support_card_id_b": 20039,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 520,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30072,
+      "support_card_id_b": 30073,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 521,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30075,
+      "support_card_id_b": 20032,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 522,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30077,
+      "support_card_id_b": 30078,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 523,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30080,
+      "support_card_id_b": 20022,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 524,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30082,
+      "support_card_id_b": 30083,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 525,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30085,
+      "support_card_id_b": 20030,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 526,
+      "type": 1,
+      "cuts_pattern": 3,
+      "support_card_id_a": 30086,
+      "support_card_id_b": 20041,
+      "support_card_id_c": 20042
+    },
+    {
+      "id": 527,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30089,
+      "support_card_id_b": 20044,
+      "support_card_id_c": 0
+    },
+    {
+      "id": 528,
+      "type": 1,
+      "cuts_pattern": 2,
+      "support_card_id_a": 30090,
+      "support_card_id_b": 30091,
+      "support_card_id_c": 0
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "table": "fan_raid_top_chara",
+  "row_count": 10,
+  "columns": [
+    "id",
+    "top_data_id",
+    "chara_id",
+    "dress_id",
+    "mini_motion_id"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "top_data_id": 1,
+      "chara_id": 1046,
+      "dress_id": 6,
+      "mini_motion_id": 4000101
+    },
+    {
+      "id": 2,
+      "top_data_id": 1,
+      "chara_id": 1027,
+      "dress_id": 6,
+      "mini_motion_id": 4000102
+    },
+    {
+      "id": 3,
+      "top_data_id": 2,
+      "chara_id": 1046,
+      "dress_id": 2,
+      "mini_motion_id": 4000103
+    },
+    {
+      "id": 4,
+      "top_data_id": 2,
+      "chara_id": 1038,
+      "dress_id": 2,
+      "mini_motion_id": 4000104
+    },
+    {
+      "id": 5,
+      "top_data_id": 3,
+      "chara_id": 1046,
+      "dress_id": 2,
+      "mini_motion_id": 4000105
+    },
+    {
+      "id": 6,
+      "top_data_id": 3,
+      "chara_id": 1019,
+      "dress_id": 2,
+      "mini_motion_id": 4000106
+    },
+    {
+      "id": 7,
+      "top_data_id": 3,
+      "chara_id": 1037,
+      "dress_id": 2,
+      "mini_motion_id": 4000107
+    },
+    {
+      "id": 8,
+      "top_data_id": 4,
+      "chara_id": 1046,
+      "dress_id": 104601,
+      "mini_motion_id": 4000108
+    },
+    {
+      "id": 9,
+      "top_data_id": 4,
+      "chara_id": 1002,
+      "dress_id": 100201,
+      "mini_motion_id": 4000109
+    },
+    {
+      "id": 10,
+      "top_data_id": 4,
+      "chara_id": 1026,
+      "dress_id": 102601,
+      "mini_motion_id": 4000110
+    }
+  ]
+}
