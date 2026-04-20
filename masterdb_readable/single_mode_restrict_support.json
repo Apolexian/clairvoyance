@@ -1,0 +1,16 @@
+{
+  "table": "single_mode_restrict_support",
+  "row_count": 1,
+  "columns": [
+    "id",
+    "scenario_id",
+    "support_card_id"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "scenario_id": 2,
+      "support_card_id": 30081
+    }
+  ]
+}

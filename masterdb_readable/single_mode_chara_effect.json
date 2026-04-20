@@ -1,0 +1,160 @@
+{
+  "table": "single_mode_chara_effect",
+  "row_count": 21,
+  "columns": [
+    "id",
+    "effect_type",
+    "effect_category",
+    "effect_group_id",
+    "priority"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "effect_type": 2,
+      "effect_category": 1,
+      "effect_group_id": 1,
+      "priority": 100
+    },
+    {
+      "id": 2,
+      "effect_type": 2,
+      "effect_category": 1,
+      "effect_group_id": 2,
+      "priority": 100
+    },
+    {
+      "id": 3,
+      "effect_type": 2,
+      "effect_category": 1,
+      "effect_group_id": 3,
+      "priority": 100
+    },
+    {
+      "id": 4,
+      "effect_type": 2,
+      "effect_category": 1,
+      "effect_group_id": 4,
+      "priority": 100
+    },
+    {
+      "id": 5,
+      "effect_type": 2,
+      "effect_category": 1,
+      "effect_group_id": 5,
+      "priority": 100
+    },
+    {
+      "id": 6,
+      "effect_type": 2,
+      "effect_category": 1,
+      "effect_group_id": 6,
+      "priority": 90
+    },
+    {
+      "id": 7,
+      "effect_type": 1,
+      "effect_category": 1,
+      "effect_group_id": 7,
+      "priority": 100
+    },
+    {
+      "id": 8,
+      "effect_type": 1,
+      "effect_category": 1,
+      "effect_group_id": 8,
+      "priority": 100
+    },
+    {
+      "id": 9,
+      "effect_type": 1,
+      "effect_category": 1,
+      "effect_group_id": 9,
+      "priority": 100
+    },
+    {
+      "id": 10,
+      "effect_type": 1,
+      "effect_category": 1,
+      "effect_group_id": 6,
+      "priority": 90
+    },
+    {
+      "id": 11,
+      "effect_type": 1,
+      "effect_category": 1,
+      "effect_group_id": 6,
+      "priority": 100
+    },
+    {
+      "id": 12,
+      "effect_type": 2,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 13,
+      "effect_type": 1,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 14,
+      "effect_type": 1,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 15,
+      "effect_type": 1,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 16,
+      "effect_type": 1,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 17,
+      "effect_type": 1,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 18,
+      "effect_type": 1,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 19,
+      "effect_type": 2,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 20,
+      "effect_type": 2,
+      "effect_category": 2,
+      "effect_group_id": 10,
+      "priority": 100
+    },
+    {
+      "id": 100,
+      "effect_type": 1,
+      "effect_category": 3,
+      "effect_group_id": 100,
+      "priority": 100
+    }
+  ]
+}

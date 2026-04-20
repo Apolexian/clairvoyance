@@ -1,0 +1,198 @@
+{
+  "table": "item_exchange_top",
+  "row_count": 23,
+  "columns": [
+    "id",
+    "item_exchange_disp_order",
+    "item_exchange_type",
+    "item_top_category",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "id": 2000,
+      "item_exchange_disp_order": 10,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 3000,
+      "item_exchange_disp_order": 70,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 4000,
+      "item_exchange_disp_order": 60,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 5000,
+      "item_exchange_disp_order": 80,
+      "item_exchange_type": 1,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 5001,
+      "item_exchange_disp_order": 81,
+      "item_exchange_type": 1,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 5002,
+      "item_exchange_disp_order": 82,
+      "item_exchange_type": 1,
+      "item_top_category": 0,
+      "start_date": 1773352800,
+      "end_date": 2543011199
+    },
+    {
+      "id": 5500,
+      "item_exchange_disp_order": 90,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 5501,
+      "item_exchange_disp_order": 91,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 5502,
+      "item_exchange_disp_order": 92,
+      "item_exchange_type": 1,
+      "item_top_category": 0,
+      "start_date": 1773352800,
+      "end_date": 2543011199
+    },
+    {
+      "id": 7000,
+      "item_exchange_disp_order": 30,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 7001,
+      "item_exchange_disp_order": 40,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 7002,
+      "item_exchange_disp_order": 50,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 8000,
+      "item_exchange_disp_order": 20,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 9000,
+      "item_exchange_disp_order": 100,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1496275200,
+      "end_date": 2543011199
+    },
+    {
+      "id": 10000,
+      "item_exchange_disp_order": 75,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1762898400,
+      "end_date": 2543011199
+    },
+    {
+      "id": 10001,
+      "item_exchange_disp_order": 77,
+      "item_exchange_type": 0,
+      "item_top_category": 0,
+      "start_date": 1762898400,
+      "end_date": 2543011199
+    },
+    {
+      "id": 11000,
+      "item_exchange_disp_order": 78,
+      "item_exchange_type": 0,
+      "item_top_category": 1,
+      "start_date": 1768514400,
+      "end_date": 1769464799
+    },
+    {
+      "id": 11001,
+      "item_exchange_disp_order": 78,
+      "item_exchange_type": 0,
+      "item_top_category": 1,
+      "start_date": 1774821600,
+      "end_date": 1775512799
+    },
+    {
+      "id": 12000,
+      "item_exchange_disp_order": 96,
+      "item_exchange_type": 0,
+      "item_top_category": 2,
+      "start_date": 1772488800,
+      "end_date": 1776203999
+    },
+    {
+      "id": 12001,
+      "item_exchange_disp_order": 97,
+      "item_exchange_type": 0,
+      "item_top_category": 2,
+      "start_date": 1772488800,
+      "end_date": 1776203999
+    },
+    {
+      "id": 12002,
+      "item_exchange_disp_order": 98,
+      "item_exchange_type": 0,
+      "item_top_category": 2,
+      "start_date": 1772488800,
+      "end_date": 1776203999
+    },
+    {
+      "id": 20001,
+      "item_exchange_disp_order": 95,
+      "item_exchange_type": 0,
+      "item_top_category": 1,
+      "start_date": 1770328800,
+      "end_date": 1771192799
+    },
+    {
+      "id": 20002,
+      "item_exchange_disp_order": 95,
+      "item_exchange_type": 0,
+      "item_top_category": 1,
+      "start_date": 1650024000,
+      "end_date": 1650887999
+    }
+  ]
+}

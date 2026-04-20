@@ -1,0 +1,48 @@
+{
+  "table": "support_card_group",
+  "row_count": 6,
+  "columns": [
+    "id",
+    "support_card_id",
+    "chara_id",
+    "outing_max"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "support_card_id": 30081,
+      "chara_id": 1013,
+      "outing_max": 1
+    },
+    {
+      "id": 2,
+      "support_card_id": 30081,
+      "chara_id": 1030,
+      "outing_max": 1
+    },
+    {
+      "id": 3,
+      "support_card_id": 30081,
+      "chara_id": 1035,
+      "outing_max": 1
+    },
+    {
+      "id": 4,
+      "support_card_id": 30081,
+      "chara_id": 1016,
+      "outing_max": 1
+    },
+    {
+      "id": 5,
+      "support_card_id": 30081,
+      "chara_id": 1002,
+      "outing_max": 1
+    },
+    {
+      "id": 6,
+      "support_card_id": 30081,
+      "chara_id": 1001,
+      "outing_max": 1
+    }
+  ]
+}

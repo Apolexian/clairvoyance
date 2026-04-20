@@ -1,0 +1,105 @@
+{
+  "table": "item_pack",
+  "row_count": 10,
+  "columns": [
+    "id",
+    "item_pack_id",
+    "item_category",
+    "item_id",
+    "item_num",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "item_pack_id": 1000,
+      "item_category": 41,
+      "item_id": 130,
+      "item_num": 1,
+      "start_date": "2017-01-01 12:00:00",
+      "end_date": "2030-01-10 00:00:00"
+    },
+    {
+      "id": 2,
+      "item_pack_id": 1001,
+      "item_category": 42,
+      "item_id": 131,
+      "item_num": 1,
+      "start_date": "2017-01-01 12:00:00",
+      "end_date": "2030-01-10 00:00:00"
+    },
+    {
+      "id": 3,
+      "item_pack_id": 9000,
+      "item_category": 91,
+      "item_id": 59,
+      "item_num": 200000,
+      "start_date": "2017-01-01 12:00:00",
+      "end_date": "2030-01-10 00:00:00"
+    },
+    {
+      "id": 4,
+      "item_pack_id": 9000,
+      "item_category": 30,
+      "item_id": 110,
+      "item_num": 50000,
+      "start_date": "2017-01-01 12:00:00",
+      "end_date": "2030-01-10 00:00:00"
+    },
+    {
+      "id": 5,
+      "item_pack_id": 9001,
+      "item_category": 40,
+      "item_id": 113,
+      "item_num": 1,
+      "start_date": "2017-01-01 12:00:00",
+      "end_date": "2030-01-10 00:00:00"
+    },
+    {
+      "id": 6,
+      "item_pack_id": 9002,
+      "item_category": 40,
+      "item_id": 114,
+      "item_num": 1,
+      "start_date": "2017-01-01 12:00:00",
+      "end_date": "2030-01-10 00:00:00"
+    },
+    {
+      "id": 7,
+      "item_pack_id": 9003,
+      "item_category": 91,
+      "item_id": 59,
+      "item_num": 600000,
+      "start_date": "2017-01-01 12:00:00",
+      "end_date": "2030-01-10 00:00:00"
+    },
+    {
+      "id": 8,
+      "item_pack_id": 9003,
+      "item_category": 30,
+      "item_id": 110,
+      "item_num": 300000,
+      "start_date": "2017-01-01 12:00:00",
+      "end_date": "2030-01-10 00:00:00"
+    },
+    {
+      "id": 9,
+      "item_pack_id": 1002,
+      "item_category": 41,
+      "item_id": 164,
+      "item_num": 1,
+      "start_date": "2026/03/12 22:00:00",
+      "end_date": "2030-01-10 0:00:00"
+    },
+    {
+      "id": 10,
+      "item_pack_id": 1003,
+      "item_category": 42,
+      "item_id": 165,
+      "item_num": 1,
+      "start_date": "2026/03/12 22:00:00",
+      "end_date": "2030-01-10 0:00:00"
+    }
+  ]
+}

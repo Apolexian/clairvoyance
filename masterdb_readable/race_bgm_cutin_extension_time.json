@@ -1,0 +1,1038 @@
+{
+  "table": "race_bgm_cutin_extension_time",
+  "row_count": 128,
+  "columns": [
+    "id",
+    "cutin_category",
+    "card_id",
+    "chara_id",
+    "extension_sec",
+    "extension_sec_long"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "cutin_category": 1,
+      "card_id": 0,
+      "chara_id": 0,
+      "extension_sec": 10000,
+      "extension_sec_long": 10000
+    },
+    {
+      "id": 2,
+      "cutin_category": 3,
+      "card_id": 100101,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 91666
+    },
+    {
+      "id": 3,
+      "cutin_category": 3,
+      "card_id": 100201,
+      "chara_id": 0,
+      "extension_sec": 26000,
+      "extension_sec_long": 81666
+    },
+    {
+      "id": 4,
+      "cutin_category": 3,
+      "card_id": 100301,
+      "chara_id": 0,
+      "extension_sec": 24000,
+      "extension_sec_long": 76666
+    },
+    {
+      "id": 5,
+      "cutin_category": 3,
+      "card_id": 100401,
+      "chara_id": 0,
+      "extension_sec": 24666,
+      "extension_sec_long": 76000
+    },
+    {
+      "id": 6,
+      "cutin_category": 3,
+      "card_id": 100601,
+      "chara_id": 0,
+      "extension_sec": 26000,
+      "extension_sec_long": 73666
+    },
+    {
+      "id": 7,
+      "cutin_category": 3,
+      "card_id": 100701,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 8,
+      "cutin_category": 3,
+      "card_id": 100801,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 9,
+      "cutin_category": 3,
+      "card_id": 100901,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 10,
+      "cutin_category": 3,
+      "card_id": 101001,
+      "chara_id": 0,
+      "extension_sec": 25000,
+      "extension_sec_long": 63333
+    },
+    {
+      "id": 11,
+      "cutin_category": 3,
+      "card_id": 101101,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 12,
+      "cutin_category": 3,
+      "card_id": 101301,
+      "chara_id": 0,
+      "extension_sec": 26333,
+      "extension_sec_long": 73000
+    },
+    {
+      "id": 13,
+      "cutin_category": 3,
+      "card_id": 101401,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 14,
+      "cutin_category": 3,
+      "card_id": 101701,
+      "chara_id": 0,
+      "extension_sec": 24666,
+      "extension_sec_long": 84333
+    },
+    {
+      "id": 15,
+      "cutin_category": 3,
+      "card_id": 101801,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 16,
+      "cutin_category": 3,
+      "card_id": 102401,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 17,
+      "cutin_category": 3,
+      "card_id": 102701,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 18,
+      "cutin_category": 3,
+      "card_id": 103001,
+      "chara_id": 0,
+      "extension_sec": 23666,
+      "extension_sec_long": 70666
+    },
+    {
+      "id": 19,
+      "cutin_category": 3,
+      "card_id": 103201,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 20,
+      "cutin_category": 3,
+      "card_id": 103501,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 21,
+      "cutin_category": 3,
+      "card_id": 104101,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 22,
+      "cutin_category": 3,
+      "card_id": 104501,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 23,
+      "cutin_category": 3,
+      "card_id": 105201,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 24,
+      "cutin_category": 3,
+      "card_id": 105601,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 25,
+      "cutin_category": 3,
+      "card_id": 106001,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 26,
+      "cutin_category": 3,
+      "card_id": 106101,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 23000
+    },
+    {
+      "id": 27,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1001,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 28,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1002,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 29,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1003,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 30,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1004,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 31,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1006,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 32,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1007,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 33,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1008,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 34,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1009,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 35,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1010,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 36,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1011,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 37,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1013,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 38,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1014,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 39,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1017,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 40,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1018,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 41,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1024,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 42,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1027,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 43,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1030,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 44,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1032,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 45,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1035,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 46,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1041,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 47,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1045,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 48,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1052,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 49,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1056,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 50,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1060,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 51,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1061,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 52,
+      "cutin_category": 3,
+      "card_id": 101501,
+      "chara_id": 0,
+      "extension_sec": 25333,
+      "extension_sec_long": 91666
+    },
+    {
+      "id": 53,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1015,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 54,
+      "cutin_category": 3,
+      "card_id": 102601,
+      "chara_id": 0,
+      "extension_sec": 29000,
+      "extension_sec_long": 90000
+    },
+    {
+      "id": 55,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1026,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 56,
+      "cutin_category": 3,
+      "card_id": 102301,
+      "chara_id": 0,
+      "extension_sec": 12333,
+      "extension_sec_long": 88333
+    },
+    {
+      "id": 57,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1023,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 58,
+      "cutin_category": 3,
+      "card_id": 100302,
+      "chara_id": 0,
+      "extension_sec": 24000,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 59,
+      "cutin_category": 3,
+      "card_id": 101302,
+      "chara_id": 0,
+      "extension_sec": 27000,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 60,
+      "cutin_category": 3,
+      "card_id": 103801,
+      "chara_id": 0,
+      "extension_sec": 23000,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 61,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1038,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 62,
+      "cutin_category": 3,
+      "card_id": 105001,
+      "chara_id": 0,
+      "extension_sec": 23000,
+      "extension_sec_long": 107000
+    },
+    {
+      "id": 63,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1050,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 64,
+      "cutin_category": 3,
+      "card_id": 104601,
+      "chara_id": 0,
+      "extension_sec": 24333,
+      "extension_sec_long": 99666
+    },
+    {
+      "id": 65,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1046,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 66,
+      "cutin_category": 3,
+      "card_id": 101601,
+      "chara_id": 0,
+      "extension_sec": 30666,
+      "extension_sec_long": 92000
+    },
+    {
+      "id": 67,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1016,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 68,
+      "cutin_category": 3,
+      "card_id": 101802,
+      "chara_id": 0,
+      "extension_sec": 32666,
+      "extension_sec_long": 101000
+    },
+    {
+      "id": 69,
+      "cutin_category": 3,
+      "card_id": 102402,
+      "chara_id": 0,
+      "extension_sec": 23000,
+      "extension_sec_long": 94333
+    },
+    {
+      "id": 70,
+      "cutin_category": 3,
+      "card_id": 102001,
+      "chara_id": 0,
+      "extension_sec": 26666,
+      "extension_sec_long": 94000
+    },
+    {
+      "id": 71,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1020,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 72,
+      "cutin_category": 3,
+      "card_id": 101201,
+      "chara_id": 0,
+      "extension_sec": 25000,
+      "extension_sec_long": 93333
+    },
+    {
+      "id": 73,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1012,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 74,
+      "cutin_category": 3,
+      "card_id": 101102,
+      "chara_id": 0,
+      "extension_sec": 26666,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 75,
+      "cutin_category": 3,
+      "card_id": 101402,
+      "chara_id": 0,
+      "extension_sec": 26666,
+      "extension_sec_long": 97666
+    },
+    {
+      "id": 76,
+      "cutin_category": 3,
+      "card_id": 100501,
+      "chara_id": 0,
+      "extension_sec": 26333,
+      "extension_sec_long": 105000
+    },
+    {
+      "id": 77,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1005,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 78,
+      "cutin_category": 3,
+      "card_id": 104001,
+      "chara_id": 0,
+      "extension_sec": 30666,
+      "extension_sec_long": 96666
+    },
+    {
+      "id": 79,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1040,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 80,
+      "cutin_category": 3,
+      "card_id": 100102,
+      "chara_id": 0,
+      "extension_sec": 41333,
+      "extension_sec_long": 95000
+    },
+    {
+      "id": 81,
+      "cutin_category": 3,
+      "card_id": 100402,
+      "chara_id": 0,
+      "extension_sec": 26666,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 82,
+      "cutin_category": 3,
+      "card_id": 105801,
+      "chara_id": 0,
+      "extension_sec": 40000,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 83,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1058,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 84,
+      "cutin_category": 3,
+      "card_id": 103701,
+      "chara_id": 0,
+      "extension_sec": 31666,
+      "extension_sec_long": 94333
+    },
+    {
+      "id": 85,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1037,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 86,
+      "cutin_category": 3,
+      "card_id": 105602,
+      "chara_id": 0,
+      "extension_sec": 29333,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 87,
+      "cutin_category": 3,
+      "card_id": 102801,
+      "chara_id": 0,
+      "extension_sec": 26666,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 88,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1028,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 89,
+      "cutin_category": 3,
+      "card_id": 101901,
+      "chara_id": 0,
+      "extension_sec": 33333,
+      "extension_sec_long": 93333
+    },
+    {
+      "id": 90,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1019,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 91,
+      "cutin_category": 3,
+      "card_id": 103002,
+      "chara_id": 0,
+      "extension_sec": 27333,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 92,
+      "cutin_category": 3,
+      "card_id": 104502,
+      "chara_id": 0,
+      "extension_sec": 35333,
+      "extension_sec_long": 96666
+    },
+    {
+      "id": 93,
+      "cutin_category": 3,
+      "card_id": 103901,
+      "chara_id": 0,
+      "extension_sec": 37333,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 94,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1039,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 95,
+      "cutin_category": 3,
+      "card_id": 102501,
+      "chara_id": 0,
+      "extension_sec": 27333,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 96,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1025,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 97,
+      "cutin_category": 3,
+      "card_id": 101702,
+      "chara_id": 0,
+      "extension_sec": 29000,
+      "extension_sec_long": 92666
+    },
+    {
+      "id": 98,
+      "cutin_category": 3,
+      "card_id": 104002,
+      "chara_id": 0,
+      "extension_sec": 35666,
+      "extension_sec_long": 100000
+    },
+    {
+      "id": 99,
+      "cutin_category": 3,
+      "card_id": 104801,
+      "chara_id": 0,
+      "extension_sec": 52333,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 100,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1048,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 101,
+      "cutin_category": 3,
+      "card_id": 105901,
+      "chara_id": 0,
+      "extension_sec": 23000,
+      "extension_sec_long": 99666
+    },
+    {
+      "id": 102,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1059,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 103,
+      "cutin_category": 3,
+      "card_id": 102302,
+      "chara_id": 0,
+      "extension_sec": 32333,
+      "extension_sec_long": 95000
+    },
+    {
+      "id": 104,
+      "cutin_category": 3,
+      "card_id": 100602,
+      "chara_id": 0,
+      "extension_sec": 23000,
+      "extension_sec_long": 99666
+    },
+    {
+      "id": 105,
+      "cutin_category": 3,
+      "card_id": 102201,
+      "chara_id": 0,
+      "extension_sec": 26000,
+      "extension_sec_long": 89000
+    },
+    {
+      "id": 106,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1022,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 107,
+      "cutin_category": 3,
+      "card_id": 102101,
+      "chara_id": 0,
+      "extension_sec": 21000,
+      "extension_sec_long": 88666
+    },
+    {
+      "id": 108,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1021,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 109,
+      "cutin_category": 3,
+      "card_id": 101502,
+      "chara_id": 0,
+      "extension_sec": 23000,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 110,
+      "cutin_category": 3,
+      "card_id": 105202,
+      "chara_id": 0,
+      "extension_sec": 19333,
+      "extension_sec_long": 108000
+    },
+    {
+      "id": 111,
+      "cutin_category": 3,
+      "card_id": 106901,
+      "chara_id": 0,
+      "extension_sec": 30000,
+      "extension_sec_long": 101333
+    },
+    {
+      "id": 112,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1069,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 113,
+      "cutin_category": 3,
+      "card_id": 102602,
+      "chara_id": 0,
+      "extension_sec": 21333,
+      "extension_sec_long": 98000
+    },
+    {
+      "id": 114,
+      "cutin_category": 3,
+      "card_id": 103702,
+      "chara_id": 0,
+      "extension_sec": 27333,
+      "extension_sec_long": 95666
+    },
+    {
+      "id": 115,
+      "cutin_category": 3,
+      "card_id": 107101,
+      "chara_id": 0,
+      "extension_sec": 31666,
+      "extension_sec_long": 95666
+    },
+    {
+      "id": 116,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1071,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 117,
+      "cutin_category": 3,
+      "card_id": 103301,
+      "chara_id": 0,
+      "extension_sec": 31000,
+      "extension_sec_long": 94666
+    },
+    {
+      "id": 118,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1033,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 119,
+      "cutin_category": 3,
+      "card_id": 106201,
+      "chara_id": 0,
+      "extension_sec": 24666,
+      "extension_sec_long": 24666
+    },
+    {
+      "id": 120,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1062,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 121,
+      "cutin_category": 3,
+      "card_id": 106801,
+      "chara_id": 0,
+      "extension_sec": 26666,
+      "extension_sec_long": 99666
+    },
+    {
+      "id": 122,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1068,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 123,
+      "cutin_category": 3,
+      "card_id": 106701,
+      "chara_id": 0,
+      "extension_sec": 28333,
+      "extension_sec_long": 99666
+    },
+    {
+      "id": 124,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1067,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 125,
+      "cutin_category": 3,
+      "card_id": 107401,
+      "chara_id": 0,
+      "extension_sec": 34333,
+      "extension_sec_long": 100333
+    },
+    {
+      "id": 126,
+      "cutin_category": 2,
+      "card_id": 0,
+      "chara_id": 1074,
+      "extension_sec": 11666,
+      "extension_sec_long": 11666
+    },
+    {
+      "id": 127,
+      "cutin_category": 3,
+      "card_id": 100502,
+      "chara_id": 0,
+      "extension_sec": 27000,
+      "extension_sec_long": 99666
+    },
+    {
+      "id": 128,
+      "cutin_category": 3,
+      "card_id": 102002,
+      "chara_id": 0,
+      "extension_sec": 23333,
+      "extension_sec_long": 95000
+    }
+  ]
+}

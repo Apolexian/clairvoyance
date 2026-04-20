@@ -1,0 +1,150 @@
+{
+  "table": "race_track",
+  "row_count": 11,
+  "columns": [
+    "id",
+    "initial_lane_type",
+    "enable_half_gate",
+    "horse_num_gate_variation",
+    "turf_vision_type",
+    "footsmoke_color_type",
+    "area",
+    "flag_type",
+    "gate_panel_type",
+    "gate_lamp_type"
+  ],
+  "rows": [
+    {
+      "id": 10001,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 0,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10002,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 0,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10003,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 1,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10004,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 1,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10005,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 2,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10006,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 2,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10007,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 3,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10008,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 3,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10009,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 3,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10010,
+      "initial_lane_type": 1,
+      "enable_half_gate": 1,
+      "horse_num_gate_variation": 0,
+      "turf_vision_type": 1,
+      "footsmoke_color_type": 1,
+      "area": 4,
+      "flag_type": 0,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    },
+    {
+      "id": 10101,
+      "initial_lane_type": 2,
+      "enable_half_gate": 0,
+      "horse_num_gate_variation": 1,
+      "turf_vision_type": 2,
+      "footsmoke_color_type": 2,
+      "area": 2,
+      "flag_type": 1,
+      "gate_panel_type": 1,
+      "gate_lamp_type": 1
+    }
+  ]
+}

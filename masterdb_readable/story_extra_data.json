@@ -1,0 +1,21 @@
+{
+  "table": "story_extra_data",
+  "row_count": 2,
+  "columns": [
+    "story_extra_id",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "story_extra_id": 1001,
+      "start_date": 1761516000,
+      "end_date": 2556100799
+    },
+    {
+      "story_extra_id": 1002,
+      "start_date": 1773352800,
+      "end_date": 2556100799
+    }
+  ]
+}

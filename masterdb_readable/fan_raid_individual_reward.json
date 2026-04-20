@@ -1,0 +1,70 @@
+{
+  "table": "fan_raid_individual_reward",
+  "row_count": 7,
+  "columns": [
+    "id",
+    "fan_raid_id",
+    "individual_fan",
+    "item_category",
+    "item_id",
+    "item_num"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "fan_raid_id": 1001,
+      "individual_fan": 300000,
+      "item_category": 91,
+      "item_id": 59,
+      "item_num": 50000
+    },
+    {
+      "id": 2,
+      "fan_raid_id": 1001,
+      "individual_fan": 600000,
+      "item_category": 30,
+      "item_id": 110,
+      "item_num": 20000
+    },
+    {
+      "id": 3,
+      "fan_raid_id": 1001,
+      "individual_fan": 1000000,
+      "item_category": 34,
+      "item_id": 95,
+      "item_num": 20
+    },
+    {
+      "id": 4,
+      "fan_raid_id": 1001,
+      "individual_fan": 1200000,
+      "item_category": 51,
+      "item_id": 20045,
+      "item_num": 1
+    },
+    {
+      "id": 5,
+      "fan_raid_id": 1001,
+      "individual_fan": 1500000,
+      "item_category": 91,
+      "item_id": 59,
+      "item_num": 100000
+    },
+    {
+      "id": 6,
+      "fan_raid_id": 1001,
+      "individual_fan": 1800000,
+      "item_category": 30,
+      "item_id": 110,
+      "item_num": 50000
+    },
+    {
+      "id": 7,
+      "fan_raid_id": 1001,
+      "individual_fan": 2000000,
+      "item_category": 55,
+      "item_id": 330101,
+      "item_num": 1
+    }
+  ]
+}

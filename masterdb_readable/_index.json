@@ -1,0 +1,1695 @@
+{
+  "total_tables": 338,
+  "tables": [
+    {
+      "name": "announce_character",
+      "row_count": 38,
+      "file": "announce_character.json"
+    },
+    {
+      "name": "announce_data",
+      "row_count": 66,
+      "file": "announce_data.json"
+    },
+    {
+      "name": "announce_event",
+      "row_count": 10,
+      "file": "announce_event.json"
+    },
+    {
+      "name": "announce_support_card",
+      "row_count": 28,
+      "file": "announce_support_card.json"
+    },
+    {
+      "name": "audience_data",
+      "row_count": 78,
+      "file": "audience_data.json"
+    },
+    {
+      "name": "audience_dress_color_set",
+      "row_count": 78,
+      "file": "audience_dress_color_set.json"
+    },
+    {
+      "name": "audience_hair_color_set",
+      "row_count": 78,
+      "file": "audience_hair_color_set.json"
+    },
+    {
+      "name": "audience_impostor",
+      "row_count": 32,
+      "file": "audience_impostor.json"
+    },
+    {
+      "name": "audience_impostor_color_set",
+      "row_count": 0,
+      "file": "audience_impostor_color_set.json"
+    },
+    {
+      "name": "audience_impostor_lottery",
+      "row_count": 132,
+      "file": "audience_impostor_lottery.json"
+    },
+    {
+      "name": "audio_cuesheet",
+      "row_count": 12,
+      "file": "audio_cuesheet.json"
+    },
+    {
+      "name": "audio_ignored_cue_on_highspeed",
+      "row_count": 7,
+      "file": "audio_ignored_cue_on_highspeed.json"
+    },
+    {
+      "name": "audio_story_effect",
+      "row_count": 12,
+      "file": "audio_story_effect.json"
+    },
+    {
+      "name": "available_skill_set",
+      "row_count": 518,
+      "file": "available_skill_set.json"
+    },
+    {
+      "name": "background_data",
+      "row_count": 410,
+      "file": "background_data.json"
+    },
+    {
+      "name": "background_offset_data",
+      "row_count": 20,
+      "file": "background_offset_data.json"
+    },
+    {
+      "name": "banner_data",
+      "row_count": 180,
+      "file": "banner_data.json"
+    },
+    {
+      "name": "campaign_chara_story_schedule",
+      "row_count": 192,
+      "file": "campaign_chara_story_schedule.json"
+    },
+    {
+      "name": "campaign_data",
+      "row_count": 121,
+      "file": "campaign_data.json"
+    },
+    {
+      "name": "campaign_present_bonus_detail",
+      "row_count": 68,
+      "file": "campaign_present_bonus_detail.json"
+    },
+    {
+      "name": "campaign_single_race_add_data",
+      "row_count": 9,
+      "file": "campaign_single_race_add_data.json"
+    },
+    {
+      "name": "campaign_single_race_add_reward",
+      "row_count": 27,
+      "file": "campaign_single_race_add_reward.json"
+    },
+    {
+      "name": "card_data",
+      "row_count": 74,
+      "file": "card_data.json"
+    },
+    {
+      "name": "card_rarity_data",
+      "row_count": 247,
+      "file": "card_rarity_data.json"
+    },
+    {
+      "name": "card_talent_hint_upgrade",
+      "row_count": 6,
+      "file": "card_talent_hint_upgrade.json"
+    },
+    {
+      "name": "card_talent_upgrade",
+      "row_count": 300,
+      "file": "card_talent_upgrade.json"
+    },
+    {
+      "name": "challenge_match_boss_npc",
+      "row_count": 6,
+      "file": "challenge_match_boss_npc.json"
+    },
+    {
+      "name": "challenge_match_data",
+      "row_count": 1,
+      "file": "challenge_match_data.json"
+    },
+    {
+      "name": "challenge_match_race",
+      "row_count": 6,
+      "file": "challenge_match_race.json"
+    },
+    {
+      "name": "challenge_match_race_npc",
+      "row_count": 66,
+      "file": "challenge_match_race_npc.json"
+    },
+    {
+      "name": "challenge_match_raw_point",
+      "row_count": 92,
+      "file": "challenge_match_raw_point.json"
+    },
+    {
+      "name": "challenge_match_retry_bonus",
+      "row_count": 5,
+      "file": "challenge_match_retry_bonus.json"
+    },
+    {
+      "name": "champions_bgm",
+      "row_count": 55,
+      "file": "champions_bgm.json"
+    },
+    {
+      "name": "champions_entry_reward",
+      "row_count": 2,
+      "file": "champions_entry_reward.json"
+    },
+    {
+      "name": "champions_evaluation_rate",
+      "row_count": 16,
+      "file": "champions_evaluation_rate.json"
+    },
+    {
+      "name": "champions_news_chara_comment",
+      "row_count": 694,
+      "file": "champions_news_chara_comment.json"
+    },
+    {
+      "name": "champions_news_chara_detail",
+      "row_count": 465,
+      "file": "champions_news_chara_detail.json"
+    },
+    {
+      "name": "champions_news_chara_wininfo",
+      "row_count": 52,
+      "file": "champions_news_chara_wininfo.json"
+    },
+    {
+      "name": "champions_news_race",
+      "row_count": 211,
+      "file": "champions_news_race.json"
+    },
+    {
+      "name": "champions_news_title",
+      "row_count": 417,
+      "file": "champions_news_title.json"
+    },
+    {
+      "name": "champions_news_trainer_detail",
+      "row_count": 126,
+      "file": "champions_news_trainer_detail.json"
+    },
+    {
+      "name": "champions_news_trainer_wininfo",
+      "row_count": 48,
+      "file": "champions_news_trainer_wininfo.json"
+    },
+    {
+      "name": "champions_news_win_comment",
+      "row_count": 641,
+      "file": "champions_news_win_comment.json"
+    },
+    {
+      "name": "champions_news_win_title",
+      "row_count": 541,
+      "file": "champions_news_win_title.json"
+    },
+    {
+      "name": "champions_race_condition",
+      "row_count": 77,
+      "file": "champions_race_condition.json"
+    },
+    {
+      "name": "champions_reward_rate",
+      "row_count": 528,
+      "file": "champions_reward_rate.json"
+    },
+    {
+      "name": "champions_round_detail",
+      "row_count": 154,
+      "file": "champions_round_detail.json"
+    },
+    {
+      "name": "champions_round_schedule",
+      "row_count": 66,
+      "file": "champions_round_schedule.json"
+    },
+    {
+      "name": "champions_schedule",
+      "row_count": 11,
+      "file": "champions_schedule.json"
+    },
+    {
+      "name": "champions_stand_motion",
+      "row_count": 18,
+      "file": "champions_stand_motion.json"
+    },
+    {
+      "name": "chara_category_motion",
+      "row_count": 53,
+      "file": "chara_category_motion.json"
+    },
+    {
+      "name": "chara_data",
+      "row_count": 84,
+      "file": "chara_data.json"
+    },
+    {
+      "name": "chara_motion_act",
+      "row_count": 36,
+      "file": "chara_motion_act.json"
+    },
+    {
+      "name": "chara_motion_set",
+      "row_count": 3989,
+      "file": "chara_motion_set.json"
+    },
+    {
+      "name": "chara_story_data",
+      "row_count": 371,
+      "file": "chara_story_data.json"
+    },
+    {
+      "name": "chara_type",
+      "row_count": 3320,
+      "file": "chara_type.json"
+    },
+    {
+      "name": "character_prop_animation",
+      "row_count": 17,
+      "file": "character_prop_animation.json"
+    },
+    {
+      "name": "character_system_lottery",
+      "row_count": 2898,
+      "file": "character_system_lottery.json"
+    },
+    {
+      "name": "character_system_text",
+      "row_count": 11104,
+      "file": "character_system_text.json"
+    },
+    {
+      "name": "circle_rank_data",
+      "row_count": 11,
+      "file": "circle_rank_data.json"
+    },
+    {
+      "name": "circle_stamp_data",
+      "row_count": 40,
+      "file": "circle_stamp_data.json"
+    },
+    {
+      "name": "crane_game_arm_swing",
+      "row_count": 3,
+      "file": "crane_game_arm_swing.json"
+    },
+    {
+      "name": "crane_game_catch_result",
+      "row_count": 68,
+      "file": "crane_game_catch_result.json"
+    },
+    {
+      "name": "crane_game_define_param",
+      "row_count": 1,
+      "file": "crane_game_define_param.json"
+    },
+    {
+      "name": "crane_game_extra_odds_condition",
+      "row_count": 1,
+      "file": "crane_game_extra_odds_condition.json"
+    },
+    {
+      "name": "crane_game_hidden_odds",
+      "row_count": 33,
+      "file": "crane_game_hidden_odds.json"
+    },
+    {
+      "name": "crane_game_prize_face",
+      "row_count": 3,
+      "file": "crane_game_prize_face.json"
+    },
+    {
+      "name": "crane_game_prize_pattern",
+      "row_count": 3,
+      "file": "crane_game_prize_pattern.json"
+    },
+    {
+      "name": "crane_game_prop",
+      "row_count": 2,
+      "file": "crane_game_prop.json"
+    },
+    {
+      "name": "daily_legend_race",
+      "row_count": 16,
+      "file": "daily_legend_race.json"
+    },
+    {
+      "name": "daily_pack",
+      "row_count": 4,
+      "file": "daily_pack.json"
+    },
+    {
+      "name": "daily_race",
+      "row_count": 8,
+      "file": "daily_race.json"
+    },
+    {
+      "name": "daily_race_billing",
+      "row_count": 1,
+      "file": "daily_race_billing.json"
+    },
+    {
+      "name": "daily_race_npc",
+      "row_count": 176,
+      "file": "daily_race_npc.json"
+    },
+    {
+      "name": "directory",
+      "row_count": 200,
+      "file": "directory.json"
+    },
+    {
+      "name": "dress_data",
+      "row_count": 181,
+      "file": "dress_data.json"
+    },
+    {
+      "name": "event_motion_data",
+      "row_count": 982,
+      "file": "event_motion_data.json"
+    },
+    {
+      "name": "event_motion_plus_data",
+      "row_count": 149,
+      "file": "event_motion_plus_data.json"
+    },
+    {
+      "name": "face_type_data",
+      "row_count": 114,
+      "file": "face_type_data.json"
+    },
+    {
+      "name": "facial_mouth_change",
+      "row_count": 14,
+      "file": "facial_mouth_change.json"
+    },
+    {
+      "name": "fan_raid_all_reward",
+      "row_count": 7,
+      "file": "fan_raid_all_reward.json"
+    },
+    {
+      "name": "fan_raid_bonus_chara",
+      "row_count": 1,
+      "file": "fan_raid_bonus_chara.json"
+    },
+    {
+      "name": "fan_raid_bonus_support_card",
+      "row_count": 3,
+      "file": "fan_raid_bonus_support_card.json"
+    },
+    {
+      "name": "fan_raid_data",
+      "row_count": 1,
+      "file": "fan_raid_data.json"
+    },
+    {
+      "name": "fan_raid_individual_reward",
+      "row_count": 7,
+      "file": "fan_raid_individual_reward.json"
+    },
+    {
+      "name": "fan_raid_story_data",
+      "row_count": 2,
+      "file": "fan_raid_story_data.json"
+    },
+    {
+      "name": "fan_raid_top_chara",
+      "row_count": 10,
+      "file": "fan_raid_top_chara.json"
+    },
+    {
+      "name": "fan_raid_top_data",
+      "row_count": 4,
+      "file": "fan_raid_top_data.json"
+    },
+    {
+      "name": "gacha_available",
+      "row_count": 8764,
+      "file": "gacha_available.json"
+    },
+    {
+      "name": "gacha_data",
+      "row_count": 100,
+      "file": "gacha_data.json"
+    },
+    {
+      "name": "gacha_exchange",
+      "row_count": 214,
+      "file": "gacha_exchange.json"
+    },
+    {
+      "name": "gacha_free_campaign",
+      "row_count": 17,
+      "file": "gacha_free_campaign.json"
+    },
+    {
+      "name": "gacha_piece",
+      "row_count": 3,
+      "file": "gacha_piece.json"
+    },
+    {
+      "name": "gacha_prize_odds",
+      "row_count": 0,
+      "file": "gacha_prize_odds.json"
+    },
+    {
+      "name": "gacha_stock_campaign",
+      "row_count": 2,
+      "file": "gacha_stock_campaign.json"
+    },
+    {
+      "name": "gacha_stock_detail",
+      "row_count": 5,
+      "file": "gacha_stock_detail.json"
+    },
+    {
+      "name": "gacha_top_bg",
+      "row_count": 100,
+      "file": "gacha_top_bg.json"
+    },
+    {
+      "name": "gift_message",
+      "row_count": 90,
+      "file": "gift_message.json"
+    },
+    {
+      "name": "highlight_interpolate",
+      "row_count": 3,
+      "file": "highlight_interpolate.json"
+    },
+    {
+      "name": "home_character_type",
+      "row_count": 23,
+      "file": "home_character_type.json"
+    },
+    {
+      "name": "home_eat",
+      "row_count": 56,
+      "file": "home_eat.json"
+    },
+    {
+      "name": "home_env_setting",
+      "row_count": 96,
+      "file": "home_env_setting.json"
+    },
+    {
+      "name": "home_event_schedule",
+      "row_count": 2,
+      "file": "home_event_schedule.json"
+    },
+    {
+      "name": "home_poster_data",
+      "row_count": 8,
+      "file": "home_poster_data.json"
+    },
+    {
+      "name": "home_prop_setting",
+      "row_count": 20,
+      "file": "home_prop_setting.json"
+    },
+    {
+      "name": "home_story_trigger",
+      "row_count": 280,
+      "file": "home_story_trigger.json"
+    },
+    {
+      "name": "home_walk_group",
+      "row_count": 53,
+      "file": "home_walk_group.json"
+    },
+    {
+      "name": "homestory_hip_offset",
+      "row_count": 14,
+      "file": "homestory_hip_offset.json"
+    },
+    {
+      "name": "honor_data",
+      "row_count": 431,
+      "file": "honor_data.json"
+    },
+    {
+      "name": "item_data",
+      "row_count": 182,
+      "file": "item_data.json"
+    },
+    {
+      "name": "item_exchange",
+      "row_count": 524,
+      "file": "item_exchange.json"
+    },
+    {
+      "name": "item_exchange_top",
+      "row_count": 23,
+      "file": "item_exchange_top.json"
+    },
+    {
+      "name": "item_group",
+      "row_count": 35,
+      "file": "item_group.json"
+    },
+    {
+      "name": "item_pack",
+      "row_count": 10,
+      "file": "item_pack.json"
+    },
+    {
+      "name": "item_place",
+      "row_count": 148,
+      "file": "item_place.json"
+    },
+    {
+      "name": "jukebox_chara_tag_data",
+      "row_count": 229,
+      "file": "jukebox_chara_tag_data.json"
+    },
+    {
+      "name": "jukebox_comment",
+      "row_count": 148,
+      "file": "jukebox_comment.json"
+    },
+    {
+      "name": "jukebox_motion_data",
+      "row_count": 16,
+      "file": "jukebox_motion_data.json"
+    },
+    {
+      "name": "jukebox_music_data",
+      "row_count": 28,
+      "file": "jukebox_music_data.json"
+    },
+    {
+      "name": "jukebox_reaction_data",
+      "row_count": 239,
+      "file": "jukebox_reaction_data.json"
+    },
+    {
+      "name": "jukebox_request_data",
+      "row_count": 149,
+      "file": "jukebox_request_data.json"
+    },
+    {
+      "name": "legend_race",
+      "row_count": 35,
+      "file": "legend_race.json"
+    },
+    {
+      "name": "legend_race_billing",
+      "row_count": 1,
+      "file": "legend_race_billing.json"
+    },
+    {
+      "name": "legend_race_boss_npc",
+      "row_count": 40,
+      "file": "legend_race_boss_npc.json"
+    },
+    {
+      "name": "legend_race_cutt_chara_data",
+      "row_count": 0,
+      "file": "legend_race_cutt_chara_data.json"
+    },
+    {
+      "name": "legend_race_npc",
+      "row_count": 636,
+      "file": "legend_race_npc.json"
+    },
+    {
+      "name": "limited_exchange",
+      "row_count": 3,
+      "file": "limited_exchange.json"
+    },
+    {
+      "name": "limited_exchange_reward",
+      "row_count": 221,
+      "file": "limited_exchange_reward.json"
+    },
+    {
+      "name": "limited_exchange_reward_odds",
+      "row_count": 20,
+      "file": "limited_exchange_reward_odds.json"
+    },
+    {
+      "name": "live_data",
+      "row_count": 29,
+      "file": "live_data.json"
+    },
+    {
+      "name": "live_extra_data",
+      "row_count": 0,
+      "file": "live_extra_data.json"
+    },
+    {
+      "name": "live_permission_data",
+      "row_count": 249,
+      "file": "live_permission_data.json"
+    },
+    {
+      "name": "login_bonus_data",
+      "row_count": 49,
+      "file": "login_bonus_data.json"
+    },
+    {
+      "name": "login_bonus_detail",
+      "row_count": 129,
+      "file": "login_bonus_detail.json"
+    },
+    {
+      "name": "love_rank",
+      "row_count": 11,
+      "file": "love_rank.json"
+    },
+    {
+      "name": "main_story_data",
+      "row_count": 103,
+      "file": "main_story_data.json"
+    },
+    {
+      "name": "main_story_part",
+      "row_count": 6,
+      "file": "main_story_part.json"
+    },
+    {
+      "name": "main_story_race_bonus",
+      "row_count": 22,
+      "file": "main_story_race_bonus.json"
+    },
+    {
+      "name": "main_story_race_bonus_condition",
+      "row_count": 14,
+      "file": "main_story_race_bonus_condition.json"
+    },
+    {
+      "name": "main_story_race_chara_data",
+      "row_count": 262,
+      "file": "main_story_race_chara_data.json"
+    },
+    {
+      "name": "main_story_race_data",
+      "row_count": 24,
+      "file": "main_story_race_data.json"
+    },
+    {
+      "name": "mini_bg",
+      "row_count": 6,
+      "file": "mini_bg.json"
+    },
+    {
+      "name": "mini_bg_chara_motion",
+      "row_count": 94,
+      "file": "mini_bg_chara_motion.json"
+    },
+    {
+      "name": "mini_face_type_data",
+      "row_count": 35,
+      "file": "mini_face_type_data.json"
+    },
+    {
+      "name": "mini_motion_set",
+      "row_count": 221,
+      "file": "mini_motion_set.json"
+    },
+    {
+      "name": "mini_mouth_type",
+      "row_count": 32,
+      "file": "mini_mouth_type.json"
+    },
+    {
+      "name": "mission_data",
+      "row_count": 2742,
+      "file": "mission_data.json"
+    },
+    {
+      "name": "mob_data",
+      "row_count": 797,
+      "file": "mob_data.json"
+    },
+    {
+      "name": "mob_dress_color_set",
+      "row_count": 781,
+      "file": "mob_dress_color_set.json"
+    },
+    {
+      "name": "mob_hair_color_set",
+      "row_count": 89,
+      "file": "mob_hair_color_set.json"
+    },
+    {
+      "name": "name_card_bg",
+      "row_count": 150,
+      "file": "name_card_bg.json"
+    },
+    {
+      "name": "need_piece_num_data",
+      "row_count": 3,
+      "file": "need_piece_num_data.json"
+    },
+    {
+      "name": "nickname",
+      "row_count": 211,
+      "file": "nickname.json"
+    },
+    {
+      "name": "note_profile",
+      "row_count": 31,
+      "file": "note_profile.json"
+    },
+    {
+      "name": "note_profile_text_type",
+      "row_count": 24,
+      "file": "note_profile_text_type.json"
+    },
+    {
+      "name": "piece_data",
+      "row_count": 75,
+      "file": "piece_data.json"
+    },
+    {
+      "name": "price_change",
+      "row_count": 9,
+      "file": "price_change.json"
+    },
+    {
+      "name": "profile_card_bg",
+      "row_count": 9,
+      "file": "profile_card_bg.json"
+    },
+    {
+      "name": "race",
+      "row_count": 1351,
+      "file": "race.json"
+    },
+    {
+      "name": "race_bgm",
+      "row_count": 217,
+      "file": "race_bgm.json"
+    },
+    {
+      "name": "race_bgm_cutin",
+      "row_count": 2,
+      "file": "race_bgm_cutin.json"
+    },
+    {
+      "name": "race_bgm_cutin_extension_time",
+      "row_count": 128,
+      "file": "race_bgm_cutin_extension_time.json"
+    },
+    {
+      "name": "race_bgm_pattern",
+      "row_count": 31,
+      "file": "race_bgm_pattern.json"
+    },
+    {
+      "name": "race_bib_color",
+      "row_count": 75,
+      "file": "race_bib_color.json"
+    },
+    {
+      "name": "race_condition",
+      "row_count": 32,
+      "file": "race_condition.json"
+    },
+    {
+      "name": "race_course_set",
+      "row_count": 107,
+      "file": "race_course_set.json"
+    },
+    {
+      "name": "race_course_set_status",
+      "row_count": 9,
+      "file": "race_course_set_status.json"
+    },
+    {
+      "name": "race_env_define",
+      "row_count": 880,
+      "file": "race_env_define.json"
+    },
+    {
+      "name": "race_fence_set",
+      "row_count": 108,
+      "file": "race_fence_set.json"
+    },
+    {
+      "name": "race_instance",
+      "row_count": 1454,
+      "file": "race_instance.json"
+    },
+    {
+      "name": "race_jikkyo_base",
+      "row_count": 3833,
+      "file": "race_jikkyo_base.json"
+    },
+    {
+      "name": "race_jikkyo_comment",
+      "row_count": 264,
+      "file": "race_jikkyo_comment.json"
+    },
+    {
+      "name": "race_jikkyo_cue",
+      "row_count": 1675,
+      "file": "race_jikkyo_cue.json"
+    },
+    {
+      "name": "race_jikkyo_message",
+      "row_count": 2387,
+      "file": "race_jikkyo_message.json"
+    },
+    {
+      "name": "race_jikkyo_race",
+      "row_count": 596,
+      "file": "race_jikkyo_race.json"
+    },
+    {
+      "name": "race_jikkyo_trigger",
+      "row_count": 1744,
+      "file": "race_jikkyo_trigger.json"
+    },
+    {
+      "name": "race_motivation_rate",
+      "row_count": 5,
+      "file": "race_motivation_rate.json"
+    },
+    {
+      "name": "race_overrun_pattern",
+      "row_count": 5,
+      "file": "race_overrun_pattern.json"
+    },
+    {
+      "name": "race_player_camera",
+      "row_count": 104,
+      "file": "race_player_camera.json"
+    },
+    {
+      "name": "race_popularity_proper_value",
+      "row_count": 16,
+      "file": "race_popularity_proper_value.json"
+    },
+    {
+      "name": "race_proper_distance_rate",
+      "row_count": 9,
+      "file": "race_proper_distance_rate.json"
+    },
+    {
+      "name": "race_proper_ground_rate",
+      "row_count": 9,
+      "file": "race_proper_ground_rate.json"
+    },
+    {
+      "name": "race_proper_runningstyle_rate",
+      "row_count": 9,
+      "file": "race_proper_runningstyle_rate.json"
+    },
+    {
+      "name": "race_single_mode_team_status",
+      "row_count": 6,
+      "file": "race_single_mode_team_status.json"
+    },
+    {
+      "name": "race_track",
+      "row_count": 11,
+      "file": "race_track.json"
+    },
+    {
+      "name": "race_trophy",
+      "row_count": 257,
+      "file": "race_trophy.json"
+    },
+    {
+      "name": "race_trophy_reward",
+      "row_count": 182,
+      "file": "race_trophy_reward.json"
+    },
+    {
+      "name": "random_ear_tail_motion",
+      "row_count": 27,
+      "file": "random_ear_tail_motion.json"
+    },
+    {
+      "name": "season_data",
+      "row_count": 28,
+      "file": "season_data.json"
+    },
+    {
+      "name": "short_episode",
+      "row_count": 10,
+      "file": "short_episode.json"
+    },
+    {
+      "name": "single_mode_analyze_message",
+      "row_count": 53,
+      "file": "single_mode_analyze_message.json"
+    },
+    {
+      "name": "single_mode_analyze_ticket",
+      "row_count": 7,
+      "file": "single_mode_analyze_ticket.json"
+    },
+    {
+      "name": "single_mode_ao_offset",
+      "row_count": 5,
+      "file": "single_mode_ao_offset.json"
+    },
+    {
+      "name": "single_mode_ao_training_plate",
+      "row_count": 3,
+      "file": "single_mode_ao_training_plate.json"
+    },
+    {
+      "name": "single_mode_aoharu_cutt_type",
+      "row_count": 24,
+      "file": "single_mode_aoharu_cutt_type.json"
+    },
+    {
+      "name": "single_mode_aoharu_result_cutt",
+      "row_count": 4,
+      "file": "single_mode_aoharu_result_cutt.json"
+    },
+    {
+      "name": "single_mode_aoharu_schedule",
+      "row_count": 5,
+      "file": "single_mode_aoharu_schedule.json"
+    },
+    {
+      "name": "single_mode_change_chara_route",
+      "row_count": 53,
+      "file": "single_mode_change_chara_route.json"
+    },
+    {
+      "name": "single_mode_chara_effect",
+      "row_count": 21,
+      "file": "single_mode_chara_effect.json"
+    },
+    {
+      "name": "single_mode_chara_grade",
+      "row_count": 10,
+      "file": "single_mode_chara_grade.json"
+    },
+    {
+      "name": "single_mode_chara_program",
+      "row_count": 596,
+      "file": "single_mode_chara_program.json"
+    },
+    {
+      "name": "single_mode_conclusion_set",
+      "row_count": 742,
+      "file": "single_mode_conclusion_set.json"
+    },
+    {
+      "name": "single_mode_difficulty_box",
+      "row_count": 2,
+      "file": "single_mode_difficulty_box.json"
+    },
+    {
+      "name": "single_mode_difficulty_box_gauge",
+      "row_count": 5,
+      "file": "single_mode_difficulty_box_gauge.json"
+    },
+    {
+      "name": "single_mode_difficulty_box_reward",
+      "row_count": 20,
+      "file": "single_mode_difficulty_box_reward.json"
+    },
+    {
+      "name": "single_mode_difficulty_data",
+      "row_count": 6,
+      "file": "single_mode_difficulty_data.json"
+    },
+    {
+      "name": "single_mode_difficulty_mode",
+      "row_count": 2,
+      "file": "single_mode_difficulty_mode.json"
+    },
+    {
+      "name": "single_mode_evaluation",
+      "row_count": 12,
+      "file": "single_mode_evaluation.json"
+    },
+    {
+      "name": "single_mode_event_choice_reward",
+      "row_count": 35,
+      "file": "single_mode_event_choice_reward.json"
+    },
+    {
+      "name": "single_mode_event_conclusion",
+      "row_count": 232,
+      "file": "single_mode_event_conclusion.json"
+    },
+    {
+      "name": "single_mode_event_cr_priority",
+      "row_count": 58,
+      "file": "single_mode_event_cr_priority.json"
+    },
+    {
+      "name": "single_mode_event_item_detail",
+      "row_count": 16,
+      "file": "single_mode_event_item_detail.json"
+    },
+    {
+      "name": "single_mode_event_production",
+      "row_count": 63,
+      "file": "single_mode_event_production.json"
+    },
+    {
+      "name": "single_mode_fan_count",
+      "row_count": 900,
+      "file": "single_mode_fan_count.json"
+    },
+    {
+      "name": "single_mode_free_coin_race",
+      "row_count": 36,
+      "file": "single_mode_free_coin_race.json"
+    },
+    {
+      "name": "single_mode_free_shop",
+      "row_count": 11,
+      "file": "single_mode_free_shop.json"
+    },
+    {
+      "name": "single_mode_free_shop_bg",
+      "row_count": 5,
+      "file": "single_mode_free_shop_bg.json"
+    },
+    {
+      "name": "single_mode_free_shop_effect",
+      "row_count": 64,
+      "file": "single_mode_free_shop_effect.json"
+    },
+    {
+      "name": "single_mode_free_shop_item",
+      "row_count": 53,
+      "file": "single_mode_free_shop_item.json"
+    },
+    {
+      "name": "single_mode_free_training_plate",
+      "row_count": 3,
+      "file": "single_mode_free_training_plate.json"
+    },
+    {
+      "name": "single_mode_free_win_point",
+      "row_count": 66,
+      "file": "single_mode_free_win_point.json"
+    },
+    {
+      "name": "single_mode_hint_gain",
+      "row_count": 1603,
+      "file": "single_mode_hint_gain.json"
+    },
+    {
+      "name": "single_mode_member_rank",
+      "row_count": 8,
+      "file": "single_mode_member_rank.json"
+    },
+    {
+      "name": "single_mode_member_rank_points",
+      "row_count": 8,
+      "file": "single_mode_member_rank_points.json"
+    },
+    {
+      "name": "single_mode_message",
+      "row_count": 26,
+      "file": "single_mode_message.json"
+    },
+    {
+      "name": "single_mode_npc",
+      "row_count": 1281,
+      "file": "single_mode_npc.json"
+    },
+    {
+      "name": "single_mode_outing",
+      "row_count": 3,
+      "file": "single_mode_outing.json"
+    },
+    {
+      "name": "single_mode_outing_set",
+      "row_count": 2,
+      "file": "single_mode_outing_set.json"
+    },
+    {
+      "name": "single_mode_program",
+      "row_count": 741,
+      "file": "single_mode_program.json"
+    },
+    {
+      "name": "single_mode_race_group",
+      "row_count": 741,
+      "file": "single_mode_race_group.json"
+    },
+    {
+      "name": "single_mode_race_live",
+      "row_count": 125,
+      "file": "single_mode_race_live.json"
+    },
+    {
+      "name": "single_mode_rank",
+      "row_count": 98,
+      "file": "single_mode_rank.json"
+    },
+    {
+      "name": "single_mode_recommend",
+      "row_count": 14,
+      "file": "single_mode_recommend.json"
+    },
+    {
+      "name": "single_mode_recommend_setting",
+      "row_count": 3,
+      "file": "single_mode_recommend_setting.json"
+    },
+    {
+      "name": "single_mode_restrict_support",
+      "row_count": 1,
+      "file": "single_mode_restrict_support.json"
+    },
+    {
+      "name": "single_mode_reward_set",
+      "row_count": 734,
+      "file": "single_mode_reward_set.json"
+    },
+    {
+      "name": "single_mode_rival",
+      "row_count": 1479,
+      "file": "single_mode_rival.json"
+    },
+    {
+      "name": "single_mode_route",
+      "row_count": 60,
+      "file": "single_mode_route.json"
+    },
+    {
+      "name": "single_mode_route_announce",
+      "row_count": 18,
+      "file": "single_mode_route_announce.json"
+    },
+    {
+      "name": "single_mode_route_condition",
+      "row_count": 16,
+      "file": "single_mode_route_condition.json"
+    },
+    {
+      "name": "single_mode_route_race",
+      "row_count": 698,
+      "file": "single_mode_route_race.json"
+    },
+    {
+      "name": "single_mode_scenario",
+      "row_count": 3,
+      "file": "single_mode_scenario.json"
+    },
+    {
+      "name": "single_mode_scenario_record",
+      "row_count": 27,
+      "file": "single_mode_scenario_record.json"
+    },
+    {
+      "name": "single_mode_scout_chara",
+      "row_count": 195,
+      "file": "single_mode_scout_chara.json"
+    },
+    {
+      "name": "single_mode_skill_need_point",
+      "row_count": 449,
+      "file": "single_mode_skill_need_point.json"
+    },
+    {
+      "name": "single_mode_special_chara",
+      "row_count": 6,
+      "file": "single_mode_special_chara.json"
+    },
+    {
+      "name": "single_mode_story_data",
+      "row_count": 6561,
+      "file": "single_mode_story_data.json"
+    },
+    {
+      "name": "single_mode_story_guide",
+      "row_count": 2,
+      "file": "single_mode_story_guide.json"
+    },
+    {
+      "name": "single_mode_tag_card_pos",
+      "row_count": 3030,
+      "file": "single_mode_tag_card_pos.json"
+    },
+    {
+      "name": "single_mode_team_name",
+      "row_count": 4,
+      "file": "single_mode_team_name.json"
+    },
+    {
+      "name": "single_mode_top_bg",
+      "row_count": 62,
+      "file": "single_mode_top_bg.json"
+    },
+    {
+      "name": "single_mode_top_bg_chara",
+      "row_count": 12,
+      "file": "single_mode_top_bg_chara.json"
+    },
+    {
+      "name": "single_mode_training",
+      "row_count": 36,
+      "file": "single_mode_training.json"
+    },
+    {
+      "name": "single_mode_training_effect",
+      "row_count": 168,
+      "file": "single_mode_training_effect.json"
+    },
+    {
+      "name": "single_mode_training_se",
+      "row_count": 220,
+      "file": "single_mode_training_se.json"
+    },
+    {
+      "name": "single_mode_turn",
+      "row_count": 234,
+      "file": "single_mode_turn.json"
+    },
+    {
+      "name": "single_mode_unique_chara",
+      "row_count": 14,
+      "file": "single_mode_unique_chara.json"
+    },
+    {
+      "name": "single_mode_wins_saddle",
+      "row_count": 155,
+      "file": "single_mode_wins_saddle.json"
+    },
+    {
+      "name": "skill_data",
+      "row_count": 553,
+      "file": "skill_data.json"
+    },
+    {
+      "name": "skill_exp",
+      "row_count": 10,
+      "file": "skill_exp.json"
+    },
+    {
+      "name": "skill_level_value",
+      "row_count": 231,
+      "file": "skill_level_value.json"
+    },
+    {
+      "name": "skill_rarity",
+      "row_count": 5,
+      "file": "skill_rarity.json"
+    },
+    {
+      "name": "skill_set",
+      "row_count": 1120,
+      "file": "skill_set.json"
+    },
+    {
+      "name": "sqlite_stat1",
+      "row_count": 418,
+      "file": "sqlite_stat1.json"
+    },
+    {
+      "name": "story_event_announce_detail",
+      "row_count": 129,
+      "file": "story_event_announce_detail.json"
+    },
+    {
+      "name": "story_event_bingo_reward",
+      "row_count": 200,
+      "file": "story_event_bingo_reward.json"
+    },
+    {
+      "name": "story_event_bonus_card",
+      "row_count": 75,
+      "file": "story_event_bonus_card.json"
+    },
+    {
+      "name": "story_event_bonus_group_support_card",
+      "row_count": 0,
+      "file": "story_event_bonus_group_support_card.json"
+    },
+    {
+      "name": "story_event_bonus_support_card",
+      "row_count": 183,
+      "file": "story_event_bonus_support_card.json"
+    },
+    {
+      "name": "story_event_data",
+      "row_count": 12,
+      "file": "story_event_data.json"
+    },
+    {
+      "name": "story_event_mission",
+      "row_count": 527,
+      "file": "story_event_mission.json"
+    },
+    {
+      "name": "story_event_mission_top_chara",
+      "row_count": 24,
+      "file": "story_event_mission_top_chara.json"
+    },
+    {
+      "name": "story_event_nickname_bonus",
+      "row_count": 36,
+      "file": "story_event_nickname_bonus.json"
+    },
+    {
+      "name": "story_event_point_reward",
+      "row_count": 1180,
+      "file": "story_event_point_reward.json"
+    },
+    {
+      "name": "story_event_roulette_bingo",
+      "row_count": 48,
+      "file": "story_event_roulette_bingo.json"
+    },
+    {
+      "name": "story_event_story_data",
+      "row_count": 98,
+      "file": "story_event_story_data.json"
+    },
+    {
+      "name": "story_event_top_chara",
+      "row_count": 137,
+      "file": "story_event_top_chara.json"
+    },
+    {
+      "name": "story_event_win_bonus",
+      "row_count": 308,
+      "file": "story_event_win_bonus.json"
+    },
+    {
+      "name": "story_extra_data",
+      "row_count": 2,
+      "file": "story_extra_data.json"
+    },
+    {
+      "name": "story_extra_story_data",
+      "row_count": 13,
+      "file": "story_extra_story_data.json"
+    },
+    {
+      "name": "story_hip_offset",
+      "row_count": 50,
+      "file": "story_hip_offset.json"
+    },
+    {
+      "name": "story_live_position",
+      "row_count": 109,
+      "file": "story_live_position.json"
+    },
+    {
+      "name": "story_still",
+      "row_count": 72,
+      "file": "story_still.json"
+    },
+    {
+      "name": "succession_factor",
+      "row_count": 904,
+      "file": "succession_factor.json"
+    },
+    {
+      "name": "succession_factor_effect",
+      "row_count": 1386,
+      "file": "succession_factor_effect.json"
+    },
+    {
+      "name": "succession_initial_factor",
+      "row_count": 7,
+      "file": "succession_initial_factor.json"
+    },
+    {
+      "name": "succession_relation",
+      "row_count": 944,
+      "file": "succession_relation.json"
+    },
+    {
+      "name": "succession_relation_member",
+      "row_count": 1832,
+      "file": "succession_relation_member.json"
+    },
+    {
+      "name": "succession_relation_rank",
+      "row_count": 3,
+      "file": "succession_relation_rank.json"
+    },
+    {
+      "name": "succession_rental",
+      "row_count": 490,
+      "file": "succession_rental.json"
+    },
+    {
+      "name": "support_card_data",
+      "row_count": 204,
+      "file": "support_card_data.json"
+    },
+    {
+      "name": "support_card_effect_table",
+      "row_count": 1671,
+      "file": "support_card_effect_table.json"
+    },
+    {
+      "name": "support_card_group",
+      "row_count": 6,
+      "file": "support_card_group.json"
+    },
+    {
+      "name": "support_card_level",
+      "row_count": 135,
+      "file": "support_card_level.json"
+    },
+    {
+      "name": "support_card_limit",
+      "row_count": 3,
+      "file": "support_card_limit.json"
+    },
+    {
+      "name": "support_card_limit_break",
+      "row_count": 2,
+      "file": "support_card_limit_break.json"
+    },
+    {
+      "name": "support_card_team_score_bonus",
+      "row_count": 7,
+      "file": "support_card_team_score_bonus.json"
+    },
+    {
+      "name": "support_card_unique_effect",
+      "row_count": 127,
+      "file": "support_card_unique_effect.json"
+    },
+    {
+      "name": "team_building_basic_reward",
+      "row_count": 0,
+      "file": "team_building_basic_reward.json"
+    },
+    {
+      "name": "team_building_chara_count",
+      "row_count": 0,
+      "file": "team_building_chara_count.json"
+    },
+    {
+      "name": "team_building_chara_group",
+      "row_count": 0,
+      "file": "team_building_chara_group.json"
+    },
+    {
+      "name": "team_building_collection_chara",
+      "row_count": 0,
+      "file": "team_building_collection_chara.json"
+    },
+    {
+      "name": "team_building_collection_set",
+      "row_count": 0,
+      "file": "team_building_collection_set.json"
+    },
+    {
+      "name": "team_building_consecutive_wins",
+      "row_count": 0,
+      "file": "team_building_consecutive_wins.json"
+    },
+    {
+      "name": "team_building_data",
+      "row_count": 0,
+      "file": "team_building_data.json"
+    },
+    {
+      "name": "team_building_discount_point",
+      "row_count": 0,
+      "file": "team_building_discount_point.json"
+    },
+    {
+      "name": "team_building_race",
+      "row_count": 0,
+      "file": "team_building_race.json"
+    },
+    {
+      "name": "team_building_race_npc",
+      "row_count": 0,
+      "file": "team_building_race_npc.json"
+    },
+    {
+      "name": "team_building_rank",
+      "row_count": 0,
+      "file": "team_building_rank.json"
+    },
+    {
+      "name": "team_building_rank_reward_group",
+      "row_count": 0,
+      "file": "team_building_rank_reward_group.json"
+    },
+    {
+      "name": "team_building_retry_bonus",
+      "row_count": 0,
+      "file": "team_building_retry_bonus.json"
+    },
+    {
+      "name": "team_building_scout_point",
+      "row_count": 0,
+      "file": "team_building_scout_point.json"
+    },
+    {
+      "name": "team_building_win_reward",
+      "row_count": 0,
+      "file": "team_building_win_reward.json"
+    },
+    {
+      "name": "team_stadium",
+      "row_count": 1,
+      "file": "team_stadium.json"
+    },
+    {
+      "name": "team_stadium_bgm",
+      "row_count": 11,
+      "file": "team_stadium_bgm.json"
+    },
+    {
+      "name": "team_stadium_class",
+      "row_count": 6,
+      "file": "team_stadium_class.json"
+    },
+    {
+      "name": "team_stadium_class_reward",
+      "row_count": 17,
+      "file": "team_stadium_class_reward.json"
+    },
+    {
+      "name": "team_stadium_evaluation_rate",
+      "row_count": 24,
+      "file": "team_stadium_evaluation_rate.json"
+    },
+    {
+      "name": "team_stadium_race_result_motion",
+      "row_count": 71,
+      "file": "team_stadium_race_result_motion.json"
+    },
+    {
+      "name": "team_stadium_rank",
+      "row_count": 30,
+      "file": "team_stadium_rank.json"
+    },
+    {
+      "name": "team_stadium_raw_score",
+      "row_count": 95,
+      "file": "team_stadium_raw_score.json"
+    },
+    {
+      "name": "team_stadium_score_bonus",
+      "row_count": 7,
+      "file": "team_stadium_score_bonus.json"
+    },
+    {
+      "name": "team_stadium_stand_motion",
+      "row_count": 14,
+      "file": "team_stadium_stand_motion.json"
+    },
+    {
+      "name": "team_stadium_support_text",
+      "row_count": 10,
+      "file": "team_stadium_support_text.json"
+    },
+    {
+      "name": "text_data",
+      "row_count": 37280,
+      "file": "text_data.json"
+    },
+    {
+      "name": "timezone_data",
+      "row_count": 4,
+      "file": "timezone_data.json"
+    },
+    {
+      "name": "topics",
+      "row_count": 339,
+      "file": "topics.json"
+    },
+    {
+      "name": "trained_chara_trade_item",
+      "row_count": 98,
+      "file": "trained_chara_trade_item.json"
+    },
+    {
+      "name": "training_challenge_exam",
+      "row_count": 8,
+      "file": "training_challenge_exam.json"
+    },
+    {
+      "name": "training_challenge_master",
+      "row_count": 2,
+      "file": "training_challenge_master.json"
+    },
+    {
+      "name": "training_challenge_score",
+      "row_count": 140,
+      "file": "training_challenge_score.json"
+    },
+    {
+      "name": "training_challenge_total_score",
+      "row_count": 50,
+      "file": "training_challenge_total_score.json"
+    },
+    {
+      "name": "training_cutt_chara_data",
+      "row_count": 280,
+      "file": "training_cutt_chara_data.json"
+    },
+    {
+      "name": "training_cutt_data",
+      "row_count": 72,
+      "file": "training_cutt_data.json"
+    },
+    {
+      "name": "transfer_event_data",
+      "row_count": 9,
+      "file": "transfer_event_data.json"
+    },
+    {
+      "name": "transfer_event_detail",
+      "row_count": 60,
+      "file": "transfer_event_detail.json"
+    },
+    {
+      "name": "transfer_event_reward",
+      "row_count": 140,
+      "file": "transfer_event_reward.json"
+    },
+    {
+      "name": "tutorial_guide_data",
+      "row_count": 125,
+      "file": "tutorial_guide_data.json"
+    }
+  ]
+}

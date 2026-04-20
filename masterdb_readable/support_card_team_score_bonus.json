@@ -1,0 +1,46 @@
+{
+  "table": "support_card_team_score_bonus",
+  "row_count": 7,
+  "columns": [
+    "id",
+    "level",
+    "score_rate"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "level": 20,
+      "score_rate": 1
+    },
+    {
+      "id": 2,
+      "level": 25,
+      "score_rate": 2
+    },
+    {
+      "id": 3,
+      "level": 30,
+      "score_rate": 2
+    },
+    {
+      "id": 4,
+      "level": 35,
+      "score_rate": 2
+    },
+    {
+      "id": 5,
+      "level": 40,
+      "score_rate": 3
+    },
+    {
+      "id": 6,
+      "level": 45,
+      "score_rate": 5
+    },
+    {
+      "id": 7,
+      "level": 50,
+      "score_rate": 5
+    }
+  ]
+}

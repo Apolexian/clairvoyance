@@ -1,0 +1,474 @@
+{
+  "table": "champions_race_condition",
+  "row_count": 77,
+  "columns": [
+    "champions_id",
+    "round_id",
+    "race_instance_id",
+    "race_condition_id"
+  ],
+  "rows": [
+    {
+      "champions_id": 1,
+      "round_id": 0,
+      "race_instance_id": 600005,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 1,
+      "round_id": 1,
+      "race_instance_id": 600005,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 1,
+      "round_id": 2,
+      "race_instance_id": 600005,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 1,
+      "round_id": 3,
+      "race_instance_id": 600005,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 1,
+      "round_id": 4,
+      "race_instance_id": 600017,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 1,
+      "round_id": 5,
+      "race_instance_id": 600017,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 1,
+      "round_id": 6,
+      "race_instance_id": 600017,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 2,
+      "round_id": 0,
+      "race_instance_id": 600006,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 2,
+      "round_id": 1,
+      "race_instance_id": 600006,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 2,
+      "round_id": 2,
+      "race_instance_id": 600006,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 2,
+      "round_id": 3,
+      "race_instance_id": 600006,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 2,
+      "round_id": 4,
+      "race_instance_id": 600018,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 2,
+      "round_id": 5,
+      "race_instance_id": 600018,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 2,
+      "round_id": 6,
+      "race_instance_id": 600018,
+      "race_condition_id": 1
+    },
+    {
+      "champions_id": 3,
+      "round_id": 0,
+      "race_instance_id": 600007,
+      "race_condition_id": 8
+    },
+    {
+      "champions_id": 3,
+      "round_id": 1,
+      "race_instance_id": 600007,
+      "race_condition_id": 8
+    },
+    {
+      "champions_id": 3,
+      "round_id": 2,
+      "race_instance_id": 600007,
+      "race_condition_id": 8
+    },
+    {
+      "champions_id": 3,
+      "round_id": 3,
+      "race_instance_id": 600007,
+      "race_condition_id": 8
+    },
+    {
+      "champions_id": 3,
+      "round_id": 4,
+      "race_instance_id": 600019,
+      "race_condition_id": 8
+    },
+    {
+      "champions_id": 3,
+      "round_id": 5,
+      "race_instance_id": 600019,
+      "race_condition_id": 8
+    },
+    {
+      "champions_id": 3,
+      "round_id": 6,
+      "race_instance_id": 600019,
+      "race_condition_id": 8
+    },
+    {
+      "champions_id": 4,
+      "round_id": 0,
+      "race_instance_id": 600008,
+      "race_condition_id": 7
+    },
+    {
+      "champions_id": 4,
+      "round_id": 1,
+      "race_instance_id": 600008,
+      "race_condition_id": 7
+    },
+    {
+      "champions_id": 4,
+      "round_id": 2,
+      "race_instance_id": 600008,
+      "race_condition_id": 7
+    },
+    {
+      "champions_id": 4,
+      "round_id": 3,
+      "race_instance_id": 600008,
+      "race_condition_id": 7
+    },
+    {
+      "champions_id": 4,
+      "round_id": 4,
+      "race_instance_id": 600020,
+      "race_condition_id": 7
+    },
+    {
+      "champions_id": 4,
+      "round_id": 5,
+      "race_instance_id": 600020,
+      "race_condition_id": 7
+    },
+    {
+      "champions_id": 4,
+      "round_id": 6,
+      "race_instance_id": 600020,
+      "race_condition_id": 7
+    },
+    {
+      "champions_id": 5,
+      "round_id": 0,
+      "race_instance_id": 600009,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 5,
+      "round_id": 1,
+      "race_instance_id": 600009,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 5,
+      "round_id": 2,
+      "race_instance_id": 600009,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 5,
+      "round_id": 3,
+      "race_instance_id": 600009,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 5,
+      "round_id": 4,
+      "race_instance_id": 600021,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 5,
+      "round_id": 5,
+      "race_instance_id": 600021,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 5,
+      "round_id": 6,
+      "race_instance_id": 600021,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 6,
+      "round_id": 0,
+      "race_instance_id": 600010,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 6,
+      "round_id": 1,
+      "race_instance_id": 600010,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 6,
+      "round_id": 2,
+      "race_instance_id": 600010,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 6,
+      "round_id": 3,
+      "race_instance_id": 600010,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 6,
+      "round_id": 4,
+      "race_instance_id": 600022,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 6,
+      "round_id": 5,
+      "race_instance_id": 600022,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 6,
+      "round_id": 6,
+      "race_instance_id": 600022,
+      "race_condition_id": 13
+    },
+    {
+      "champions_id": 7,
+      "round_id": 0,
+      "race_instance_id": 600011,
+      "race_condition_id": 17
+    },
+    {
+      "champions_id": 7,
+      "round_id": 1,
+      "race_instance_id": 600011,
+      "race_condition_id": 17
+    },
+    {
+      "champions_id": 7,
+      "round_id": 2,
+      "race_instance_id": 600011,
+      "race_condition_id": 17
+    },
+    {
+      "champions_id": 7,
+      "round_id": 3,
+      "race_instance_id": 600011,
+      "race_condition_id": 17
+    },
+    {
+      "champions_id": 7,
+      "round_id": 4,
+      "race_instance_id": 600023,
+      "race_condition_id": 17
+    },
+    {
+      "champions_id": 7,
+      "round_id": 5,
+      "race_instance_id": 600023,
+      "race_condition_id": 17
+    },
+    {
+      "champions_id": 7,
+      "round_id": 6,
+      "race_instance_id": 600023,
+      "race_condition_id": 17
+    },
+    {
+      "champions_id": 8,
+      "round_id": 0,
+      "race_instance_id": 600012,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 8,
+      "round_id": 1,
+      "race_instance_id": 600012,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 8,
+      "round_id": 2,
+      "race_instance_id": 600012,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 8,
+      "round_id": 3,
+      "race_instance_id": 600012,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 8,
+      "round_id": 4,
+      "race_instance_id": 600024,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 8,
+      "round_id": 5,
+      "race_instance_id": 600024,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 8,
+      "round_id": 6,
+      "race_instance_id": 600024,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 9,
+      "round_id": 0,
+      "race_instance_id": 600001,
+      "race_condition_id": 26
+    },
+    {
+      "champions_id": 9,
+      "round_id": 1,
+      "race_instance_id": 600001,
+      "race_condition_id": 26
+    },
+    {
+      "champions_id": 9,
+      "round_id": 2,
+      "race_instance_id": 600001,
+      "race_condition_id": 26
+    },
+    {
+      "champions_id": 9,
+      "round_id": 3,
+      "race_instance_id": 600001,
+      "race_condition_id": 26
+    },
+    {
+      "champions_id": 9,
+      "round_id": 4,
+      "race_instance_id": 600013,
+      "race_condition_id": 26
+    },
+    {
+      "champions_id": 9,
+      "round_id": 5,
+      "race_instance_id": 600013,
+      "race_condition_id": 26
+    },
+    {
+      "champions_id": 9,
+      "round_id": 6,
+      "race_instance_id": 600013,
+      "race_condition_id": 26
+    },
+    {
+      "champions_id": 10,
+      "round_id": 0,
+      "race_instance_id": 600002,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 10,
+      "round_id": 1,
+      "race_instance_id": 600002,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 10,
+      "round_id": 2,
+      "race_instance_id": 600002,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 10,
+      "round_id": 3,
+      "race_instance_id": 600002,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 10,
+      "round_id": 4,
+      "race_instance_id": 600014,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 10,
+      "round_id": 5,
+      "race_instance_id": 600014,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 10,
+      "round_id": 6,
+      "race_instance_id": 600014,
+      "race_condition_id": 19
+    },
+    {
+      "champions_id": 11,
+      "round_id": 0,
+      "race_instance_id": 600003,
+      "race_condition_id": 6
+    },
+    {
+      "champions_id": 11,
+      "round_id": 1,
+      "race_instance_id": 600003,
+      "race_condition_id": 6
+    },
+    {
+      "champions_id": 11,
+      "round_id": 2,
+      "race_instance_id": 600003,
+      "race_condition_id": 6
+    },
+    {
+      "champions_id": 11,
+      "round_id": 3,
+      "race_instance_id": 600003,
+      "race_condition_id": 6
+    },
+    {
+      "champions_id": 11,
+      "round_id": 4,
+      "race_instance_id": 600015,
+      "race_condition_id": 6
+    },
+    {
+      "champions_id": 11,
+      "round_id": 5,
+      "race_instance_id": 600015,
+      "race_condition_id": 6
+    },
+    {
+      "champions_id": 11,
+      "round_id": 6,
+      "race_instance_id": 600015,
+      "race_condition_id": 6
+    }
+  ]
+}

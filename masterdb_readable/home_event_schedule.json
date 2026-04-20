@@ -1,0 +1,24 @@
+{
+  "table": "home_event_schedule",
+  "row_count": 2,
+  "columns": [
+    "id",
+    "event_id",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "event_id": 20001,
+      "start_date": 1761516000,
+      "end_date": 1765317599
+    },
+    {
+      "id": 2,
+      "event_id": 20002,
+      "start_date": 1772488800,
+      "end_date": 1776203999
+    }
+  ]
+}

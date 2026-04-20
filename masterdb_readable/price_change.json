@@ -1,0 +1,76 @@
+{
+  "table": "price_change",
+  "row_count": 9,
+  "columns": [
+    "id",
+    "group_id",
+    "min_num",
+    "max_num",
+    "pay_item_num"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "group_id": 10,
+      "min_num": 1,
+      "max_num": 25,
+      "pay_item_num": 1
+    },
+    {
+      "id": 2,
+      "group_id": 10,
+      "min_num": 26,
+      "max_num": 50,
+      "pay_item_num": 2
+    },
+    {
+      "id": 3,
+      "group_id": 10,
+      "min_num": 51,
+      "max_num": 75,
+      "pay_item_num": 3
+    },
+    {
+      "id": 4,
+      "group_id": 10,
+      "min_num": 76,
+      "max_num": 100,
+      "pay_item_num": 4
+    },
+    {
+      "id": 5,
+      "group_id": 10,
+      "min_num": 101,
+      "max_num": 650,
+      "pay_item_num": 5
+    },
+    {
+      "id": 6,
+      "group_id": 20,
+      "min_num": 1,
+      "max_num": 1,
+      "pay_item_num": 100
+    },
+    {
+      "id": 7,
+      "group_id": 20,
+      "min_num": 2,
+      "max_num": 2,
+      "pay_item_num": 900
+    },
+    {
+      "id": 8,
+      "group_id": 20,
+      "min_num": 3,
+      "max_num": 3,
+      "pay_item_num": 2000
+    },
+    {
+      "id": 9,
+      "group_id": 20,
+      "min_num": 4,
+      "max_num": 4,
+      "pay_item_num": 3000
+    }
+  ]
+}

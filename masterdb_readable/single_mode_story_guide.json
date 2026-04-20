@@ -1,0 +1,18 @@
+{
+  "table": "single_mode_story_guide",
+  "row_count": 2,
+  "columns": [
+    "story_id",
+    "guide_id"
+  ],
+  "rows": [
+    {
+      "story_id": 400002041,
+      "guide_id": 10205
+    },
+    {
+      "story_id": 400004002,
+      "guide_id": 10301
+    }
+  ]
+}

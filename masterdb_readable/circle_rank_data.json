@@ -1,0 +1,138 @@
+{
+  "table": "circle_rank_data",
+  "row_count": 11,
+  "columns": [
+    "id",
+    "need_ranking_max",
+    "need_ranking_min",
+    "reward_item_category_1",
+    "reward_item_id_1",
+    "reward_num_1",
+    "reward_item_category_2",
+    "reward_item_id_2",
+    "reward_num_2"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "need_ranking_max": 0,
+      "need_ranking_min": 0,
+      "reward_item_category_1": 0,
+      "reward_item_id_1": 0,
+      "reward_num_1": 0,
+      "reward_item_category_2": 0,
+      "reward_item_id_2": 0,
+      "reward_num_2": 0
+    },
+    {
+      "id": 2,
+      "need_ranking_max": 10001,
+      "need_ranking_min": 0,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 225,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 225
+    },
+    {
+      "id": 3,
+      "need_ranking_max": 7001,
+      "need_ranking_min": 10000,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 450,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 450
+    },
+    {
+      "id": 4,
+      "need_ranking_max": 5001,
+      "need_ranking_min": 7000,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 900,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 900
+    },
+    {
+      "id": 5,
+      "need_ranking_max": 3001,
+      "need_ranking_min": 5000,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 1350,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 1350
+    },
+    {
+      "id": 6,
+      "need_ranking_max": 1001,
+      "need_ranking_min": 3000,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 1800,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 1800
+    },
+    {
+      "id": 7,
+      "need_ranking_max": 501,
+      "need_ranking_min": 1000,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 2250,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 2250
+    },
+    {
+      "id": 8,
+      "need_ranking_max": 101,
+      "need_ranking_min": 500,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 2700,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 2700
+    },
+    {
+      "id": 9,
+      "need_ranking_max": 31,
+      "need_ranking_min": 100,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 3150,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 3150
+    },
+    {
+      "id": 10,
+      "need_ranking_max": 11,
+      "need_ranking_min": 30,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 3600,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 3600
+    },
+    {
+      "id": 11,
+      "need_ranking_max": 1,
+      "need_ranking_min": 10,
+      "reward_item_category_1": 90,
+      "reward_item_id_1": 43,
+      "reward_num_1": 4500,
+      "reward_item_category_2": 161,
+      "reward_item_id_2": 134,
+      "reward_num_2": 4500
+    }
+  ]
+}

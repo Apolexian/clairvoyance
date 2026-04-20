@@ -1,0 +1,30 @@
+{
+  "table": "single_mode_outing",
+  "row_count": 3,
+  "columns": [
+    "id",
+    "command_group_id",
+    "condition",
+    "is_play_cutt"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "command_group_id": 301,
+      "condition": 0,
+      "is_play_cutt": 1
+    },
+    {
+      "id": 2,
+      "command_group_id": 304,
+      "condition": 0,
+      "is_play_cutt": 1
+    },
+    {
+      "id": 3,
+      "command_group_id": 390,
+      "condition": 1,
+      "is_play_cutt": 0
+    }
+  ]
+}

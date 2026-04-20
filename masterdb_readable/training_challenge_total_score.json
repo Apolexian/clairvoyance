@@ -1,0 +1,261 @@
+{
+  "table": "training_challenge_total_score",
+  "row_count": 50,
+  "columns": [
+    "id",
+    "total_score",
+    "reward_coin"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "total_score": 1000,
+      "reward_coin": 20
+    },
+    {
+      "id": 2,
+      "total_score": 2000,
+      "reward_coin": 40
+    },
+    {
+      "id": 3,
+      "total_score": 3000,
+      "reward_coin": 60
+    },
+    {
+      "id": 4,
+      "total_score": 4000,
+      "reward_coin": 80
+    },
+    {
+      "id": 5,
+      "total_score": 5000,
+      "reward_coin": 100
+    },
+    {
+      "id": 6,
+      "total_score": 6000,
+      "reward_coin": 120
+    },
+    {
+      "id": 7,
+      "total_score": 7000,
+      "reward_coin": 140
+    },
+    {
+      "id": 8,
+      "total_score": 8000,
+      "reward_coin": 160
+    },
+    {
+      "id": 9,
+      "total_score": 9000,
+      "reward_coin": 180
+    },
+    {
+      "id": 10,
+      "total_score": 10000,
+      "reward_coin": 200
+    },
+    {
+      "id": 11,
+      "total_score": 11000,
+      "reward_coin": 220
+    },
+    {
+      "id": 12,
+      "total_score": 12000,
+      "reward_coin": 240
+    },
+    {
+      "id": 13,
+      "total_score": 13000,
+      "reward_coin": 260
+    },
+    {
+      "id": 14,
+      "total_score": 14000,
+      "reward_coin": 280
+    },
+    {
+      "id": 15,
+      "total_score": 15000,
+      "reward_coin": 300
+    },
+    {
+      "id": 16,
+      "total_score": 16000,
+      "reward_coin": 320
+    },
+    {
+      "id": 17,
+      "total_score": 17000,
+      "reward_coin": 340
+    },
+    {
+      "id": 18,
+      "total_score": 18000,
+      "reward_coin": 360
+    },
+    {
+      "id": 19,
+      "total_score": 19000,
+      "reward_coin": 380
+    },
+    {
+      "id": 20,
+      "total_score": 20000,
+      "reward_coin": 400
+    },
+    {
+      "id": 21,
+      "total_score": 21000,
+      "reward_coin": 420
+    },
+    {
+      "id": 22,
+      "total_score": 22000,
+      "reward_coin": 440
+    },
+    {
+      "id": 23,
+      "total_score": 23000,
+      "reward_coin": 460
+    },
+    {
+      "id": 24,
+      "total_score": 24000,
+      "reward_coin": 480
+    },
+    {
+      "id": 25,
+      "total_score": 25000,
+      "reward_coin": 500
+    },
+    {
+      "id": 26,
+      "total_score": 26000,
+      "reward_coin": 520
+    },
+    {
+      "id": 27,
+      "total_score": 27000,
+      "reward_coin": 540
+    },
+    {
+      "id": 28,
+      "total_score": 28000,
+      "reward_coin": 560
+    },
+    {
+      "id": 29,
+      "total_score": 29000,
+      "reward_coin": 580
+    },
+    {
+      "id": 30,
+      "total_score": 30000,
+      "reward_coin": 600
+    },
+    {
+      "id": 31,
+      "total_score": 31000,
+      "reward_coin": 620
+    },
+    {
+      "id": 32,
+      "total_score": 32000,
+      "reward_coin": 640
+    },
+    {
+      "id": 33,
+      "total_score": 33000,
+      "reward_coin": 660
+    },
+    {
+      "id": 34,
+      "total_score": 34000,
+      "reward_coin": 680
+    },
+    {
+      "id": 35,
+      "total_score": 35000,
+      "reward_coin": 700
+    },
+    {
+      "id": 36,
+      "total_score": 36000,
+      "reward_coin": 720
+    },
+    {
+      "id": 37,
+      "total_score": 37000,
+      "reward_coin": 740
+    },
+    {
+      "id": 38,
+      "total_score": 38000,
+      "reward_coin": 760
+    },
+    {
+      "id": 39,
+      "total_score": 39000,
+      "reward_coin": 780
+    },
+    {
+      "id": 40,
+      "total_score": 40000,
+      "reward_coin": 800
+    },
+    {
+      "id": 41,
+      "total_score": 41000,
+      "reward_coin": 820
+    },
+    {
+      "id": 42,
+      "total_score": 42000,
+      "reward_coin": 840
+    },
+    {
+      "id": 43,
+      "total_score": 43000,
+      "reward_coin": 860
+    },
+    {
+      "id": 44,
+      "total_score": 44000,
+      "reward_coin": 880
+    },
+    {
+      "id": 45,
+      "total_score": 45000,
+      "reward_coin": 900
+    },
+    {
+      "id": 46,
+      "total_score": 46000,
+      "reward_coin": 920
+    },
+    {
+      "id": 47,
+      "total_score": 47000,
+      "reward_coin": 940
+    },
+    {
+      "id": 48,
+      "total_score": 48000,
+      "reward_coin": 960
+    },
+    {
+      "id": 49,
+      "total_score": 49000,
+      "reward_coin": 980
+    },
+    {
+      "id": 50,
+      "total_score": 50000,
+      "reward_coin": 1000
+    }
+  ]
+}

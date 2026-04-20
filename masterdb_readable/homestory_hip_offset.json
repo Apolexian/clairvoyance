@@ -1,0 +1,126 @@
+{
+  "table": "homestory_hip_offset",
+  "row_count": 14,
+  "columns": [
+    "id",
+    "home_event_type",
+    "num",
+    "story_id",
+    "chara_id",
+    "offset"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1012002,
+      "chara_id": 1054,
+      "offset": 100
+    },
+    {
+      "id": 2,
+      "home_event_type": 0,
+      "num": 1,
+      "story_id": 1037002,
+      "chara_id": 1037,
+      "offset": 100
+    },
+    {
+      "id": 3,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1037001,
+      "chara_id": 1037,
+      "offset": 100
+    },
+    {
+      "id": 4,
+      "home_event_type": 0,
+      "num": 1,
+      "story_id": 1025002,
+      "chara_id": 1025,
+      "offset": 100
+    },
+    {
+      "id": 5,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1045001,
+      "chara_id": 1045,
+      "offset": 100
+    },
+    {
+      "id": 6,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1069001,
+      "chara_id": 1069,
+      "offset": 100
+    },
+    {
+      "id": 7,
+      "home_event_type": 0,
+      "num": 3,
+      "story_id": 36,
+      "chara_id": 1027,
+      "offset": 100
+    },
+    {
+      "id": 8,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1038001,
+      "chara_id": 1033,
+      "offset": 100
+    },
+    {
+      "id": 9,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1033002,
+      "chara_id": 1015,
+      "offset": 100
+    },
+    {
+      "id": 10,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1015002,
+      "chara_id": 1033,
+      "offset": 100
+    },
+    {
+      "id": 11,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1033001,
+      "chara_id": 1038,
+      "offset": 100
+    },
+    {
+      "id": 12,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1068001,
+      "chara_id": 1067,
+      "offset": 100
+    },
+    {
+      "id": 13,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1067002,
+      "chara_id": 1013,
+      "offset": 100
+    },
+    {
+      "id": 14,
+      "home_event_type": 0,
+      "num": 2,
+      "story_id": 1067002,
+      "chara_id": 1067,
+      "offset": 100
+    }
+  ]
+}

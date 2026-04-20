@@ -1,0 +1,21 @@
+{
+  "table": "gacha_stock_campaign",
+  "row_count": 2,
+  "columns": [
+    "id",
+    "start_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "start_date": 1769551200,
+      "end_date": 1770389999
+    },
+    {
+      "id": 2,
+      "start_date": 1773352800,
+      "end_date": 1774364399
+    }
+  ]
+}

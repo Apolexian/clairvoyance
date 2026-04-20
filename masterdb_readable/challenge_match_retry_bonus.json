@@ -1,0 +1,48 @@
+{
+  "table": "challenge_match_retry_bonus",
+  "row_count": 5,
+  "columns": [
+    "id",
+    "retry_min",
+    "retry_max",
+    "bonus_rate",
+    "resimulate_num"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "retry_min": 1,
+      "retry_max": 1,
+      "bonus_rate": 25,
+      "resimulate_num": 1
+    },
+    {
+      "id": 2,
+      "retry_min": 2,
+      "retry_max": 2,
+      "bonus_rate": 50,
+      "resimulate_num": 2
+    },
+    {
+      "id": 3,
+      "retry_min": 3,
+      "retry_max": 3,
+      "bonus_rate": 75,
+      "resimulate_num": 2
+    },
+    {
+      "id": 4,
+      "retry_min": 4,
+      "retry_max": 4,
+      "bonus_rate": 100,
+      "resimulate_num": 2
+    },
+    {
+      "id": 5,
+      "retry_min": 5,
+      "retry_max": 999,
+      "bonus_rate": 150,
+      "resimulate_num": 3
+    }
+  ]
+}

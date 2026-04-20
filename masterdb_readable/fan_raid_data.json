@@ -1,0 +1,32 @@
+{
+  "table": "fan_raid_data",
+  "row_count": 1,
+  "columns": [
+    "fan_raid_id",
+    "condition_type",
+    "condition_value",
+    "chara_id",
+    "dress_id",
+    "result_se_cue_name",
+    "result_se_cuesheet_name",
+    "start_date",
+    "calc_start_date",
+    "calc_end_date",
+    "end_date"
+  ],
+  "rows": [
+    {
+      "fan_raid_id": 1001,
+      "condition_type": 2,
+      "condition_value": 2,
+      "chara_id": 1046,
+      "dress_id": 104601,
+      "result_se_cue_name": "snd_sfx_raid_result_heart_effect",
+      "result_se_cuesheet_name": "snd_sfx_raid_event_000",
+      "start_date": 1775512800,
+      "calc_start_date": 1775771999,
+      "calc_end_date": 1775858400,
+      "end_date": 1776117599
+    }
+  ]
+}

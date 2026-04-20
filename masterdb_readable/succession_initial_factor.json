@@ -1,0 +1,62 @@
+{
+  "table": "succession_initial_factor",
+  "row_count": 7,
+  "columns": [
+    "id",
+    "factor_type",
+    "value_1",
+    "value_2",
+    "add_point"
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "factor_type": 1,
+      "value_1": 1,
+      "value_2": 0,
+      "add_point": 5
+    },
+    {
+      "id": 2,
+      "factor_type": 1,
+      "value_1": 2,
+      "value_2": 0,
+      "add_point": 12
+    },
+    {
+      "id": 3,
+      "factor_type": 1,
+      "value_1": 3,
+      "value_2": 0,
+      "add_point": 21
+    },
+    {
+      "id": 4,
+      "factor_type": 2,
+      "value_1": 1,
+      "value_2": 3,
+      "add_point": 1
+    },
+    {
+      "id": 5,
+      "factor_type": 2,
+      "value_1": 4,
+      "value_2": 6,
+      "add_point": 2
+    },
+    {
+      "id": 6,
+      "factor_type": 2,
+      "value_1": 7,
+      "value_2": 9,
+      "add_point": 3
+    },
+    {
+      "id": 7,
+      "factor_type": 2,
+      "value_1": 10,
+      "value_2": 999,
+      "add_point": 4
+    }
+  ]
+}
