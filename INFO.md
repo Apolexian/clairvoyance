@@ -133,6 +133,10 @@ The chain is:
    ```
    https://kamigame.jp/vls-kamigame-gametool/json/1JrYvw5XiwWeKR5c2BKVQykutI_Lj2_zauLvaWtnzvDo_411452117.json
    ```
+   The underlying Google Sheet:
+   ```
+   https://docs.google.com/spreadsheets/d/1JrYvw5XiwWeKR5c2BKVQykutI_Lj2_zauLvaWtnzvDo
+   ```
 
 3. **UmamusumeDeserializeDB5** (C# tool) fetches this kamigame JSON, matches events to story IDs from master.mdb, and produces structured event data with effects.
 
