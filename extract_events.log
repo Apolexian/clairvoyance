@@ -1,150 +1,163 @@
-05:13:11 INFO Logging to C:\Users\nikit\Documents\clairvoyance\extract_events.log
-05:13:11 INFO Querying master database...
-05:13:11 INFO Found 250 character variants, 128 characters with shared events
-05:13:11 INFO Total unique story_ids to process: 12957
-05:13:11 INFO Reading meta database for story bundles...
-05:13:12 INFO Found 12957/12957 story bundles in meta
-05:13:13 INFO Extracting choices from 12957 bundles...
-05:13:13 INFO DIAG story=400000046 obj keys: ['m_GameObject', 'm_Enabled', 'm_Script', 'm_Name', 'DataVer', 'Lerp', 'AnimationCurve', 'EasingType', 'IsEnableClip', 'StartFrame', 'ClipLength', 'IsForceUpdate', '_isUpdateOverBlock', 'CharaId', 'SubCharaId', 'SubIconId', 'VoiceSheetId', 'CueId', 'UseVoiceSelector', 'Name', 'Text', 'Size', 'IsCustomFontStyle', 'OutlineSizeType', 'GradientColorType', 'OutlineColorType', 'NextBlock', 'DifferenceType', 'DifferenceFlag', 'IsTypewriteAnimation', 'WaitFrame', 'VoiceLength', 'Pan3dAngle', 'Type', 'IconMode', 'GainTypeOnExitLoop', 'ChoiceDataList', 'LoopCountSettingData', 'ColorTextInfoList', 'AdditionalGradientList', 'FeaturesFlag', 'EnableClipEndSpace', 'IsOverrideTypewriteSecond', 'OverrideTypewriteSecond', 'SingleChoiceAutoSelectDuration', 'ShowChoiceTextToComment']
-05:13:13 INFO DIAG ChoiceDataList[0] keys: ['Text', 'NextBlock', 'LoopExitNextBlock', 'DifferenceType', 'DifferenceFlag', 'CharaIconId', 'PropItemId']
-05:13:13 INFO DIAG   Text = '<nickname>をさらに強くしたい！'
-05:13:13 INFO DIAG   NextBlock = 3
-05:13:13 INFO DIAG   LoopExitNextBlock = -1
-05:13:13 INFO DIAG   DifferenceType = 0
-05:13:13 INFO DIAG   DifferenceFlag = 0
-05:13:13 INFO DIAG   CharaIconId = 0
-05:13:13 INFO DIAG   PropItemId = 0
-05:13:13 INFO Using 8 worker processes
-05:13:14 INFO   Progress: 100/12956 bundles
-05:13:14 INFO   Progress: 200/12956 bundles
-05:13:15 INFO   Progress: 300/12956 bundles
-05:13:16 INFO   Progress: 400/12956 bundles
-05:13:17 INFO   Progress: 500/12956 bundles
-05:13:18 INFO   Progress: 600/12956 bundles
-05:13:19 INFO   Progress: 700/12956 bundles
-05:13:20 INFO   Progress: 800/12956 bundles
-05:13:21 INFO   Progress: 900/12956 bundles
-05:13:22 INFO   Progress: 1000/12956 bundles
-05:13:24 INFO   Progress: 1100/12956 bundles
-05:13:25 INFO   Progress: 1200/12956 bundles
-05:13:26 INFO   Progress: 1300/12956 bundles
-05:13:27 INFO   Progress: 1400/12956 bundles
-05:13:28 INFO   Progress: 1500/12956 bundles
-05:13:29 INFO   Progress: 1600/12956 bundles
-05:13:31 INFO   Progress: 1700/12956 bundles
-05:13:32 INFO   Progress: 1800/12956 bundles
-05:13:33 INFO   Progress: 1900/12956 bundles
-05:13:34 INFO   Progress: 2000/12956 bundles
-05:13:35 INFO   Progress: 2100/12956 bundles
-05:13:37 INFO   Progress: 2200/12956 bundles
-05:13:38 INFO   Progress: 2300/12956 bundles
-05:13:39 INFO   Progress: 2400/12956 bundles
-05:13:40 INFO   Progress: 2500/12956 bundles
-05:13:42 INFO   Progress: 2600/12956 bundles
-05:13:43 INFO   Progress: 2700/12956 bundles
-05:13:44 INFO   Progress: 2800/12956 bundles
-05:13:45 INFO   Progress: 2900/12956 bundles
-05:13:47 INFO   Progress: 3000/12956 bundles
-05:13:48 INFO   Progress: 3100/12956 bundles
-05:13:49 INFO   Progress: 3200/12956 bundles
-05:13:51 INFO   Progress: 3300/12956 bundles
-05:13:52 INFO   Progress: 3400/12956 bundles
-05:13:53 INFO   Progress: 3500/12956 bundles
-05:13:55 INFO   Progress: 3600/12956 bundles
-05:13:56 INFO   Progress: 3700/12956 bundles
-05:13:57 INFO   Progress: 3800/12956 bundles
-05:13:58 INFO   Progress: 3900/12956 bundles
-05:14:00 INFO   Progress: 4000/12956 bundles
-05:14:01 INFO   Progress: 4100/12956 bundles
-05:14:02 INFO   Progress: 4200/12956 bundles
-05:14:03 INFO   Progress: 4300/12956 bundles
-05:14:05 INFO   Progress: 4400/12956 bundles
-05:14:06 INFO   Progress: 4500/12956 bundles
-05:14:07 INFO   Progress: 4600/12956 bundles
-05:14:08 INFO   Progress: 4700/12956 bundles
-05:14:10 INFO   Progress: 4800/12956 bundles
-05:14:11 INFO   Progress: 4900/12956 bundles
-05:14:12 INFO   Progress: 5000/12956 bundles
-05:14:14 INFO   Progress: 5100/12956 bundles
-05:14:15 INFO   Progress: 5200/12956 bundles
-05:14:16 INFO   Progress: 5300/12956 bundles
-05:14:17 INFO   Progress: 5400/12956 bundles
-05:14:19 INFO   Progress: 5500/12956 bundles
-05:14:20 INFO   Progress: 5600/12956 bundles
-05:14:21 INFO   Progress: 5700/12956 bundles
-05:14:22 INFO   Progress: 5800/12956 bundles
-05:14:24 INFO   Progress: 5900/12956 bundles
-05:14:25 INFO   Progress: 6000/12956 bundles
-05:14:26 INFO   Progress: 6100/12956 bundles
-05:14:28 INFO   Progress: 6200/12956 bundles
-05:14:29 INFO   Progress: 6300/12956 bundles
-05:14:31 INFO   Progress: 6400/12956 bundles
-05:14:32 INFO   Progress: 6500/12956 bundles
-05:14:33 INFO   Progress: 6600/12956 bundles
-05:14:35 INFO   Progress: 6700/12956 bundles
-05:14:36 INFO   Progress: 6800/12956 bundles
-05:14:38 INFO   Progress: 6900/12956 bundles
-05:14:39 INFO   Progress: 7000/12956 bundles
-05:14:40 INFO   Progress: 7100/12956 bundles
-05:14:42 INFO   Progress: 7200/12956 bundles
-05:14:43 INFO   Progress: 7300/12956 bundles
-05:14:45 INFO   Progress: 7400/12956 bundles
-05:14:46 INFO   Progress: 7500/12956 bundles
-05:14:48 INFO   Progress: 7600/12956 bundles
-05:14:49 INFO   Progress: 7700/12956 bundles
-05:14:50 INFO   Progress: 7800/12956 bundles
-05:14:52 INFO   Progress: 7900/12956 bundles
-05:14:53 INFO   Progress: 8000/12956 bundles
-05:14:55 INFO   Progress: 8100/12956 bundles
-05:14:56 INFO   Progress: 8200/12956 bundles
-05:14:58 INFO   Progress: 8300/12956 bundles
-05:14:59 INFO   Progress: 8400/12956 bundles
-05:15:01 INFO   Progress: 8500/12956 bundles
-05:15:02 INFO   Progress: 8600/12956 bundles
-05:15:03 INFO   Progress: 8700/12956 bundles
-05:15:05 INFO   Progress: 8800/12956 bundles
-05:15:06 INFO   Progress: 8900/12956 bundles
-05:15:08 INFO   Progress: 9000/12956 bundles
-05:15:10 INFO   Progress: 9100/12956 bundles
-05:15:11 INFO   Progress: 9200/12956 bundles
-05:15:13 INFO   Progress: 9300/12956 bundles
-05:15:14 INFO   Progress: 9400/12956 bundles
-05:15:16 INFO   Progress: 9500/12956 bundles
-05:15:18 INFO   Progress: 9600/12956 bundles
-05:15:19 INFO   Progress: 9700/12956 bundles
-05:15:21 INFO   Progress: 9800/12956 bundles
-05:15:22 INFO   Progress: 9900/12956 bundles
-05:15:23 INFO   Progress: 10000/12956 bundles
-05:15:25 INFO   Progress: 10100/12956 bundles
-05:15:27 INFO   Progress: 10200/12956 bundles
-05:15:28 INFO   Progress: 10300/12956 bundles
-05:15:30 INFO   Progress: 10400/12956 bundles
-05:15:31 INFO   Progress: 10500/12956 bundles
-05:15:32 INFO   Progress: 10600/12956 bundles
-05:15:34 INFO   Progress: 10700/12956 bundles
-05:15:36 INFO   Progress: 10800/12956 bundles
-05:15:37 INFO   Progress: 10900/12956 bundles
-05:15:39 INFO   Progress: 11000/12956 bundles
-05:15:40 INFO   Progress: 11100/12956 bundles
-05:15:42 INFO   Progress: 11200/12956 bundles
-05:15:44 INFO   Progress: 11300/12956 bundles
-05:15:45 INFO   Progress: 11400/12956 bundles
-05:15:47 INFO   Progress: 11500/12956 bundles
-05:15:49 INFO   Progress: 11600/12956 bundles
-05:15:50 INFO   Progress: 11700/12956 bundles
-05:15:52 INFO   Progress: 11800/12956 bundles
-05:15:54 INFO   Progress: 11900/12956 bundles
-05:15:55 INFO   Progress: 12000/12956 bundles
-05:15:57 INFO   Progress: 12100/12956 bundles
-05:15:58 INFO   Progress: 12200/12956 bundles
-05:16:00 INFO   Progress: 12300/12956 bundles
-05:16:02 INFO   Progress: 12400/12956 bundles
-05:16:04 INFO   Progress: 12500/12956 bundles
-05:16:05 INFO   Progress: 12600/12956 bundles
-05:16:07 INFO   Progress: 12700/12956 bundles
-05:16:08 INFO   Progress: 12800/12956 bundles
-05:16:10 INFO   Progress: 12900/12956 bundles
-05:16:11 INFO Extracted choices from 4007 stories
-05:16:11 INFO Building event data...
-05:16:12 INFO Built event data for 250 character variants in 181.0s (250 with asset choices)
-05:16:12 INFO Wrote 250 character variants to C:\Users\nikit\Documents\clairvoyance\character_events.json
+05:37:13 INFO Logging to C:\Users\nikit\Documents\clairvoyance\extract_events.log
+05:37:13 INFO Fetching effect data from kamigame.jp...
+05:37:13 INFO Loaded 5842 unique events from kamigame
+05:37:13 INFO Querying master database...
+05:37:13 INFO Found 250 character variants, 128 characters with shared events
+05:37:13 INFO Total unique story_ids to process: 12957
+05:37:13 INFO Reading meta database for story bundles...
+05:37:15 INFO Found 12957/12957 story bundles in meta
+05:37:15 INFO Extracting choices from 12957 bundles...
+05:37:15 INFO DIAG story=400000046 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'AnimationCurve', 'EasingType', 'IsEnableClip', 'StartFrame', 'ClipLength', 'IsForceUpdate', '_isUpdateOverBlock', 'Type']
+05:37:15 INFO DIAG story=400000046 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'AnimationCurve', 'EasingType', 'IsEnableClip', 'StartFrame', 'ClipLength', 'IsForceUpdate', '_isUpdateOverBlock', 'CharaId', 'SubCharaId', 'SubIconId', 'VoiceSheetId', 'CueId', 'UseVoiceSelector', 'Name', 'Text', 'Size', 'IsCustomFontStyle', 'OutlineSizeType', 'GradientColorType', 'OutlineColorType', 'NextBlock', 'DifferenceType', 'DifferenceFlag', 'IsTypewriteAnimation', 'WaitFrame', 'VoiceLength', 'Pan3dAngle', 'Type', 'IconMode', 'GainTypeOnExitLoop', 'ChoiceDataList', 'LoopCountSettingData', 'ColorTextInfoList', 'AdditionalGradientList', 'FeaturesFlag', 'EnableClipEndSpace', 'IsOverrideTypewriteSecond', 'OverrideTypewriteSecond', 'SingleChoiceAutoSelectDuration', 'ShowChoiceTextToComment']
+05:37:15 INFO DIAG story=400000046 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'AnimationCurve', 'EasingType', 'IsEnableClip', 'StartFrame', 'ClipLength', 'IsForceUpdate', '_isUpdateOverBlock', 'MotionName', 'OutGameMotionClipPath', 'Category', 'StateType', 'BlendTime', 'OriginalClipLength', 'MotionSpeed', 'PauseStartFrame', 'PauseLength', 'Curve', 'SavedUsePoseMotion', 'SavedPoseBlendRate', 'AllowFKApplyIK', 'AlternativeCharaId', 'StartBlendTime', 'EndBlendTime', 'HipBlend', 'HipBlendRate', 'LeftWrist', 'RightWrist']
+05:37:15 INFO DIAG story=400000046 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'AnimationCurve', 'EasingType', 'IsEnableClip', 'StartFrame', 'ClipLength', 'IsForceUpdate', '_isUpdateOverBlock', 'CharaId', 'SubCharaId', 'SubIconId', 'VoiceSheetId', 'CueId', 'UseVoiceSelector', 'Name', 'Text', 'Size', 'IsCustomFontStyle', 'OutlineSizeType', 'GradientColorType', 'OutlineColorType', 'NextBlock', 'DifferenceType', 'DifferenceFlag', 'IsTypewriteAnimation', 'WaitFrame', 'VoiceLength', 'Pan3dAngle', 'Type', 'IconMode', 'GainTypeOnExitLoop', 'ChoiceDataList', 'LoopCountSettingData', 'ColorTextInfoList', 'AdditionalGradientList', 'FeaturesFlag', 'EnableClipEndSpace', 'IsOverrideTypewriteSecond', 'OverrideTypewriteSecond', 'SingleChoiceAutoSelectDuration', 'ShowChoiceTextToComment']
+05:37:15 INFO DIAG ChoiceDataList[0] keys: ['Text', 'NextBlock', 'LoopExitNextBlock', 'DifferenceType', 'DifferenceFlag', 'CharaIconId', 'PropItemId']
+05:37:15 INFO DIAG   Text = '<nickname>をさらに強くしたい！'
+05:37:15 INFO DIAG   NextBlock = 3
+05:37:15 INFO DIAG   LoopExitNextBlock = -1
+05:37:15 INFO DIAG   DifferenceType = 0
+05:37:15 INFO DIAG   DifferenceFlag = 0
+05:37:15 INFO DIAG   CharaIconId = 0
+05:37:15 INFO DIAG   PropItemId = 0
+05:37:15 INFO Using 8 worker processes
+05:37:17 INFO   Progress: 100/12956 bundles
+05:37:17 INFO   Progress: 200/12956 bundles
+05:37:18 INFO   Progress: 300/12956 bundles
+05:37:19 INFO   Progress: 400/12956 bundles
+05:37:20 INFO   Progress: 500/12956 bundles
+05:37:21 INFO   Progress: 600/12956 bundles
+05:37:22 INFO   Progress: 700/12956 bundles
+05:37:23 INFO   Progress: 800/12956 bundles
+05:37:24 INFO   Progress: 900/12956 bundles
+05:37:25 INFO   Progress: 1000/12956 bundles
+05:37:26 INFO   Progress: 1100/12956 bundles
+05:37:27 INFO   Progress: 1200/12956 bundles
+05:37:29 INFO   Progress: 1300/12956 bundles
+05:37:30 INFO   Progress: 1400/12956 bundles
+05:37:31 INFO   Progress: 1500/12956 bundles
+05:37:32 INFO   Progress: 1600/12956 bundles
+05:37:33 INFO   Progress: 1700/12956 bundles
+05:37:35 INFO   Progress: 1800/12956 bundles
+05:37:36 INFO   Progress: 1900/12956 bundles
+05:37:37 INFO   Progress: 2000/12956 bundles
+05:37:38 INFO   Progress: 2100/12956 bundles
+05:37:40 INFO   Progress: 2200/12956 bundles
+05:37:41 INFO   Progress: 2300/12956 bundles
+05:37:42 INFO   Progress: 2400/12956 bundles
+05:37:43 INFO   Progress: 2500/12956 bundles
+05:37:44 INFO   Progress: 2600/12956 bundles
+05:37:45 INFO   Progress: 2700/12956 bundles
+05:37:47 INFO   Progress: 2800/12956 bundles
+05:37:48 INFO   Progress: 2900/12956 bundles
+05:37:49 INFO   Progress: 3000/12956 bundles
+05:37:50 INFO   Progress: 3100/12956 bundles
+05:37:51 INFO   Progress: 3200/12956 bundles
+05:37:53 INFO   Progress: 3300/12956 bundles
+05:37:54 INFO   Progress: 3400/12956 bundles
+05:37:55 INFO   Progress: 3500/12956 bundles
+05:37:57 INFO   Progress: 3600/12956 bundles
+05:37:58 INFO   Progress: 3700/12956 bundles
+05:37:59 INFO   Progress: 3800/12956 bundles
+05:38:01 INFO   Progress: 3900/12956 bundles
+05:38:02 INFO   Progress: 4000/12956 bundles
+05:38:03 INFO   Progress: 4100/12956 bundles
+05:38:04 INFO   Progress: 4200/12956 bundles
+05:38:06 INFO   Progress: 4300/12956 bundles
+05:38:07 INFO   Progress: 4400/12956 bundles
+05:38:08 INFO   Progress: 4500/12956 bundles
+05:38:09 INFO   Progress: 4600/12956 bundles
+05:38:11 INFO   Progress: 4700/12956 bundles
+05:38:12 INFO   Progress: 4800/12956 bundles
+05:38:13 INFO   Progress: 4900/12956 bundles
+05:38:15 INFO   Progress: 5000/12956 bundles
+05:38:16 INFO   Progress: 5100/12956 bundles
+05:38:17 INFO   Progress: 5200/12956 bundles
+05:38:18 INFO   Progress: 5300/12956 bundles
+05:38:20 INFO   Progress: 5400/12956 bundles
+05:38:21 INFO   Progress: 5500/12956 bundles
+05:38:22 INFO   Progress: 5600/12956 bundles
+05:38:24 INFO   Progress: 5700/12956 bundles
+05:38:25 INFO   Progress: 5800/12956 bundles
+05:38:26 INFO   Progress: 5900/12956 bundles
+05:38:27 INFO   Progress: 6000/12956 bundles
+05:38:29 INFO   Progress: 6100/12956 bundles
+05:38:30 INFO   Progress: 6200/12956 bundles
+05:38:31 INFO   Progress: 6300/12956 bundles
+05:38:33 INFO   Progress: 6400/12956 bundles
+05:38:34 INFO   Progress: 6500/12956 bundles
+05:38:36 INFO   Progress: 6600/12956 bundles
+05:38:37 INFO   Progress: 6700/12956 bundles
+05:38:39 INFO   Progress: 6800/12956 bundles
+05:38:40 INFO   Progress: 6900/12956 bundles
+05:38:41 INFO   Progress: 7000/12956 bundles
+05:38:43 INFO   Progress: 7100/12956 bundles
+05:38:44 INFO   Progress: 7200/12956 bundles
+05:38:46 INFO   Progress: 7300/12956 bundles
+05:38:47 INFO   Progress: 7400/12956 bundles
+05:38:49 INFO   Progress: 7500/12956 bundles
+05:38:50 INFO   Progress: 7600/12956 bundles
+05:38:52 INFO   Progress: 7700/12956 bundles
+05:38:53 INFO   Progress: 7800/12956 bundles
+05:38:54 INFO   Progress: 7900/12956 bundles
+05:38:56 INFO   Progress: 8000/12956 bundles
+05:38:57 INFO   Progress: 8100/12956 bundles
+05:38:59 INFO   Progress: 8200/12956 bundles
+05:39:00 INFO   Progress: 8300/12956 bundles
+05:39:02 INFO   Progress: 8400/12956 bundles
+05:39:03 INFO   Progress: 8500/12956 bundles
+05:39:05 INFO   Progress: 8600/12956 bundles
+05:39:06 INFO   Progress: 8700/12956 bundles
+05:39:07 INFO   Progress: 8800/12956 bundles
+05:39:09 INFO   Progress: 8900/12956 bundles
+05:39:10 INFO   Progress: 9000/12956 bundles
+05:39:12 INFO   Progress: 9100/12956 bundles
+05:39:14 INFO   Progress: 9200/12956 bundles
+05:39:15 INFO   Progress: 9300/12956 bundles
+05:39:17 INFO   Progress: 9400/12956 bundles
+05:39:18 INFO   Progress: 9500/12956 bundles
+05:39:20 INFO   Progress: 9600/12956 bundles
+05:39:21 INFO   Progress: 9700/12956 bundles
+05:39:23 INFO   Progress: 9800/12956 bundles
+05:39:24 INFO   Progress: 9900/12956 bundles
+05:39:25 INFO   Progress: 10000/12956 bundles
+05:39:27 INFO   Progress: 10100/12956 bundles
+05:39:28 INFO   Progress: 10200/12956 bundles
+05:39:30 INFO   Progress: 10300/12956 bundles
+05:39:32 INFO   Progress: 10400/12956 bundles
+05:39:33 INFO   Progress: 10500/12956 bundles
+05:39:34 INFO   Progress: 10600/12956 bundles
+05:39:36 INFO   Progress: 10700/12956 bundles
+05:39:37 INFO   Progress: 10800/12956 bundles
+05:39:39 INFO   Progress: 10900/12956 bundles
+05:39:40 INFO   Progress: 11000/12956 bundles
+05:39:42 INFO   Progress: 11100/12956 bundles
+05:39:44 INFO   Progress: 11200/12956 bundles
+05:39:45 INFO   Progress: 11300/12956 bundles
+05:39:47 INFO   Progress: 11400/12956 bundles
+05:39:49 INFO   Progress: 11500/12956 bundles
+05:39:50 INFO   Progress: 11600/12956 bundles
+05:39:52 INFO   Progress: 11700/12956 bundles
+05:39:54 INFO   Progress: 11800/12956 bundles
+05:39:55 INFO   Progress: 11900/12956 bundles
+05:39:57 INFO   Progress: 12000/12956 bundles
+05:39:58 INFO   Progress: 12100/12956 bundles
+05:40:00 INFO   Progress: 12200/12956 bundles
+05:40:02 INFO   Progress: 12300/12956 bundles
+05:40:03 INFO   Progress: 12400/12956 bundles
+05:40:05 INFO   Progress: 12500/12956 bundles
+05:40:07 INFO   Progress: 12600/12956 bundles
+05:40:08 INFO   Progress: 12700/12956 bundles
+05:40:10 INFO   Progress: 12800/12956 bundles
+05:40:12 INFO   Progress: 12900/12956 bundles
+05:40:13 INFO Extracted choices from 4007 stories
+05:40:13 INFO Building event data...
+Traceback (most recent call last):
+  File "C:\Users\nikit\Documents\clairvoyance\extract_character_events.py", line 1230, in <module>
+    main()
+  File "C:\Users\nikit\Documents\clairvoyance\extract_character_events.py", line 1214, in main
+    result = build_character_events(
+  File "C:\Users\nikit\Documents\clairvoyance\extract_character_events.py", line 1013, in build_character_events
+    choices = _match_kamigame_effects(event_name_jp, choices, kamigame_data)
+  File "C:\Users\nikit\Documents\clairvoyance\extract_character_events.py", line 833, in _match_kamigame_effects
+    failure = _translate_effect_line(best["failure_lines"][i])
+IndexError: list index out of range
