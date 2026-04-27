@@ -830,11 +830,12 @@ def _match_kamigame_effects(
     for i, choice in enumerate(choices):
         if i < len(best["success_lines"]):
             success = _translate_effect_line(best["success_lines"][i])
-            failure = _translate_effect_line(best["failure_lines"][i])
+            failure = ""
+            if i < len(best["failure_lines"]):
+                failure = _translate_effect_line(best["failure_lines"][i])
 
             outcomes = []
             if success:
-                # Split multi-line effects into individual outcome strings
                 outcomes.extend(success.split("\n"))
             if failure and failure != "-":
                 outcomes.extend(f"(Fail) {f}" for f in failure.split("\n") if f)
