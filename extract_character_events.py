@@ -682,7 +682,7 @@ def build_character_events(
             with open(existing_data_path) as f:
                 for entry in json.load(f):
                     existing[entry["card_id"]] = entry
-            log.info("Loaded %d existing cards from %s", len(existing), existing_data_path.name)
+            log.info("Loaded %d existing umas from %s", len(existing), existing_data_path.name)
         except Exception as e:
             log.warning("Failed to load existing data: %s", e)
 
@@ -698,7 +698,7 @@ def build_character_events(
         all_target_cards &= set(card_ids)
 
     log.info(
-        "Found %d cards, %d characters with shared events",
+        "Found %d character variants, %d characters with shared events",
         len(all_target_cards),
         len(common_stories),
     )
@@ -869,7 +869,7 @@ def build_character_events(
 
     elapsed = time.time() - t0
     log.info(
-        "Built event data for %d cards in %.1fs (%d with asset choices)",
+        "Built event data for %d character variants in %.1fs (%d with asset choices)",
         len(result),
         elapsed,
         sum(1 for r in result if any(e["options"] for e in r["events"])),
@@ -972,7 +972,7 @@ def main():
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
-    log.info("Wrote %d cards to %s", len(result), args.output)
+    log.info("Wrote %d character variants to %s", len(result), args.output)
 
 
 if __name__ == "__main__":
