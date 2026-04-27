@@ -30,6 +30,7 @@ import sqlite3
 import struct
 import sys
 import time
+import urllib.request
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
@@ -572,7 +573,7 @@ def _extract_from_bundle_worker(args: tuple) -> tuple[int, list[dict], str | Non
             m_name = tree.get("m_Name", "")
             # Log every unique m_Name in first bundle
             log.info("DIAG story=%d m_Name=%s keys=%s", story_id, m_name,
-                     [k for k in tree.keys() if k not in ("m_GameObject", "m_Enabled", "m_Script")])
+                     [k for k in tree if k not in ("m_GameObject", "m_Enabled", "m_Script")])
             cdl = _get_ci(tree, "ChoiceDataList", "choiceDataList")
             if cdl and isinstance(cdl, list) and len(cdl) > 0:
                 diag_done = True
@@ -674,6 +675,176 @@ def classify_event(
     return ("nochoice", "No-Choice Event")
 
 
+# ── Kamigame effect data ───────────────────────────────────────────────
+
+KAMIGAME_URL = (
+    "https://kamigame.jp/vls-kamigame-gametool/json/"
+    "1JrYvw5XiwWeKR5c2BKVQykutI_Lj2_zauLvaWtnzvDo_411452117.json"
+)
+
+# Map kamigame JP terms → English for umaguide
+EFFECT_TRANSLATIONS: dict[str, str] = {
+    "スピード": "Speed",
+    "スタミナ": "Stamina",
+    "パワー": "Power",
+    "根性": "Guts",
+    "賢さ": "Wisdom",
+    "体力": "Energy",
+    "やる気": "Mood",
+    "スキルPt": "Skill Points",
+    "スキルpt": "Skill Points",
+    "全ステータス": "All Stats",
+    "ステータス": "Stats",
+    "ファン": "Fans",
+    "ヒントLv": "hint",
+    "のヒント": " hint",
+    "の絆ゲージ": " Bond",
+    "絆ゲージ": "Bond",
+    "バッドコンディションが治る": "Heal condition",
+    "バッドコンディションが解消": "Heal condition",
+    "進行イベント打ち切り": "Event ends",
+    "確率で": "Randomly ",
+    "獲得": "get ",
+    "ランダムな": "Random ",
+    "つの": " ",
+    "全ての": "All ",
+    "お出かけ不可になる": "Outings disabled",
+    "とお出かけできるようになる": " outing unlocked",
+}
+
+
+def _translate_effect_line(line: str) -> str:
+    """Translate a single kamigame effect line from JP to English."""
+    result = line.strip()
+    if not result or result == "-":
+        return ""
+
+    # Apply translations
+    for jp, en in EFFECT_TRANSLATIONS.items():
+        result = result.replace(jp, en)
+
+    # Clean up: fullwidth +/- to ASCII
+    result = result.replace("\u2212", "-").replace("\uff0b", "+")
+    result = result.replace("\u3001", "\n")  # JP comma → newline
+
+    # Add space before +/- in stat effects like "Speed+10" → "Speed +10"
+    result = re.sub(r"([A-Za-z])([+-]\d)", r"\1 \2", result)
+
+    return result.strip()
+
+
+def fetch_kamigame_effects() -> dict[str, list[dict]]:
+    """
+    Fetch event effect data from kamigame.jp.
+
+    Returns: {event_name_jp: [{option_texts: [str], success: str, failure: str}]}
+    keyed by the last column (イベント名) which is the canonical event name.
+    """
+    log.info("Fetching effect data from kamigame.jp...")
+    try:
+        req = urllib.request.Request(KAMIGAME_URL, headers={"User-Agent": "UmaGuide/1.0"})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            raw = resp.read().decode("utf-8")
+    except Exception as e:
+        log.warning("Failed to fetch kamigame data: %s", e)
+        return {}
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        log.warning("Failed to parse kamigame JSON: %s", e)
+        return {}
+
+    if not data or len(data) < 2:
+        log.warning("Kamigame data is empty or too small")
+        return {}
+
+    # Header: [名前, カテゴリ, キャラ, 発生タイミング, 選択肢, 成功結果, 失敗結果,
+    #          ふりがな, シナリオリンクキャラ, イベント名]
+    # Columns: 0=name, 1=category, 2=character, 3=timing, 4=options,
+    #          5=successEffects, 6=failureEffects, 7=furigana, 8=scenarioLink, 9=eventName
+    result: dict[str, list[dict]] = {}
+
+    for row in data[1:]:  # skip header
+        if len(row) < 10:
+            continue
+        event_name = row[9] or row[0]  # prefer canonical name (col 9), fall back to col 0
+        if not event_name or not event_name.strip():
+            continue
+        event_name = event_name.strip()
+
+        options_raw = (row[4] or "").replace("<br>", "\n").strip()
+        success_raw = (row[5] or "").replace("<br>", "\n").strip()
+        failure_raw = (row[6] or "").replace("<br>", "\n").strip()
+
+        # Options are newline-separated
+        option_texts = [o.strip() for o in options_raw.split("\n") if o.strip()]
+        success_lines = [s.strip() for s in success_raw.split("\n") if s.strip()]
+        failure_lines = [s.strip() for s in failure_raw.split("\n") if s.strip()]
+
+        # Pad to match option count
+        while len(success_lines) < len(option_texts):
+            success_lines.append("")
+        while len(failure_lines) < len(option_texts):
+            failure_lines.append("")
+
+        if event_name not in result:
+            result[event_name] = []
+
+        result[event_name].append({
+            "option_texts": option_texts,
+            "success_lines": success_lines,
+            "failure_lines": failure_lines,
+            "category": (row[1] or "").strip(),
+            "character": (row[2] or "").strip(),
+        })
+
+    log.info("Loaded %d unique events from kamigame", len(result))
+    return result
+
+
+def _match_kamigame_effects(
+    event_name_jp: str,
+    choices: list[dict],
+    kamigame: dict[str, list[dict]],
+) -> list[dict]:
+    """
+    Match extracted choices with kamigame effect data.
+
+    Tries to find the event in kamigame by name, then aligns options
+    by index or fuzzy text match.
+
+    Returns the choices list with outcomes filled in.
+    """
+    entries = kamigame.get(event_name_jp, [])
+    if not entries:
+        return choices
+
+    # Pick the best matching entry (prefer one with matching option count)
+    best = entries[0]
+    for entry in entries:
+        if len(entry["option_texts"]) == len(choices):
+            best = entry
+            break
+
+    for i, choice in enumerate(choices):
+        if i < len(best["success_lines"]):
+            success = _translate_effect_line(best["success_lines"][i])
+            failure = _translate_effect_line(best["failure_lines"][i])
+
+            outcomes = []
+            if success:
+                # Split multi-line effects into individual outcome strings
+                outcomes.extend(success.split("\n"))
+            if failure and failure != "-":
+                outcomes.extend(f"(Fail) {f}" for f in failure.split("\n") if f)
+
+            if outcomes:
+                choice["kamigame_outcomes"] = outcomes
+
+    return choices
+
+
 # ── Main pipeline ─────────────────────────────────────────────────────
 
 
@@ -683,6 +854,7 @@ def build_character_events(
     card_ids: list[int] | None = None,
     workers: int = 0,
     existing_data_path: Path | None = None,
+    kamigame_data: dict[str, list[dict]] | None = None,
 ) -> list[dict]:
     """
     Build the character events data structure.
@@ -693,6 +865,7 @@ def build_character_events(
         card_ids: Optional filter for specific card IDs. None = all cards.
         workers: Number of parallel workers. 0 = auto.
         existing_data_path: Path to existing character_events_clean.json to merge with.
+        kamigame_data: Pre-fetched kamigame effect data. None = skip effect merging.
 
     Returns list compatible with character_events_clean.json format.
     """
@@ -835,30 +1008,38 @@ def build_character_events(
                 sid, event_name_jp, has_choices, story["event_category"]
             )
 
+            # Merge kamigame effects if available
+            if kamigame_data and choices:
+                choices = _match_kamigame_effects(event_name_jp, choices, kamigame_data)
+
             # Build options from extracted choices
             options = []
             for choice in choices:
-                outcomes = []
+                # Prefer kamigame outcomes (translated), fall back to extracted effects
+                if "kamigame_outcomes" in choice:
+                    outcomes = choice["kamigame_outcomes"]
+                else:
+                    outcomes = []
 
-                # Format success effects
-                success_parts = []
-                for st, val in choice.get("success_effects", []):
-                    formatted = format_effect(st, val)
-                    if formatted:
-                        success_parts.append(formatted)
-                if success_parts:
-                    outcomes.append("\n".join(success_parts))
+                    # Format success effects from asset bundle extraction
+                    success_parts = []
+                    for st, val in choice.get("success_effects", []):
+                        formatted = format_effect(st, val)
+                        if formatted:
+                            success_parts.append(formatted)
+                    if success_parts:
+                        outcomes.extend(success_parts)
 
-                # Format failure effects (separate outcome)
-                failure_parts = []
-                for st, val in choice.get("failure_effects", []):
-                    formatted = format_effect(st, val)
-                    if formatted:
-                        failure_parts.append(formatted)
-                if failure_parts:
-                    outcomes.append("\n".join(failure_parts))
+                    # Format failure effects (separate outcome)
+                    failure_parts = []
+                    for st, val in choice.get("failure_effects", []):
+                        formatted = format_effect(st, val)
+                        if formatted:
+                            failure_parts.append(formatted)
+                    if failure_parts:
+                        outcomes.extend(f"(Fail) {f}" for f in failure_parts)
 
-                # If no effects extracted, add empty outcome
+                # If no effects at all, add empty outcome
                 if not outcomes:
                     outcomes = [""]
 
@@ -900,6 +1081,16 @@ def build_character_events(
                 "events": events,
             })
 
+    # Count kamigame matches
+    kamigame_matched = 0
+    total_options = 0
+    for r in result:
+        for e in r["events"]:
+            for o in e["options"]:
+                total_options += 1
+                if o["outcomes"] and o["outcomes"] != [""]:
+                    kamigame_matched += 1
+
     elapsed = time.time() - t0
     log.info(
         "Built event data for %d character variants in %.1fs (%d with asset choices)",
@@ -907,6 +1098,11 @@ def build_character_events(
         elapsed,
         sum(1 for r in result if any(e["options"] for e in r["events"])),
     )
+    if kamigame_data:
+        log.info(
+            "Kamigame effects: %d/%d options have outcomes",
+            kamigame_matched, total_options,
+        )
 
     return result
 
@@ -967,6 +1163,11 @@ def main():
         action="store_true",
         help="Enable debug logging",
     )
+    parser.add_argument(
+        "--no-kamigame",
+        action="store_true",
+        help="Skip fetching effect data from kamigame.jp",
+    )
 
     args = parser.parse_args()
 
@@ -1005,12 +1206,18 @@ def main():
     if args.cards:
         card_ids = [int(c.strip()) for c in args.cards.split(",")]
 
+    # Fetch kamigame effect data
+    kamigame_data = None
+    if not args.no_kamigame:
+        kamigame_data = fetch_kamigame_effects()
+
     result = build_character_events(
         masterdb_path=args.masterdb,
         game_dir=game_dir,
         card_ids=card_ids,
         workers=args.workers,
         existing_data_path=args.existing,
+        kamigame_data=kamigame_data,
     )
 
     with open(args.output, "w", encoding="utf-8") as f:
