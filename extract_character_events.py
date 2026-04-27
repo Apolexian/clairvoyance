@@ -957,11 +957,22 @@ def main():
 
     args = parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.DEBUG if args.verbose else logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
-        datefmt="%H:%M:%S",
-    )
+    level = logging.DEBUG if args.verbose else logging.INFO
+    fmt = logging.Formatter("%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
+
+    # Log to both console and file
+    log.setLevel(level)
+    console = logging.StreamHandler()
+    console.setLevel(level)
+    console.setFormatter(fmt)
+    log.addHandler(console)
+
+    log_file = APP_DIR / "extract_events.log"
+    fh = logging.FileHandler(log_file, mode="w", encoding="utf-8")
+    fh.setLevel(logging.DEBUG)  # always capture full detail in file
+    fh.setFormatter(fmt)
+    log.addHandler(fh)
+    log.info("Logging to %s", log_file)
 
     if not args.masterdb.is_file():
         log.error("Master database not found: %s", args.masterdb)
