@@ -567,12 +567,15 @@ def _extract_from_bundle_worker(args: tuple) -> tuple[int, list[dict], str | Non
         if not isinstance(tree, dict):
             continue
 
-        # Diagnostic: dump structure of ANY object with ChoiceDataList
+        # Diagnostic: dump ALL MonoBehaviour m_Name values + any with ChoiceDataList
         if diag and not diag_done:
+            m_name = tree.get("m_Name", "")
+            # Log every unique m_Name in first bundle
+            log.info("DIAG story=%d m_Name=%s keys=%s", story_id, m_name,
+                     [k for k in tree.keys() if k not in ("m_GameObject", "m_Enabled", "m_Script")])
             cdl = _get_ci(tree, "ChoiceDataList", "choiceDataList")
             if cdl and isinstance(cdl, list) and len(cdl) > 0:
                 diag_done = True
-                log.info("DIAG story=%d obj keys: %s", story_id, list(tree.keys()))
                 c0 = cdl[0]
                 if isinstance(c0, dict):
                     log.info("DIAG ChoiceDataList[0] keys: %s", list(c0.keys()))
