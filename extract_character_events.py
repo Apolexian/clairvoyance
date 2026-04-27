@@ -555,6 +555,7 @@ def _extract_from_bundle_worker(args: tuple) -> tuple[int, list[dict], str | Non
         return (story_id, [], f"Failed to load bundle: {e}")
 
     all_choices: list[dict] = []
+    diag_done = False
 
     for obj in env.objects:
         if obj.type.name != "MonoBehaviour":
@@ -566,11 +567,30 @@ def _extract_from_bundle_worker(args: tuple) -> tuple[int, list[dict], str | Non
         if not isinstance(tree, dict):
             continue
 
+        # Diagnostic: dump structure of ANY object with ChoiceDataList
+        if diag and not diag_done:
+            cdl = _get_ci(tree, "ChoiceDataList", "choiceDataList")
+            if cdl and isinstance(cdl, list) and len(cdl) > 0:
+                diag_done = True
+                log.info("DIAG story=%d obj keys: %s", story_id, list(tree.keys()))
+                c0 = cdl[0]
+                if isinstance(c0, dict):
+                    log.info("DIAG ChoiceDataList[0] keys: %s", list(c0.keys()))
+                    for k, v in c0.items():
+                        if isinstance(v, list):
+                            if v and isinstance(v[0], dict):
+                                log.info("DIAG   %s = list[%d], item keys=%s",
+                                         k, len(v), list(v[0].keys()))
+                            else:
+                                log.info("DIAG   %s = list[%d] %s",
+                                         k, len(v), repr(v[:2])[:200])
+                        else:
+                            log.info("DIAG   %s = %s", k, repr(v)[:200])
+
         # Extract choices from TextClipData objects
-        choices = _extract_choice_data(tree, diag=diag)
+        choices = _extract_choice_data(tree, diag=False)
         if choices:
             all_choices.extend(choices)
-            diag = False  # Only log first hit
 
     # Deduplicate by text while preserving order
     seen = set()
