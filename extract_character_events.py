@@ -408,28 +408,44 @@ def _get_ci(d: dict, *keys: str):
     return None
 
 
-def _extract_choice_data(tree: dict) -> list[dict]:
+def _extract_choice_data(tree: dict, diag: bool = False) -> list[dict]:
     """
     Extract choice data from a StoryTimelineTextClipData MonoBehaviour.
 
+    Only extracts REAL player choices (SelectIndex > 0).
     Each choice has: Text (option label), and optionally SuccessEffect/FailureEffect
     containing arrays of {StatusType, Value} effect entries.
 
-    Returns list of {text, success_effects: [(type, val)], failure_effects: [(type, val)]}
+    Returns list of {text, select_index, success_effects, failure_effects}
     """
     choice_list = _get_ci(tree, "ChoiceDataList", "choiceDataList")
     if not choice_list or not isinstance(choice_list, list):
         return []
 
+    # Diagnostic: log first choice's keys to understand structure
+    if diag and choice_list:
+        c0 = choice_list[0]
+        if isinstance(c0, dict):
+            log.info("DIAG ChoiceDataList[0] keys: %s", list(c0.keys()))
+            for k, v in c0.items():
+                sample = repr(v)[:200] if not isinstance(v, (list, dict)) else type(v).__name__
+                log.info("DIAG   %s = %s", k, sample)
+
     choices = []
     for choice in choice_list:
         if not isinstance(choice, dict):
             continue
+
+        # Filter: only real player choices have SelectIndex > 0
+        select_idx = _get_ci(choice, "SelectIndex", "selectIndex", "select_index")
+        if not isinstance(select_idx, int) or select_idx <= 0:
+            continue
+
         text = _get_ci(choice, "Text", "text", "Name", "name")
         if not isinstance(text, str) or not text.strip():
             continue
 
-        # Extract effects
+        # Extract effects from all known field name variants
         success = []
         failure = []
         for eff_key, dest in [
@@ -437,6 +453,8 @@ def _extract_choice_data(tree: dict) -> list[dict]:
             ("FailureEffect", failure),
             ("SuccessEffectList", success),
             ("FailureEffectList", failure),
+            ("successEffect", success),
+            ("failureEffect", failure),
         ]:
             eff_list = _get_ci(choice, eff_key)
             if not eff_list or not isinstance(eff_list, list):
@@ -446,11 +464,12 @@ def _extract_choice_data(tree: dict) -> list[dict]:
                     continue
                 st = _get_ci(eff, "StatusType", "statusType", "Type", "type")
                 val = _get_ci(eff, "Value", "value")
-                if isinstance(st, int) and isinstance(val, int):
+                if isinstance(st, int) and isinstance(val, int) and st != 0:
                     dest.append((st, val))
 
         choices.append({
             "text": text.strip(),
+            "select_index": select_idx,
             "success_effects": success,
             "failure_effects": failure,
         })
@@ -462,10 +481,11 @@ def _extract_from_bundle_worker(args: tuple) -> tuple[int, list[dict], str | Non
     """
     Worker function for parallel bundle extraction.
 
-    Args: (story_id, file_path_str, entry_key)
+    Args: (story_id, file_path_str, entry_key, diag)
     Returns: (story_id, choices, error_or_none)
     """
-    story_id, file_path_str, entry_key = args
+    story_id, file_path_str, entry_key = args[:3]
+    diag = args[3] if len(args) > 3 else False
     file_path = Path(file_path_str)
 
     _init_xor()
@@ -494,9 +514,10 @@ def _extract_from_bundle_worker(args: tuple) -> tuple[int, list[dict], str | Non
             continue
 
         # Extract choices from TextClipData objects
-        choices = _extract_choice_data(tree)
+        choices = _extract_choice_data(tree, diag=diag)
         if choices:
             all_choices.extend(choices)
+            diag = False  # Only log first hit
 
     # Deduplicate by text while preserving order
     seen = set()
@@ -652,11 +673,13 @@ def build_character_events(
 
         dat_dir = game_dir / "dat"
         work_items = []
+        first = True
         for sid, entry in meta_entries.items():
             h = entry["hash"]
             file_path = dat_dir / h[:2] / h
             if file_path.is_file():
-                work_items.append((sid, str(file_path), entry["key"]))
+                work_items.append((sid, str(file_path), entry["key"], first))
+                first = False
 
         log.info("Extracting choices from %d bundles...", len(work_items))
 
