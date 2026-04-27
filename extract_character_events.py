@@ -408,12 +408,61 @@ def _get_ci(d: dict, *keys: str):
     return None
 
 
+def _is_gender_variant_pair(a: str, b: str) -> bool:
+    """Check if two strings are trainer gender variants (male/female speech)."""
+    if a == b:
+        return True
+    # Gender variants differ by 1-3 chars at most and share 80%+ of characters
+    if abs(len(a) - len(b)) > 3:
+        return False
+    # Use SequenceMatcher ratio for fuzzy comparison
+    from difflib import SequenceMatcher
+    return SequenceMatcher(None, a, b).ratio() > 0.7
+
+
+def _dedupe_gender_variants(entries: list[dict]) -> list[dict]:
+    """
+    Remove trainer gender variant duplicates from choice entries.
+
+    Gender variants come in pairs: male speech (だ/な/俺/ぞ) and
+    female speech (の/ね/私/よ). Keep only one from each pair.
+    """
+    if len(entries) < 2:
+        return entries
+
+    # Try to detect if ALL entries are gender variant pairs
+    # (even count, each consecutive pair is similar)
+    if len(entries) % 2 == 0:
+        all_pairs = True
+        for i in range(0, len(entries), 2):
+            if not _is_gender_variant_pair(entries[i]["text"], entries[i + 1]["text"]):
+                all_pairs = False
+                break
+        if all_pairs:
+            # These are gendered dialogue, not real choices — skip entirely
+            return []
+
+    # Otherwise, dedupe any individual pairs while keeping real choices
+    result = []
+    skip = set()
+    for i, entry in enumerate(entries):
+        if i in skip:
+            continue
+        # Check if next entry is a gender variant
+        if i + 1 < len(entries) and _is_gender_variant_pair(entry["text"], entries[i + 1]["text"]):
+            skip.add(i + 1)
+        result.append(entry)
+
+    return result
+
+
 def _extract_choice_data(tree: dict, diag: bool = False) -> list[dict]:
     """
     Extract choice data from a StoryTimelineTextClipData MonoBehaviour.
 
     Real player choices have multiple entries in ChoiceDataList (2+ options).
     Single-entry lists are dialogue/narration text — skip those.
+    Gender variant pairs (male/female trainer speech) are detected and removed.
 
     Returns list of {text, success_effects, failure_effects}
     """
@@ -422,7 +471,6 @@ def _extract_choice_data(tree: dict, diag: bool = False) -> list[dict]:
         return []
 
     # Filter: single-entry ChoiceDataList is dialogue, not a real choice
-    # Count entries with actual text
     text_entries = [
         c for c in choice_list
         if isinstance(c, dict) and isinstance(_get_ci(c, "Text", "text", "Name", "name"), str)
@@ -475,6 +523,9 @@ def _extract_choice_data(tree: dict, diag: bool = False) -> list[dict]:
             "success_effects": success,
             "failure_effects": failure,
         })
+
+    # Remove gender variant pairs (male/female trainer dialogue)
+    choices = _dedupe_gender_variants(choices)
 
     return choices
 
