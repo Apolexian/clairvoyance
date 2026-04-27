@@ -759,6 +759,16 @@ def build_character_events(
         if workers == 0:
             workers = min(os.cpu_count() or 4, 8)
 
+        # Run first bundle sequentially in main process for diagnostic logging
+        if work_items:
+            first_args = work_items[0]
+            sid, choices, err = _extract_from_bundle_worker(first_args)
+            if err:
+                log.debug("Error extracting %d: %s", sid, err)
+            if choices:
+                story_choices[sid] = choices
+            work_items = work_items[1:]
+
         if len(work_items) <= 10 or workers == 1:
             # Sequential for small batches
             for args in work_items:
