@@ -412,35 +412,38 @@ def _extract_choice_data(tree: dict, diag: bool = False) -> list[dict]:
     """
     Extract choice data from a StoryTimelineTextClipData MonoBehaviour.
 
-    Only extracts REAL player choices (SelectIndex > 0).
-    Each choice has: Text (option label), and optionally SuccessEffect/FailureEffect
-    containing arrays of {StatusType, Value} effect entries.
+    Real player choices have multiple entries in ChoiceDataList (2+ options).
+    Single-entry lists are dialogue/narration text — skip those.
 
-    Returns list of {text, select_index, success_effects, failure_effects}
+    Returns list of {text, success_effects, failure_effects}
     """
     choice_list = _get_ci(tree, "ChoiceDataList", "choiceDataList")
     if not choice_list or not isinstance(choice_list, list):
         return []
 
+    # Filter: single-entry ChoiceDataList is dialogue, not a real choice
+    # Count entries with actual text
+    text_entries = [
+        c for c in choice_list
+        if isinstance(c, dict) and isinstance(_get_ci(c, "Text", "text", "Name", "name"), str)
+        and (_get_ci(c, "Text", "text", "Name", "name") or "").strip()
+    ]
+    if len(text_entries) < 2:
+        return []
+
     # Diagnostic: log first choice's keys to understand structure
-    if diag and choice_list:
-        c0 = choice_list[0]
-        if isinstance(c0, dict):
-            log.info("DIAG ChoiceDataList[0] keys: %s", list(c0.keys()))
-            for k, v in c0.items():
-                sample = repr(v)[:200] if not isinstance(v, (list, dict)) else type(v).__name__
-                log.info("DIAG   %s = %s", k, sample)
+    if diag and text_entries:
+        c0 = text_entries[0]
+        log.info("DIAG ChoiceDataList[0] keys: %s", list(c0.keys()))
+        for k, v in c0.items():
+            if isinstance(v, list) and v:
+                log.info("DIAG   %s = list[%d], first=%s", k, len(v),
+                         repr(v[0])[:200] if v else "empty")
+            else:
+                log.info("DIAG   %s = %s", k, repr(v)[:200])
 
     choices = []
-    for choice in choice_list:
-        if not isinstance(choice, dict):
-            continue
-
-        # Filter: only real player choices have SelectIndex > 0
-        select_idx = _get_ci(choice, "SelectIndex", "selectIndex", "select_index")
-        if not isinstance(select_idx, int) or select_idx <= 0:
-            continue
-
+    for choice in text_entries:
         text = _get_ci(choice, "Text", "text", "Name", "name")
         if not isinstance(text, str) or not text.strip():
             continue
@@ -469,7 +472,6 @@ def _extract_choice_data(tree: dict, diag: bool = False) -> list[dict]:
 
         choices.append({
             "text": text.strip(),
-            "select_index": select_idx,
             "success_effects": success,
             "failure_effects": failure,
         })
