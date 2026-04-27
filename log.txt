@@ -1,0 +1,172 @@
+C:\Users\nikit\Documents\clairvoyance>python extract_character_events.py C:\Users\nikit\Umamusume\umamusume_Data\Persistent -v
+04:55:35 INFO Querying master database...
+04:55:35 INFO Found 250 character variants, 128 characters with shared events
+04:55:35 INFO Total unique story_ids to process: 12957
+04:55:35 INFO Reading meta database for story bundles...
+04:55:36 DEBUG Trying Global key for meta decryption...
+04:55:36 DEBUG pysqlcipher3 not available
+04:55:36 DEBUG sqlcipher3 not available
+04:55:36 DEBUG sqlite3mc DLL search dirs: ['C:\\Users\\nikit\\Documents\\clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\_internal']
+04:55:36 INFO Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance
+04:55:36 INFO Decrypting meta via sqlite3mc DLL...
+04:55:36 DEBUG sqlite3_open_v2 OK, db_ptr=2393278204448
+04:55:36 DEBUG sqlite3mc_config('cipher', 3) rc=3
+04:55:36 DEBUG sqlite3_key(raw 12 bytes) rc=0
+04:55:36 DEBUG sqlite3mc validation failed for cipher 3 rc=26 errmsg=file is not a database
+04:55:36 DEBUG sqlite3_open_v2 OK, db_ptr=2393278204448
+04:55:36 DEBUG sqlite3mc_config('cipher', 5) rc=5
+04:55:36 DEBUG sqlite3_key(raw 12 bytes) rc=0
+04:55:36 DEBUG sqlite3mc validation failed for cipher 5 rc=26 errmsg=file is not a database
+04:55:36 DEBUG sqlite3_open_v2 OK, db_ptr=2393278204448
+04:55:36 DEBUG sqlite3mc_config('cipher', 4) rc=4
+04:55:36 DEBUG sqlite3_key(raw 12 bytes) rc=0
+04:55:36 DEBUG sqlite3mc validation failed for cipher 4 rc=26 errmsg=file is not a database
+04:55:36 ERROR sqlite3mc: no cipher ID worked (tried [3, 5, 4])
+04:55:36 DEBUG Trying JP key for meta decryption...
+04:55:36 DEBUG pysqlcipher3 not available
+04:55:36 DEBUG sqlcipher3 not available
+04:55:36 DEBUG sqlite3mc DLL search dirs: ['C:\\Users\\nikit\\Documents\\clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\_internal']
+04:55:36 INFO Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance
+04:55:36 INFO Decrypting meta via sqlite3mc DLL...
+04:55:36 DEBUG sqlite3_open_v2 OK, db_ptr=2393278204448
+04:55:36 DEBUG sqlite3mc_config('cipher', 3) rc=3
+04:55:36 DEBUG sqlite3_key(raw 32 bytes) rc=0
+04:55:36 INFO Validation OK — cipher=3 key=32 bytes
+04:55:37 INFO Decrypted meta -> C:\Users\nikit\Umamusume\umamusume_Data\Persistent\meta_decrypted
+04:55:37 INFO Decrypted meta via sqlite3mc (JP key)
+04:55:37 INFO Found 12957/12957 story bundles in meta
+04:55:37 INFO Extracting choices from 12957 bundles...
+04:55:37 INFO Using 8 worker processes
+04:55:39 INFO   Progress: 100/12957 bundles
+04:55:39 INFO   Progress: 200/12957 bundles
+04:55:40 INFO   Progress: 300/12957 bundles
+04:55:41 INFO   Progress: 400/12957 bundles
+04:55:42 INFO   Progress: 500/12957 bundles
+04:55:43 INFO   Progress: 600/12957 bundles
+04:55:44 INFO   Progress: 700/12957 bundles
+04:55:46 INFO   Progress: 800/12957 bundles
+04:55:47 INFO   Progress: 900/12957 bundles
+04:55:48 INFO   Progress: 1000/12957 bundles
+04:55:49 INFO   Progress: 1100/12957 bundles
+04:55:50 INFO   Progress: 1200/12957 bundles
+04:55:51 INFO   Progress: 1300/12957 bundles
+04:55:52 INFO   Progress: 1400/12957 bundles
+04:55:53 INFO   Progress: 1500/12957 bundles
+04:55:55 INFO   Progress: 1600/12957 bundles
+04:55:56 INFO   Progress: 1700/12957 bundles
+04:55:57 INFO   Progress: 1800/12957 bundles
+04:55:58 INFO   Progress: 1900/12957 bundles
+04:55:59 INFO   Progress: 2000/12957 bundles
+04:56:01 INFO   Progress: 2100/12957 bundles
+04:56:02 INFO   Progress: 2200/12957 bundles
+04:56:03 INFO   Progress: 2300/12957 bundles
+04:56:04 INFO   Progress: 2400/12957 bundles
+04:56:06 INFO   Progress: 2500/12957 bundles
+04:56:07 INFO   Progress: 2600/12957 bundles
+04:56:08 INFO   Progress: 2700/12957 bundles
+04:56:09 INFO   Progress: 2800/12957 bundles
+04:56:11 INFO   Progress: 2900/12957 bundles
+04:56:12 INFO   Progress: 3000/12957 bundles
+04:56:13 INFO   Progress: 3100/12957 bundles
+04:56:14 INFO   Progress: 3200/12957 bundles
+04:56:16 INFO   Progress: 3300/12957 bundles
+04:56:17 INFO   Progress: 3400/12957 bundles
+04:56:18 INFO   Progress: 3500/12957 bundles
+04:56:20 INFO   Progress: 3600/12957 bundles
+04:56:21 INFO   Progress: 3700/12957 bundles
+04:56:22 INFO   Progress: 3800/12957 bundles
+04:56:24 INFO   Progress: 3900/12957 bundles
+04:56:25 INFO   Progress: 4000/12957 bundles
+04:56:26 INFO   Progress: 4100/12957 bundles
+04:56:28 INFO   Progress: 4200/12957 bundles
+04:56:29 INFO   Progress: 4300/12957 bundles
+04:56:30 INFO   Progress: 4400/12957 bundles
+04:56:31 INFO   Progress: 4500/12957 bundles
+04:56:33 INFO   Progress: 4600/12957 bundles
+04:56:34 INFO   Progress: 4700/12957 bundles
+04:56:36 INFO   Progress: 4800/12957 bundles
+04:56:37 INFO   Progress: 4900/12957 bundles
+04:56:38 INFO   Progress: 5000/12957 bundles
+04:56:40 INFO   Progress: 5100/12957 bundles
+04:56:41 INFO   Progress: 5200/12957 bundles
+04:56:42 INFO   Progress: 5300/12957 bundles
+04:56:43 INFO   Progress: 5400/12957 bundles
+04:56:45 INFO   Progress: 5500/12957 bundles
+04:56:46 INFO   Progress: 5600/12957 bundles
+04:56:47 INFO   Progress: 5700/12957 bundles
+04:56:48 INFO   Progress: 5800/12957 bundles
+04:56:50 INFO   Progress: 5900/12957 bundles
+04:56:51 INFO   Progress: 6000/12957 bundles
+04:56:52 INFO   Progress: 6100/12957 bundles
+04:56:54 INFO   Progress: 6200/12957 bundles
+04:56:55 INFO   Progress: 6300/12957 bundles
+04:56:57 INFO   Progress: 6400/12957 bundles
+04:56:58 INFO   Progress: 6500/12957 bundles
+04:56:59 INFO   Progress: 6600/12957 bundles
+04:57:01 INFO   Progress: 6700/12957 bundles
+04:57:02 INFO   Progress: 6800/12957 bundles
+04:57:04 INFO   Progress: 6900/12957 bundles
+04:57:05 INFO   Progress: 7000/12957 bundles
+04:57:06 INFO   Progress: 7100/12957 bundles
+04:57:08 INFO   Progress: 7200/12957 bundles
+04:57:09 INFO   Progress: 7300/12957 bundles
+04:57:11 INFO   Progress: 7400/12957 bundles
+04:57:12 INFO   Progress: 7500/12957 bundles
+04:57:14 INFO   Progress: 7600/12957 bundles
+04:57:15 INFO   Progress: 7700/12957 bundles
+04:57:17 INFO   Progress: 7800/12957 bundles
+04:57:18 INFO   Progress: 7900/12957 bundles
+04:57:19 INFO   Progress: 8000/12957 bundles
+04:57:21 INFO   Progress: 8100/12957 bundles
+04:57:22 INFO   Progress: 8200/12957 bundles
+04:57:24 INFO   Progress: 8300/12957 bundles
+04:57:25 INFO   Progress: 8400/12957 bundles
+04:57:27 INFO   Progress: 8500/12957 bundles
+04:57:28 INFO   Progress: 8600/12957 bundles
+04:57:30 INFO   Progress: 8700/12957 bundles
+04:57:31 INFO   Progress: 8800/12957 bundles
+04:57:33 INFO   Progress: 8900/12957 bundles
+04:57:34 INFO   Progress: 9000/12957 bundles
+04:57:36 INFO   Progress: 9100/12957 bundles
+04:57:38 INFO   Progress: 9200/12957 bundles
+04:57:39 INFO   Progress: 9300/12957 bundles
+04:57:41 INFO   Progress: 9400/12957 bundles
+04:57:42 INFO   Progress: 9500/12957 bundles
+04:57:44 INFO   Progress: 9600/12957 bundles
+04:57:46 INFO   Progress: 9700/12957 bundles
+04:57:47 INFO   Progress: 9800/12957 bundles
+04:57:48 INFO   Progress: 9900/12957 bundles
+04:57:50 INFO   Progress: 10000/12957 bundles
+04:57:51 INFO   Progress: 10100/12957 bundles
+04:57:53 INFO   Progress: 10200/12957 bundles
+04:57:55 INFO   Progress: 10300/12957 bundles
+04:57:56 INFO   Progress: 10400/12957 bundles
+04:57:57 INFO   Progress: 10500/12957 bundles
+04:57:59 INFO   Progress: 10600/12957 bundles
+04:58:01 INFO   Progress: 10700/12957 bundles
+04:58:02 INFO   Progress: 10800/12957 bundles
+04:58:04 INFO   Progress: 10900/12957 bundles
+04:58:05 INFO   Progress: 11000/12957 bundles
+04:58:07 INFO   Progress: 11100/12957 bundles
+04:58:09 INFO   Progress: 11200/12957 bundles
+04:58:10 INFO   Progress: 11300/12957 bundles
+04:58:12 INFO   Progress: 11400/12957 bundles
+04:58:13 INFO   Progress: 11500/12957 bundles
+04:58:15 INFO   Progress: 11600/12957 bundles
+04:58:17 INFO   Progress: 11700/12957 bundles
+04:58:19 INFO   Progress: 11800/12957 bundles
+04:58:20 INFO   Progress: 11900/12957 bundles
+04:58:22 INFO   Progress: 12000/12957 bundles
+04:58:23 INFO   Progress: 12100/12957 bundles
+04:58:25 INFO   Progress: 12200/12957 bundles
+04:58:27 INFO   Progress: 12300/12957 bundles
+04:58:29 INFO   Progress: 12400/12957 bundles
+04:58:30 INFO   Progress: 12500/12957 bundles
+04:58:32 INFO   Progress: 12600/12957 bundles
+04:58:34 INFO   Progress: 12700/12957 bundles
+04:58:35 INFO   Progress: 12800/12957 bundles
+04:58:37 INFO   Progress: 12900/12957 bundles
+04:58:39 INFO Extracted choices from 4007 stories
+04:58:39 INFO Building event data...
+04:58:39 INFO Built event data for 250 character variants in 183.3s (250 with asset choices)
+04:58:39 INFO Wrote 250 character variants to C:\Users\nikit\Documents\clairvoyance\character_events.json
