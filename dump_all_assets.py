@@ -35,6 +35,7 @@ Usage:
     uv run dump_all_assets.py --filter "story/%"        # only story assets
     uv run dump_all_assets.py --filter "sound/%"        # only sound assets
     uv run dump_all_assets.py --types Texture2D Sprite  # only textures
+    uv run dump_all_assets.py --images-only              # images only, flat dirs
     uv run dump_all_assets.py --dry-run                 # list entries, don't extract
 """
 
@@ -490,32 +491,20 @@ def _safe_filename(name: str, fallback: str = "unnamed") -> str:
 
 
 def _export_texture(obj, out_dir: Path, idx: int) -> list[str]:
-    """Export a Texture2D or Sprite object. Returns list of saved filenames."""
+    """Export a Texture2D or Sprite object. Returns list of saved filenames.
+
+    Always saves as lossless PNG at the original resolution to preserve
+    quality and aspect ratio.
+    """
     saved = []
     try:
         data = obj.read()
         name = _safe_filename(getattr(data, "m_Name", "") or "", f"texture_{idx:04d}")
-        ext = _img_ext()
 
-        Image = _get_pillow()
-        if Image is None:
-            # No Pillow — save raw image bytes if available
-            img = getattr(data, "image", None)
-            if img is not None:
-                raw_path = out_dir / f"{name}.png"
-                img.save(str(raw_path))
-                saved.append(raw_path.name)
-            return saved
+        img = data.image  # PIL Image at original dimensions
 
-        img = data.image
-        if img.mode not in ("RGBA", "RGB"):
-            img = img.convert("RGBA")
-
-        out_path = out_dir / f"{name}{ext}"
-        if ext == ".webp":
-            img.save(str(out_path), "WEBP", quality=85)
-        else:
-            img.save(str(out_path), "PNG")
+        out_path = out_dir / f"{name}.png"
+        img.save(str(out_path), "PNG")
         saved.append(out_path.name)
     except Exception as e:
         log.debug("  texture export failed: %s", e)
@@ -720,16 +709,33 @@ def dump_bundle(
     asset_name: str,
     output_root: Path,
     type_filter: set[str] | None = None,
+    flat_depth: int | None = None,
 ) -> dict[str, int]:
     """
     Decrypt and dump all objects from a single asset bundle.
+
+    Args:
+        flat_depth: If set, cap the output directory nesting to this many
+                    levels below *output_root*.  For example ``flat_depth=1``
+                    turns ``chara/chr1001_00/pfb_chr1001_00`` into
+                    ``chara/chr1001_00__pfb_chr1001_00`` (one subdirectory).
 
     Returns a dict of {type_name: count_exported}.
     """
     UnityPy = _get_unitypy()
     stats: dict[str, int] = {}
 
-    out_dir = output_root / asset_name
+    if flat_depth is not None:
+        parts = Path(asset_name).parts
+        if len(parts) > flat_depth:
+            # Keep the first (flat_depth) parts as dirs, join the rest with "__"
+            dir_parts = parts[:flat_depth]
+            rest = "__".join(parts[flat_depth:])
+            out_dir = output_root / Path(*dir_parts) / rest
+        else:
+            out_dir = output_root / asset_name
+    else:
+        out_dir = output_root / asset_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
     env = None
@@ -780,16 +786,16 @@ def _dump_one(args: tuple) -> tuple[str, dict[str, int], str | None]:
     """
     Process a single bundle entry. Designed to be called via ProcessPoolExecutor.
 
-    Args is a tuple of (file_path_str, entry_key, asset_name, output_root_str, type_filter_list).
+    Args is a tuple of (file_path_str, entry_key, asset_name, output_root_str, type_filter_list, flat_depth).
     Returns (asset_name, stats_dict, error_msg_or_None).
     """
-    file_path_str, entry_key, asset_name, output_root_str, type_filter_list = args
+    file_path_str, entry_key, asset_name, output_root_str, type_filter_list, flat_depth = args
     file_path = Path(file_path_str)
     output_root = Path(output_root_str)
     type_filter = set(type_filter_list) if type_filter_list else None
 
     try:
-        stats = dump_bundle(file_path, entry_key, asset_name, output_root, type_filter)
+        stats = dump_bundle(file_path, entry_key, asset_name, output_root, type_filter, flat_depth)
         return (asset_name, stats, None)
     except Exception as e:
         return (asset_name, {}, str(e))
@@ -806,12 +812,14 @@ def dump_all(
     dry_run: bool = False,
     skip_existing: bool = True,
     workers: int = 0,
+    flat_depth: int | None = None,
 ) -> dict[str, int]:
     """
     Dump all assets matching the filter.
 
     Args:
         workers: Number of parallel workers. 0 = auto (cpu_count), 1 = sequential.
+        flat_depth: Max directory nesting depth below output_root (None = unlimited).
 
     Returns aggregate {type_name: total_count}.
     """
@@ -866,7 +874,7 @@ def dump_all(
 
         work_items.append((
             str(file_path), entry["key"], asset_name,
-            str(output_root), type_filter_list,
+            str(output_root), type_filter_list, flat_depth,
         ))
 
     remaining = len(work_items)
@@ -1103,6 +1111,7 @@ Examples:
   %(prog)s --filter "chara/%%"           # only character assets
   %(prog)s --types Texture2D Sprite     # only textures
   %(prog)s --types MonoBehaviour        # only MonoBehaviours (JSON)
+  %(prog)s --images-only                # only images, flat directory structure
   %(prog)s --dry-run                    # list asset categories without extracting
   %(prog)s --no-skip                    # re-extract even if output exists
         """,
@@ -1132,6 +1141,11 @@ Examples:
         "--no-skip",
         action="store_true",
         help="Re-extract assets even if output directory already has files",
+    )
+    parser.add_argument(
+        "--images-only", "-i",
+        action="store_true",
+        help="Only dump images (Texture2D/Sprite), flatten output to max 1 directory depth",
     )
     parser.add_argument(
         "--workers", "-w",
@@ -1189,6 +1203,11 @@ Examples:
     log.info("Output directory: %s", output_root.resolve())
 
     type_filter = set(args.types) if args.types else None
+    flat_depth = None
+
+    if args.images_only:
+        type_filter = {"Texture2D", "Sprite"}
+        flat_depth = 1
 
     stats = dump_all(
         game_dir=game_dir,
@@ -1198,6 +1217,7 @@ Examples:
         dry_run=args.dry_run,
         skip_existing=not args.no_skip,
         workers=args.workers,
+        flat_depth=flat_depth,
     )
 
     if stats:
