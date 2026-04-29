@@ -899,6 +899,138 @@ SKIP_TYPES = {
 }
 
 
+def _resolve_external_resources(env, asset_name: str, dat_dir: Path | None,
+                                meta_lookup: dict[str, tuple[str, int]] | None) -> None:
+    """Load external .resource/.resS files that objects in *env* reference.
+
+    Unity bundles for audio/video often store the heavy data in a separate
+    StreamedResource.  The m_Source field names a cab like ``CAB-xxx.resource``
+    that lives inside a *companion* bundle.  In Uma Musume's hash-based storage
+    the companion is a different file in dat/, so UnityPy can't find it on
+    disk by name.
+
+    We scan every SerializedFile's externals and every AudioClip/VideoClip
+    resource reference, then load the companion bundle from dat/ using the
+    meta DB hash mapping.
+    """
+    if not dat_dir or not meta_lookup:
+        return
+
+    import ntpath
+    UnityPy = _get_unitypy()
+
+    needed: set[str] = set()
+
+    # 1) Gather explicit externals listed in serialized files
+    for f in env.files.values():
+        for ext in getattr(f, "externals", []):
+            path = getattr(ext, "path", "")
+            if path:
+                needed.add(path)
+
+    # 2) Scan objects for StreamedResource references
+    for obj in env.objects:
+        tname = obj.type.name
+        if tname not in ("AudioClip", "VideoClip"):
+            continue
+        try:
+            data = obj.read()
+            res = getattr(data, "m_Resource", None) or getattr(data, "m_ExternalResources", None)
+            if res and getattr(res, "m_Size", 0) > 0:
+                src = getattr(res, "m_Source", "")
+                if src:
+                    needed.add(src)
+        except Exception:
+            pass
+
+    if not needed:
+        return
+
+    # Filter out resources already registered as cabs
+    missing = set()
+    for name in needed:
+        basename = ntpath.basename(name).lower()
+        if env.get_cab(basename) is None and env.get_cab(name) is None:
+            missing.add(name)
+
+    if not missing:
+        return
+
+    # The meta DB maps asset names → (hash, key). Companion resource bundles
+    # often share the same asset name prefix.  We also try the exact cab name.
+    # Build a reverse lookup: cab-name-stem → meta entry.
+    #
+    # In practice, Uma Musume's meta DB entries like
+    #   sound/b/bgm_race_001  → hash1 (the bundle with AudioClip metadata)
+    # don't have a separate entry for the .resource — it's inside the SAME
+    # bundle archive.  So if we get here, the resource is truly inside the
+    # loaded bundle but UnityPy couldn't find it.  Let's check env.files:
+    loaded_cabs = {k.lower() for k in env.cabs}
+    for name in list(missing):
+        # Try variations that UnityPy's get_resource_data checks
+        basename = ntpath.basename(name)
+        stem = ntpath.splitext(basename)[0]
+        variations = [
+            basename.lower(),
+            f"{stem}.resource".lower(),
+            f"{stem}.assets.ress".lower(),
+            f"{stem}.ress".lower(),
+        ]
+        if any(v in loaded_cabs for v in variations):
+            missing.discard(name)
+
+    if not missing:
+        return
+
+    log.debug("  %s: resolving %d external resources: %s",
+              asset_name, len(missing), [ntpath.basename(n) for n in missing])
+
+    # Try companion bundles from the sibling lookup (entries sharing same
+    # directory prefix in the meta DB namespace)
+    candidates: list[tuple[str, str, int]] = [
+        (meta_name, h, key) for meta_name, (h, key) in meta_lookup.items()
+    ]
+
+    for meta_name, h, key in candidates:
+        fp = dat_dir / h[:2] / h
+        if not fp.is_file():
+            continue
+        try:
+            if key != 0:
+                comp_data = decrypt_bundle(fp, key)
+                try:
+                    comp_env = UnityPy.load(comp_data)
+                except Exception:
+                    comp_env = UnityPy.load(io.BytesIO(comp_data))
+            else:
+                comp_env = UnityPy.load(str(fp))
+
+            # Register all cabs from companion into main env
+            registered_any = False
+            for cab_name, cab_reader in comp_env.cabs.items():
+                if cab_name not in env.cabs:
+                    env.register_cab(cab_name, cab_reader)
+                    registered_any = True
+            if registered_any:
+                log.debug("  loaded companion bundle %s (%s)", h[:12], meta_name)
+
+            # Check if all missing resources are now resolved
+            still_missing = set()
+            for name in missing:
+                basename = ntpath.basename(name).lower()
+                if env.get_cab(basename) is None and env.get_cab(name) is None:
+                    still_missing.add(name)
+            missing = still_missing
+            if not missing:
+                return
+        except Exception as e:
+            log.debug("  failed to load companion %s: %s", h[:12], e)
+
+    if missing:
+        log.debug("  %s: could not resolve resources: %s",
+                  asset_name, [ntpath.basename(n) for n in missing])
+
+
 def dump_bundle(
     file_path: Path,
     entry_key: int,
@@ -907,6 +1039,8 @@ def dump_bundle(
     type_filter: set[str] | None = None,
     flat_depth: int | None = None,
     collapse_singles: bool = False,
+    dat_dir: Path | None = None,
+    meta_lookup: dict[str, tuple[str, int]] | None = None,
 ) -> dict[str, int]:
     """
     Decrypt and dump all objects from a single asset bundle.
@@ -920,6 +1054,8 @@ def dump_bundle(
                           move it up to the parent directory and remove the
                           now-empty wrapper directory.  File names are kept
                           as-is (they contain the IDs callers rely on).
+        dat_dir: Path to the dat/ directory for resolving external resources.
+        meta_lookup: {asset_name: (hash, key)} for finding companion bundles.
 
     Returns a dict of {type_name: count_exported}.
     """
@@ -955,6 +1091,9 @@ def dump_bundle(
         with contextlib.suppress(OSError):
             out_dir.rmdir()
         return stats
+
+    # Resolve external .resource/.resS files for audio/video
+    _resolve_external_resources(env, asset_name, dat_dir, meta_lookup)
 
     # When exporting images, prefer Sprite over Texture2D for the same
     # asset name because Sprite.image uses the textureRect to crop to the
@@ -1028,15 +1167,16 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
 
     Args is a tuple of (file_path_str, entry_key, asset_name, entry_hash,
     output_root_str, type_filter_list, flat_depth, collapse_singles,
-    image_format, image_quality).
+    image_format, image_quality, dat_dir_str, meta_lookup).
     Returns (asset_name, entry_hash, stats_dict, error_msg_or_None).
     """
     (file_path_str, entry_key, asset_name, entry_hash, output_root_str,
      type_filter_list, flat_depth, collapse_singles,
-     image_format, image_quality) = args
+     image_format, image_quality, dat_dir_str, meta_lookup) = args
     file_path = Path(file_path_str)
     output_root = Path(output_root_str)
     type_filter = set(type_filter_list) if type_filter_list else None
+    dat_dir = Path(dat_dir_str) if dat_dir_str else None
 
     # Set module globals in spawned workers (macOS/Windows use spawn)
     global _IMAGE_FORMAT, _IMAGE_QUALITY
@@ -1047,6 +1187,7 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
         stats = dump_bundle(
             file_path, entry_key, asset_name, output_root,
             type_filter, flat_depth, collapse_singles,
+            dat_dir=dat_dir, meta_lookup=meta_lookup,
         )
         return (asset_name, entry_hash, stats, None)
     except Exception as e:
@@ -1157,10 +1298,21 @@ def dump_all(
             processed += 1
             continue
 
+        # Build a small sibling lookup for resolving companion resource bundles
+        # (only entries sharing the same directory prefix)
+        prefix = asset_name.rsplit("/", 1)[0] + "/" if "/" in asset_name else ""
+        sibling_lookup = {
+            n: (e2["hash"], e2["key"])
+            for e2 in entries
+            for n in [e2["name"]]
+            if prefix and n.startswith(prefix) and n != asset_name
+        } if prefix else {}
+
         work_items.append((
             str(file_path), entry["key"], asset_name, h,
             str(output_root), type_filter_list, flat_depth,
             collapse_singles, _IMAGE_FORMAT, _IMAGE_QUALITY,
+            str(dat_dir), sibling_lookup,
         ))
 
     remaining = len(work_items)
