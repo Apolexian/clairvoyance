@@ -1566,6 +1566,8 @@ Examples:
   %(prog)s --images-only --no-cache    # images-only, ignore manifest cache
   %(prog)s --support-cards             # only support card images
   %(prog)s --chara                     # only character icons + portraits
+  %(prog)s --sound                     # only sound/audio assets
+  %(prog)s --movie                     # only movie/video assets
   %(prog)s --images-only --format webp # images as high-quality WEBP (~3x smaller)
   %(prog)s --format webp --quality 100 # WEBP lossless (smaller than PNG)
   %(prog)s --dry-run                    # list asset categories without extracting
@@ -1613,6 +1615,17 @@ Examples:
         "--chara",
         action="store_true",
         help="Only dump character images (icons + portraits from chara/ assets)",
+    )
+    parser.add_argument(
+        "--sound",
+        action="store_true",
+        help="Only dump sound/audio assets (sound/ bundles). "
+             "Saves as OGG/WAV/M4A if decodable, raw FSB otherwise",
+    )
+    parser.add_argument(
+        "--movie",
+        action="store_true",
+        help="Only dump movie/video assets (movie/ bundles)",
     )
     parser.add_argument(
         "--no-cache",
@@ -1736,6 +1749,20 @@ Examples:
             else:
                 log.warning("WEBP not available, falling back to PNG")
                 _IMAGE_FORMAT = "png"
+
+    if args.sound:
+        type_filter = {"AudioClip"}
+        flat_depth = 1
+        collapse_singles = True
+        if name_filter == "%":
+            name_filter = "sound/%"
+
+    if args.movie:
+        type_filter = {"VideoClip"}
+        flat_depth = 1
+        collapse_singles = True
+        if name_filter == "%":
+            name_filter = "movie/%"
 
     if args.images_only:
         type_filter = {"Texture2D", "Sprite"}
