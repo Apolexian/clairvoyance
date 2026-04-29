@@ -531,6 +531,12 @@ def _img_ext() -> str:
     return ".webp" if _can_webp() else ".png"
 
 
+# Image output format for _export_texture.  Set via --format CLI flag.
+# "png" = lossless PNG, "webp" = high-quality WEBP (lossless by default).
+_IMAGE_FORMAT: str = "png"
+_IMAGE_QUALITY: int = 95  # only used when _IMAGE_FORMAT == "webp" and lossy
+
+
 # ── Per-type exporters ─────────────────────────────────────────────────
 
 
@@ -576,6 +582,9 @@ def _export_texture(obj, out_dir: Path, idx: int) -> list[str]:
     UnityPy's Sprite.image uses the textureRect to crop to the correct region.
     For any remaining Texture2D objects (no matching Sprite in the bundle),
     transparent padding is auto-cropped as a fallback.
+
+    Output format is controlled by the module-level ``_IMAGE_FORMAT`` setting
+    (default PNG, switchable to WEBP via ``--format webp``).
     """
     saved = []
     try:
@@ -588,8 +597,13 @@ def _export_texture(obj, out_dir: Path, idx: int) -> list[str]:
         if obj.type.name == "Texture2D":
             img = _autocrop_transparent(img)
 
-        out_path = out_dir / f"{name}.png"
-        img.save(str(out_path), "PNG")
+        if _IMAGE_FORMAT == "webp" and _can_webp():
+            out_path = out_dir / f"{name}.webp"
+            img.save(str(out_path), "WEBP", lossless=(_IMAGE_QUALITY >= 100),
+                     quality=_IMAGE_QUALITY, method=4)
+        else:
+            out_path = out_dir / f"{name}.png"
+            img.save(str(out_path), "PNG")
         saved.append(out_path.name)
     except Exception as e:
         log.debug("  texture export failed: %s", e)
@@ -818,9 +832,11 @@ def dump_bundle(
     if flat_depth is not None:
         parts = Path(asset_name).parts
         if len(parts) > flat_depth:
-            dir_parts = parts[:flat_depth]
             rest = "__".join(parts[flat_depth:])
-            out_dir = output_root / Path(*dir_parts) / rest
+            if flat_depth > 0:
+                out_dir = output_root / Path(*parts[:flat_depth]) / rest
+            else:
+                out_dir = output_root / rest
         else:
             out_dir = output_root / asset_name
     else:
@@ -914,13 +930,21 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
     Process a single bundle entry. Designed to be called via ProcessPoolExecutor.
 
     Args is a tuple of (file_path_str, entry_key, asset_name, entry_hash,
-    output_root_str, type_filter_list, flat_depth, collapse_singles).
+    output_root_str, type_filter_list, flat_depth, collapse_singles,
+    image_format, image_quality).
     Returns (asset_name, entry_hash, stats_dict, error_msg_or_None).
     """
-    file_path_str, entry_key, asset_name, entry_hash, output_root_str, type_filter_list, flat_depth, collapse_singles = args
+    (file_path_str, entry_key, asset_name, entry_hash, output_root_str,
+     type_filter_list, flat_depth, collapse_singles,
+     image_format, image_quality) = args
     file_path = Path(file_path_str)
     output_root = Path(output_root_str)
     type_filter = set(type_filter_list) if type_filter_list else None
+
+    # Set module globals in spawned workers (macOS/Windows use spawn)
+    global _IMAGE_FORMAT, _IMAGE_QUALITY
+    _IMAGE_FORMAT = image_format
+    _IMAGE_QUALITY = image_quality
 
     try:
         stats = dump_bundle(
@@ -1039,7 +1063,7 @@ def dump_all(
         work_items.append((
             str(file_path), entry["key"], asset_name, h,
             str(output_root), type_filter_list, flat_depth,
-            collapse_singles,
+            collapse_singles, _IMAGE_FORMAT, _IMAGE_QUALITY,
         ))
 
     remaining = len(work_items)
@@ -1293,6 +1317,8 @@ Examples:
   %(prog)s --images-only --no-cache    # images-only, ignore manifest cache
   %(prog)s --support-cards             # only support card images
   %(prog)s --chara                     # only character icons + portraits
+  %(prog)s --images-only --format webp # images as high-quality WEBP (~3x smaller)
+  %(prog)s --format webp --quality 100 # WEBP lossless (smaller than PNG)
   %(prog)s --dry-run                    # list asset categories without extracting
   %(prog)s --no-skip                    # re-extract even if output exists
         """,
@@ -1343,6 +1369,20 @@ Examples:
         "--no-cache",
         action="store_true",
         help="Ignore the .dump_manifest.json cache (force full rescan)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["png", "webp"],
+        default="png",
+        help="Image output format (default: png). webp is much smaller with "
+             "negligible quality loss at high --quality values",
+    )
+    parser.add_argument(
+        "--quality", "-q",
+        type=int,
+        default=95,
+        help="WEBP quality 1-100, or 100 for lossless (default: 95). "
+             "Only used with --format webp",
     )
     parser.add_argument(
         "--workers", "-w",
@@ -1399,6 +1439,18 @@ Examples:
     output_root.mkdir(parents=True, exist_ok=True)
     log.info("Output directory: %s", output_root.resolve())
 
+    # Set image output format (used by _export_texture in worker processes)
+    global _IMAGE_FORMAT, _IMAGE_QUALITY
+    _IMAGE_FORMAT = args.format
+    _IMAGE_QUALITY = max(1, min(100, args.quality))
+    if _IMAGE_FORMAT == "webp":
+        if _can_webp():
+            mode = "lossless" if _IMAGE_QUALITY >= 100 else f"quality={_IMAGE_QUALITY}"
+            log.info("Image format: WEBP (%s)", mode)
+        else:
+            log.warning("WEBP not available (missing Pillow plugin), falling back to PNG")
+            _IMAGE_FORMAT = "png"
+
     type_filter = set(args.types) if args.types else None
     flat_depth = None
     collapse_singles = False
@@ -1407,10 +1459,19 @@ Examples:
     # Convenience presets — these imply --images-only behaviour
     if args.support_cards:
         type_filter = {"Texture2D", "Sprite"}
-        flat_depth = 1
+        flat_depth = 0          # everything flat in output_root
         collapse_singles = True
         if name_filter == "%":
             name_filter = "supportcard/%"
+        # Default to webp for support cards (much smaller for web use)
+        if args.format == "png" and "--format" not in sys.argv:
+            _IMAGE_FORMAT = "webp"
+            if _can_webp():
+                mode = "lossless" if _IMAGE_QUALITY >= 100 else f"quality={_IMAGE_QUALITY}"
+                log.info("Image format: WEBP (%s) [default for --support-cards]", mode)
+            else:
+                log.warning("WEBP not available, falling back to PNG")
+                _IMAGE_FORMAT = "png"
 
     if args.chara:
         type_filter = {"Texture2D", "Sprite"}
