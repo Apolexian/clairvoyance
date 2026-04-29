@@ -146,25 +146,6 @@ python build_win.py
 
 ### Output
 
-- **`discovery/analysis.md`** — human-readable report, top classes per domain
-- **`discovery/interesting.json`** — filtered/scored JSON for the dump module
-
-### 3. Collect — capture data while playing
-
-```bash
-# Targeted hooks (skills, events, races, network)
-uv run collect.py
-
-# Data-driven dump — reads field layouts from interesting.json,
-# hooks top-scored classes, dumps all field values at runtime
-uv run collect.py --modules dump --label my-session
-uv run collect.py --modules dump --dump-min-score 40 --dump-max-classes 50
-
-# Combine modules
-uv run collect.py --modules dump network skills
-
-# Network capture only
-uv run collect.py --modules network
 ```
 dist/Clairvoyance/
   Clairvoyance.exe      ← double-click to launch
@@ -182,6 +163,91 @@ double-click `Clairvoyance.exe`, and they're running.
 **End-user requirements:** Windows 10/11 with .NET Framework 4.x (pre-installed
 on all modern Windows). If the GUI window doesn't appear, the user should
 install the [.NET Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0).
+
+## Asset Dumper (`dump_all_assets.py`)
+
+Extracts assets from the game's Unity bundles into organised files.
+Auto-detects the game directory and handles decryption, decompression, and
+format conversion.
+
+### Quick Start
+
+```bash
+uv run dump_all_assets.py                    # dump everything (auto-detect game dir)
+uv run dump_all_assets.py /path/to/game      # explicit game directory
+```
+
+### Convenience Presets
+
+```bash
+uv run dump_all_assets.py --support-cards    # support card images → flat dir, WEBP
+uv run dump_all_assets.py --chara            # character images → flat dir, WEBP
+uv run dump_all_assets.py --images-only      # all images (Texture2D + Sprite)
+uv run dump_all_assets.py --sound            # all audio (AudioClip)
+uv run dump_all_assets.py --movie            # all video (VideoClip)
+```
+
+Each preset filters to the relevant asset type and name prefix, collapses
+unnecessary directory nesting, and skips scanning unrelated assets entirely.
+
+### Image Format
+
+```bash
+uv run dump_all_assets.py --images-only --format webp              # lossy WEBP (quality 95)
+uv run dump_all_assets.py --images-only --format webp --quality 100  # lossless WEBP
+uv run dump_all_assets.py --images-only --format png               # PNG (default, lossless)
+```
+
+`--support-cards` and `--chara` default to WEBP automatically.
+
+### Delta Mode (Incremental)
+
+On the first run, a `.dump_manifest.json` is written alongside the output.
+Subsequent runs skip bundles that have already been extracted — only new or
+changed assets are processed.
+
+```bash
+uv run dump_all_assets.py --images-only      # first run: extracts everything
+uv run dump_all_assets.py --images-only      # second run: skips what's done
+uv run dump_all_assets.py --no-cache         # force full re-extract
+```
+
+### Filtering
+
+```bash
+uv run dump_all_assets.py --filter "story/%"             # only story assets
+uv run dump_all_assets.py --filter "supportcard/%"       # only support card bundles
+uv run dump_all_assets.py --types Texture2D Sprite       # only these Unity types
+uv run dump_all_assets.py --dry-run                      # list categories, don't extract
+```
+
+### All Options
+
+| Flag | Description |
+|------|-------------|
+| `--output`, `-o` | Output directory (default: interactive or `./dump`) |
+| `--filter` | SQL LIKE pattern on asset name (default: `%` = all) |
+| `--types` | Space-separated Unity type names to extract |
+| `--images-only`, `-i` | Only Texture2D + Sprite, flat dirs |
+| `--support-cards` | Support card images, flat output, WEBP default |
+| `--chara` | Character images, flat output, WEBP default |
+| `--sound` | Audio assets only (OGG/WAV/FSB) |
+| `--movie` | Video assets only |
+| `--format` | `png` or `webp` (default: `png`) |
+| `--quality`, `-q` | WEBP quality 1-100 (default: 95, 100 = lossless) |
+| `--no-cache` | Ignore manifest, force full rescan |
+| `--no-skip` | Re-extract even if output directory exists |
+| `--workers`, `-w` | Parallel workers (default: auto, 1 = sequential) |
+| `--dry-run` | List asset categories without extracting |
+| `-v` | Verbose logging |
+
+### Audio Notes
+
+Audio is saved in its native format when possible (OGG, WAV, M4A). Most Uma
+Musume audio uses FMOD Sound Bank (FSB) format. If the FMOD native library is
+installed (`fmod.dll` on Windows), UnityPy decodes FSB to WAV automatically.
+Otherwise, raw `.fsb` files are saved — these can be played with
+[vgmstream](https://vgmstream.org/) or foobar2000 with the vgmstream plugin.
 
 ## How It Works
 
