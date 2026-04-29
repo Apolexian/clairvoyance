@@ -36,6 +36,7 @@ Usage:
     uv run dump_all_assets.py --filter "sound/%"        # only sound assets
     uv run dump_all_assets.py --types Texture2D Sprite  # only textures
     uv run dump_all_assets.py --images-only              # images only, flat dirs
+    uv run dump_all_assets.py --images-only --no-cache  # force full rescan
     uv run dump_all_assets.py --dry-run                 # list entries, don't extract
 """
 
@@ -450,6 +451,61 @@ def read_all_meta_entries(game_dir: Path, name_filter: str = "%") -> list[dict]:
     return entries
 
 
+# ── Bundle type cache / manifest ───────────────────────────────────────
+# Tracks which Unity types each bundle contains so subsequent runs can
+# skip bundles that have no types matching the filter (e.g. images-only
+# skips bundles that only contain AudioClip/TextAsset).  Also serves as
+# a delta mechanism: if a bundle's hash hasn't changed, it's skipped.
+
+_MANIFEST_NAME = ".dump_manifest.json"
+_MANIFEST_VERSION = 1
+
+
+def _load_manifest(output_root: Path) -> dict:
+    """Load the manifest from disk. Returns {hash: {types: [...]}}.
+
+    The top-level structure is ``{"v": 1, "bundles": {hash: {...}}}``.
+    """
+    p = output_root / _MANIFEST_NAME
+    if not p.is_file():
+        return {}
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+        if data.get("v") != _MANIFEST_VERSION:
+            return {}
+        return data.get("bundles", {})
+    except Exception:
+        return {}
+
+
+def _save_manifest(output_root: Path, bundles: dict) -> None:
+    p = output_root / _MANIFEST_NAME
+    p.write_text(
+        json.dumps({"v": _MANIFEST_VERSION, "bundles": bundles}, separators=(",", ":")),
+        encoding="utf-8",
+    )
+
+
+# Asset name prefixes that are known to never contain image data.
+# Used to pre-filter entries in images-only mode for a large speedup.
+_NON_IMAGE_PREFIXES = (
+    "sound/",
+    "movie/",
+    "font/",
+    "masterdb/",
+    "manifest/",
+    "shader/",
+)
+
+
+def _is_image_candidate(name: str) -> bool:
+    """Return False for asset names that are known to never contain images."""
+    for prefix in _NON_IMAGE_PREFIXES:
+        if name.startswith(prefix):
+            return False
+    return True
+
+
 # ── Image format detection ─────────────────────────────────────────────
 
 _webp_ok: bool | None = None
@@ -490,11 +546,36 @@ def _safe_filename(name: str, fallback: str = "unnamed") -> str:
     return name[:200] or fallback
 
 
+def _autocrop_transparent(img):
+    """Crop transparent padding from an RGBA image.
+
+    Unity textures are often padded to power-of-2 dimensions.  This trims
+    fully-transparent rows/columns so the exported file has the correct
+    aspect ratio (e.g. support cards at 9:12 instead of being squished
+    into a 1024×1024 square).
+
+    Returns the cropped image, or the original if no cropping is needed.
+    """
+    if img.mode != "RGBA":
+        return img
+    bbox = img.getbbox()  # bounding box of non-zero (non-transparent) area
+    if bbox is None:
+        return img
+    # Only crop if there's meaningful padding (>1 px on any side)
+    w, h = img.size
+    left, upper, right, lower = bbox
+    if left <= 1 and upper <= 1 and right >= w - 1 and lower >= h - 1:
+        return img
+    return img.crop(bbox)
+
+
 def _export_texture(obj, out_dir: Path, idx: int) -> list[str]:
     """Export a Texture2D or Sprite object. Returns list of saved filenames.
 
-    Always saves as lossless PNG at the original resolution to preserve
-    quality and aspect ratio.
+    Sprite objects are preferred over Texture2D (handled in dump_bundle) since
+    UnityPy's Sprite.image uses the textureRect to crop to the correct region.
+    For any remaining Texture2D objects (no matching Sprite in the bundle),
+    transparent padding is auto-cropped as a fallback.
     """
     saved = []
     try:
@@ -502,6 +583,10 @@ def _export_texture(obj, out_dir: Path, idx: int) -> list[str]:
         name = _safe_filename(getattr(data, "m_Name", "") or "", f"texture_{idx:04d}")
 
         img = data.image  # PIL Image at original dimensions
+
+        # Texture2D may have power-of-2 padding; Sprites are already cropped
+        if obj.type.name == "Texture2D":
+            img = _autocrop_transparent(img)
 
         out_path = out_dir / f"{name}.png"
         img.save(str(out_path), "PNG")
@@ -710,6 +795,7 @@ def dump_bundle(
     output_root: Path,
     type_filter: set[str] | None = None,
     flat_depth: int | None = None,
+    collapse_singles: bool = False,
 ) -> dict[str, int]:
     """
     Decrypt and dump all objects from a single asset bundle.
@@ -719,6 +805,10 @@ def dump_bundle(
                     levels below *output_root*.  For example ``flat_depth=1``
                     turns ``chara/chr1001_00/pfb_chr1001_00`` into
                     ``chara/chr1001_00__pfb_chr1001_00`` (one subdirectory).
+        collapse_singles: If True, when a bundle produces exactly one file
+                          move it up to the parent directory and remove the
+                          now-empty wrapper directory.  File names are kept
+                          as-is (they contain the IDs callers rely on).
 
     Returns a dict of {type_name: count_exported}.
     """
@@ -728,7 +818,6 @@ def dump_bundle(
     if flat_depth is not None:
         parts = Path(asset_name).parts
         if len(parts) > flat_depth:
-            # Keep the first (flat_depth) parts as dirs, join the rest with "__"
             dir_parts = parts[:flat_depth]
             rest = "__".join(parts[flat_depth:])
             out_dir = output_root / Path(*dir_parts) / rest
@@ -754,6 +843,19 @@ def dump_bundle(
             out_dir.rmdir()
         return stats
 
+    # When exporting images, prefer Sprite over Texture2D for the same
+    # asset name because Sprite.image uses the textureRect to crop to the
+    # correct aspect ratio (e.g. 9:12 support cards) whereas Texture2D
+    # returns the raw texture which may have power-of-2 padding.
+    sprite_names: set[str] = set()
+    if not type_filter or "Texture2D" in type_filter or "Sprite" in type_filter:
+        for obj in env.objects:
+            if obj.type.name == "Sprite":
+                with contextlib.suppress(Exception):
+                    name = obj.peek_name()
+                    if name:
+                        sprite_names.add(name)
+
     for idx, obj in enumerate(env.objects):
         type_name = obj.type.name
 
@@ -762,6 +864,13 @@ def dump_bundle(
 
         if type_filter and type_name not in type_filter:
             continue
+
+        # Skip Texture2D when a Sprite with the same name exists — the
+        # Sprite export will have the correct dimensions / aspect ratio.
+        if type_name == "Texture2D" and sprite_names:
+            with contextlib.suppress(Exception):
+                if obj.peek_name() in sprite_names:
+                    continue
 
         exporter = EXPORTERS.get(type_name)
         if exporter:
@@ -775,30 +884,52 @@ def dump_bundle(
     if not stats:
         with contextlib.suppress(OSError):
             out_dir.rmdir()
+    elif collapse_singles:
+        _collapse_single_file_dir(out_dir)
 
     return stats
+
+
+def _collapse_single_file_dir(out_dir: Path) -> None:
+    """Move a lone file up to the parent dir and remove the wrapper."""
+    try:
+        children = list(out_dir.iterdir())
+        if len(children) != 1 or not children[0].is_file():
+            return
+        single = children[0]
+        dest = out_dir.parent / single.name
+        if dest.exists():
+            return  # name collision — keep the directory
+        single.rename(dest)
+        out_dir.rmdir()
+    except OSError:
+        pass
 
 
 # ── Worker function for multiprocessing ────────────────────────────────
 
 
-def _dump_one(args: tuple) -> tuple[str, dict[str, int], str | None]:
+def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
     """
     Process a single bundle entry. Designed to be called via ProcessPoolExecutor.
 
-    Args is a tuple of (file_path_str, entry_key, asset_name, output_root_str, type_filter_list, flat_depth).
-    Returns (asset_name, stats_dict, error_msg_or_None).
+    Args is a tuple of (file_path_str, entry_key, asset_name, entry_hash,
+    output_root_str, type_filter_list, flat_depth, collapse_singles).
+    Returns (asset_name, entry_hash, stats_dict, error_msg_or_None).
     """
-    file_path_str, entry_key, asset_name, output_root_str, type_filter_list, flat_depth = args
+    file_path_str, entry_key, asset_name, entry_hash, output_root_str, type_filter_list, flat_depth, collapse_singles = args
     file_path = Path(file_path_str)
     output_root = Path(output_root_str)
     type_filter = set(type_filter_list) if type_filter_list else None
 
     try:
-        stats = dump_bundle(file_path, entry_key, asset_name, output_root, type_filter, flat_depth)
-        return (asset_name, stats, None)
+        stats = dump_bundle(
+            file_path, entry_key, asset_name, output_root,
+            type_filter, flat_depth, collapse_singles,
+        )
+        return (asset_name, entry_hash, stats, None)
     except Exception as e:
-        return (asset_name, {}, str(e))
+        return (asset_name, entry_hash, {}, str(e))
 
 
 # ── Main dump logic ───────────────────────────────────────────────────
@@ -813,6 +944,8 @@ def dump_all(
     skip_existing: bool = True,
     workers: int = 0,
     flat_depth: int | None = None,
+    collapse_singles: bool = False,
+    use_cache: bool = True,
 ) -> dict[str, int]:
     """
     Dump all assets matching the filter.
@@ -820,6 +953,9 @@ def dump_all(
     Args:
         workers: Number of parallel workers. 0 = auto (cpu_count), 1 = sequential.
         flat_depth: Max directory nesting depth below output_root (None = unlimited).
+        collapse_singles: Collapse single-file output directories.
+        use_cache: Use .dump_manifest.json to skip already-processed bundles
+                   and bundles known to have no matching types (delta mode).
 
     Returns aggregate {type_name: total_count}.
     """
@@ -830,6 +966,15 @@ def dump_all(
 
     # Filter out resourcelist / manifest-only entries
     entries = [e for e in entries if "resourcelist" not in e["name"]]
+
+    # In images-only mode, skip asset names that are known to never contain images
+    images_only = type_filter and type_filter <= {"Texture2D", "Sprite"}
+    if images_only:
+        before = len(entries)
+        entries = [e for e in entries if _is_image_candidate(e["name"])]
+        excluded = before - len(entries)
+        if excluded:
+            log.info("Excluded %d non-image entries (sound/movie/font/…)", excluded)
 
     log.info("Found %d asset entries to process", len(entries))
 
@@ -850,8 +995,12 @@ def dump_all(
     agg_stats: dict[str, int] = {}
     processed = 0
     skipped = 0
+    cache_skipped = 0
     errors = 0
     t0 = time.time()
+
+    # Load manifest for delta / type-cache support
+    manifest = _load_manifest(output_root) if use_cache else {}
 
     # Build work list, skipping already-done and missing files
     work_items: list[tuple] = []
@@ -861,6 +1010,21 @@ def dump_all(
         asset_name = entry["name"]
         h = entry["hash"]
         file_path = dat_dir / h[:2] / h
+
+        # Delta: skip if manifest shows this hash was already processed
+        if use_cache and h in manifest:
+            cached = manifest[h]
+            # If type-filtered, skip bundles that had no matching types
+            if type_filter:
+                cached_types = set(cached.get("types", []))
+                if not (cached_types & type_filter):
+                    cache_skipped += 1
+                    processed += 1
+                    continue
+            # Hash matches and not type-filtered out — already extracted
+            skipped += 1
+            processed += 1
+            continue
 
         out_dir = output_root / asset_name
         if skip_existing and out_dir.is_dir() and any(out_dir.iterdir()):
@@ -873,14 +1037,18 @@ def dump_all(
             continue
 
         work_items.append((
-            str(file_path), entry["key"], asset_name,
+            str(file_path), entry["key"], asset_name, h,
             str(output_root), type_filter_list, flat_depth,
+            collapse_singles,
         ))
 
     remaining = len(work_items)
+    skip_detail = f"{skipped} skipped (existing)"
+    if cache_skipped:
+        skip_detail += f", {cache_skipped} skipped (cache: no matching types)"
     log.info(
-        "%d to extract, %d skipped (existing), %d missing files",
-        remaining, skipped, processed - skipped,
+        "%d to extract, %s, %d missing files",
+        remaining, skip_detail, processed - skipped - cache_skipped,
     )
 
     if not work_items:
@@ -896,12 +1064,14 @@ def dump_all(
     if workers == 1:
         # Sequential mode
         for args in work_items:
-            asset_name, stats, err = _dump_one(args)
+            asset_name, entry_hash, stats, err = _dump_one(args)
             if err:
                 errors += 1
                 log.debug("Error processing %s: %s", asset_name, err)
             for k, v in stats.items():
                 agg_stats[k] = agg_stats.get(k, 0) + v
+            if use_cache:
+                manifest[entry_hash] = {"types": list(stats.keys())}
             processed += 1
             if processed % 50 == 0:
                 _progress(processed, total, skipped, errors, agg_stats, t0)
@@ -916,12 +1086,14 @@ def dump_all(
             for future in as_completed(futures):
                 asset_name = futures[future]
                 try:
-                    _, stats, err = future.result()
+                    _, entry_hash, stats, err = future.result()
                     if err:
                         errors += 1
                         log.debug("Error processing %s: %s", asset_name, err)
                     for k, v in stats.items():
                         agg_stats[k] = agg_stats.get(k, 0) + v
+                    if use_cache:
+                        manifest[entry_hash] = {"types": list(stats.keys())}
                 except Exception as e:
                     errors += 1
                     log.debug("Worker exception for %s: %s", asset_name, e)
@@ -930,6 +1102,12 @@ def dump_all(
                     _progress(processed, total, skipped, errors, agg_stats, t0)
 
     _progress(processed, total, skipped, errors, agg_stats, t0, final=True)
+
+    # Persist manifest for next run (delta + type cache)
+    if use_cache and manifest:
+        _save_manifest(output_root, manifest)
+        log.info("Saved manifest (%d entries) → %s", len(manifest), _MANIFEST_NAME)
+
     return agg_stats
 
 
@@ -1112,6 +1290,9 @@ Examples:
   %(prog)s --types Texture2D Sprite     # only textures
   %(prog)s --types MonoBehaviour        # only MonoBehaviours (JSON)
   %(prog)s --images-only                # only images, flat directory structure
+  %(prog)s --images-only --no-cache    # images-only, ignore manifest cache
+  %(prog)s --support-cards             # only support card images
+  %(prog)s --chara                     # only character icons + portraits
   %(prog)s --dry-run                    # list asset categories without extracting
   %(prog)s --no-skip                    # re-extract even if output exists
         """,
@@ -1145,7 +1326,23 @@ Examples:
     parser.add_argument(
         "--images-only", "-i",
         action="store_true",
-        help="Only dump images (Texture2D/Sprite), flatten output to max 1 directory depth",
+        help="Only dump images (Texture2D/Sprite), collapse single-file dirs, "
+             "flatten output to max 1 directory depth",
+    )
+    parser.add_argument(
+        "--support-cards",
+        action="store_true",
+        help="Only dump support card images (supportcard/ assets)",
+    )
+    parser.add_argument(
+        "--chara",
+        action="store_true",
+        help="Only dump character images (icons + portraits from chara/ assets)",
+    )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Ignore the .dump_manifest.json cache (force full rescan)",
     )
     parser.add_argument(
         "--workers", "-w",
@@ -1204,20 +1401,40 @@ Examples:
 
     type_filter = set(args.types) if args.types else None
     flat_depth = None
+    collapse_singles = False
+    name_filter = args.filter
+
+    # Convenience presets — these imply --images-only behaviour
+    if args.support_cards:
+        type_filter = {"Texture2D", "Sprite"}
+        flat_depth = 1
+        collapse_singles = True
+        if name_filter == "%":
+            name_filter = "supportcard/%"
+
+    if args.chara:
+        type_filter = {"Texture2D", "Sprite"}
+        flat_depth = 1
+        collapse_singles = True
+        if name_filter == "%":
+            name_filter = "chara/%"
 
     if args.images_only:
         type_filter = {"Texture2D", "Sprite"}
         flat_depth = 1
+        collapse_singles = True
 
     stats = dump_all(
         game_dir=game_dir,
         output_root=output_root,
-        name_filter=args.filter,
+        name_filter=name_filter,
         type_filter=type_filter,
         dry_run=args.dry_run,
         skip_existing=not args.no_skip,
         workers=args.workers,
         flat_depth=flat_depth,
+        collapse_singles=collapse_singles,
+        use_cache=not args.no_cache,
     )
 
     if stats:
