@@ -639,28 +639,78 @@ def _export_text_asset(obj, out_dir: Path, idx: int) -> list[str]:
     return saved
 
 
+def _get_audio_data(data) -> bytes | None:
+    """Get raw audio bytes from an AudioClip, handling external resources."""
+    audio_data = getattr(data, "m_AudioData", None)
+    if audio_data and len(audio_data) > 0:
+        return bytes(audio_data)
+    # Audio stored in external .resource file
+    res = getattr(data, "m_Resource", None)
+    if res and getattr(res, "m_Size", 0) > 0:
+        try:
+            from UnityPy.helpers.ResourceReader import get_resource_data
+
+            return get_resource_data(
+                res.m_Source, data.object_reader.assets_file, res.m_Offset, res.m_Size
+            )
+        except Exception as e:
+            log.debug("  failed to read external audio resource: %s", e)
+    return None
+
+
+def _audio_ext_from_magic(data: bytes) -> str:
+    """Detect audio format from magic bytes."""
+    if data[:4] == b"OggS":
+        return ".ogg"
+    if data[:4] == b"RIFF":
+        return ".wav"
+    if len(data) >= 8 and data[4:8] == b"ftyp":
+        return ".m4a"
+    if data[:4] in (b"FSB3", b"FSB4", b"FSB5"):
+        return ".fsb"
+    return ".bin"
+
+
 def _export_audioclip(obj, out_dir: Path, idx: int) -> list[str]:
-    """Export an AudioClip — WAV via UnityPy samples if available, else raw."""
+    """Export an AudioClip.
+
+    Strategy:
+      1. Try UnityPy .samples (decodes OGG/WAV/M4A natively, FSB via FMOD).
+      2. If .samples fails (FMOD not installed), save raw audio with the
+         correct extension so external tools (vgmstream, foobar2000) can
+         open it.
+    """
     saved = []
     try:
         data = obj.read()
         name = _safe_filename(getattr(data, "m_Name", "") or "", f"audio_{idx:04d}")
 
-        # UnityPy exposes .samples as {sample_name: bytes} for decoded audio
-        samples = getattr(data, "samples", None)
-        if samples:
-            for sname, sbytes in samples.items():
-                sname_safe = _safe_filename(sname or name, f"sample_{idx:04d}")
-                out_path = out_dir / f"{sname_safe}.wav"
-                out_path.write_bytes(sbytes)
-                saved.append(out_path.name)
-        else:
-            # Fallback: save m_AudioData raw bytes
-            audio_data = getattr(data, "m_AudioData", b"")
-            if audio_data:
-                out_path = out_dir / f"{name}.audioclip"
-                out_path.write_bytes(audio_data)
-                saved.append(out_path.name)
+        # Try the full UnityPy decode path first (handles OGG/WAV/M4A natively,
+        # FSB via pyfmodex if the FMOD native library is installed)
+        try:
+            samples = data.samples
+            if samples:
+                for sname, sbytes in samples.items():
+                    sname_safe = _safe_filename(sname or name, f"sample_{idx:04d}")
+                    out_path = out_dir / sname_safe
+                    out_path.write_bytes(sbytes)
+                    saved.append(out_path.name)
+                return saved
+        except Exception as e:
+            log.debug("  UnityPy .samples decode failed (likely no FMOD): %s", e)
+
+        # Fallback: save raw audio data with detected extension
+        raw = _get_audio_data(data)
+        if raw and len(raw) > 0:
+            ext = _audio_ext_from_magic(raw)
+            out_path = out_dir / f"{name}{ext}"
+            out_path.write_bytes(raw)
+            saved.append(out_path.name)
+            if ext == ".fsb":
+                log.debug(
+                    "  saved as FSB (install FMOD SDK for WAV conversion, "
+                    "or use vgmstream/foobar2000 to play)"
+                )
     except Exception as e:
         log.debug("  audioclip export failed: %s", e)
     return saved
@@ -757,19 +807,66 @@ def _export_material(obj, out_dir: Path, idx: int) -> list[str]:
     return _export_typetree(obj, out_dir, idx, f"material_{idx:04d}")
 
 
+def _video_ext_from_magic(data: bytes) -> str:
+    """Detect video format from magic bytes."""
+    if len(data) >= 8 and data[4:8] == b"ftyp":
+        return ".mp4"
+    if data[:4] == b"CRID":
+        return ".usm"
+    if data[:4] == b"\x1aE\xdf\xa3":
+        return ".webm"
+    return ".mp4"
+
+
 def _export_videoclip(obj, out_dir: Path, idx: int) -> list[str]:
-    """Export a VideoClip — save raw external data if present."""
+    """Export a VideoClip.
+
+    Videos are usually stored in an external StreamedResource (not inline).
+    We read m_ExternalResources via UnityPy's resource reader, then save
+    with the correct extension based on magic bytes.
+    """
     saved = []
     try:
         data = obj.read()
         name = _safe_filename(getattr(data, "m_Name", "") or "", f"video_{idx:04d}")
-        video_data = getattr(data, "m_VideoData", b"") or getattr(data, "m_ExternalResources", b"")
-        if video_data and isinstance(video_data, bytes) and len(video_data) > 0:
-            out_path = out_dir / f"{name}.mp4"
-            out_path.write_bytes(video_data)
+
+        video_bytes = None
+
+        # m_ExternalResources is a StreamedResource with (m_Source, m_Offset, m_Size)
+        res = getattr(data, "m_ExternalResources", None)
+        if res and getattr(res, "m_Size", 0) > 0:
+            try:
+                from UnityPy.helpers.ResourceReader import get_resource_data
+
+                video_bytes = get_resource_data(
+                    res.m_Source, data.object_reader.assets_file, res.m_Offset, res.m_Size
+                )
+            except FileNotFoundError:
+                # External .resource file not bundled — common for large videos.
+                # Log the original path so the user knows where to find it.
+                orig = getattr(data, "m_OriginalPath", "")
+                log.debug(
+                    "  video %r: external resource %r not found (original: %s)",
+                    name,
+                    getattr(res, "m_Source", "?"),
+                    orig or "unknown",
+                )
+            except Exception as e:
+                log.debug("  video %r: failed to read resource: %s", name, e)
+
+        # Some clips embed data directly (rare)
+        if not video_bytes:
+            raw = getattr(data, "m_VideoData", b"")
+            if raw and len(raw) > 0:
+                video_bytes = bytes(raw)
+
+        if video_bytes and len(video_bytes) > 0:
+            ext = _video_ext_from_magic(video_bytes)
+            out_path = out_dir / f"{name}{ext}"
+            out_path.write_bytes(video_bytes)
             saved.append(out_path.name)
         else:
-            # Try typetree for metadata at least
+            # No video data available — dump metadata as JSON
             saved.extend(_export_typetree(obj, out_dir, idx, f"videoclip_{name}"))
     except Exception as e:
         log.debug("  videoclip export failed: %s", e)
