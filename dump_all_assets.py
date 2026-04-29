@@ -1475,10 +1475,18 @@ Examples:
 
     if args.chara:
         type_filter = {"Texture2D", "Sprite"}
-        flat_depth = 1
+        flat_depth = 0
         collapse_singles = True
         if name_filter == "%":
             name_filter = "chara/%"
+        if args.format == "png" and "--format" not in sys.argv:
+            _IMAGE_FORMAT = "webp"
+            if _can_webp():
+                mode = "lossless" if _IMAGE_QUALITY >= 100 else f"quality={_IMAGE_QUALITY}"
+                log.info("Image format: WEBP (%s) [default for --chara]", mode)
+            else:
+                log.warning("WEBP not available, falling back to PNG")
+                _IMAGE_FORMAT = "png"
 
     if args.images_only:
         type_filter = {"Texture2D", "Sprite"}
