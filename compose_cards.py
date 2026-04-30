@@ -40,6 +40,11 @@ TYPE_ICON_DIR = OVERLAY_DIR / "type"
 WIDTH = 1440
 HEIGHT = 1920
 
+# The frame border is ~3.2% thick. In-game the frame extends outward from
+# the art edge, so the art fills only the inner opening of the frame.
+# We inset the art by the frame border thickness so the frame wraps around it.
+FRAME_BORDER_FRAC = 0.032  # fraction of canvas each side
+
 # Layout positions (matching umaguide CSS percentages)
 TYPE_ICON_SIZE = round(WIDTH * 0.25)  # top-right, 25% width
 RARITY_LEFT = round(WIDTH * 0.05)
@@ -130,24 +135,29 @@ def composite_single_card(
         log.error("Pillow is required for composition")
         return None
 
-    # Load card art and resize to canvas
+    # Load card art
     try:
         art = Image.open(art_path).convert("RGBA")
     except Exception as e:
         log.warning("Failed to open %s: %s", art_path, e)
         return None
 
-    art = art.resize((WIDTH, HEIGHT), Image.LANCZOS)
-
-    # Apply rounded corners
-    radius = round(WIDTH * CORNER_RADIUS_FRAC)
-    mask = _make_rounded_mask(WIDTH, HEIGHT, radius)
-    # Create transparent canvas, paste art with rounded mask
     canvas = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-    canvas.paste(art, (0, 0), mask)
 
-    # Load and overlay frame (only for raw tex, not for thumbs)
     if include_frame:
+        # Art is inset so the frame border wraps around it (extends outward)
+        border_x = round(WIDTH * FRAME_BORDER_FRAC)
+        border_y = round(HEIGHT * FRAME_BORDER_FRAC)
+        art_w = WIDTH - 2 * border_x
+        art_h = HEIGHT - 2 * border_y
+        art = art.resize((art_w, art_h), Image.LANCZOS)
+
+        # Rounded corners on the inset art
+        radius = round(art_w * CORNER_RADIUS_FRAC)
+        mask = _make_rounded_mask(art_w, art_h, radius)
+        canvas.paste(art, (border_x, border_y), mask)
+
+        # Overlay frame at full canvas size
         frame_path = FRAME_DIR / f"{rarity}frame.webp"
         if frame_path.is_file():
             frame = Image.open(frame_path).convert("RGBA")
@@ -155,6 +165,12 @@ def composite_single_card(
             canvas = Image.alpha_composite(canvas, frame)
         else:
             log.debug("Frame not found: %s", frame_path)
+    else:
+        # Thumb already has frame — just resize to canvas with rounded corners
+        art = art.resize((WIDTH, HEIGHT), Image.LANCZOS)
+        radius = round(WIDTH * CORNER_RADIUS_FRAC)
+        mask = _make_rounded_mask(WIDTH, HEIGHT, radius)
+        canvas.paste(art, (0, 0), mask)
 
     # Load and overlay type icon (top-right)
     type_path = TYPE_ICON_DIR / f"{type_icon_name}.png"
