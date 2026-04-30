@@ -1831,7 +1831,9 @@ Examples:
 
             composite_dir = output_root / "composite"
             log.info("Compositing support cards → %s", composite_dir)
-            results = composite_support_cards(output_root, composite_dir)
+            results = composite_support_cards(
+                output_root, composite_dir, search_dirs=[game_dir]
+            )
             log.info("Composited %d support card images", len(results))
         except Exception as e:
             log.warning("Support card composition failed: %s", e)

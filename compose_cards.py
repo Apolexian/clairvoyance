@@ -72,18 +72,30 @@ SUPPORT_TYPE_OVERRIDE = {
 }
 
 
-def _load_card_metadata(master_db: Path | None = None) -> dict[int, dict]:
+def _load_card_metadata(master_db: Path | None = None, search_dirs: list[Path] | None = None) -> dict[int, dict]:
     """Load support card rarity and type from master.mdb.
 
+    Searches for master.mdb in: explicit path, search_dirs, APP_DIR.
     Returns {card_id: {"rarity": "SSR", "type_icon": "speed"}}.
     """
-    if master_db is None:
-        master_db = APP_DIR / "master.mdb"
-    if not master_db.is_file():
-        log.warning("master.mdb not found at %s", master_db)
+    if master_db and master_db.is_file():
+        db_path = master_db
+    else:
+        # Search common locations
+        candidates = []
+        if search_dirs:
+            for d in search_dirs:
+                candidates.append(d / "master.mdb")
+                candidates.append(d / "master" / "master.mdb")
+        candidates.append(APP_DIR / "master.mdb")
+        db_path = next((p for p in candidates if p.is_file()), None)
+
+    if not db_path:
+        log.warning("master.mdb not found")
         return {}
 
-    conn = sqlite3.connect(str(master_db))
+    log.info("Loading card metadata from %s", db_path)
+    conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     rows = conn.execute(
         "SELECT id, rarity, command_id, support_card_type FROM support_card_data"
@@ -213,6 +225,7 @@ def composite_support_cards(
     output_dir: Path,
     card_ids: list[int] | None = None,
     master_db: Path | None = None,
+    search_dirs: list[Path] | None = None,
     progress_callback=None,
 ) -> dict[int, str]:
     """Composite all support card images in input_dir.
@@ -227,7 +240,9 @@ def composite_support_cards(
         log.error("Pillow is required. Install with: pip install Pillow")
         return {}
 
-    metadata = _load_card_metadata(master_db)
+    # Search input_dir too for master.mdb (common when dumping to same folder)
+    all_search = [input_dir] + (search_dirs or [])
+    metadata = _load_card_metadata(master_db, search_dirs=all_search)
     if not metadata:
         log.error("No card metadata available — cannot determine rarity/type")
         return {}
