@@ -59,9 +59,9 @@ RARITY_MAP = {1: "R", 2: "SR", 3: "SSR"}
 # command_id → type icon name (matches filenames in static/overlay/type/)
 COMMAND_TYPE_MAP = {
     101: "speed",
-    102: "stamina",
-    103: "power",
-    105: "guts",
+    102: "power",
+    103: "guts",
+    105: "stamina",
     106: "wit",
 }
 
@@ -235,6 +235,8 @@ def composite_support_cards(
     # Discover input files: (card_id, path, needs_frame)
     tex_pattern = re.compile(r"tex_support_card_(\d+)\.(webp|png)$")
     thumb_pattern = re.compile(r"support_thumb_(\d+)\.(webp|png)$")
+    # support_card_{id} (without tex_ prefix, not _s_) is also a thumbnail with frame
+    card_thumb_pattern = re.compile(r"support_card_(\d+)\.(webp|png)$")
 
     # tex files: raw art, need frame + badges
     work: list[tuple[int, Path, bool]] = []
@@ -251,6 +253,8 @@ def composite_support_cards(
     # thumb files: already have frame, just need rarity + type badges
     for f in input_dir.iterdir():
         m = thumb_pattern.match(f.name)
+        if not m:
+            m = card_thumb_pattern.match(f.name)
         if m:
             cid = int(m.group(1))
             if (card_ids is None or cid in card_ids) and cid not in seen_ids:
@@ -270,7 +274,7 @@ def composite_support_cards(
     for cid, art_path, needs_frame in sorted(work):
         meta = metadata.get(cid)
         if not meta:
-            log.debug("No metadata for card %d, skipping", cid)
+            log.warning("No metadata for card %d in master.mdb, skipping", cid)
             processed += 1
             continue
 
