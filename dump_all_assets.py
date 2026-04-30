@@ -1278,6 +1278,7 @@ def dump_all(
             log.info("Excluded %d non-image entries (sound/movie/font/…)", excluded)
 
     log.info("Found %d asset entries to process", len(entries))
+    log.info("Building work list…")
 
     if dry_run:
         by_prefix: dict[str, int] = {}
@@ -1306,6 +1307,14 @@ def dump_all(
     # Build work list, skipping already-done and missing files
     work_items: list[tuple] = []
     type_filter_list = list(type_filter) if type_filter else None
+
+    # Pre-build prefix→entries index for sibling lookups (avoids O(n²))
+    _prefix_index: dict[str, dict[str, tuple[str, int]]] = {}
+    for e2 in entries:
+        n = e2["name"]
+        pfx = n.rsplit("/", 1)[0] + "/" if "/" in n else ""
+        if pfx:
+            _prefix_index.setdefault(pfx, {})[n] = (e2["hash"], e2["key"])
 
     for entry in entries:
         asset_name = entry["name"]
@@ -1337,14 +1346,11 @@ def dump_all(
             processed += 1
             continue
 
-        # Build a small sibling lookup for resolving companion resource bundles
-        # (only entries sharing the same directory prefix)
+        # Sibling lookup for resolving companion resource bundles (O(1) now)
         prefix = asset_name.rsplit("/", 1)[0] + "/" if "/" in asset_name else ""
         sibling_lookup = {
-            n: (e2["hash"], e2["key"])
-            for e2 in entries
-            for n in [e2["name"]]
-            if prefix and n.startswith(prefix) and n != asset_name
+            k: v for k, v in _prefix_index.get(prefix, {}).items()
+            if k != asset_name
         } if prefix else {}
 
         work_items.append((
@@ -1385,7 +1391,7 @@ def dump_all(
             if use_cache:
                 manifest[entry_hash] = {"types": list(stats.keys())}
             processed += 1
-            if processed % 50 == 0:
+            if processed % 10 == 0:
                 _progress(processed, total, skipped, errors, agg_stats, t0)
     else:
         # Parallel mode
@@ -1410,7 +1416,7 @@ def dump_all(
                     errors += 1
                     log.debug("Worker exception for %s: %s", asset_name, e)
                 processed += 1
-                if processed % 50 == 0:
+                if processed % 10 == 0:
                     _progress(processed, total, skipped, errors, agg_stats, t0)
 
     _progress(processed, total, skipped, errors, agg_stats, t0, final=True)
@@ -1753,8 +1759,8 @@ Examples:
             _IMAGE_FORMAT = "png"
 
     type_filter = set(args.types) if args.types else None
-    flat_depth = None
-    collapse_singles = False
+    flat_depth = 3              # max 3 levels deep by default
+    collapse_singles = True     # don't create wrapper dirs for single files
     name_filter = args.filter
 
     # Convenience presets — these imply --images-only behaviour
