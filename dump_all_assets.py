@@ -589,10 +589,14 @@ def _is_support_card_name(name: str) -> bool:
 
 
 def _fix_support_card_aspect(img):
-    """Resize a squished square support card texture to the correct 9:12 ratio."""
+    """Resize a squished square support card texture to the correct 9:12 ratio.
+
+    Only applies to large textures (>=512px) — small square thumbnails/icons
+    are genuinely square and should not be resized.
+    """
     w, h = img.size
-    if w != h:
-        return img  # not squished into a square — leave as-is
+    if w != h or w < 512:
+        return img
     target_w = int(h * _SUPPORT_CARD_ASPECT[0] / _SUPPORT_CARD_ASPECT[1])
     PIL_Image = _get_pillow()
     resample = getattr(PIL_Image, "LANCZOS", None) or getattr(PIL_Image, "ANTIALIAS", 1)

@@ -211,7 +211,7 @@ def _save_image(image_data, output_path: Path) -> Path | None:
         # Support card textures are squished into square dimensions;
         # restore the correct 3:4 (9:12) aspect ratio.
         tex_name = getattr(image_data, "m_Name", "") or ""
-        if _is_support_card_name(tex_name) and img.size[0] == img.size[1]:
+        if _is_support_card_name(tex_name) and img.size[0] == img.size[1] and img.size[0] >= 512:
             target_w = int(img.size[1] * 3 / 4)
             resample = getattr(Image, "LANCZOS", None) or getattr(Image, "ANTIALIAS", 1)
             img = img.resize((target_w, img.size[1]), resample)
