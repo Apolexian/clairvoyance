@@ -575,6 +575,30 @@ def _autocrop_transparent(img):
     return img.crop(bbox)
 
 
+# Support card native aspect ratio is 9:12 (3:4).  The game stores these
+# textures squished into square (power-of-2) dimensions.  We restore the
+# correct aspect ratio on export by resizing width to height * 3/4.
+_SUPPORT_CARD_ASPECT = (3, 4)  # width : height
+_SUPPORT_CARD_KEYWORDS = ("support_card", "support_thumb", "supportcard")
+
+
+def _is_support_card_name(name: str) -> bool:
+    """Return True if the texture name looks like a support card asset."""
+    name_lower = name.lower()
+    return any(kw in name_lower for kw in _SUPPORT_CARD_KEYWORDS)
+
+
+def _fix_support_card_aspect(img):
+    """Resize a squished square support card texture to the correct 9:12 ratio."""
+    w, h = img.size
+    if w != h:
+        return img  # not squished into a square — leave as-is
+    target_w = int(h * _SUPPORT_CARD_ASPECT[0] / _SUPPORT_CARD_ASPECT[1])
+    PIL_Image = _get_pillow()
+    resample = getattr(PIL_Image, "LANCZOS", None) or getattr(PIL_Image, "ANTIALIAS", 1)
+    return img.resize((target_w, h), resample)
+
+
 def _export_texture(obj, out_dir: Path, idx: int) -> list[str]:
     """Export a Texture2D or Sprite object. Returns list of saved filenames.
 
@@ -596,6 +620,12 @@ def _export_texture(obj, out_dir: Path, idx: int) -> list[str]:
         # Texture2D may have power-of-2 padding; Sprites are already cropped
         if obj.type.name == "Texture2D":
             img = _autocrop_transparent(img)
+
+        # Support card textures are squished into square dimensions by the
+        # game; restore the correct 9:12 aspect ratio.
+        raw_name = getattr(data, "m_Name", "") or ""
+        if _is_support_card_name(raw_name):
+            img = _fix_support_card_aspect(img)
 
         if _IMAGE_FORMAT == "webp" and _can_webp():
             out_path = out_dir / f"{name}.webp"

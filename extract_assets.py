@@ -186,6 +186,16 @@ def read_meta_entries_for_pattern(game_dir: Path, name_pattern: str) -> list[dic
 
 # ── Image extraction from bundles ──────────────────────────────────────
 
+# Support card native aspect ratio is 9:12 (3:4).  The game stores these
+# textures squished into square (power-of-2) dimensions.
+_SUPPORT_CARD_KEYWORDS = ("support_card", "support_thumb", "supportcard")
+
+
+def _is_support_card_name(name: str) -> bool:
+    """Return True if the texture name looks like a support card asset."""
+    name_lower = name.lower()
+    return any(kw in name_lower for kw in _SUPPORT_CARD_KEYWORDS)
+
 
 def _save_image(image_data, output_path: Path) -> Path | None:
     """Save a UnityPy image object.  Returns the actual file path on success, None on failure.
@@ -197,6 +207,14 @@ def _save_image(image_data, output_path: Path) -> Path | None:
         img = image_data.image  # PIL Image from UnityPy
         if img.mode not in ("RGBA", "RGB"):
             img = img.convert("RGBA")
+
+        # Support card textures are squished into square dimensions;
+        # restore the correct 3:4 (9:12) aspect ratio.
+        tex_name = getattr(image_data, "m_Name", "") or ""
+        if _is_support_card_name(tex_name) and img.size[0] == img.size[1]:
+            target_w = int(img.size[1] * 3 / 4)
+            resample = getattr(Image, "LANCZOS", None) or getattr(Image, "ANTIALIAS", 1)
+            img = img.resize((target_w, img.size[1]), resample)
 
         if _WEBP_OK:
             img.save(str(output_path), "WEBP", quality=85)
