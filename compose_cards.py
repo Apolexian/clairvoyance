@@ -42,8 +42,10 @@ HEIGHT = 1920
 
 # The frame border is ~3.2% thick. In-game the frame extends outward from
 # the art edge, so the art fills only the inner opening of the frame.
-# We inset the art by the frame border thickness so the frame wraps around it.
-FRAME_BORDER_FRAC = 0.032  # fraction of canvas each side
+# We inset the art slightly less than the full border width so it tucks
+# behind the frame edge with no visible gap.
+FRAME_BORDER_FRAC = 0.032  # actual frame border thickness
+ART_INSET_FRAC = 0.018     # art inset (smaller than border to overlap behind frame)
 
 # Layout positions (matching umaguide CSS percentages)
 TYPE_ICON_SIZE = round(WIDTH * 0.25)  # top-right, 25% width
@@ -145,9 +147,11 @@ def composite_single_card(
     canvas = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
 
     if include_frame:
-        # Art is inset so the frame border wraps around it (extends outward)
-        border_x = round(WIDTH * FRAME_BORDER_FRAC)
-        border_y = round(HEIGHT * FRAME_BORDER_FRAC)
+        # Art is inset so the frame border wraps around it (extends outward).
+        # Use a slightly smaller inset than the full border so art tucks
+        # behind the frame edge — no gaps.
+        border_x = round(WIDTH * ART_INSET_FRAC)
+        border_y = round(HEIGHT * ART_INSET_FRAC)
         art_w = WIDTH - 2 * border_x
         art_h = HEIGHT - 2 * border_y
         art = art.resize((art_w, art_h), Image.LANCZOS)
