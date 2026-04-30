@@ -583,8 +583,13 @@ _SUPPORT_CARD_KEYWORDS = ("support_card", "support_thumb", "supportcard")
 
 
 def _is_support_card_name(name: str) -> bool:
-    """Return True if the texture name looks like a support card asset."""
+    """Return True if the texture name looks like a full-size support card asset.
+
+    Excludes support_card_s_{id} which are small square icons.
+    """
     name_lower = name.lower()
+    if "support_card_s_" in name_lower:
+        return False
     return any(kw in name_lower for kw in _SUPPORT_CARD_KEYWORDS)
 
 
