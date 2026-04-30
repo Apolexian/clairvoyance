@@ -650,6 +650,18 @@ def main():
         )
         print(f"\n  Done: {len(results)} support card images")
 
+        # Auto-composite extracted support cards
+        if results:
+            try:
+                from compose_cards import composite_support_cards
+
+                composite_dir = out / "composite"
+                print(f"  Compositing → {composite_dir}")
+                comp_results = composite_support_cards(out, composite_dir, card_ids=args.ids)
+                print(f"  Done: {len(comp_results)} composited")
+            except Exception as e:
+                log.warning("Support card composition failed: %s", e)
+
     if args.type in ("icons", "all"):
         out = Path(args.output) if args.output else APP_DIR / "static" / "uma"
         print(f"Extracting character icons → {out}")

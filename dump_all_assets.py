@@ -1819,6 +1819,18 @@ Examples:
     if stats:
         log.info("Done! Assets written to %s", output_root.resolve())
 
+    # Auto-composite support cards after extraction
+    if args.support_cards and stats and not args.dry_run:
+        try:
+            from compose_cards import composite_support_cards
+
+            composite_dir = output_root / "composite"
+            log.info("Compositing support cards → %s", composite_dir)
+            results = composite_support_cards(output_root, composite_dir)
+            log.info("Composited %d support card images", len(results))
+        except Exception as e:
+            log.warning("Support card composition failed: %s", e)
+
 
 if __name__ == "__main__":
     main()
