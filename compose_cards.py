@@ -24,7 +24,7 @@ import sqlite3
 from pathlib import Path
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageChops, ImageDraw
 except ImportError:
     Image = None  # type: ignore[assignment]
 
@@ -40,15 +40,10 @@ TYPE_ICON_DIR = OVERLAY_DIR / "type"
 WIDTH = 1440
 HEIGHT = 1920
 
-# Frame border is 44px on all sides; art sits exactly inside the opening.
-FRAME_BORDER = 44
-ART_W = WIDTH - 2 * FRAME_BORDER   # 1352
-ART_H = HEIGHT - 2 * FRAME_BORDER  # 1832
-
 # Layout positions (matching umaguide CSS percentages)
-TYPE_ICON_SIZE = round(WIDTH * 0.25)  # top-right, 25% width
+TYPE_ICON_SIZE = round(WIDTH * 0.20)  # top-right, 20% width
 RARITY_LEFT = round(WIDTH * 0.05)
-RARITY_WIDTH = round(WIDTH * 0.30)
+RARITY_WIDTH = round(WIDTH * 0.24)
 CORNER_RADIUS_FRAC = 0.12  # border-radius: 12%
 
 # Rarity mapping: DB value → display string
@@ -119,11 +114,7 @@ def _load_card_metadata(master_db: Path | None = None, search_dirs: list[Path] |
 def _make_rounded_mask(width: int, height: int, radius: int) -> Image.Image:
     """Create a rounded rectangle alpha mask."""
     mask = Image.new("L", (width, height), 0)
-    # Use a simple approach: draw a rounded rect via ellipse corners
-    from PIL import ImageDraw
-
     draw = ImageDraw.Draw(mask)
-    # Draw the inner rect and corner circles
     draw.rounded_rectangle([0, 0, width - 1, height - 1], radius=radius, fill=255)
     return mask
 
@@ -157,22 +148,34 @@ def composite_single_card(
     canvas = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
 
     if include_frame:
-        # Resize art to fit exactly inside the frame opening
-        art = art.resize((ART_W, ART_H), Image.LANCZOS)
-
-        # Rounded corners on the inset art
-        radius = round(ART_W * CORNER_RADIUS_FRAC)
-        mask = _make_rounded_mask(ART_W, ART_H, radius)
-        canvas.paste(art, (FRAME_BORDER, FRAME_BORDER), mask)
-
-        # Overlay frame at full canvas size
         frame_path = FRAME_DIR / f"{rarity}frame.webp"
         if frame_path.is_file():
-            frame = Image.open(frame_path).convert("RGBA")
-            frame = frame.resize((WIDTH, HEIGHT), Image.LANCZOS)
-            canvas = Image.alpha_composite(canvas, frame)
+            # Composite at the frame's native resolution so the shape
+            # mask never needs scaling — avoids all anti-aliasing artefacts.
+            native_frame = Image.open(frame_path).convert("RGBA")
+            nw, nh = native_frame.size
+
+            # Build shape mask by flood-filling exterior corners
+            fill_map = native_frame.getchannel("A").copy()
+            for corner in [(0, 0), (nw - 1, 0), (0, nh - 1), (nw - 1, nh - 1)]:
+                if fill_map.getpixel(corner) < 128:
+                    ImageDraw.floodfill(fill_map, corner, 128)
+            shape_mask = fill_map.point(lambda a: 0 if a == 128 else 255)
+
+            # Art + frame composited at native res
+            native_canvas = Image.new("RGBA", (nw, nh), (0, 0, 0, 0))
+            native_canvas.paste(art.resize((nw, nh), Image.LANCZOS), (0, 0))
+            native_canvas = Image.alpha_composite(native_canvas, native_frame)
+            native_canvas.putalpha(
+                ImageChops.darker(native_canvas.getchannel("A"), shape_mask)
+            )
+
+            # Single LANCZOS upscale of the finished composite
+            canvas = native_canvas.resize((WIDTH, HEIGHT), Image.LANCZOS)
         else:
             log.debug("Frame not found: %s", frame_path)
+            art = art.resize((WIDTH, HEIGHT), Image.LANCZOS)
+            canvas.paste(art, (0, 0))
     else:
         # Thumb already has frame — just resize to canvas with rounded corners
         art = art.resize((WIDTH, HEIGHT), Image.LANCZOS)
@@ -193,7 +196,7 @@ def composite_single_card(
         log.debug("Type icon not found: %s", type_path)
 
     # Load and overlay rarity badge (top-left area)
-    rarity_path = RARITY_DIR / f"{rarity}.webp"
+    rarity_path = RARITY_DIR / f"{rarity}.png"
     if rarity_path.is_file():
         rarity_img = Image.open(rarity_path).convert("RGBA")
         # Scale to RARITY_WIDTH, preserving aspect ratio
