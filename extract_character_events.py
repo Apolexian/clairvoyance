@@ -1108,6 +1108,552 @@ def build_character_events(
     return result
 
 
+# ── Support card mode ──────────────────────────────────────────────────
+
+RARITY_MAP = {1: "R", 2: "SR", 3: "SSR"}
+
+# Maps StatusType to reward DB field names
+STATUS_TO_FIELD = {
+    1: "speed", 2: "stamina", 3: "power", 4: "guts", 5: "wit",
+    6: "max energy", 7: "skill_point", 10: "energy", 40: "bond",
+}
+
+REWARD_FIELDS = [
+    "skill_name", "skill_id", "hint_lv", "speed", "stamina", "power",
+    "guts", "wit", "energy", "max energy", "skill_point", "mood", "bond",
+    "condition", "random", "random_stat_amount", "random_stat_count",
+    "scenario_link", "starts_date_chain", "ends_chain",
+]
+
+
+def _empty_outcome(opt: int, out: int) -> dict:
+    s = f"_Option_{opt}_Outcome_{out}"
+    return {f"{k}{s}": None for k in REWARD_FIELDS}
+
+
+def _effects_to_outcome(
+    effects: list[tuple[int, int]],
+    opt: int,
+    out: int,
+    skill_names: dict[int, str],
+) -> dict:
+    """Convert raw (StatusType, Value) tuples to reward DB outcome fields."""
+    s = f"_Option_{opt}_Outcome_{out}"
+    fields: dict[str, str | None] = {f"{k}{s}": None for k in REWARD_FIELDS}
+
+    hints: list[str] = []
+    hint_ids: list[str] = []
+    hint_lvs: list[str] = []
+
+    for st, val in effects:
+        fname = STATUS_TO_FIELD.get(st)
+        if fname:
+            # Accumulate numeric stats
+            cur = fields.get(f"{fname}{s}")
+            if cur is not None:
+                fields[f"{fname}{s}"] = str(int(cur) + val)
+            else:
+                fields[f"{fname}{s}"] = str(val)
+        elif st == 11:  # Mood
+            if val > 0:
+                fields[f"mood{s}"] = f"+{val}"
+            elif val < 0:
+                fields[f"mood{s}"] = str(val)
+        elif st in (21, 22):  # Hint
+            lv = 2 if st == 22 else 1
+            sname = skill_names.get(val, "")
+            hints.append(sname)
+            hint_ids.append(str(val))
+            hint_lvs.append(str(lv))
+        elif st == 30:  # Condition gain
+            cname = CONDITION_MAP.get(val, f"Condition_{val}")
+            fields[f"condition{s}"] = f"Get {cname}"
+        elif st == 31:  # Condition loss
+            cname = CONDITION_MAP.get(val, f"Condition_{val}")
+            fields[f"condition{s}"] = f"Lose {cname}"
+        elif st == 50:  # All stats
+            for f in ("speed", "stamina", "power", "guts", "wit"):
+                cur = fields.get(f"{f}{s}")
+                if cur is not None:
+                    fields[f"{f}{s}"] = str(int(cur) + val)
+                else:
+                    fields[f"{f}{s}"] = str(val)
+
+    if hints:
+        fields[f"skill_name{s}"] = ", ".join(hints)
+        fields[f"skill_id{s}"] = ", ".join(hint_ids)
+        fields[f"hint_lv{s}"] = ", ".join(hint_lvs)
+
+    return fields
+
+
+def query_support_card_stories(db_path: Path) -> dict:
+    """
+    Query master.mdb for support card event data.
+
+    Returns:
+        {
+            "stories": [{story_id, event_name, support_card_id, support_chara_id}],
+            "card_meta": {card_id: {chara_id, rarity, card_name, chara_name}},
+            "chara_cards": {chara_id: [card_id, ...]},
+            "skill_names": {skill_id: name},
+        }
+    """
+    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+
+    # Support card metadata
+    card_meta: dict[int, dict] = {}
+    chara_cards: dict[int, list[int]] = {}
+
+    for r in conn.execute(
+        "SELECT s.id, s.chara_id, s.rarity, "
+        "t_name.text as card_name, t_chara.text as chara_name "
+        "FROM support_card_data s "
+        "LEFT JOIN text_data t_name ON t_name.category=75 AND t_name.\"index\"=s.id "
+        "LEFT JOIN text_data t_chara ON t_chara.category=170 AND t_chara.\"index\"=s.chara_id"
+    ).fetchall():
+        cid = r["id"]
+        chara_id = r["chara_id"]
+        card_meta[cid] = {
+            "chara_id": chara_id,
+            "rarity": r["rarity"],
+            "card_name": r["card_name"] or "",
+            "chara_name": r["chara_name"] or "",
+        }
+        chara_cards.setdefault(chara_id, []).append(cid)
+
+    # All support card stories
+    stories = []
+    for r in conn.execute(
+        "SELECT DISTINCT s.story_id, s.support_card_id, s.support_chara_id, "
+        "t.text as event_name "
+        "FROM single_mode_story_data s "
+        "LEFT JOIN text_data t ON t.category=181 AND t.\"index\"=s.story_id "
+        "WHERE (s.support_chara_id > 0 OR s.support_card_id > 0) "
+        "ORDER BY s.story_id"
+    ).fetchall():
+        stories.append({
+            "story_id": r["story_id"],
+            "event_name": r["event_name"] or "",
+            "support_card_id": r["support_card_id"],
+            "support_chara_id": r["support_chara_id"],
+        })
+
+    # Skill names for hint lookups
+    skill_names: dict[int, str] = {}
+    for r in conn.execute(
+        "SELECT \"index\", text FROM text_data WHERE category=47"
+    ).fetchall():
+        skill_names[r["index"]] = r["text"]
+
+    conn.close()
+
+    log.info(
+        "Support cards: %d cards, %d stories, %d skill names",
+        len(card_meta), len(stories), len(skill_names),
+    )
+    return {
+        "stories": stories,
+        "card_meta": card_meta,
+        "chara_cards": chara_cards,
+        "skill_names": skill_names,
+    }
+
+
+def _build_reward_entry(
+    story_id: int,
+    event_name: str,
+    support_card_id: int | None,
+    support_chara_id: int | None,
+    card_name: str,
+    chara_name: str,
+    rarity_str: str,
+    choices: list[dict],
+    skill_names: dict[int, str],
+    notes: str = "asset-bundle",
+) -> dict:
+    """Build one reward DB entry from extracted choice data."""
+    data: dict = {
+        "card_id": None,
+        "character_name": None,
+        "card_chara_id": None,
+        "support_chara_id": str(support_chara_id) if support_chara_id else None,
+        "support_card_id": support_card_id,
+        "support_card_name": card_name or None,
+        "uma_name": chara_name or None,
+        "card_rarity": rarity_str,
+        "story_id": str(story_id),
+        "scenario_link": None,
+        "event_name": event_name,
+        "notes": notes,
+    }
+
+    for i, choice in enumerate(choices, 1):
+        opt_key = f"Option_{i}"
+        opt_data: dict = {}
+
+        # Outcome 1: success effects
+        if choice.get("success_effects"):
+            opt_data[f"{opt_key}_Outcome_1"] = _effects_to_outcome(
+                choice["success_effects"], i, 1, skill_names,
+            )
+        else:
+            opt_data[f"{opt_key}_Outcome_1"] = _empty_outcome(i, 1)
+
+        # Outcome 2: failure effects
+        if choice.get("failure_effects"):
+            opt_data[f"{opt_key}_Outcome_2"] = _effects_to_outcome(
+                choice["failure_effects"], i, 2, skill_names,
+            )
+        else:
+            opt_data[f"{opt_key}_Outcome_2"] = _empty_outcome(i, 2)
+
+        # Outcome 3: always empty
+        opt_data[f"{opt_key}_Outcome_3"] = _empty_outcome(i, 3)
+
+        data[opt_key] = opt_data
+
+    return data
+
+
+def _build_reward_entry_from_kamigame(
+    story_id: int,
+    event_name: str,
+    support_card_id: int | None,
+    support_chara_id: int | None,
+    card_name: str,
+    chara_name: str,
+    rarity_str: str,
+    kg_entry: dict,
+    notes: str = "kamigame",
+) -> dict:
+    """Build a reward DB entry from kamigame data (for events with no asset bundle)."""
+    data: dict = {
+        "card_id": None,
+        "character_name": None,
+        "card_chara_id": None,
+        "support_chara_id": str(support_chara_id) if support_chara_id else None,
+        "support_card_id": support_card_id,
+        "support_card_name": card_name or None,
+        "uma_name": chara_name or None,
+        "card_rarity": rarity_str,
+        "story_id": str(story_id),
+        "scenario_link": None,
+        "event_name": event_name,
+        "notes": notes,
+    }
+
+    options = kg_entry.get("option_texts", [])
+    successes = kg_entry.get("success_lines", [])
+    failures = kg_entry.get("failure_lines", [])
+
+    if not options and successes:
+        # Deterministic: single outcome, no choices
+        options = [""]
+        notes = "kamigame-deterministic"
+        data["notes"] = notes
+
+    for i in range(max(len(options), 1)):
+        opt_key = f"Option_{i + 1}"
+        succ = _translate_effect_line(successes[i]) if i < len(successes) else ""
+        fail = _translate_effect_line(failures[i]) if i < len(failures) else ""
+
+        opt_data: dict = {}
+        # Parse translated effect strings into structured fields
+        opt_data[f"{opt_key}_Outcome_1"] = _parse_translated_effects(succ, i + 1, 1)
+        if fail and fail != "-":
+            opt_data[f"{opt_key}_Outcome_2"] = _parse_translated_effects(fail, i + 1, 2)
+        else:
+            opt_data[f"{opt_key}_Outcome_2"] = _empty_outcome(i + 1, 2)
+        opt_data[f"{opt_key}_Outcome_3"] = _empty_outcome(i + 1, 3)
+
+        data[opt_key] = opt_data
+
+    return data
+
+
+def _parse_translated_effects(text: str, opt: int, out: int) -> dict:
+    """Parse translated kamigame effect text into reward DB outcome fields."""
+    s = f"_Option_{opt}_Outcome_{out}"
+    fields: dict[str, str | None] = {f"{k}{s}": None for k in REWARD_FIELDS}
+
+    if not text or not text.strip():
+        return fields
+
+    # Map English effect names to field names
+    effect_map = {
+        "Speed": "speed", "Stamina": "stamina", "Power": "power",
+        "Guts": "guts", "Wisdom": "wit", "Wit": "wit",
+        "Energy": "energy", "Max Energy": "max energy",
+        "Skill Points": "skill_point", "All Stats": None,  # handled specially
+        "Bond": "bond",
+    }
+
+    for line in text.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+
+        # Mood
+        if "Mood" in line:
+            m = re.search(r"Mood\s*([+-]\d+)", line)
+            if m:
+                fields[f"mood{s}"] = m.group(1)
+            continue
+
+        # hint
+        if "hint" in line.lower():
+            m = re.search(r"(.+?)\s+hint\s*\+?(\d+)", line, re.IGNORECASE)
+            if m:
+                cur = fields.get(f"skill_name{s}")
+                name = m.group(1).strip()
+                lv = m.group(2)
+                if cur:
+                    fields[f"skill_name{s}"] += f", {name}"
+                    fields[f"hint_lv{s}"] += f", {lv}"
+                else:
+                    fields[f"skill_name{s}"] = name
+                    fields[f"hint_lv{s}"] = lv
+            continue
+
+        # Condition
+        if "condition" in line.lower() or "Heal" in line or "Get " in line or "Lose " in line:
+            fields[f"condition{s}"] = line
+            continue
+
+        # Stat effects: "Speed +10", "All Stats +5"
+        m = re.search(r"([\w\s]+?)\s*([+-]\d+)", line)
+        if m:
+            stat_name = m.group(1).strip()
+            val = m.group(2)
+
+            if stat_name == "All Stats":
+                for f in ("speed", "stamina", "power", "guts", "wit"):
+                    cur = fields.get(f"{f}{s}")
+                    if cur is not None:
+                        fields[f"{f}{s}"] = str(int(cur) + int(val))
+                    else:
+                        fields[f"{f}{s}"] = val.lstrip("+")
+                continue
+
+            fname = effect_map.get(stat_name)
+            if fname:
+                cur = fields.get(f"{fname}{s}")
+                if cur is not None:
+                    fields[f"{fname}{s}"] = str(int(cur) + int(val))
+                else:
+                    fields[f"{fname}{s}"] = val.lstrip("+")
+
+    return fields
+
+
+def build_support_card_events(
+    masterdb_path: Path,
+    game_dir: Path | None = None,
+    workers: int = 0,
+    kamigame_data: dict[str, list[dict]] | None = None,
+) -> list[dict]:
+    """
+    Build support card event data in reward DB format.
+
+    Data source priority:
+      1. Asset bundles (choice text + exact stat effects)
+      2. Kamigame (fallback for events without asset data)
+
+    Returns list of entries in reward DB schema.
+    """
+    t0 = time.time()
+
+    db_data = query_support_card_stories(masterdb_path)
+    stories = db_data["stories"]
+    card_meta = db_data["card_meta"]
+    chara_cards = db_data["chara_cards"]
+    skill_names = db_data["skill_names"]
+
+    # Deduplicate stories by (story_id, support_chara_id, support_card_id)
+    seen_stories: dict[tuple, dict] = {}
+    for s in stories:
+        key = (s["story_id"], s["support_chara_id"], s["support_card_id"])
+        if key not in seen_stories:
+            seen_stories[key] = s
+    stories = list(seen_stories.values())
+    log.info("Deduplicated to %d unique story rows", len(stories))
+
+    # Collect all story_ids for bundle extraction
+    all_story_ids = {s["story_id"] for s in stories}
+
+    # Extract from asset bundles
+    story_choices: dict[int, list[dict]] = {}
+    if game_dir:
+        log.info("Reading meta database for support story bundles...")
+        meta_entries = read_story_meta_entries(game_dir, all_story_ids)
+        log.info("Found %d/%d story bundles in meta", len(meta_entries), len(all_story_ids))
+
+        dat_dir = game_dir / "dat"
+        work_items = []
+        for sid, entry in meta_entries.items():
+            h = entry["hash"]
+            file_path = dat_dir / h[:2] / h
+            if file_path.is_file():
+                work_items.append((sid, str(file_path), entry["key"]))
+
+        log.info("Extracting choices from %d bundles...", len(work_items))
+
+        if workers == 0:
+            workers = min(os.cpu_count() or 4, 8)
+
+        if len(work_items) <= 10 or workers == 1:
+            for args in work_items:
+                sid, choices, err = _extract_from_bundle_worker(args)
+                if err:
+                    log.debug("Error extracting %d: %s", sid, err)
+                if choices:
+                    story_choices[sid] = choices
+        else:
+            log.info("Using %d worker processes", workers)
+            with ProcessPoolExecutor(max_workers=workers) as executor:
+                futures = {
+                    executor.submit(_extract_from_bundle_worker, args): args[0]
+                    for args in work_items
+                }
+                done_count = 0
+                for future in as_completed(futures):
+                    done_count += 1
+                    sid = futures[future]
+                    try:
+                        _, choices, err = future.result()
+                        if err:
+                            log.debug("Error extracting %d: %s", sid, err)
+                        if choices:
+                            story_choices[sid] = choices
+                    except Exception as e:
+                        log.debug("Worker exception for %d: %s", sid, e)
+                    if done_count % 200 == 0:
+                        log.info("  Progress: %d/%d bundles", done_count, len(work_items))
+
+        log.info("Extracted choices from %d stories", len(story_choices))
+
+    # Build kamigame lookup keyed by (chara_name, normalized_event_name)
+    import unicodedata
+
+    def _match_norm(s: str) -> str:
+        return unicodedata.normalize("NFKC", s).replace(" ", "").lower()
+
+    kg_by_chara_event: dict[tuple[str, str], dict] = {}
+    if kamigame_data:
+        for event_name, entries in kamigame_data.items():
+            for entry in entries:
+                chara = entry.get("character", "")
+                if chara:
+                    key = (_match_norm(chara), _match_norm(event_name))
+                    if key not in kg_by_chara_event:
+                        kg_by_chara_event[key] = entry
+
+    # Build output
+    output: list[dict] = []
+    from_assets = 0
+    from_kamigame = 0
+    from_kamigame_det = 0
+    no_data = 0
+
+    for story in stories:
+        sid = story["story_id"]
+        event_name = story["event_name"]
+        if not event_name:
+            continue
+
+        sup_card_id = story["support_card_id"]
+        sup_chara_id = story["support_chara_id"]
+
+        choices = story_choices.get(sid, [])
+
+        if sup_card_id > 0:
+            # Card-specific event: single entry
+            meta = card_meta.get(sup_card_id, {})
+            rarity_str = RARITY_MAP.get(meta.get("rarity", 0), "")
+            card_name = meta.get("card_name", "")
+            chara_name = meta.get("chara_name", "")
+
+            if choices:
+                entry = _build_reward_entry(
+                    sid, event_name, sup_card_id, sup_chara_id,
+                    card_name, chara_name, rarity_str, choices, skill_names,
+                )
+                output.append(entry)
+                from_assets += 1
+            else:
+                # Try kamigame fallback
+                kg_key = (_match_norm(chara_name), _match_norm(event_name))
+                kg_entry = kg_by_chara_event.get(kg_key)
+                if kg_entry and (kg_entry.get("option_texts") or kg_entry.get("success_lines")):
+                    has_options = bool(kg_entry.get("option_texts"))
+                    entry = _build_reward_entry_from_kamigame(
+                        sid, event_name, sup_card_id, sup_chara_id,
+                        card_name, chara_name, rarity_str, kg_entry,
+                    )
+                    output.append(entry)
+                    if has_options:
+                        from_kamigame += 1
+                    else:
+                        from_kamigame_det += 1
+                else:
+                    no_data += 1
+
+        elif sup_chara_id > 0:
+            # Shared event: emit one row per rarity variant
+            cards_for_chara = chara_cards.get(sup_chara_id, [])
+            rarities = sorted({
+                card_meta[c]["rarity"]
+                for c in cards_for_chara
+                if c in card_meta
+            })
+            if not rarities:
+                rarities = [3]  # default to SSR
+
+            chara_name = ""
+            if cards_for_chara and cards_for_chara[0] in card_meta:
+                chara_name = card_meta[cards_for_chara[0]].get("chara_name", "")
+
+            for rar in rarities:
+                rarity_str = RARITY_MAP.get(rar, "")
+
+                if choices:
+                    entry = _build_reward_entry(
+                        sid, event_name, None, sup_chara_id,
+                        "", chara_name, rarity_str, choices, skill_names,
+                    )
+                    output.append(entry)
+                    from_assets += 1
+                else:
+                    kg_key = (_match_norm(chara_name), _match_norm(event_name))
+                    kg_entry = kg_by_chara_event.get(kg_key)
+                    if kg_entry and (kg_entry.get("option_texts") or kg_entry.get("success_lines")):
+                        has_options = bool(kg_entry.get("option_texts"))
+                        entry = _build_reward_entry_from_kamigame(
+                            sid, event_name, None, sup_chara_id,
+                            "", chara_name, rarity_str, kg_entry,
+                        )
+                        output.append(entry)
+                        if has_options:
+                            from_kamigame += 1
+                        else:
+                            from_kamigame_det += 1
+                    else:
+                        no_data += 1
+
+    elapsed = time.time() - t0
+    log.info("=== Support Card Results ===")
+    log.info("Total entries: %d", len(output))
+    log.info("From asset bundles: %d", from_assets)
+    log.info("From kamigame (choices): %d", from_kamigame)
+    log.info("From kamigame (deterministic): %d", from_kamigame_det)
+    log.info("No data (excluded): %d", no_data)
+    log.info("Built in %.1fs", elapsed)
+
+    return output
+
+
 # ── CLI ────────────────────────────────────────────────────────────────
 
 
@@ -1169,6 +1715,11 @@ def main():
         action="store_true",
         help="Skip fetching effect data from kamigame.jp",
     )
+    parser.add_argument(
+        "--support-cards",
+        action="store_true",
+        help="Extract support card events in reward DB format instead of character events.",
+    )
 
     args = parser.parse_args()
 
@@ -1212,19 +1763,38 @@ def main():
     if not args.no_kamigame:
         kamigame_data = fetch_kamigame_effects()
 
-    result = build_character_events(
-        masterdb_path=args.masterdb,
-        game_dir=game_dir,
-        card_ids=card_ids,
-        workers=args.workers,
-        existing_data_path=args.existing,
-        kamigame_data=kamigame_data,
-    )
+    if args.support_cards:
+        # Support card mode: reward DB format output
+        output_path = args.output
+        if output_path == APP_DIR / "character_events.json":
+            output_path = APP_DIR / "support_card_events.json"
 
-    with open(args.output, "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
+        result = build_support_card_events(
+            masterdb_path=args.masterdb,
+            game_dir=game_dir,
+            workers=args.workers,
+            kamigame_data=kamigame_data,
+        )
 
-    log.info("Wrote %d character variants to %s", len(result), args.output)
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
+
+        log.info("Wrote %d support card event entries to %s", len(result), output_path)
+    else:
+        # Character events mode (original behavior)
+        result = build_character_events(
+            masterdb_path=args.masterdb,
+            game_dir=game_dir,
+            card_ids=card_ids,
+            workers=args.workers,
+            existing_data_path=args.existing,
+            kamigame_data=kamigame_data,
+        )
+
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
+
+        log.info("Wrote %d character variants to %s", len(result), args.output)
 
 
 if __name__ == "__main__":
