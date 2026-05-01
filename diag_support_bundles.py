@@ -4,13 +4,19 @@ Diagnostic: dump raw MonoBehaviour structure from support card story bundles.
 Run on machine with game assets to understand why choice extraction is empty.
 
 Usage:
-    uv run --extra extract diag_support_bundles.py /path/to/game
-    uv run --extra extract diag_support_bundles.py /path/to/game --story-ids 830289001,801001001
+    pip install UnityPy
+    python diag_support_bundles.py /path/to/game
+    python diag_support_bundles.py /path/to/game --story-ids 830289001,801001001
+
+Outputs:
+    diag_support_bundles.json  - full structured dump
+    diag_support_bundles.log   - readable console log (commit this)
 """
 
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import sqlite3
 import sys
@@ -132,6 +138,23 @@ def main():
     )
     args = parser.parse_args()
 
+    # Tee all output to both stdout and log file
+    log_path = APP_DIR / "diag_support_bundles.log"
+    log_file = open(log_path, "w", encoding="utf-8")
+
+    class Tee:
+        def __init__(self, *streams):
+            self.streams = streams
+        def write(self, data):
+            for s in self.streams:
+                s.write(data)
+                s.flush()
+        def flush(self):
+            for s in self.streams:
+                s.flush()
+
+    sys.stdout = Tee(sys.__stdout__, log_file)
+
     if args.story_ids:
         target_ids = {int(s.strip()) for s in args.story_ids.split(",")}
     else:
@@ -209,6 +232,9 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False, default=str)
     print(f"\nFull dump written to {out_path}")
+    print(f"Log written to {log_path}")
+    log_file.close()
+    sys.stdout = sys.__stdout__
 
 
 if __name__ == "__main__":
