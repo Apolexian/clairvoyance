@@ -40,12 +40,10 @@ TYPE_ICON_DIR = OVERLAY_DIR / "type"
 WIDTH = 1440
 HEIGHT = 1920
 
-# The frame border is ~3.2% thick. In-game the frame extends outward from
-# the art edge, so the art fills only the inner opening of the frame.
-# We inset the art slightly less than the full border width so it tucks
-# behind the frame edge with no visible gap.
-FRAME_BORDER_FRAC = 0.032  # actual frame border thickness
-ART_INSET_FRAC = 0.018     # art inset (smaller than border to overlap behind frame)
+# Frame border is 44px on all sides; art sits exactly inside the opening.
+FRAME_BORDER = 44
+ART_W = WIDTH - 2 * FRAME_BORDER   # 1352
+ART_H = HEIGHT - 2 * FRAME_BORDER  # 1832
 
 # Layout positions (matching umaguide CSS percentages)
 TYPE_ICON_SIZE = round(WIDTH * 0.25)  # top-right, 25% width
@@ -159,19 +157,13 @@ def composite_single_card(
     canvas = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
 
     if include_frame:
-        # Art is inset so the frame border wraps around it (extends outward).
-        # Use a slightly smaller inset than the full border so art tucks
-        # behind the frame edge — no gaps.
-        border_x = round(WIDTH * ART_INSET_FRAC)
-        border_y = round(HEIGHT * ART_INSET_FRAC)
-        art_w = WIDTH - 2 * border_x
-        art_h = HEIGHT - 2 * border_y
-        art = art.resize((art_w, art_h), Image.LANCZOS)
+        # Resize art to fit exactly inside the frame opening
+        art = art.resize((ART_W, ART_H), Image.LANCZOS)
 
         # Rounded corners on the inset art
-        radius = round(art_w * CORNER_RADIUS_FRAC)
-        mask = _make_rounded_mask(art_w, art_h, radius)
-        canvas.paste(art, (border_x, border_y), mask)
+        radius = round(ART_W * CORNER_RADIUS_FRAC)
+        mask = _make_rounded_mask(ART_W, ART_H, radius)
+        canvas.paste(art, (FRAME_BORDER, FRAME_BORDER), mask)
 
         # Overlay frame at full canvas size
         frame_path = FRAME_DIR / f"{rarity}frame.webp"
