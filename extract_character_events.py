@@ -868,6 +868,42 @@ def _match_kamigame_effects(
 # ── Main pipeline ─────────────────────────────────────────────────────
 
 
+def _build_en_to_jp_map(masterdb_path: Path) -> dict[str, str]:
+    """
+    Build EN→JP event name mapping using a JP master.mdb alongside the
+    (possibly Global) masterdb. Returns empty dict if JP DB not found.
+    """
+    jp_db_path = masterdb_path.parent / "dump-jp" / "master.mdb"
+    if not jp_db_path.is_file():
+        # Try sibling path
+        jp_db_path = APP_DIR / "dump-jp" / "master.mdb"
+    if not jp_db_path.is_file():
+        return {}
+
+    try:
+        gl_conn = sqlite3.connect(f"file:{masterdb_path}?mode=ro", uri=True)
+        jp_conn = sqlite3.connect(f"file:{jp_db_path}?mode=ro", uri=True)
+        gl_texts = dict(gl_conn.execute(
+            'SELECT "index", text FROM text_data WHERE category=181'
+        ).fetchall())
+        jp_texts = dict(jp_conn.execute(
+            'SELECT "index", text FROM text_data WHERE category=181'
+        ).fetchall())
+        gl_conn.close()
+        jp_conn.close()
+
+        en_to_jp = {}
+        for sid, en_text in gl_texts.items():
+            jp_text = jp_texts.get(sid)
+            if en_text and jp_text and en_text != jp_text:
+                en_to_jp[en_text] = jp_text
+        log.info("Built EN→JP event name map: %d entries", len(en_to_jp))
+        return en_to_jp
+    except Exception as e:
+        log.warning("Failed to build EN→JP map: %s", e)
+        return {}
+
+
 def build_character_events(
     masterdb_path: Path,
     game_dir: Path | None = None,
@@ -908,6 +944,9 @@ def build_character_events(
     cards = db_data["cards"]
     common_stories = db_data["common_stories"]
     card_chara_map = db_data["card_chara_map"]
+
+    # Build EN→JP name map for kamigame lookups when using Global DB
+    en_to_jp = _build_en_to_jp_map(masterdb_path) if kamigame_data else {}
 
     all_target_cards = set(cards.keys())
     if card_ids:
@@ -1021,16 +1060,37 @@ def build_character_events(
 
         for story in sorted(seen_stories.values(), key=lambda x: x["story_id"]):
             sid = story["story_id"]
-            event_name_jp = story["event_name"]
+            event_name = story["event_name"]
+            # Resolve JP name for kamigame lookup (EN→JP when using Global DB)
+            kamigame_key = en_to_jp.get(event_name, event_name)
             choices = story_choices.get(sid, [])
             has_choices = len(choices) > 0
             category, event_type = classify_event(
-                sid, event_name_jp, has_choices, story["event_category"]
+                sid, event_name, has_choices, story["event_category"]
             )
 
-            # Merge kamigame effects if available
+            # Merge kamigame effects if available (uses JP name for lookup)
             if kamigame_data and choices:
-                choices = _match_kamigame_effects(event_name_jp, choices, kamigame_data)
+                choices = _match_kamigame_effects(kamigame_key, choices, kamigame_data)
+
+            # For nochoice events with no asset choices, try kamigame for
+            # auto-outcomes (e.g. "Speed +5") using a synthetic "(Auto)" choice
+            if kamigame_data and not choices and category in ("nochoice",):
+                entries = kamigame_data.get(kamigame_key, [])
+                if entries:
+                    best = entries[0]
+                    # Use first success line as the auto-outcome
+                    success = _translate_effect_line(best["success_lines"][0]) if best["success_lines"] else ""
+                    failure = ""
+                    if best.get("failure_lines") and best["failure_lines"][0]:
+                        failure = _translate_effect_line(best["failure_lines"][0])
+                    outcomes = []
+                    if success:
+                        outcomes.extend(success.split("\n"))
+                    if failure and failure != "-":
+                        outcomes.extend(f"(Fail) {f}" for f in failure.split("\n") if f)
+                    if outcomes:
+                        choices = [{"text": "(Auto)", "kamigame_outcomes": outcomes}]
 
             # Build options from extracted choices
             options = []
@@ -1074,8 +1134,8 @@ def build_character_events(
                 continue
 
             event_entry = {
-                "event_name": event_name_jp,  # Will be JP text (no translation available)
-                "event_name_jp": event_name_jp,
+                "event_name": event_name,
+                "event_name_jp": kamigame_key,  # JP name from lookup, or same as event_name
                 "event_type": event_type,
                 "category": category,
                 "event_order": choice_event_order if category == "wchoice" else 0,
