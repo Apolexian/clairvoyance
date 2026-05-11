@@ -246,9 +246,15 @@ def query_masterdb(
     # Query all stories for target characters
     # card_id=0 means shared across all outfits of that character
     placeholders = ",".join("?" * len(target_charas))
+
+    # event_category only exists in newer (JP) schema — detect and adapt
+    col_names = [c[1] for c in conn.execute("PRAGMA table_info(single_mode_story_data)").fetchall()]
+    has_event_category = "event_category" in col_names
+    cat_col = "s.event_category, " if has_event_category else ""
+
     stories = conn.execute(
         f"SELECT s.id, s.story_id, s.card_id, s.card_chara_id, s.support_card_id, "
-        f"s.event_category, t.text as event_name "
+        f"{cat_col}t.text as event_name "
         f"FROM single_mode_story_data s "
         f"LEFT JOIN text_data t ON t.category=181 AND t.\"index\"=s.story_id "
         f"WHERE s.card_chara_id IN ({placeholders}) "
@@ -265,7 +271,7 @@ def query_masterdb(
         story_info = {
             "story_id": s["story_id"],
             "event_name": s["event_name"] or "",
-            "event_category": s["event_category"],
+            "event_category": s["event_category"] if has_event_category else -1,
             "card_id": s["card_id"],
             "chara_id": s["card_chara_id"],
         }
@@ -617,6 +623,7 @@ def _extract_from_bundle_worker(args: tuple) -> tuple[int, list[dict], str | Non
 # 400XXXXXX = shared/special events
 
 LIFECYCLE_EVENTS = {
+    # JP keywords
     "新年": ("nyear", "New Year's Event"),
     "初詣": ("nyear", "New Year's Event"),
     "バレンタイン": ("wchoice", "Choice Event"),
@@ -626,6 +633,16 @@ LIFECYCLE_EVENTS = {
     "エンディング": ("nochoice", "No-Choice Event"),
     "温泉旅行": ("outings", "Outing Event"),
     "ダンスレッスン": ("dance", "Dance Lesson"),
+    # EN keywords (Global master.mdb)
+    "New Year": ("nyear", "New Year's Event"),
+    "Shrine Visit": ("nyear", "New Year's Event"),
+    "Valentine": ("wchoice", "Choice Event"),
+    "Holiday Season": ("wchoice", "Choice Event"),
+    "Fan Fest": ("nochoice", "No-Choice Event"),
+    "Summer Camp": ("nochoice", "No-Choice Event"),
+    "Ending (": ("nochoice", "No-Choice Event"),
+    "Hot Spring": ("outings", "Outing Event"),
+    "Dance Lesson": ("dance", "Dance Lesson"),
 }
 
 
@@ -639,6 +656,7 @@ def classify_event(
         1 = lifecycle (fixed story events like debut, ending)
         2 = race/goal events
         3 = random events (choice events, no-choice, outings, dance, etc.)
+        -1 = unknown (Global DB lacks this column)
     """
     sid_str = str(story_id)
 
@@ -647,12 +665,12 @@ def classify_event(
         if keyword in event_name:
             return (cat, etype)
 
-    # Dance lessons
-    if "ダンス" in event_name:
+    # Dance lessons (JP and EN)
+    if "ダンス" in event_name or "Dance Lesson" in event_name:
         return ("dance", "Dance Lesson")
 
-    # Outings
-    if "お出かけ" in event_name:
+    # Outings (JP and EN)
+    if "お出かけ" in event_name or "Outing" in event_name:
         return ("outings", "Outing Event")
 
     # Secret/version events (story_id starts with 40)
@@ -669,6 +687,7 @@ def classify_event(
     if event_category == 2:
         return ("nochoice", "No-Choice Event")
 
+    # When event_category is unknown (-1), use heuristics
     if has_choices:
         return ("wchoice", "Choice Event")
 
