@@ -1,25 +1,84 @@
-06:01:10 INFO Logging to C:\Users\nikit\Documents\clairvoyance\extract_events.log
-06:01:10 INFO Fetching effect data from kamigame.jp...
-06:01:10 INFO Loaded 5842 unique events from kamigame
-06:01:10 INFO Support cards: 531 cards, 1632 stories, 2029 skill names
-06:01:10 INFO Deduplicated to 1632 unique story rows
-06:01:10 INFO Reading meta database for support story bundles...
-06:01:12 INFO Found 1590/1590 story bundles in meta
-06:01:13 INFO Extracting choices from 1590 bundles...
-06:01:13 INFO Using 8 worker processes
-06:01:14 INFO   Progress: 200/1590 bundles
-06:01:15 INFO   Progress: 400/1590 bundles
-06:01:16 INFO   Progress: 600/1590 bundles
-06:01:18 INFO   Progress: 800/1590 bundles
-06:01:20 INFO   Progress: 1000/1590 bundles
-06:01:21 INFO   Progress: 1200/1590 bundles
-06:01:24 INFO   Progress: 1400/1590 bundles
-06:01:26 INFO Extracted choices from 618 stories
-06:01:26 INFO === Support Card Results ===
-06:01:26 INFO Total entries: 1866
-06:01:26 INFO From asset bundles: 1024
-06:01:26 INFO From kamigame (choices): 170
-06:01:26 INFO From kamigame (deterministic): 672
-06:01:26 INFO No data (excluded): 268
-06:01:26 INFO Built in 15.8s
-06:01:26 INFO Wrote 1866 support card event entries to C:\Users\nikit\Documents\clairvoyance\support_card_events.json
+05:26:40 INFO Logging to C:\Users\nikit\Documents\clairvoyance\extract_events.log
+05:26:40 INFO Fetching effect data from kamigame.jp...
+05:26:40 INFO Loaded 5842 unique events from kamigame
+05:26:40 INFO Querying master database...
+05:26:40 INFO Found 80 character variants, 57 characters with shared events
+05:26:40 INFO Total unique story_ids to process: 5584
+05:26:40 INFO Reading meta database for story bundles...
+05:26:42 INFO Found 5584/5584 story bundles in meta
+05:26:42 INFO Extracting choices from 5584 bundles...
+05:26:42 INFO DIAG story=501001100 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'IsEnableClip', 'StartFrame', 'ClipLength', 'MotionName', 'Category', 'StateType', 'BlendTime', 'OriginalClipLength', 'MotionSpeed', 'PauseStartFrame', 'PauseLength', 'Curve', 'SavedUsePoseMotion', 'SavedPoseBlendRate', 'AllowFKApplyIK', 'StartBlendTime', 'EndBlendTime', 'HipBlend', 'HipBlendRate', 'LeftWrist', 'RightWrist']
+05:26:42 INFO DIAG story=501001100 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'IsEnableClip', 'StartFrame', 'ClipLength', 'MotionName', 'Category', 'StateType', 'BlendTime', 'OriginalClipLength', 'MotionSpeed', 'PauseStartFrame', 'PauseLength', 'Curve', 'SavedUsePoseMotion', 'SavedPoseBlendRate', 'AllowFKApplyIK', 'StartBlendTime', 'EndBlendTime', 'HipBlend', 'HipBlendRate', 'LeftWrist', 'RightWrist']
+05:26:42 INFO DIAG story=501001100 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'IsEnableClip', 'StartFrame', 'ClipLength', 'Type', 'Target', 'Direction', 'EyeTargetName', 'EyeTargetPosition']
+05:26:42 INFO DIAG story=501001100 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'IsEnableClip', 'StartFrame', 'ClipLength', 'Type', 'EffectColor', 'FrameColor', 'IsFadeOut', 'KeepWindow', 'ControlDspBusEffect', 'Target', 'PictureFileId', 'PictureSequenceNumber', 'PicturePos', 'PictureSize', 'TelopTextureFileId', 'TelopSquenceNumber', 'UseTelopOffsetPos', 'TelopOffsetPos', 'SetTelopSize', 'TelopSize', 'TelopDefaultAnchor', 'TelopAnimationStartPos', 'TelopAnimationEndPos', 'TelopAnimationStartAngle', 'TelopAnimationEndAngle', 'TelopAnimationStartScale', 'TelopAnimationEndScale', 'TelopTransformCurve', 'TelopAnimationStartAlpha', 'TelopAnimationEndAlpha', 'TelopAlphaCurve', 'TelopIn', 'PlayTelopMoveAnimation', 'PlayTelopRotateAnimation', 'PlayTelopScaleAnimation', 'PlayTelopAlphaAnimation', 'CharacterShakeIntensity']
+05:26:42 INFO DIAG story=501001100 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'IsEnableClip', 'StartFrame', 'ClipLength', 'MotionName', 'Category', 'StateType', 'BlendTime', 'OriginalClipLength', 'MotionSpeed', 'PauseStartFrame', 'PauseLength', 'Curve', 'SavedUsePoseMotion', 'SavedPoseBlendRate', 'AllowFKApplyIK', 'StartBlendTime', 'EndBlendTime', 'HipBlend', 'HipBlendRate', 'LeftAnkle', 'RightAnkle']
+05:26:42 INFO DIAG story=501001100 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'IsEnableClip', 'StartFrame', 'ClipLength', 'StartAngle', 'EndAngle', 'WithMotion', 'WithHead', 'TurnLeftMotionName', 'TurnRightMotionName', 'Weight', 'TurnAnimationCurve']
+05:26:42 INFO DIAG story=501001100 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'IsEnableClip', 'StartFrame', 'ClipLength', 'Curve', 'UseTransitionCurve', 'FaceInfoList1', 'FaceInfoList2', 'IsOpenDefault']
+05:26:42 INFO DIAG story=501001100 m_Name= keys=['m_Name', 'DataVer', 'Lerp', 'IsEnableClip', 'StartFrame', 'ClipLength', 'CharaId', 'SubCharaId', 'VoiceSheetId', 'CueId', 'UseVoiceSelector', 'Name', 'Text', 'Size', 'NextBlock', 'DifferenceType', 'DifferenceFlag', 'WaitFrame', 'VoiceLength', 'Pan3dAngle', 'Type', 'ChoiceDataList', 'ColorTextInfoList', 'FeaturesFlag']
+05:26:42 INFO DIAG ChoiceDataList[0] keys: ['Text', 'NextBlock', 'LoopExitNextBlock', 'DifferenceType', 'DifferenceFlag']
+05:26:42 INFO DIAG   Text = "I'll do whatever it takes to help make Spe's\ndream come true!"
+05:26:42 INFO DIAG   NextBlock = 2
+05:26:42 INFO DIAG   LoopExitNextBlock = -1
+05:26:42 INFO DIAG   DifferenceType = 0
+05:26:42 INFO DIAG   DifferenceFlag = 0
+05:26:42 INFO Using 8 worker processes
+05:26:43 INFO   Progress: 100/5583 bundles
+05:26:44 INFO   Progress: 200/5583 bundles
+05:26:44 INFO   Progress: 300/5583 bundles
+05:26:44 INFO   Progress: 400/5583 bundles
+05:26:44 INFO   Progress: 500/5583 bundles
+05:26:45 INFO   Progress: 600/5583 bundles
+05:26:45 INFO   Progress: 700/5583 bundles
+05:26:46 INFO   Progress: 800/5583 bundles
+05:26:46 INFO   Progress: 900/5583 bundles
+05:26:47 INFO   Progress: 1000/5583 bundles
+05:26:47 INFO   Progress: 1100/5583 bundles
+05:26:48 INFO   Progress: 1200/5583 bundles
+05:26:48 INFO   Progress: 1300/5583 bundles
+05:26:49 INFO   Progress: 1400/5583 bundles
+05:26:49 INFO   Progress: 1500/5583 bundles
+05:26:50 INFO   Progress: 1600/5583 bundles
+05:26:51 INFO   Progress: 1700/5583 bundles
+05:26:51 INFO   Progress: 1800/5583 bundles
+05:26:52 INFO   Progress: 1900/5583 bundles
+05:26:52 INFO   Progress: 2000/5583 bundles
+05:26:53 INFO   Progress: 2100/5583 bundles
+05:26:54 INFO   Progress: 2200/5583 bundles
+05:26:54 INFO   Progress: 2300/5583 bundles
+05:26:55 INFO   Progress: 2400/5583 bundles
+05:26:55 INFO   Progress: 2500/5583 bundles
+05:26:56 INFO   Progress: 2600/5583 bundles
+05:26:56 INFO   Progress: 2700/5583 bundles
+05:26:57 INFO   Progress: 2800/5583 bundles
+05:26:58 INFO   Progress: 2900/5583 bundles
+05:26:58 INFO   Progress: 3000/5583 bundles
+05:26:59 INFO   Progress: 3100/5583 bundles
+05:27:00 INFO   Progress: 3200/5583 bundles
+05:27:00 INFO   Progress: 3300/5583 bundles
+05:27:01 INFO   Progress: 3400/5583 bundles
+05:27:01 INFO   Progress: 3500/5583 bundles
+05:27:02 INFO   Progress: 3600/5583 bundles
+05:27:02 INFO   Progress: 3700/5583 bundles
+05:27:03 INFO   Progress: 3800/5583 bundles
+05:27:04 INFO   Progress: 3900/5583 bundles
+05:27:04 INFO   Progress: 4000/5583 bundles
+05:27:05 INFO   Progress: 4100/5583 bundles
+05:27:05 INFO   Progress: 4200/5583 bundles
+05:27:06 INFO   Progress: 4300/5583 bundles
+05:27:06 INFO   Progress: 4400/5583 bundles
+05:27:07 INFO   Progress: 4500/5583 bundles
+05:27:08 INFO   Progress: 4600/5583 bundles
+05:27:08 INFO   Progress: 4700/5583 bundles
+05:27:09 INFO   Progress: 4800/5583 bundles
+05:27:10 INFO   Progress: 4900/5583 bundles
+05:27:10 INFO   Progress: 5000/5583 bundles
+05:27:11 INFO   Progress: 5100/5583 bundles
+05:27:12 INFO   Progress: 5200/5583 bundles
+05:27:12 INFO   Progress: 5300/5583 bundles
+05:27:13 INFO   Progress: 5400/5583 bundles
+05:27:14 INFO   Progress: 5500/5583 bundles
+05:27:15 INFO Extracted choices from 1309 stories
+05:27:15 INFO Building event data...
+05:27:15 INFO Built event data for 80 character variants in 34.1s (80 with asset choices)
+05:27:15 INFO Kamigame effects: 2/4193 options have outcomes
+05:27:15 INFO Wrote 80 character variants to C:\Users\nikit\Documents\clairvoyance\events.json
