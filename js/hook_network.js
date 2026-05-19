@@ -395,6 +395,173 @@
     // loaded modules for SSL_read and SSL_write exports. These operate
     // on plaintext — the data has already been decrypted (read) or is
     // about to be encrypted (write).
+    //
+    // Includes HTTP chunk reassembly: TLS writes are buffered per-connection
+    // and only processed as complete HTTP messages (tracking Content-Length).
+    // This prevents fragmented captures and enables credential extraction
+    // at the SSL layer as a fallback when Layer 0 (libnative) isn't available.
+
+    // ── HTTP chunk reassembly state ──────────────────────────────────
+    // Per-connection buffers that accumulate TLS write data and emit
+    // complete HTTP requests once Content-Length is satisfied.
+    var _sslWriteBuffers = Object.create(null);
+
+    function _hexFromBytes(arr) {
+        var h = "";
+        for (var i = 0; i < arr.length; i++) {
+            var b = arr[i].toString(16);
+            h += b.length < 2 ? "0" + b : b;
+        }
+        return h;
+    }
+
+    function _b64Decode(s) {
+        var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        var out = [];
+        var buffer = 0;
+        var bits = 0;
+        for (var i = 0; i < s.length; i++) {
+            var c = s.charAt(i);
+            if (c === "=") break;
+            var idx = chars.indexOf(c);
+            if (idx < 0) continue;
+            buffer = (buffer << 6) | idx;
+            bits += 6;
+            if (bits >= 8) {
+                bits -= 8;
+                out.push((buffer >> bits) & 255);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Extract credentials from a base64-encoded request body.
+     * The game packs requests as: base64(LE_u32(headerLen) + blob1 + encrypted_body)
+     * blob1 tail contains: session_id(16) + udid(16) + response_key(32) [+ auth_key(48)]
+     */
+    function _extractCredsFromBody(bodyStr) {
+        try {
+            var decoded = _b64Decode(bodyStr.trim());
+            if (decoded.length < 140) return null;
+            var headerLen = decoded[0] | (decoded[1] << 8) | (decoded[2] << 16) | (decoded[3] << 24);
+            var blob1End = 4 + headerLen;
+            if (headerLen < 120 || headerLen > 2048 || decoded.length < blob1End) return null;
+
+            // UDID is 16 bytes at offset blob1End - 96
+            var udidHex = "";
+            for (var i = blob1End - 96; i < blob1End - 80; i++) udidHex += _hexFromBytes([decoded[i]]);
+            // Auth key is 48 bytes at the end of blob1
+            var authHex = "";
+            for (var j = blob1End - 48; j < blob1End; j++) authHex += _hexFromBytes([decoded[j]]);
+
+            if (!authHex || authHex.length < 64 || udidHex.length !== 32) return null;
+
+            // Format UDID as UUID
+            var u = udidHex;
+            var udidUuid = u.slice(0, 8) + "-" + u.slice(8, 12) + "-" + u.slice(12, 16) +
+                "-" + u.slice(16, 20) + "-" + u.slice(20, 32);
+
+            return { udid: udidUuid, auth_key: authHex };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Process a complete HTTP request reassembled from TLS write chunks.
+     * Extracts endpoint, headers (ViewerID, APP-VER, RES-VER), and credentials.
+     */
+    function _processReassembledRequest(httpText) {
+        if (httpText.indexOf("/umamusume/") < 0) return;
+
+        var endpointMatch = httpText.match(/POST\s+\/umamusume\/([^\s]+)\s+HTTP/i);
+        var viewerIdMatch = httpText.match(/(?:^|\r\n)(?:ViewerID|ViewerId):\s*(\d+)/i);
+        var appVerMatch = httpText.match(/(?:^|\r\n)APP-VER:\s*([^\r\n]+)/i);
+        var resVerMatch = httpText.match(/(?:^|\r\n)RES-VER:\s*([^\r\n]+)/i);
+        var bodyIdx = httpText.indexOf("\r\n\r\n");
+        if (!endpointMatch || bodyIdx < 0) return;
+
+        var endpoint = endpointMatch[1];
+        var viewerId = viewerIdMatch ? viewerIdMatch[1] : null;
+        var appVer = appVerMatch ? appVerMatch[1].trim() : "";
+        var resVer = resVerMatch ? resVerMatch[1].trim() : "";
+        var body = httpText.substring(bodyIdx + 4);
+
+        // Try credential extraction from the request body
+        var creds = null;
+        if (body.length > 100) {
+            creds = _extractCredsFromBody(body);
+        }
+
+        var record = {
+            _seq: _seq++,
+            event: "ssl_write_reassembled",
+            direction: "out",
+            endpoint: endpoint,
+            bytes: httpText.length,
+        };
+        if (viewerId) record.viewerId = viewerId;
+        if (appVer) record.appVer = appVer;
+        if (resVer) record.resVer = resVer;
+
+        if (creds) {
+            record.crypto = {
+                udid: creds.udid,
+                auth_key: creds.auth_key,
+                source: "ssl_layer",
+            };
+            // Update global crypto state as fallback for Layer 0
+            if (!_lastUdidHex) {
+                _lastUdidHex = creds.udid.replace(/-/g, "");
+            }
+        }
+
+        send({ type: "collect", domain: "network", data: record });
+    }
+
+    /**
+     * Feed a TLS write chunk into the per-connection reassembly buffer.
+     * Emits complete HTTP requests when Content-Length is satisfied.
+     */
+    function _feedSslWriteChunk(connKey, chunk) {
+        var buf = (_sslWriteBuffers[connKey] || "") + chunk;
+        // Safety cap: discard if buffer grows too large (2MB)
+        if (buf.length > 2097152) buf = buf.substring(buf.length - 1048576);
+
+        var start = buf.indexOf("POST ");
+        if (start < 0) {
+            // No request start found — keep tail for future reassembly
+            _sslWriteBuffers[connKey] = buf.slice(-4096);
+            return;
+        }
+        if (start > 0) buf = buf.substring(start);
+
+        var headerEnd = buf.indexOf("\r\n\r\n");
+        if (headerEnd < 0) {
+            // Headers not yet complete
+            _sslWriteBuffers[connKey] = buf;
+            return;
+        }
+
+        var headers = buf.substring(0, headerEnd);
+        var lengthMatch = headers.match(/Content-Length:\s*(\d+)/i);
+        var contentLength = lengthMatch ? parseInt(lengthMatch[1], 10) : 0;
+        var totalLen = headerEnd + 4 + contentLength;
+
+        if (contentLength > 0 && buf.length < totalLen) {
+            // Body not yet complete — wait for more chunks
+            _sslWriteBuffers[connKey] = buf;
+            return;
+        }
+
+        // Complete request assembled — process it
+        var completeRequest = contentLength > 0 ? buf.substring(0, totalLen) : buf;
+        _processReassembledRequest(completeRequest);
+
+        // Keep remainder for next request
+        _sslWriteBuffers[connKey] = buf.length > totalLen ? buf.substring(totalLen) : "";
+    }
 
     const SSL_EXPORT_NAMES = {
         read: ["SSL_read", "SSL_read_ex"],
@@ -564,6 +731,7 @@
         try {
             Interceptor.attach(sslWriteAddr, {
                 onEnter: function (args) {
+                    var ssl = args[0];
                     var buf = args[1];
                     var num = args[2].toInt32();
                     if (num <= 0) return;
@@ -575,16 +743,23 @@
                         // Try to extract HTTP method/path from the first bytes
                         var httpMethod = null;
                         var httpUrl = null;
+                        var chunkStr = null;
                         try {
-                            var peek = buf.readUtf8String(Math.min(num, 256));
-                            if (peek) {
-                                var m = peek.match(/^(POST|GET|PUT|DELETE|PATCH)\s+([^\s]+)/);
+                            chunkStr = buf.readUtf8String(Math.min(num, num));
+                            if (chunkStr) {
+                                var m = chunkStr.match(/^(POST|GET|PUT|DELETE|PATCH)\s+([^\s]+)/);
                                 if (m) {
                                     httpMethod = m[1];
                                     httpUrl = m[2];
                                 }
                             }
                         } catch (e) {}
+
+                        // Feed into chunk reassembly for complete HTTP request processing
+                        if (chunkStr) {
+                            var connKey = ssl.toString();
+                            _feedSslWriteChunk(connKey, chunkStr);
+                        }
 
                         var record = {
                             _seq: _seq++,
@@ -609,7 +784,7 @@
                 },
             });
             hookCount++;
-            console.log("[network] Hooked SSL_write");
+            console.log("[network] Hooked SSL_write (with chunk reassembly)");
         } catch (e) {
             console.log("[network] Failed to hook SSL_write: " + e);
         }
@@ -663,6 +838,106 @@
                 }
             }
         } catch (e) {}
+    }
+
+    // ── UnityTLS vtable hooking (fallback) ────────────────────────────
+    // When SSL exports aren't found, we can hook TLS write functions
+    // directly from Unity's internal TLS interface vtable. The game calls
+    // il2cpp_unity_install_unitytls_interface to install a vtable pointer.
+    // We read that global, then hook the write function pointers at known
+    // offsets (0xd0, 0xd8, 0xe0, 0xe8) which correspond to the TLS send
+    // path. This is more resilient than export searching for Unity games.
+
+    if (!sslWriteAddr && !sslReadAddr) {
+        (function tryUnityTlsVtable() {
+            var ga = null;
+            try { ga = Process.findModuleByName("GameAssembly.dll"); } catch (e) {}
+            if (!ga) try { ga = Process.findModuleByName("libil2cpp.so"); } catch (e) {}
+            if (!ga) return;
+
+            var installFn = ga.findExportByName("il2cpp_unity_install_unitytls_interface");
+            if (!installFn) return;
+
+            // Read the function prologue to find the global vtable pointer
+            var rb = new Uint8Array(installFn.readByteArray(16));
+            var realFn = installFn;
+
+            // Follow relative jump if present (e9 xx xx xx xx)
+            if (rb[0] === 0xe9) {
+                var off = rb[1] | (rb[2] << 8) | (rb[3] << 16) | (rb[4] << 24);
+                if (off > 0x7fffffff) off -= 0x100000000;
+                realFn = installFn.add(5 + off);
+                rb = new Uint8Array(realFn.readByteArray(16));
+            }
+
+            // Look for: mov [rip+disp], rcx (48 89 0d xx xx xx xx)
+            var globalPtr = null;
+            if (rb[0] === 0x48 && rb[1] === 0x89 && rb[2] === 0x0d) {
+                var disp = rb[3] | (rb[4] << 8) | (rb[5] << 16) | (rb[6] << 24);
+                if (disp > 0x7fffffff) disp -= 0x100000000;
+                globalPtr = realFn.add(7 + disp);
+            }
+            if (!globalPtr) return;
+
+            var iface = globalPtr.readPointer();
+            if (!iface || iface.isNull()) return;
+
+            // Hook the TLS write functions at known vtable offsets
+            var unityTlsHooked = 0;
+            var vtableAttached = Object.create(null);
+            var writeOffsets = [0xd0, 0xd8, 0xe0, 0xe8];
+
+            writeOffsets.forEach(function (off) {
+                var addr = iface.add(off).readPointer();
+                if (!addr || addr.isNull()) return;
+                var key = "utls_" + addr.toString();
+                if (vtableAttached[key]) return;
+                try {
+                    Interceptor.attach(addr, {
+                        onEnter: function (args) {
+                            var len = args[2].toInt32();
+                            if (len <= 0 || len > 1048576 || args[1].isNull()) return;
+                            try {
+                                var bytes = args[1].readByteArray(len);
+                                var u8 = new Uint8Array(bytes);
+                                var s = "";
+                                for (var i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+
+                                // Feed into chunk reassembly
+                                _feedSslWriteChunk(args[0].toString(), s);
+
+                                // Also emit raw event
+                                send(
+                                    {
+                                        type: "collect",
+                                        domain: "network",
+                                        data: {
+                                            _seq: _seq++,
+                                            event: "unitytls_write",
+                                            direction: "out",
+                                            bytes: len,
+                                            captured: len,
+                                            truncated: false,
+                                        },
+                                    },
+                                    bytes,
+                                );
+                            } catch (e) {}
+                        },
+                    });
+                    vtableAttached[key] = true;
+                    unityTlsHooked++;
+                } catch (e) {}
+            });
+
+            if (unityTlsHooked > 0) {
+                hookCount += unityTlsHooked;
+                console.log(
+                    "[network] Hooked " + unityTlsHooked +
+                    " UnityTLS vtable write functions (fallback)",
+                );
+            }
+        })();
     }
 
     // ══════════════════════════════════════════════════════════════════
