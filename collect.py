@@ -367,6 +367,12 @@ def on_message(message, data):
                 if crypto and crypto.get("udid"):
                     _crypto_udid = crypto["udid"]
                     log.info("  [crypto] UDID extracted: %s", _crypto_udid)
+            elif event_name == "ssl_write_reassembled":
+                # Fallback credential extraction from SSL layer reassembly
+                crypto = record.get("crypto")
+                if crypto and crypto.get("udid") and not _crypto_udid:
+                    _crypto_udid = crypto["udid"]
+                    log.info("  [crypto] UDID extracted (SSL layer): %s", _crypto_udid)
 
             # ── Race data extraction ──────────────────────────────────
             # When we see decoded MsgPack data (from API hooks or libnative

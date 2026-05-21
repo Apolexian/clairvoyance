@@ -1129,9 +1129,9 @@ def build_character_events(
                     "option_name_jp": choice["text"],
                 })
 
-            # Skip no-choice and lifecycle events that add no value
+            # Nochoice events without kamigame data: keep with empty auto option
             if category in ("nochoice",) and not options:
-                continue
+                options = [{"option_name": "(Auto)", "outcomes": [""], "option_name_jp": "(Auto)"}]
 
             event_entry = {
                 "event_name": event_name,

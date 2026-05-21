@@ -451,6 +451,9 @@ def get_network_events(session_name: str) -> dict:
             decoded_count += 1
 
         api = rec.get("api", "")
+        # ssl_write_reassembled events have 'endpoint' instead of 'api'
+        if not api and event_type == "ssl_write_reassembled":
+            api = rec.get("endpoint", "")
         if api:
             api_set.add(api)
 
