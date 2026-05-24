@@ -1078,6 +1078,7 @@ def dump_bundle(
     type_filter: set[str] | None = None,
     flat_depth: int | None = None,
     collapse_singles: bool = False,
+    flatten_all: bool = False,
     dat_dir: Path | None = None,
     meta_lookup: dict[str, tuple[str, int]] | None = None,
 ) -> dict[str, int]:
@@ -1093,6 +1094,8 @@ def dump_bundle(
                           move it up to the parent directory and remove the
                           now-empty wrapper directory.  File names are kept
                           as-is (they contain the IDs callers rely on).
+        flatten_all: If True, move ALL output files (regardless of count)
+                     into the parent directory for a completely flat layout.
         dat_dir: Path to the dat/ directory for resolving external resources.
         meta_lookup: {asset_name: (hash, key)} for finding companion bundles.
 
@@ -1175,6 +1178,8 @@ def dump_bundle(
     if not stats:
         with contextlib.suppress(OSError):
             out_dir.rmdir()
+    elif flatten_all:
+        _collapse_dir_flat(out_dir)
     elif collapse_singles:
         _collapse_single_file_dir(out_dir)
 
@@ -1197,6 +1202,32 @@ def _collapse_single_file_dir(out_dir: Path) -> None:
         pass
 
 
+def _collapse_dir_flat(out_dir: Path) -> None:
+    """Move ALL files from out_dir into its parent, prefixing with the dir
+    name to avoid collisions, then remove the now-empty directory."""
+    try:
+        children = [f for f in out_dir.iterdir() if f.is_file()]
+        if not children:
+            return
+        parent = out_dir.parent
+        prefix = out_dir.name
+        if len(children) == 1:
+            # Single file — try without prefix first for cleaner names
+            dest = parent / children[0].name
+            if not dest.exists():
+                children[0].rename(dest)
+                out_dir.rmdir()
+                return
+        for child in children:
+            dest = parent / f"{prefix}__{child.name}"
+            if dest.exists():
+                return  # collision — bail and keep dir intact
+            child.rename(dest)
+        out_dir.rmdir()
+    except OSError:
+        pass
+
+
 # ── Worker function for multiprocessing ────────────────────────────────
 
 
@@ -1205,12 +1236,12 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
     Process a single bundle entry. Designed to be called via ProcessPoolExecutor.
 
     Args is a tuple of (file_path_str, entry_key, asset_name, entry_hash,
-    output_root_str, type_filter_list, flat_depth, collapse_singles,
+    output_root_str, type_filter_list, flat_depth, collapse_singles, flatten_all,
     image_format, image_quality, dat_dir_str, meta_lookup).
     Returns (asset_name, entry_hash, stats_dict, error_msg_or_None).
     """
     (file_path_str, entry_key, asset_name, entry_hash, output_root_str,
-     type_filter_list, flat_depth, collapse_singles,
+     type_filter_list, flat_depth, collapse_singles, flatten_all,
      image_format, image_quality, dat_dir_str, meta_lookup) = args
     file_path = Path(file_path_str)
     output_root = Path(output_root_str)
@@ -1226,6 +1257,7 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
         stats = dump_bundle(
             file_path, entry_key, asset_name, output_root,
             type_filter, flat_depth, collapse_singles,
+            flatten_all=flatten_all,
             dat_dir=dat_dir, meta_lookup=meta_lookup,
         )
         return (asset_name, entry_hash, stats, None)
@@ -1246,6 +1278,7 @@ def dump_all(
     workers: int = 0,
     flat_depth: int | None = None,
     collapse_singles: bool = False,
+    flatten_all: bool = False,
     use_cache: bool = True,
 ) -> dict[str, int]:
     """
@@ -1255,6 +1288,7 @@ def dump_all(
         workers: Number of parallel workers. 0 = auto (cpu_count), 1 = sequential.
         flat_depth: Max directory nesting depth below output_root (None = unlimited).
         collapse_singles: Collapse single-file output directories.
+        flatten_all: Move all files directly into output_root (completely flat).
         use_cache: Use .dump_manifest.json to skip already-processed bundles
                    and bundles known to have no matching types (delta mode).
 
@@ -1356,7 +1390,7 @@ def dump_all(
         work_items.append((
             str(file_path), entry["key"], asset_name, h,
             str(output_root), type_filter_list, flat_depth,
-            collapse_singles, _IMAGE_FORMAT, _IMAGE_QUALITY,
+            collapse_singles, flatten_all, _IMAGE_FORMAT, _IMAGE_QUALITY,
             str(dat_dir), sibling_lookup,
         ))
 
@@ -1761,6 +1795,7 @@ Examples:
     type_filter = set(args.types) if args.types else None
     flat_depth = 3              # max 3 levels deep by default
     collapse_singles = True     # don't create wrapper dirs for single files
+    flatten_all = False         # completely flat output (no subdirs at all)
     name_filter = args.filter
 
     # Convenience presets — these imply --images-only behaviour
@@ -1811,8 +1846,9 @@ Examples:
 
     if args.images_only:
         type_filter = {"Texture2D", "Sprite"}
-        flat_depth = 1
-        collapse_singles = True
+        flat_depth = 0
+        collapse_singles = False
+        flatten_all = True
 
     stats = dump_all(
         game_dir=game_dir,
@@ -1824,6 +1860,7 @@ Examples:
         workers=args.workers,
         flat_depth=flat_depth,
         collapse_singles=collapse_singles,
+        flatten_all=flatten_all,
         use_cache=not args.no_cache,
     )
 
