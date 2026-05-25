@@ -1,0 +1,16 @@
+00:39:35 INFO: Log file: C:\Users\nikit\Documents\clairvoyance\dump_all_assets.log
+00:39:35 INFO: Game directory: C:\Program Files (x86)\Steam\steamapps\common\UmamusumePrettyDerby_Jpn\UmamusumePrettyDerby_Jpn_Data\Persistent
+00:40:06 INFO: Output directory: C:\Users\nikit\Documents\clairvoyance\songs
+00:40:07 INFO: Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance
+00:40:07 INFO: Decrypting meta via sqlite3mc DLL...
+00:40:07 ERROR: sqlite3mc: no cipher ID worked (tried [3, 5, 4])
+00:40:07 INFO: Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance
+00:40:07 INFO: Decrypting meta via sqlite3mc DLL...
+00:40:07 INFO: Validation OK — cipher=3 key=32 bytes
+00:40:10 INFO: Decrypted meta -> C:\Program Files (x86)\Steam\steamapps\common\UmamusumePrettyDerby_Jpn\UmamusumePrettyDerby_Jpn_Data\Persistent\meta_decrypted
+00:40:10 INFO: Decrypted meta via sqlite3mc (JP key)
+00:40:10 INFO: Found 32636 asset entries to process
+00:40:10 INFO: Building work list…
+00:40:20 INFO: 15028 to extract, 0 skipped (existing), 17608 missing files
+00:40:20 INFO: Using 8 worker processes
+00:40:39 INFO: Saved manifest (15028 entries) → .dump_manifest.json
