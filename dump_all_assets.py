@@ -1232,12 +1232,15 @@ def dump_bundle(
     try:
         if entry_key != 0:
             data = decrypt_bundle(file_path, entry_key)
+            log.debug("  %s: decrypted %d bytes (key=%d)", asset_name, len(data) if data else 0, entry_key)
             try:
                 env = UnityPy.load(data)
             except Exception:
                 env = UnityPy.load(io.BytesIO(data))
         else:
             env = UnityPy.load(str(file_path))
+        log.debug("  %s: loaded env with %d objects, %d cabs",
+                  asset_name, len(list(env.objects)), len(env.cabs))
     except Exception as e:
         log.warning("Failed to load bundle %s: %s", asset_name, e)
         with contextlib.suppress(OSError):
@@ -1414,6 +1417,7 @@ def dump_all(
     collapse_singles: bool = False,
     flatten_all: bool = False,
     use_cache: bool = True,
+    limit: int = 0,
 ) -> dict[str, int]:
     """
     Dump all assets matching the filter.
@@ -1425,6 +1429,7 @@ def dump_all(
         flatten_all: Move all files directly into output_root (completely flat).
         use_cache: Use .dump_manifest.json to skip already-processed bundles
                    and bundles known to have no matching types (delta mode).
+        limit: If > 0, only process the first N bundles (for debugging).
 
     Returns aggregate {type_name: total_count}.
     """
@@ -1529,6 +1534,10 @@ def dump_all(
         ))
 
     remaining = len(work_items)
+    if limit > 0:
+        work_items = work_items[:limit]
+        remaining = len(work_items)
+        log.info("--limit %d: processing only first %d bundles", limit, remaining)
     skip_detail = f"{skipped} skipped (existing)"
     if cache_skipped:
         skip_detail += f", {cache_skipped} skipped (cache: no matching types)"
@@ -1764,7 +1773,9 @@ def _progress(
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+    # Console handler stays at INFO (don't spam terminal with debug)
+    logging.getLogger().handlers[0].setLevel(logging.INFO)
 
     # Always log to file at DEBUG level for diagnostics
     _log_file = Path(__file__).parent / "dump_all_assets.log"
@@ -1883,6 +1894,12 @@ Examples:
         "--verbose", "-v",
         action="store_true",
         help="Enable debug logging",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=0,
+        help="Only process the first N bundles (for debugging)",
     )
     parser.add_argument(
         "--save",
@@ -2010,6 +2027,7 @@ Examples:
         collapse_singles=collapse_singles,
         flatten_all=flatten_all,
         use_cache=not args.no_cache,
+        limit=args.limit,
     )
 
     if stats:
