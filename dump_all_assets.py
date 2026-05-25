@@ -710,6 +710,104 @@ def _get_audio_data(data) -> bytes | None:
     return None
 
 
+def _export_cri_audio(file_path: Path, entry_key: int, asset_name: str, out_dir: Path) -> list[str]:
+    """Export CRI ACB/AWB audio files using vgmstream-cli.
+
+    CRI audio files are NOT Unity asset bundles. They may be encrypted with
+    the same bundle key system, but their content is CRI Middleware format
+    (ACB = cue sheet with embedded or referenced waveforms, AWB = waveform archive).
+
+    Strategy:
+      1. Decrypt if needed (key != 0) and save as raw .acb/.awb
+      2. Try vgmstream-cli to decode to WAV
+      3. If vgmstream unavailable, keep the raw file for manual conversion
+    """
+    import subprocess
+
+    saved = []
+    ext = Path(asset_name).suffix  # .acb or .awb
+
+    # Get the raw file data
+    if entry_key != 0:
+        raw_data = decrypt_bundle(file_path, entry_key)
+        log.debug("  %s: decrypted CRI audio, %d bytes", asset_name, len(raw_data) if raw_data else 0)
+    else:
+        raw_data = file_path.read_bytes()
+        log.debug("  %s: read CRI audio, %d bytes", asset_name, len(raw_data))
+
+    if not raw_data or len(raw_data) == 0:
+        log.warning("  %s: empty file after decryption", asset_name)
+        return saved
+
+    # For AWB files, try vgmstream directly
+    # For ACB files, we need the paired AWB — vgmstream can handle ACB+AWB pairs
+    # but needs them on disk together. Save raw first.
+    name_stem = Path(asset_name).stem
+    raw_path = out_dir / f"{name_stem}{ext}"
+    raw_path.write_bytes(raw_data)
+
+    vgmstream = _find_vgmstream()
+    if not vgmstream:
+        log.info("  %s: saved raw CRI file (install vgmstream-cli for WAV conversion)", asset_name)
+        saved.append(raw_path.name)
+        return saved
+
+    # Try vgmstream conversion
+    try:
+        # Check subsong count
+        result = subprocess.run(
+            [vgmstream, "-m", str(raw_path)],
+            capture_output=True, text=True, timeout=30,
+        )
+
+        if result.returncode != 0:
+            # vgmstream can't handle this file (might be ACB without paired AWB)
+            log.debug("  %s: vgmstream metadata failed (rc=%d): %s",
+                     asset_name, result.returncode, result.stderr[:200] if result.stderr else "")
+            saved.append(raw_path.name)
+            return saved
+
+        num_streams = 1
+        for line in result.stdout.splitlines():
+            if "stream count:" in line.lower():
+                try:
+                    num_streams = int(line.split(":")[-1].strip())
+                except ValueError:
+                    pass
+
+        log.debug("  %s: vgmstream found %d stream(s)", asset_name, num_streams)
+
+        converted_any = False
+        for i in range(1, num_streams + 1):
+            suffix = f"_{i:03d}" if num_streams > 1 else ""
+            wav_path = out_dir / f"{name_stem}{suffix}.wav"
+            cmd = [vgmstream, "-o", str(wav_path), str(raw_path)]
+            if num_streams > 1:
+                cmd.extend(["-s", str(i)])
+            r = subprocess.run(cmd, capture_output=True, timeout=60)
+            if r.returncode == 0 and wav_path.is_file() and wav_path.stat().st_size > 0:
+                saved.append(wav_path.name)
+                converted_any = True
+            else:
+                log.debug("  %s stream %d: vgmstream failed (rc=%d)", asset_name, i, r.returncode)
+
+        if converted_any:
+            # Remove raw file since we have WAV conversions
+            raw_path.unlink(missing_ok=True)
+        else:
+            saved.append(raw_path.name)
+            log.debug("  %s: no streams converted, keeping raw", asset_name)
+
+    except subprocess.TimeoutExpired:
+        log.warning("  %s: vgmstream timed out", asset_name)
+        saved.append(raw_path.name)
+    except Exception as e:
+        log.warning("  %s: vgmstream error: %s", asset_name, e)
+        saved.append(raw_path.name)
+
+    return saved
+
+
 def _audio_ext_from_magic(data: bytes) -> str:
     """Detect audio format from magic bytes."""
     if data[:4] == b"OggS":
@@ -1227,6 +1325,22 @@ def dump_bundle(
     else:
         out_dir = output_root / asset_name
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Detect CRI ACB/AWB audio files — these are NOT Unity bundles
+    # and need to be handled with vgmstream-cli instead of UnityPy
+    is_cri_audio = asset_name.endswith((".acb", ".awb"))
+    if is_cri_audio:
+        saved = _export_cri_audio(file_path, entry_key, asset_name, out_dir)
+        if saved:
+            stats["CriAudio"] = len(saved)
+        else:
+            with contextlib.suppress(OSError):
+                out_dir.rmdir()
+        if flatten_all and stats:
+            _collapse_dir_flat(out_dir)
+        elif collapse_singles and stats:
+            _collapse_single_file_dir(out_dir)
+        return stats
 
     env = None
     try:
