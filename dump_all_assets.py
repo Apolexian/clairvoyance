@@ -1260,6 +1260,16 @@ def dump_bundle(
                     if name:
                         sprite_names.add(name)
 
+    # Log all object types in this bundle for diagnostics
+    all_types = {}
+    for obj in env.objects:
+        tname = obj.type.name
+        all_types[tname] = all_types.get(tname, 0) + 1
+    if all_types:
+        log.debug("  %s: contains types: %s", asset_name, dict(all_types))
+    else:
+        log.debug("  %s: bundle has NO objects", asset_name)
+
     for idx, obj in enumerate(env.objects):
         type_name = obj.type.name
 
@@ -1341,14 +1351,14 @@ def _collapse_dir_flat(out_dir: Path) -> None:
 # ── Worker function for multiprocessing ────────────────────────────────
 
 
-def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
+def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None, list[str]]:
     """
     Process a single bundle entry. Designed to be called via ProcessPoolExecutor.
 
     Args is a tuple of (file_path_str, entry_key, asset_name, entry_hash,
     output_root_str, type_filter_list, flat_depth, collapse_singles, flatten_all,
     image_format, image_quality, dat_dir_str, meta_lookup).
-    Returns (asset_name, entry_hash, stats_dict, error_msg_or_None).
+    Returns (asset_name, entry_hash, stats_dict, error_msg_or_None, log_lines).
     """
     (file_path_str, entry_key, asset_name, entry_hash, output_root_str,
      type_filter_list, flat_depth, collapse_singles, flatten_all,
@@ -1363,6 +1373,16 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
     _IMAGE_FORMAT = image_format
     _IMAGE_QUALITY = image_quality
 
+    # Capture log output from worker for return to main process
+    import io as _io
+    _log_stream = _io.StringIO()
+    _handler = logging.StreamHandler(_log_stream)
+    _handler.setLevel(logging.DEBUG)
+    _handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    worker_log = logging.getLogger("dump_all_assets")
+    worker_log.addHandler(_handler)
+    worker_log.setLevel(logging.DEBUG)
+
     try:
         stats = dump_bundle(
             file_path, entry_key, asset_name, output_root,
@@ -1370,9 +1390,13 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
             flatten_all=flatten_all,
             dat_dir=dat_dir, meta_lookup=meta_lookup,
         )
-        return (asset_name, entry_hash, stats, None)
+        log_lines = _log_stream.getvalue().splitlines()
+        return (asset_name, entry_hash, stats, None, log_lines)
     except Exception as e:
-        return (asset_name, entry_hash, {}, str(e))
+        log_lines = _log_stream.getvalue().splitlines()
+        return (asset_name, entry_hash, {}, str(e), log_lines)
+    finally:
+        worker_log.removeHandler(_handler)
 
 
 # ── Main dump logic ───────────────────────────────────────────────────
@@ -1526,10 +1550,12 @@ def dump_all(
     if workers == 1:
         # Sequential mode
         for args in work_items:
-            asset_name, entry_hash, stats, err = _dump_one(args)
+            asset_name, entry_hash, stats, err, log_lines = _dump_one(args)
             if err:
                 errors += 1
                 log.debug("Error processing %s: %s", asset_name, err)
+            for line in log_lines:
+                log.debug("[%s] %s", asset_name, line)
             for k, v in stats.items():
                 agg_stats[k] = agg_stats.get(k, 0) + v
             if use_cache:
@@ -1548,10 +1574,12 @@ def dump_all(
             for future in as_completed(futures):
                 asset_name = futures[future]
                 try:
-                    _, entry_hash, stats, err = future.result()
+                    _, entry_hash, stats, err, log_lines = future.result()
                     if err:
                         errors += 1
                         log.debug("Error processing %s: %s", asset_name, err)
+                    for line in log_lines:
+                        log.debug("[%s] %s", asset_name, line)
                     for k, v in stats.items():
                         agg_stats[k] = agg_stats.get(k, 0) + v
                     if use_cache:
