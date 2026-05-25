@@ -686,14 +686,27 @@ def _get_audio_data(data) -> bytes | None:
     # Audio stored in external .resource file
     res = getattr(data, "m_Resource", None)
     if res and getattr(res, "m_Size", 0) > 0:
+        src = getattr(res, "m_Source", "")
+        log.debug("  trying external resource: source=%r, offset=%d, size=%d",
+                  src, getattr(res, "m_Offset", 0), getattr(res, "m_Size", 0))
         try:
             from UnityPy.helpers.ResourceReader import get_resource_data
 
-            return get_resource_data(
+            result = get_resource_data(
                 res.m_Source, data.object_reader.assets_file, res.m_Offset, res.m_Size
             )
+            log.debug("  external resource read OK: %d bytes", len(result))
+            return result
+        except FileNotFoundError as e:
+            log.warning("  external resource NOT FOUND: %s (source=%r)", e, src)
+            # Log available cabs for diagnosis
+            env = data.object_reader.assets_file.environment
+            cabs = list(env.cabs.keys())[:20]
+            log.debug("  available cabs (%d total): %s", len(env.cabs), cabs)
         except Exception as e:
-            log.debug("  failed to read external audio resource: %s", e)
+            log.warning("  failed to read external audio resource: %s (source=%r)", e, src)
+    else:
+        log.debug("  AudioClip has no m_AudioData and no m_Resource (or size=0)")
     return None
 
 
@@ -710,14 +723,97 @@ def _audio_ext_from_magic(data: bytes) -> str:
     return ".bin"
 
 
+def _find_vgmstream() -> str | None:
+    """Find vgmstream-cli executable on PATH or common locations."""
+    import shutil
+
+    for name in ("vgmstream-cli", "vgmstream_cli", "vgmstream123"):
+        path = shutil.which(name)
+        if path:
+            return path
+    # Common Windows install locations
+    for candidate in (
+        Path("C:/tools/vgmstream-win64/vgmstream-cli.exe"),
+        Path("C:/tools/vgmstream/vgmstream-cli.exe"),
+        Path.home() / "vgmstream" / "vgmstream-cli.exe",
+    ):
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
+def _convert_fsb_to_wav(fsb_data: bytes, name: str, out_dir: Path) -> list[str]:
+    """Convert FSB5 audio data to WAV using vgmstream-cli.
+
+    Returns list of saved filenames, or empty list if conversion fails.
+    """
+    import subprocess
+    import tempfile
+
+    vgmstream = _find_vgmstream()
+    if not vgmstream:
+        return []
+
+    saved = []
+    with tempfile.NamedTemporaryFile(suffix=".fsb", delete=False) as tmp:
+        tmp.write(fsb_data)
+        tmp_path = Path(tmp.name)
+
+    try:
+        # vgmstream-cli can extract subsongs from FSB containers
+        # First, check how many subsongs there are
+        result = subprocess.run(
+            [vgmstream, "-m", str(tmp_path)],
+            capture_output=True, text=True, timeout=30,
+        )
+        # Parse stream count from metadata output
+        num_streams = 1
+        for line in result.stdout.splitlines():
+            if "stream count:" in line.lower():
+                try:
+                    num_streams = int(line.split(":")[-1].strip())
+                except ValueError:
+                    pass
+
+        if num_streams == 1:
+            out_path = out_dir / f"{name}.wav"
+            r = subprocess.run(
+                [vgmstream, "-o", str(out_path), str(tmp_path)],
+                capture_output=True, timeout=60,
+            )
+            if r.returncode == 0 and out_path.is_file() and out_path.stat().st_size > 0:
+                saved.append(out_path.name)
+            else:
+                log.debug("  vgmstream conversion failed (rc=%d): %s", r.returncode, r.stderr[:200])
+        else:
+            for i in range(1, num_streams + 1):
+                suffix = f"_{i:02d}" if num_streams > 1 else ""
+                out_path = out_dir / f"{name}{suffix}.wav"
+                r = subprocess.run(
+                    [vgmstream, "-o", str(out_path), "-s", str(i), str(tmp_path)],
+                    capture_output=True, timeout=60,
+                )
+                if r.returncode == 0 and out_path.is_file() and out_path.stat().st_size > 0:
+                    saved.append(out_path.name)
+    except subprocess.TimeoutExpired:
+        log.debug("  vgmstream timed out for %s", name)
+    except Exception as e:
+        log.debug("  vgmstream conversion error: %s", e)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    return saved
+
+
 def _export_audioclip(obj, out_dir: Path, idx: int) -> list[str]:
     """Export an AudioClip.
 
     Strategy:
       1. Try UnityPy .samples (decodes OGG/WAV/M4A natively, FSB via FMOD).
-      2. If .samples fails (FMOD not installed), save raw audio with the
-         correct extension so external tools (vgmstream, foobar2000) can
-         open it.
+      2. If .samples fails, get raw audio data and:
+         a. If OGG/WAV/M4A → save directly.
+         b. If FSB → try vgmstream-cli conversion to WAV.
+         c. If vgmstream unavailable → save raw .fsb file.
     """
     saved = []
     try:
@@ -738,20 +834,34 @@ def _export_audioclip(obj, out_dir: Path, idx: int) -> list[str]:
         except Exception as e:
             log.debug("  UnityPy .samples decode failed (likely no FMOD): %s", e)
 
-        # Fallback: save raw audio data with detected extension
+        # Fallback: get raw audio bytes
         raw = _get_audio_data(data)
         if raw and len(raw) > 0:
             ext = _audio_ext_from_magic(raw)
-            out_path = out_dir / f"{name}{ext}"
-            out_path.write_bytes(raw)
-            saved.append(out_path.name)
             if ext == ".fsb":
-                log.debug(
-                    "  saved as FSB (install FMOD SDK for WAV conversion, "
-                    "or use vgmstream/foobar2000 to play)"
-                )
+                # Try vgmstream conversion first
+                converted = _convert_fsb_to_wav(raw, name, out_dir)
+                if converted:
+                    saved.extend(converted)
+                else:
+                    # Save raw FSB as last resort
+                    out_path = out_dir / f"{name}{ext}"
+                    out_path.write_bytes(raw)
+                    saved.append(out_path.name)
+                    log.warning(
+                        "  %s: saved as .fsb — install vgmstream-cli for WAV "
+                        "conversion (https://vgmstream.org)", name
+                    )
+            else:
+                # OGG/WAV/M4A — save directly
+                out_path = out_dir / f"{name}{ext}"
+                out_path.write_bytes(raw)
+                saved.append(out_path.name)
+        else:
+            log.warning("  %s: AudioClip has no extractable audio data "
+                       "(external resource not resolved)", name)
     except Exception as e:
-        log.debug("  audioclip export failed: %s", e)
+        log.warning("  audioclip export failed for idx %d: %s", idx, e)
     return saved
 
 
@@ -1066,8 +1176,8 @@ def _resolve_external_resources(env, asset_name: str, dat_dir: Path | None,
             log.debug("  failed to load companion %s: %s", h[:12], e)
 
     if missing:
-        log.debug("  %s: could not resolve resources: %s",
-                  asset_name, [ntpath.basename(n) for n in missing])
+        log.warning("  %s: could not resolve %d external resources: %s",
+                    asset_name, len(missing), [ntpath.basename(n) for n in missing])
 
 
 def dump_bundle(
@@ -1627,6 +1737,16 @@ def _progress(
 
 def main():
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+    # Always log to file at DEBUG level for diagnostics
+    _log_file = Path(__file__).parent / "dump_all_assets.log"
+    _file_handler = logging.FileHandler(_log_file, mode="w", encoding="utf-8")
+    _file_handler.setLevel(logging.DEBUG)
+    _file_handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s: %(message)s", datefmt="%H:%M:%S"
+    ))
+    logging.getLogger().addHandler(_file_handler)
+    log.info("Log file: %s", _log_file)
 
     parser = argparse.ArgumentParser(
         description="Dump ALL assets from Uma Musume game bundles.",
