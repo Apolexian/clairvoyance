@@ -452,6 +452,173 @@ def read_all_meta_entries(game_dir: Path, name_filter: str = "%") -> list[dict]:
     return entries
 
 
+def _mark_songs_for_download(game_dir: Path) -> None:
+    """Mark sound/l/ entries in meta DB for download by setting group=0.
+
+    The game only downloads live/song audio on demand. By setting the
+    asset group to Default (0), the game treats them as required and
+    downloads them on next launch. Creates a backup of meta before modifying.
+    """
+    import shutil
+    import sqlite3
+
+    meta_path = game_dir / "meta"
+    if not meta_path.is_file():
+        log.warning("Cannot mark songs for download: meta not found at %s", meta_path)
+        return
+
+    # Check if we need to use the decrypted copy or original
+    meta_decrypted = game_dir / "meta_decrypted"
+    if meta_decrypted.is_file():
+        # Use decrypted copy — but we need to modify the ORIGINAL for the game
+        # First check if original meta has a 'g' column
+        pass
+
+    # Try opening meta directly (might be plaintext on some versions)
+    try:
+        conn = sqlite3.connect(str(meta_path))
+        conn.row_factory = sqlite3.Row
+        tables = [
+            r[0] for r in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        ]
+        if "a" not in tables:
+            conn.close()
+            log.warning("Cannot mark songs: meta DB has no table 'a'")
+            return
+
+        # Check columns
+        cols_info = conn.execute("PRAGMA table_info(a)").fetchall()
+        cols = {r[1] for r in cols_info}
+        if "g" not in cols:
+            conn.close()
+            log.warning("Cannot mark songs: meta DB table 'a' has no 'g' column")
+            return
+
+        # Count how many need updating
+        count = conn.execute(
+            "SELECT COUNT(*) FROM a WHERE n LIKE 'sound/l/%' AND g != 0"
+        ).fetchone()[0]
+
+        if count == 0:
+            conn.close()
+            log.info("All song entries already marked for download (g=0)")
+            return
+
+        # Backup meta before modifying
+        backup_path = meta_path.with_suffix(".bak")
+        if not backup_path.is_file():
+            shutil.copy2(meta_path, backup_path)
+            log.info("Backed up meta → %s", backup_path.name)
+
+        # Update group to 0 (Default) for all sound/l/ entries
+        conn.execute("UPDATE a SET g = 0 WHERE n LIKE 'sound/l/%' AND g != 0")
+        conn.commit()
+        conn.close()
+
+        log.info(
+            "Marked %d song entries for download (g=0). "
+            "Launch the game to trigger downloads, then run --songs again.",
+            count,
+        )
+
+    except sqlite3.DatabaseError as e:
+        # Meta is encrypted — need to use sqlite3mc
+        log.debug("Direct meta open failed (%s), trying sqlite3mc...", e)
+        _mark_songs_encrypted(meta_path, game_dir)
+
+
+def _mark_songs_encrypted(meta_path: Path, game_dir: Path) -> None:
+    """Mark songs for download in an encrypted meta DB via sqlite3mc."""
+    import shutil
+
+    try:
+        from extract_story_text import _find_sqlite3mc_dll, _META_KEYS
+    except ImportError:
+        log.warning(
+            "Cannot modify encrypted meta: extract_story_text.py not found. "
+            "Use UmamusumeExplorer's Download Workaround instead."
+        )
+        return
+
+    dll_path = _find_sqlite3mc_dll()
+    if not dll_path:
+        log.warning("Cannot modify encrypted meta: sqlite3mc DLL not found")
+        return
+
+    import ctypes
+
+    lib = ctypes.cdll.LoadLibrary(str(dll_path))
+
+    # Setup function signatures
+    lib.sqlite3_open_v2.restype = ctypes.c_int
+    lib.sqlite3_open_v2.argtypes = [
+        ctypes.c_char_p, ctypes.POINTER(ctypes.c_void_p),
+        ctypes.c_int, ctypes.c_char_p,
+    ]
+    lib.sqlite3_close.restype = ctypes.c_int
+    lib.sqlite3_close.argtypes = [ctypes.c_void_p]
+    lib.sqlite3_key.restype = ctypes.c_int
+    lib.sqlite3_key.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
+    lib.sqlite3_exec.restype = ctypes.c_int
+    lib.sqlite3_exec.argtypes = [
+        ctypes.c_void_p, ctypes.c_char_p, ctypes.c_void_p,
+        ctypes.c_void_p, ctypes.POINTER(ctypes.c_char_p),
+    ]
+    lib.sqlite3mc_config.restype = ctypes.c_int
+    lib.sqlite3mc_config.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int]
+
+    SQLITE_OPEN_READWRITE = 0x00000002
+
+    # Backup first
+    backup_path = meta_path.with_suffix(".bak")
+    if not backup_path.is_file():
+        shutil.copy2(meta_path, backup_path)
+        log.info("Backed up meta → %s", backup_path.name)
+
+    for key_label, key_bytes in _META_KEYS:
+        db_ptr = ctypes.c_void_p()
+        rc = lib.sqlite3_open_v2(
+            str(meta_path).encode(), ctypes.byref(db_ptr),
+            SQLITE_OPEN_READWRITE, None,
+        )
+        if rc != 0:
+            continue
+
+        # Try cipher configs
+        for cipher_id in [3, 5, 4]:
+            lib.sqlite3mc_config(db_ptr, b"cipher", cipher_id)
+
+        rc = lib.sqlite3_key(db_ptr, key_bytes, len(key_bytes))
+        if rc != 0:
+            lib.sqlite3_close(db_ptr)
+            continue
+
+        # Test if we can query
+        err_msg = ctypes.c_char_p()
+        rc = lib.sqlite3_exec(
+            db_ptr,
+            b"UPDATE a SET g = 0 WHERE n LIKE 'sound/l/%' AND g != 0",
+            None, None, ctypes.byref(err_msg),
+        )
+
+        if rc == 0:
+            log.info(
+                "Marked song entries for download in encrypted meta. "
+                "Launch the game to trigger downloads, then run --songs again."
+            )
+            lib.sqlite3_close(db_ptr)
+            return
+
+        lib.sqlite3_close(db_ptr)
+
+    log.warning(
+        "Could not modify encrypted meta DB. "
+        "Use UmamusumeExplorer's Download Workaround instead."
+    )
+
+
 # ── Bundle type cache / manifest ───────────────────────────────────────
 # Tracks which Unity types each bundle contains so subsequent runs can
 # skip bundles that have no types matching the filter (e.g. images-only
@@ -2130,6 +2297,10 @@ Examples:
         collapse_singles = True
         if name_filter == "%":
             name_filter = "sound/l/%"
+
+        # Modify meta DB to mark song assets for download (group = 0)
+        # This tricks the game into downloading them on next launch.
+        _mark_songs_for_download(game_dir)
 
     if args.movie:
         type_filter = {"VideoClip"}
