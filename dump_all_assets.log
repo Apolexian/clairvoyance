@@ -1,60 +1,62 @@
-03:19:05 INFO: Log file: C:\Users\nikit\Documents\clairvoyance\dump_all_assets.log
-03:19:05 INFO: Game directory: C:\Program Files (x86)\Steam\steamapps\common\UmamusumePrettyDerby_Jpn\UmamusumePrettyDerby_Jpn_Data\Persistent
-03:19:15 INFO: Output directory: C:\Users\nikit\Music\rando
-03:19:17 DEBUG: Trying Global key for meta decryption...
-03:19:17 DEBUG: pysqlcipher3 not available
-03:19:17 DEBUG: sqlcipher3 not available
-03:19:17 DEBUG: sqlite3mc DLL search dirs: ['C:\\Users\\nikit\\Documents\\clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\_internal']
-03:19:17 INFO: Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance
-03:19:17 INFO: Decrypting meta via sqlite3mc DLL...
-03:19:17 DEBUG: sqlite3_open_v2 OK, db_ptr=2250601749472
-03:19:17 DEBUG: sqlite3mc_config('cipher', 3) rc=3
-03:19:17 DEBUG: sqlite3_key(raw 12 bytes) rc=0
-03:19:17 DEBUG: sqlite3mc validation failed for cipher 3 rc=26 errmsg=file is not a database
-03:19:17 DEBUG: sqlite3_open_v2 OK, db_ptr=2250601747776
-03:19:17 DEBUG: sqlite3mc_config('cipher', 5) rc=5
-03:19:17 DEBUG: sqlite3_key(raw 12 bytes) rc=0
-03:19:17 DEBUG: sqlite3mc validation failed for cipher 5 rc=26 errmsg=file is not a database
-03:19:17 DEBUG: sqlite3_open_v2 OK, db_ptr=2250601752864
-03:19:17 DEBUG: sqlite3mc_config('cipher', 4) rc=4
-03:19:17 DEBUG: sqlite3_key(raw 12 bytes) rc=0
-03:19:17 DEBUG: sqlite3mc validation failed for cipher 4 rc=26 errmsg=file is not a database
-03:19:17 ERROR: sqlite3mc: no cipher ID worked (tried [3, 5, 4])
-03:19:17 DEBUG: Trying JP key for meta decryption...
-03:19:17 DEBUG: pysqlcipher3 not available
-03:19:17 DEBUG: sqlcipher3 not available
-03:19:17 DEBUG: sqlite3mc DLL search dirs: ['C:\\Users\\nikit\\Documents\\clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\_internal']
-03:19:17 INFO: Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance
-03:19:17 INFO: Decrypting meta via sqlite3mc DLL...
-03:19:17 DEBUG: sqlite3_open_v2 OK, db_ptr=2250601743536
-03:19:17 DEBUG: sqlite3mc_config('cipher', 3) rc=3
-03:19:17 DEBUG: sqlite3_key(raw 32 bytes) rc=0
-03:19:17 INFO: Validation OK — cipher=3 key=32 bytes
-03:19:18 INFO: Decrypted meta -> C:\Program Files (x86)\Steam\steamapps\common\UmamusumePrettyDerby_Jpn\UmamusumePrettyDerby_Jpn_Data\Persistent\meta_decrypted
-03:19:18 INFO: Decrypted meta via sqlite3mc (JP key)
-03:19:18 INFO: Found 4303 asset entries to process
-03:19:18 INFO: Building work list…
-03:19:19 INFO: 10 to extract, 0 skipped (existing), 4293 missing files
-03:19:19 INFO: Using 8 worker processes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1003_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1003_01.acb: read CRI audio, 11904 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1003_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1003_01.acb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1001_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1001_01.acb: read CRI audio, 11904 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1001_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1001_01.acb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1002_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1002_01.acb: read CRI audio, 11904 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1002_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1002_01.acb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_oke_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_oke_01.acb: read CRI audio, 12480 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_oke_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_oke_01.acb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_preview_02.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_preview_02.acb: read CRI audio, 13056 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_preview_02.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_preview_02.acb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_preview_02.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_preview_02.awb: read CRI audio, 1371168 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_preview_02.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_preview_02.awb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1003_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1003_01.awb: read CRI audio, 6976640 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1003_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1003_01.awb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1001_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1001_01.awb: read CRI audio, 6976640 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1001_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1001_01.awb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_oke_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_oke_01.awb: read CRI audio, 6768768 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_oke_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_oke_01.awb: vgmstream found 1 stream(s)
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1002_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1002_01.awb: read CRI audio, 6976640 bytes
-03:19:21 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1002_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1002_01.awb: vgmstream found 1 stream(s)
-03:19:21 INFO: Saved manifest (10 entries) → .dump_manifest.json
-03:19:21 INFO: Done! Assets written to C:\Users\nikit\Music\rando
+03:33:52 INFO: Log file: C:\Users\nikit\Documents\clairvoyance\dump_all_assets.log
+03:33:52 INFO: Game directory: C:\Program Files (x86)\Steam\steamapps\common\UmamusumePrettyDerby_Jpn\UmamusumePrettyDerby_Jpn_Data\Persistent
+03:34:02 INFO: Output directory: C:\Users\nikit\Music\rando
+03:34:02 DEBUG: Direct meta open failed (file is not a database), trying sqlite3mc...
+03:34:03 WARNING: Cannot modify encrypted meta: extract_story_text.py not found. Use UmamusumeExplorer's Download Workaround instead.
+03:34:03 DEBUG: Trying Global key for meta decryption...
+03:34:03 DEBUG: pysqlcipher3 not available
+03:34:03 DEBUG: sqlcipher3 not available
+03:34:03 DEBUG: sqlite3mc DLL search dirs: ['C:\\Users\\nikit\\Documents\\clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\_internal']
+03:34:03 INFO: Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance
+03:34:03 INFO: Decrypting meta via sqlite3mc DLL...
+03:34:03 DEBUG: sqlite3_open_v2 OK, db_ptr=2134438860128
+03:34:03 DEBUG: sqlite3mc_config('cipher', 3) rc=3
+03:34:03 DEBUG: sqlite3_key(raw 12 bytes) rc=0
+03:34:03 DEBUG: sqlite3mc validation failed for cipher 3 rc=26 errmsg=file is not a database
+03:34:03 DEBUG: sqlite3_open_v2 OK, db_ptr=2134438859280
+03:34:03 DEBUG: sqlite3mc_config('cipher', 5) rc=5
+03:34:03 DEBUG: sqlite3_key(raw 12 bytes) rc=0
+03:34:03 DEBUG: sqlite3mc validation failed for cipher 5 rc=26 errmsg=file is not a database
+03:34:03 DEBUG: sqlite3_open_v2 OK, db_ptr=2134438866064
+03:34:03 DEBUG: sqlite3mc_config('cipher', 4) rc=4
+03:34:04 DEBUG: sqlite3_key(raw 12 bytes) rc=0
+03:34:04 DEBUG: sqlite3mc validation failed for cipher 4 rc=26 errmsg=file is not a database
+03:34:04 ERROR: sqlite3mc: no cipher ID worked (tried [3, 5, 4])
+03:34:04 DEBUG: Trying JP key for meta decryption...
+03:34:04 DEBUG: pysqlcipher3 not available
+03:34:04 DEBUG: sqlcipher3 not available
+03:34:04 DEBUG: sqlite3mc DLL search dirs: ['C:\\Users\\nikit\\Documents\\clairvoyance', 'C:\\Users\\nikit\\Documents\\clairvoyance\\_internal']
+03:34:04 INFO: Loaded sqlite3mc_x64.dll from C:\Users\nikit\Documents\clairvoyance
+03:34:04 INFO: Decrypting meta via sqlite3mc DLL...
+03:34:04 DEBUG: sqlite3_open_v2 OK, db_ptr=2134438858432
+03:34:04 DEBUG: sqlite3mc_config('cipher', 3) rc=3
+03:34:04 DEBUG: sqlite3_key(raw 32 bytes) rc=0
+03:34:04 INFO: Validation OK — cipher=3 key=32 bytes
+03:34:05 INFO: Decrypted meta -> C:\Program Files (x86)\Steam\steamapps\common\UmamusumePrettyDerby_Jpn\UmamusumePrettyDerby_Jpn_Data\Persistent\meta_decrypted
+03:34:05 INFO: Decrypted meta via sqlite3mc (JP key)
+03:34:05 INFO: Found 4303 asset entries to process
+03:34:05 INFO: Building work list…
+03:34:06 INFO: 10 to extract, 0 skipped (existing), 4293 missing files
+03:34:06 INFO: Using 8 worker processes
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_oke_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_oke_01.acb: read CRI audio, 12480 bytes
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_oke_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_oke_01.acb: vgmstream found 1 stream(s)
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1001_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1001_01.acb: read CRI audio, 11904 bytes
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1001_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1001_01.acb: vgmstream found 1 stream(s)
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1002_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1002_01.acb: read CRI audio, 11904 bytes
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1002_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1002_01.acb: vgmstream found 1 stream(s)
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1003_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1003_01.acb: read CRI audio, 11904 bytes
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1003_01.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1003_01.acb: vgmstream found 1 stream(s)
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_preview_02.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_preview_02.acb: read CRI audio, 13056 bytes
+03:34:06 DEBUG: [sound/l/1006/snd_bgm_live_1006_preview_02.acb] DEBUG:   sound/l/1006/snd_bgm_live_1006_preview_02.acb: vgmstream found 1 stream(s)
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_preview_02.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_preview_02.awb: read CRI audio, 1371168 bytes
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_preview_02.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_preview_02.awb: vgmstream found 1 stream(s)
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1003_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1003_01.awb: read CRI audio, 6976640 bytes
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1003_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1003_01.awb: vgmstream found 1 stream(s)
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1002_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1002_01.awb: read CRI audio, 6976640 bytes
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1002_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1002_01.awb: vgmstream found 1 stream(s)
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1001_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1001_01.awb: read CRI audio, 6976640 bytes
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_chara_1001_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_chara_1001_01.awb: vgmstream found 1 stream(s)
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_oke_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_oke_01.awb: read CRI audio, 6768768 bytes
+03:34:07 DEBUG: [sound/l/1006/snd_bgm_live_1006_oke_01.awb] DEBUG:   sound/l/1006/snd_bgm_live_1006_oke_01.awb: vgmstream found 1 stream(s)
+03:34:07 INFO: Saved manifest (10 entries) → .dump_manifest.json
+03:34:07 INFO: Done! Assets written to C:\Users\nikit\Music\rando
