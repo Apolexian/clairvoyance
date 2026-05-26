@@ -34,6 +34,7 @@ Usage:
     uv run dump_all_assets.py --output ./dump           # custom output dir
     uv run dump_all_assets.py --filter "story/%"        # only story assets
     uv run dump_all_assets.py --filter "sound/%"        # only sound assets
+    uv run dump_all_assets.py --songs                     # only live/song audio
     uv run dump_all_assets.py --types Texture2D Sprite  # only textures
     uv run dump_all_assets.py --images-only              # images only, flat dirs
     uv run dump_all_assets.py --images-only --no-cache  # force full rescan
@@ -1919,6 +1920,7 @@ Examples:
   %(prog)s --support-cards             # only support card images
   %(prog)s --chara                     # only character icons + portraits
   %(prog)s --sound                     # only sound/audio assets
+  %(prog)s --songs                     # only live/song audio (sound/l/)
   %(prog)s --movie                     # only movie/video assets
   %(prog)s --images-only --format webp # images as high-quality WEBP (~3x smaller)
   %(prog)s --format webp --quality 100 # WEBP lossless (smaller than PNG)
@@ -1973,6 +1975,12 @@ Examples:
         action="store_true",
         help="Only dump sound/audio assets (sound/ bundles). "
              "Saves as OGG/WAV/M4A if decodable, raw FSB otherwise",
+    )
+    parser.add_argument(
+        "--songs",
+        action="store_true",
+        help="Only dump live/song audio (sound/l/ bundles). "
+             "These are the full songs from the jukebox/live performances",
     )
     parser.add_argument(
         "--movie",
@@ -2115,6 +2123,13 @@ Examples:
         collapse_singles = True
         if name_filter == "%":
             name_filter = "sound/%"
+
+    if args.songs:
+        type_filter = {"AudioClip"}
+        flat_depth = 1
+        collapse_singles = True
+        if name_filter == "%":
+            name_filter = "sound/l/%"
 
     if args.movie:
         type_filter = {"VideoClip"}
