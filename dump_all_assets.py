@@ -34,6 +34,7 @@ Usage:
     uv run dump_all_assets.py --output ./dump           # custom output dir
     uv run dump_all_assets.py --filter "story/%"        # only story assets
     uv run dump_all_assets.py --filter "sound/%"        # only sound assets
+    uv run dump_all_assets.py --songs                     # only live/song audio
     uv run dump_all_assets.py --types Texture2D Sprite  # only textures
     uv run dump_all_assets.py --images-only              # images only, flat dirs
     uv run dump_all_assets.py --images-only --no-cache  # force full rescan
@@ -451,6 +452,223 @@ def read_all_meta_entries(game_dir: Path, name_filter: str = "%") -> list[dict]:
     return entries
 
 
+def _mark_songs_for_download(game_dir: Path) -> None:
+    """Mark sound/l/ entries in meta DB for download by setting group=0.
+
+    The game only downloads live/song audio on demand. By setting the
+    asset group to Default (0), the game treats them as required and
+    downloads them on next launch. Creates a backup of meta before modifying.
+    """
+    import shutil
+    import sqlite3
+
+    meta_path = game_dir / "meta"
+    if not meta_path.is_file():
+        log.warning("Cannot mark songs for download: meta not found at %s", meta_path)
+        return
+
+    # Check if we need to use the decrypted copy or original
+    meta_decrypted = game_dir / "meta_decrypted"
+    if meta_decrypted.is_file():
+        # Use decrypted copy — but we need to modify the ORIGINAL for the game
+        # First check if original meta has a 'g' column
+        pass
+
+    # Try opening meta directly (might be plaintext on some versions)
+    try:
+        conn = sqlite3.connect(str(meta_path))
+        conn.row_factory = sqlite3.Row
+        tables = [
+            r[0] for r in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        ]
+        if "a" not in tables:
+            conn.close()
+            log.warning("Cannot mark songs: meta DB has no table 'a'")
+            return
+
+        # Check columns
+        cols_info = conn.execute("PRAGMA table_info(a)").fetchall()
+        cols = {r[1] for r in cols_info}
+        if "g" not in cols:
+            conn.close()
+            log.warning("Cannot mark songs: meta DB table 'a' has no 'g' column")
+            return
+
+        # Count how many need updating
+        count = conn.execute(
+            "SELECT COUNT(*) FROM a WHERE n LIKE 'sound/l/%' AND g != 0"
+        ).fetchone()[0]
+
+        if count == 0:
+            conn.close()
+            log.info("All song entries already marked for download (g=0)")
+            return
+
+        # Backup meta before modifying
+        backup_path = meta_path.with_suffix(".bak")
+        if not backup_path.is_file():
+            shutil.copy2(meta_path, backup_path)
+            log.info("Backed up meta → %s", backup_path.name)
+
+        # Update group to 0 (Default) for all sound/l/ entries
+        conn.execute("UPDATE a SET g = 0 WHERE n LIKE 'sound/l/%' AND g != 0")
+        conn.commit()
+        conn.close()
+
+        log.info(
+            "Marked %d song entries for download (g=0). "
+            "Launch the game to trigger downloads, then run --songs again.",
+            count,
+        )
+
+    except sqlite3.DatabaseError as e:
+        # Meta is encrypted — need to use sqlite3mc
+        log.debug("Direct meta open failed (%s), trying sqlite3mc...", e)
+        _mark_songs_encrypted(meta_path, game_dir)
+
+
+def _mark_songs_encrypted(meta_path: Path, game_dir: Path) -> None:
+    """Mark songs for download in an encrypted meta DB via sqlite3mc."""
+    import ctypes
+    import shutil
+
+    from extract_story_text import (
+        _try_decrypt_via_sqlite3mc,
+        DB_KEY,
+        GLOBAL_DB_KEY,
+        DB_BASE_KEY,
+        APP_DIR,
+    )
+
+    def _derive_db_key(db_key: bytes) -> bytes:
+        key = bytearray(db_key)
+        for i in range(len(key)):
+            key[i] ^= DB_BASE_KEY[i % 13]
+        return bytes(key)
+
+    keys_to_try = [
+        ("Global", _derive_db_key(GLOBAL_DB_KEY)),
+        ("JP", _derive_db_key(DB_KEY)),
+    ]
+
+    # Find sqlite3mc DLL (same logic as extract_story_text)
+    search_dirs = [APP_DIR, APP_DIR / "_internal"]
+    dll_names = ["sqlite3mc_x64.dll", "sqlite3mc.dll"]
+
+    dll = None
+    for d in search_dirs:
+        if d is None or not d.is_dir():
+            continue
+        for name in dll_names:
+            candidate = d / name
+            if candidate.is_file():
+                try:
+                    dll = ctypes.CDLL(str(candidate))
+                    break
+                except OSError:
+                    continue
+        if dll:
+            break
+
+    if dll is None:
+        for name in ["sqlite3mc_x64", "sqlite3mc_x64.dll", "sqlite3mc"]:
+            try:
+                dll = ctypes.CDLL(name)
+                break
+            except OSError:
+                continue
+
+    if dll is None:
+        log.warning("Cannot modify encrypted meta: sqlite3mc DLL not found")
+        return
+
+    # Setup function signatures
+    _vp = ctypes.c_void_p
+    _cp = ctypes.c_char_p
+    _ci = ctypes.c_int
+    _pp = ctypes.POINTER(ctypes.c_void_p)
+
+    dll.sqlite3_open_v2.argtypes = [_cp, _pp, _ci, _cp]
+    dll.sqlite3_open_v2.restype = _ci
+    dll.sqlite3mc_config.argtypes = [_vp, _cp, _ci]
+    dll.sqlite3mc_config.restype = _ci
+    dll.sqlite3_key.argtypes = [_vp, _cp, _ci]
+    dll.sqlite3_key.restype = _ci
+    dll.sqlite3_exec.argtypes = [_vp, _cp, _vp, _vp, _pp]
+    dll.sqlite3_exec.restype = _ci
+    dll.sqlite3_errmsg.argtypes = [_vp]
+    dll.sqlite3_errmsg.restype = _cp
+    dll.sqlite3_close.argtypes = [_vp]
+    dll.sqlite3_close.restype = _ci
+
+    SQLITE_OPEN_READWRITE = 0x00000002
+    _CIPHER_IDS = [3, 5, 4]
+
+    # Backup first
+    backup_path = meta_path.with_suffix(".bak")
+    if not backup_path.is_file():
+        shutil.copy2(meta_path, backup_path)
+        log.info("Backed up meta → %s", backup_path.name)
+
+    for region, key in keys_to_try:
+        for cipher_id in _CIPHER_IDS:
+            db_ptr = ctypes.c_void_p()
+            rc = dll.sqlite3_open_v2(
+                str(meta_path).encode("utf-8"),
+                ctypes.byref(db_ptr),
+                SQLITE_OPEN_READWRITE,
+                None,
+            )
+            if rc != 0:
+                continue
+
+            rc = dll.sqlite3mc_config(db_ptr, b"cipher", cipher_id)
+            rc = dll.sqlite3_key(db_ptr, key, len(key))
+            if rc != 0:
+                dll.sqlite3_close(db_ptr)
+                continue
+
+            # Validate access
+            err_ptr = ctypes.c_void_p()
+            rc = dll.sqlite3_exec(
+                db_ptr,
+                b"SELECT name FROM sqlite_master LIMIT 1;",
+                None, None, ctypes.byref(err_ptr),
+            )
+            if rc != 0:
+                dll.sqlite3_close(db_ptr)
+                continue
+
+            # Key works — do the update
+            rc = dll.sqlite3_exec(
+                db_ptr,
+                b"UPDATE a SET g = 0 WHERE n LIKE 'sound/l/%' AND g != 0",
+                None, None, ctypes.byref(err_ptr),
+            )
+
+            if rc == 0:
+                log.info(
+                    "Marked song entries for download (%s key, cipher %d). "
+                    "Launch the game to trigger downloads, then run --songs again.",
+                    region, cipher_id,
+                )
+                dll.sqlite3_close(db_ptr)
+                return
+            else:
+                msg = dll.sqlite3_errmsg(db_ptr)
+                log.debug("UPDATE failed: rc=%d err=%s", rc,
+                         msg.decode() if msg else "unknown")
+                dll.sqlite3_close(db_ptr)
+                continue
+
+    log.warning(
+        "Could not modify encrypted meta DB. "
+        "Use UmamusumeExplorer's Download Workaround instead."
+    )
+
+
 # ── Bundle type cache / manifest ───────────────────────────────────────
 # Tracks which Unity types each bundle contains so subsequent runs can
 # skip bundles that have no types matching the filter (e.g. images-only
@@ -686,15 +904,126 @@ def _get_audio_data(data) -> bytes | None:
     # Audio stored in external .resource file
     res = getattr(data, "m_Resource", None)
     if res and getattr(res, "m_Size", 0) > 0:
+        src = getattr(res, "m_Source", "")
+        log.debug("  trying external resource: source=%r, offset=%d, size=%d",
+                  src, getattr(res, "m_Offset", 0), getattr(res, "m_Size", 0))
         try:
             from UnityPy.helpers.ResourceReader import get_resource_data
 
-            return get_resource_data(
+            result = get_resource_data(
                 res.m_Source, data.object_reader.assets_file, res.m_Offset, res.m_Size
             )
+            log.debug("  external resource read OK: %d bytes", len(result))
+            return result
+        except FileNotFoundError as e:
+            log.warning("  external resource NOT FOUND: %s (source=%r)", e, src)
+            # Log available cabs for diagnosis
+            env = data.object_reader.assets_file.environment
+            cabs = list(env.cabs.keys())[:20]
+            log.debug("  available cabs (%d total): %s", len(env.cabs), cabs)
         except Exception as e:
-            log.debug("  failed to read external audio resource: %s", e)
+            log.warning("  failed to read external audio resource: %s (source=%r)", e, src)
+    else:
+        log.debug("  AudioClip has no m_AudioData and no m_Resource (or size=0)")
     return None
+
+
+def _export_cri_audio(file_path: Path, entry_key: int, asset_name: str, out_dir: Path) -> list[str]:
+    """Export CRI ACB/AWB audio files using vgmstream-cli.
+
+    CRI audio files are NOT Unity asset bundles. They may be encrypted with
+    the same bundle key system, but their content is CRI Middleware format
+    (ACB = cue sheet with embedded or referenced waveforms, AWB = waveform archive).
+
+    Strategy:
+      1. Decrypt if needed (key != 0) and save as raw .acb/.awb
+      2. Try vgmstream-cli to decode to WAV
+      3. If vgmstream unavailable, keep the raw file for manual conversion
+    """
+    import subprocess
+
+    saved = []
+    ext = Path(asset_name).suffix  # .acb or .awb
+
+    # Get the raw file data
+    if entry_key != 0:
+        raw_data = decrypt_bundle(file_path, entry_key)
+        log.debug("  %s: decrypted CRI audio, %d bytes", asset_name, len(raw_data) if raw_data else 0)
+    else:
+        raw_data = file_path.read_bytes()
+        log.debug("  %s: read CRI audio, %d bytes", asset_name, len(raw_data))
+
+    if not raw_data or len(raw_data) == 0:
+        log.warning("  %s: empty file after decryption", asset_name)
+        return saved
+
+    # For AWB files, try vgmstream directly
+    # For ACB files, we need the paired AWB — vgmstream can handle ACB+AWB pairs
+    # but needs them on disk together. Save raw first.
+    name_stem = Path(asset_name).stem
+    raw_path = out_dir / f"{name_stem}{ext}"
+    raw_path.write_bytes(raw_data)
+
+    vgmstream = _find_vgmstream()
+    if not vgmstream:
+        log.info("  %s: saved raw CRI file (install vgmstream-cli for WAV conversion)", asset_name)
+        saved.append(raw_path.name)
+        return saved
+
+    # Try vgmstream conversion
+    try:
+        # Check subsong count
+        result = subprocess.run(
+            [vgmstream, "-m", str(raw_path)],
+            capture_output=True, text=True, timeout=30,
+        )
+
+        if result.returncode != 0:
+            # vgmstream can't handle this file (might be ACB without paired AWB)
+            log.debug("  %s: vgmstream metadata failed (rc=%d): %s",
+                     asset_name, result.returncode, result.stderr[:200] if result.stderr else "")
+            saved.append(raw_path.name)
+            return saved
+
+        num_streams = 1
+        for line in result.stdout.splitlines():
+            if "stream count:" in line.lower():
+                try:
+                    num_streams = int(line.split(":")[-1].strip())
+                except ValueError:
+                    pass
+
+        log.debug("  %s: vgmstream found %d stream(s)", asset_name, num_streams)
+
+        converted_any = False
+        for i in range(1, num_streams + 1):
+            suffix = f"_{i:03d}" if num_streams > 1 else ""
+            wav_path = out_dir / f"{name_stem}{suffix}.wav"
+            cmd = [vgmstream, "-o", str(wav_path), str(raw_path)]
+            if num_streams > 1:
+                cmd.extend(["-s", str(i)])
+            r = subprocess.run(cmd, capture_output=True, timeout=60)
+            if r.returncode == 0 and wav_path.is_file() and wav_path.stat().st_size > 0:
+                saved.append(wav_path.name)
+                converted_any = True
+            else:
+                log.debug("  %s stream %d: vgmstream failed (rc=%d)", asset_name, i, r.returncode)
+
+        if converted_any:
+            # Remove raw file since we have WAV conversions
+            raw_path.unlink(missing_ok=True)
+        else:
+            saved.append(raw_path.name)
+            log.debug("  %s: no streams converted, keeping raw", asset_name)
+
+    except subprocess.TimeoutExpired:
+        log.warning("  %s: vgmstream timed out", asset_name)
+        saved.append(raw_path.name)
+    except Exception as e:
+        log.warning("  %s: vgmstream error: %s", asset_name, e)
+        saved.append(raw_path.name)
+
+    return saved
 
 
 def _audio_ext_from_magic(data: bytes) -> str:
@@ -710,14 +1039,97 @@ def _audio_ext_from_magic(data: bytes) -> str:
     return ".bin"
 
 
+def _find_vgmstream() -> str | None:
+    """Find vgmstream-cli executable on PATH or common locations."""
+    import shutil
+
+    for name in ("vgmstream-cli", "vgmstream_cli", "vgmstream123"):
+        path = shutil.which(name)
+        if path:
+            return path
+    # Common Windows install locations
+    for candidate in (
+        Path("C:/tools/vgmstream-win64/vgmstream-cli.exe"),
+        Path("C:/tools/vgmstream/vgmstream-cli.exe"),
+        Path.home() / "vgmstream" / "vgmstream-cli.exe",
+    ):
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
+def _convert_fsb_to_wav(fsb_data: bytes, name: str, out_dir: Path) -> list[str]:
+    """Convert FSB5 audio data to WAV using vgmstream-cli.
+
+    Returns list of saved filenames, or empty list if conversion fails.
+    """
+    import subprocess
+    import tempfile
+
+    vgmstream = _find_vgmstream()
+    if not vgmstream:
+        return []
+
+    saved = []
+    with tempfile.NamedTemporaryFile(suffix=".fsb", delete=False) as tmp:
+        tmp.write(fsb_data)
+        tmp_path = Path(tmp.name)
+
+    try:
+        # vgmstream-cli can extract subsongs from FSB containers
+        # First, check how many subsongs there are
+        result = subprocess.run(
+            [vgmstream, "-m", str(tmp_path)],
+            capture_output=True, text=True, timeout=30,
+        )
+        # Parse stream count from metadata output
+        num_streams = 1
+        for line in result.stdout.splitlines():
+            if "stream count:" in line.lower():
+                try:
+                    num_streams = int(line.split(":")[-1].strip())
+                except ValueError:
+                    pass
+
+        if num_streams == 1:
+            out_path = out_dir / f"{name}.wav"
+            r = subprocess.run(
+                [vgmstream, "-o", str(out_path), str(tmp_path)],
+                capture_output=True, timeout=60,
+            )
+            if r.returncode == 0 and out_path.is_file() and out_path.stat().st_size > 0:
+                saved.append(out_path.name)
+            else:
+                log.debug("  vgmstream conversion failed (rc=%d): %s", r.returncode, r.stderr[:200])
+        else:
+            for i in range(1, num_streams + 1):
+                suffix = f"_{i:02d}" if num_streams > 1 else ""
+                out_path = out_dir / f"{name}{suffix}.wav"
+                r = subprocess.run(
+                    [vgmstream, "-o", str(out_path), "-s", str(i), str(tmp_path)],
+                    capture_output=True, timeout=60,
+                )
+                if r.returncode == 0 and out_path.is_file() and out_path.stat().st_size > 0:
+                    saved.append(out_path.name)
+    except subprocess.TimeoutExpired:
+        log.debug("  vgmstream timed out for %s", name)
+    except Exception as e:
+        log.debug("  vgmstream conversion error: %s", e)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    return saved
+
+
 def _export_audioclip(obj, out_dir: Path, idx: int) -> list[str]:
     """Export an AudioClip.
 
     Strategy:
       1. Try UnityPy .samples (decodes OGG/WAV/M4A natively, FSB via FMOD).
-      2. If .samples fails (FMOD not installed), save raw audio with the
-         correct extension so external tools (vgmstream, foobar2000) can
-         open it.
+      2. If .samples fails, get raw audio data and:
+         a. If OGG/WAV/M4A → save directly.
+         b. If FSB → try vgmstream-cli conversion to WAV.
+         c. If vgmstream unavailable → save raw .fsb file.
     """
     saved = []
     try:
@@ -738,20 +1150,34 @@ def _export_audioclip(obj, out_dir: Path, idx: int) -> list[str]:
         except Exception as e:
             log.debug("  UnityPy .samples decode failed (likely no FMOD): %s", e)
 
-        # Fallback: save raw audio data with detected extension
+        # Fallback: get raw audio bytes
         raw = _get_audio_data(data)
         if raw and len(raw) > 0:
             ext = _audio_ext_from_magic(raw)
-            out_path = out_dir / f"{name}{ext}"
-            out_path.write_bytes(raw)
-            saved.append(out_path.name)
             if ext == ".fsb":
-                log.debug(
-                    "  saved as FSB (install FMOD SDK for WAV conversion, "
-                    "or use vgmstream/foobar2000 to play)"
-                )
+                # Try vgmstream conversion first
+                converted = _convert_fsb_to_wav(raw, name, out_dir)
+                if converted:
+                    saved.extend(converted)
+                else:
+                    # Save raw FSB as last resort
+                    out_path = out_dir / f"{name}{ext}"
+                    out_path.write_bytes(raw)
+                    saved.append(out_path.name)
+                    log.warning(
+                        "  %s: saved as .fsb — install vgmstream-cli for WAV "
+                        "conversion (https://vgmstream.org)", name
+                    )
+            else:
+                # OGG/WAV/M4A — save directly
+                out_path = out_dir / f"{name}{ext}"
+                out_path.write_bytes(raw)
+                saved.append(out_path.name)
+        else:
+            log.warning("  %s: AudioClip has no extractable audio data "
+                       "(external resource not resolved)", name)
     except Exception as e:
-        log.debug("  audioclip export failed: %s", e)
+        log.warning("  audioclip export failed for idx %d: %s", idx, e)
     return saved
 
 
@@ -1066,8 +1492,8 @@ def _resolve_external_resources(env, asset_name: str, dat_dir: Path | None,
             log.debug("  failed to load companion %s: %s", h[:12], e)
 
     if missing:
-        log.debug("  %s: could not resolve resources: %s",
-                  asset_name, [ntpath.basename(n) for n in missing])
+        log.warning("  %s: could not resolve %d external resources: %s",
+                    asset_name, len(missing), [ntpath.basename(n) for n in missing])
 
 
 def dump_bundle(
@@ -1118,16 +1544,35 @@ def dump_bundle(
         out_dir = output_root / asset_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Detect CRI ACB/AWB audio files — these are NOT Unity bundles
+    # and need to be handled with vgmstream-cli instead of UnityPy
+    is_cri_audio = asset_name.endswith((".acb", ".awb"))
+    if is_cri_audio:
+        saved = _export_cri_audio(file_path, entry_key, asset_name, out_dir)
+        if saved:
+            stats["CriAudio"] = len(saved)
+        else:
+            with contextlib.suppress(OSError):
+                out_dir.rmdir()
+        if flatten_all and stats:
+            _collapse_dir_flat(out_dir)
+        elif collapse_singles and stats:
+            _collapse_single_file_dir(out_dir)
+        return stats
+
     env = None
     try:
         if entry_key != 0:
             data = decrypt_bundle(file_path, entry_key)
+            log.debug("  %s: decrypted %d bytes (key=%d)", asset_name, len(data) if data else 0, entry_key)
             try:
                 env = UnityPy.load(data)
             except Exception:
                 env = UnityPy.load(io.BytesIO(data))
         else:
             env = UnityPy.load(str(file_path))
+        log.debug("  %s: loaded env with %d objects, %d cabs",
+                  asset_name, len(list(env.objects)), len(env.cabs))
     except Exception as e:
         log.warning("Failed to load bundle %s: %s", asset_name, e)
         with contextlib.suppress(OSError):
@@ -1149,6 +1594,16 @@ def dump_bundle(
                     name = obj.peek_name()
                     if name:
                         sprite_names.add(name)
+
+    # Log all object types in this bundle for diagnostics
+    all_types = {}
+    for obj in env.objects:
+        tname = obj.type.name
+        all_types[tname] = all_types.get(tname, 0) + 1
+    if all_types:
+        log.debug("  %s: contains types: %s", asset_name, dict(all_types))
+    else:
+        log.debug("  %s: bundle has NO objects", asset_name)
 
     for idx, obj in enumerate(env.objects):
         type_name = obj.type.name
@@ -1231,14 +1686,14 @@ def _collapse_dir_flat(out_dir: Path) -> None:
 # ── Worker function for multiprocessing ────────────────────────────────
 
 
-def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
+def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None, list[str]]:
     """
     Process a single bundle entry. Designed to be called via ProcessPoolExecutor.
 
     Args is a tuple of (file_path_str, entry_key, asset_name, entry_hash,
     output_root_str, type_filter_list, flat_depth, collapse_singles, flatten_all,
     image_format, image_quality, dat_dir_str, meta_lookup).
-    Returns (asset_name, entry_hash, stats_dict, error_msg_or_None).
+    Returns (asset_name, entry_hash, stats_dict, error_msg_or_None, log_lines).
     """
     (file_path_str, entry_key, asset_name, entry_hash, output_root_str,
      type_filter_list, flat_depth, collapse_singles, flatten_all,
@@ -1253,6 +1708,16 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
     _IMAGE_FORMAT = image_format
     _IMAGE_QUALITY = image_quality
 
+    # Capture log output from worker for return to main process
+    import io as _io
+    _log_stream = _io.StringIO()
+    _handler = logging.StreamHandler(_log_stream)
+    _handler.setLevel(logging.DEBUG)
+    _handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    worker_log = logging.getLogger("dump_all_assets")
+    worker_log.addHandler(_handler)
+    worker_log.setLevel(logging.DEBUG)
+
     try:
         stats = dump_bundle(
             file_path, entry_key, asset_name, output_root,
@@ -1260,9 +1725,13 @@ def _dump_one(args: tuple) -> tuple[str, str, dict[str, int], str | None]:
             flatten_all=flatten_all,
             dat_dir=dat_dir, meta_lookup=meta_lookup,
         )
-        return (asset_name, entry_hash, stats, None)
+        log_lines = _log_stream.getvalue().splitlines()
+        return (asset_name, entry_hash, stats, None, log_lines)
     except Exception as e:
-        return (asset_name, entry_hash, {}, str(e))
+        log_lines = _log_stream.getvalue().splitlines()
+        return (asset_name, entry_hash, {}, str(e), log_lines)
+    finally:
+        worker_log.removeHandler(_handler)
 
 
 # ── Main dump logic ───────────────────────────────────────────────────
@@ -1280,6 +1749,7 @@ def dump_all(
     collapse_singles: bool = False,
     flatten_all: bool = False,
     use_cache: bool = True,
+    limit: int = 0,
 ) -> dict[str, int]:
     """
     Dump all assets matching the filter.
@@ -1291,6 +1761,7 @@ def dump_all(
         flatten_all: Move all files directly into output_root (completely flat).
         use_cache: Use .dump_manifest.json to skip already-processed bundles
                    and bundles known to have no matching types (delta mode).
+        limit: If > 0, only process the first N bundles (for debugging).
 
     Returns aggregate {type_name: total_count}.
     """
@@ -1395,6 +1866,10 @@ def dump_all(
         ))
 
     remaining = len(work_items)
+    if limit > 0:
+        work_items = work_items[:limit]
+        remaining = len(work_items)
+        log.info("--limit %d: processing only first %d bundles", limit, remaining)
     skip_detail = f"{skipped} skipped (existing)"
     if cache_skipped:
         skip_detail += f", {cache_skipped} skipped (cache: no matching types)"
@@ -1416,10 +1891,12 @@ def dump_all(
     if workers == 1:
         # Sequential mode
         for args in work_items:
-            asset_name, entry_hash, stats, err = _dump_one(args)
+            asset_name, entry_hash, stats, err, log_lines = _dump_one(args)
             if err:
                 errors += 1
                 log.debug("Error processing %s: %s", asset_name, err)
+            for line in log_lines:
+                log.debug("[%s] %s", asset_name, line)
             for k, v in stats.items():
                 agg_stats[k] = agg_stats.get(k, 0) + v
             if use_cache:
@@ -1438,10 +1915,12 @@ def dump_all(
             for future in as_completed(futures):
                 asset_name = futures[future]
                 try:
-                    _, entry_hash, stats, err = future.result()
+                    _, entry_hash, stats, err, log_lines = future.result()
                     if err:
                         errors += 1
                         log.debug("Error processing %s: %s", asset_name, err)
+                    for line in log_lines:
+                        log.debug("[%s] %s", asset_name, line)
                     for k, v in stats.items():
                         agg_stats[k] = agg_stats.get(k, 0) + v
                     if use_cache:
@@ -1626,7 +2105,19 @@ def _progress(
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+    # Console handler stays at INFO (don't spam terminal with debug)
+    logging.getLogger().handlers[0].setLevel(logging.INFO)
+
+    # Always log to file at DEBUG level for diagnostics
+    _log_file = Path(__file__).parent / "dump_all_assets.log"
+    _file_handler = logging.FileHandler(_log_file, mode="w", encoding="utf-8")
+    _file_handler.setLevel(logging.DEBUG)
+    _file_handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s: %(message)s", datefmt="%H:%M:%S"
+    ))
+    logging.getLogger().addHandler(_file_handler)
+    log.info("Log file: %s", _log_file)
 
     parser = argparse.ArgumentParser(
         description="Dump ALL assets from Uma Musume game bundles.",
@@ -1646,6 +2137,7 @@ Examples:
   %(prog)s --support-cards             # only support card images
   %(prog)s --chara                     # only character icons + portraits
   %(prog)s --sound                     # only sound/audio assets
+  %(prog)s --songs                     # only live/song audio (sound/l/)
   %(prog)s --movie                     # only movie/video assets
   %(prog)s --images-only --format webp # images as high-quality WEBP (~3x smaller)
   %(prog)s --format webp --quality 100 # WEBP lossless (smaller than PNG)
@@ -1702,6 +2194,12 @@ Examples:
              "Saves as OGG/WAV/M4A if decodable, raw FSB otherwise",
     )
     parser.add_argument(
+        "--songs",
+        action="store_true",
+        help="Only dump live/song audio (sound/l/ bundles). "
+             "These are the full songs from the jukebox/live performances",
+    )
+    parser.add_argument(
         "--movie",
         action="store_true",
         help="Only dump movie/video assets (movie/ bundles)",
@@ -1735,6 +2233,12 @@ Examples:
         "--verbose", "-v",
         action="store_true",
         help="Enable debug logging",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=0,
+        help="Only process the first N bundles (for debugging)",
     )
     parser.add_argument(
         "--save",
@@ -1837,6 +2341,17 @@ Examples:
         if name_filter == "%":
             name_filter = "sound/%"
 
+    if args.songs:
+        type_filter = {"AudioClip"}
+        flat_depth = 1
+        collapse_singles = True
+        if name_filter == "%":
+            name_filter = "sound/l/%"
+
+        # Modify meta DB to mark song assets for download (group = 0)
+        # This tricks the game into downloading them on next launch.
+        _mark_songs_for_download(game_dir)
+
     if args.movie:
         type_filter = {"VideoClip"}
         flat_depth = 1
@@ -1862,6 +2377,7 @@ Examples:
         collapse_singles=collapse_singles,
         flatten_all=flatten_all,
         use_cache=not args.no_cache,
+        limit=args.limit,
     )
 
     if stats:

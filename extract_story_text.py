@@ -107,92 +107,34 @@ def detect_game_dir(explicit_path: str | None = None) -> Path | None:
     return None
 
 
-# ── Meta database decryption keys (from UmaViewer Config.cs) ───────────
+# ── Meta database decryption keys ──────────────────────────────────────
+# Captured dynamically via Frida from sqlite3_key in libnative.dll.
+# These are the final keys passed directly to sqlite3_key (no XOR needed).
+# Game updated 2026-07-01 (v1.22.1): sqlite3mc moved to libnative.dll,
+# key length changed to 33 bytes.
 
-# DB encryption key — JP (XOR'd with DBBaseKey to produce the final key)
-DB_KEY = bytes(
-    [
-        0x6D,
-        0x5B,
-        0x65,
-        0x33,
-        0x63,
-        0x36,
-        0x63,
-        0x25,
-        0x54,
-        0x71,
-        0x2D,
-        0x73,
-        0x50,
-        0x53,
-        0x63,
-        0x38,
-        0x6D,
-        0x34,
-        0x37,
-        0x7B,
-        0x35,
-        0x63,
-        0x70,
-        0x23,
-        0x37,
-        0x34,
-        0x53,
-        0x29,
-        0x73,
-        0x43,
-        0x36,
-        0x33,
-    ]
-)
-
-# DB encryption key — Global (from UmaViewer Config.cs GlobalDBKey)
+# DB encryption key — Global/Steam (captured 2026-07-01)
 GLOBAL_DB_KEY = bytes(
     [
-        0x56,
-        0x63,
-        0x6B,
-        0x63,
-        0x42,
-        0x72,
-        0x37,
-        0x76,
-        0x65,
-        0x70,
-        0x41,
-        0x62,
+        0x36, 0x23, 0x6B, 0x4C, 0x2A, 0x39, 0x21, 0x75,
+        0x52, 0x26, 0x32, 0x76, 0x25, 0x50, 0x3F, 0x35,
+        0x5D, 0x77, 0x58, 0x6D, 0x40, 0x71, 0x38, 0x5E,
+        0x4C, 0x31, 0x28, 0x74, 0x29, 0x59, 0x37, 0x24,
+        0x53,
     ]
 )
 
-DB_BASE_KEY = bytes(
-    [
-        0xF1,
-        0x70,
-        0xCE,
-        0xA4,
-        0xDF,
-        0xCE,
-        0xA3,
-        0xE1,
-        0xA5,
-        0xD8,
-        0xC7,
-        0x0B,
-        0xD1,
-        0x00,
-        0x00,
-        0x00,
-    ]
-)
+# JP key unknown post-update; fall back to Global key.
+# Update this when JP server is tested.
+DB_KEY = GLOBAL_DB_KEY
+
+# Kept for API compatibility with dump_all_assets.py imports.
+DB_BASE_KEY = bytes(13)
 
 
 def _derive_db_key(db_key: bytes = DB_KEY) -> bytes:
-    """Derive the final decryption key: db_key XOR DBBaseKey (cycling 13 bytes)."""
-    key = bytearray(db_key)
-    for i in range(len(key)):
-        key[i] ^= DB_BASE_KEY[i % 13]
-    return bytes(key)
+    """Return the final decryption key. XOR step dropped — keys are pre-derived."""
+    return db_key
 
 
 def _try_open_encrypted_meta(meta_path: Path) -> sqlite3.Connection | None:
@@ -266,46 +208,73 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
     """
     import ctypes
 
-    # Search for the DLL in multiple locations.
-    # For a PyInstaller --onedir build the layout is:
-    #   dist/Clairvoyance/Clairvoyance.exe
-    #   dist/Clairvoyance/sqlite3mc_x64.dll      ← next to exe (APP_DIR)
-    #   dist/Clairvoyance/_internal/              ← sys._MEIPASS
-    #   dist/Clairvoyance/_internal/sqlite3mc_x64.dll  ← bundled via --add-binary
+    # Search for the DLL. Priority:
+    #   1. libnative.dll from game install (ships with sqlite3mc since v1.22.1)
+    #   2. sqlite3mc_x64.dll next to script / exe (bundled fallback)
     _meipass = Path(sys._MEIPASS) if _FROZEN and hasattr(sys, "_MEIPASS") else None
     _exe_dir = Path(sys.executable).resolve().parent if _FROZEN else None
 
-    search_dirs = [
-        APP_DIR,  # next to script / exe
-        _exe_dir,  # exe's own directory (frozen)
-        _meipass,  # PyInstaller _MEIPASS (onedir → _internal/)
-        APP_DIR / "_internal",  # explicit _internal/ fallback
+    # Locate libnative.dll from the game install directory.
+    # meta_path is  <game_dir>/meta  →  game_dir is meta_path.parent
+    _game_dir = meta_path.parent
+    _libnative_candidates = [
+        _game_dir.parent / "UmamusumePrettyDerby_Data" / "Plugins" / "x86_64" / "libnative.dll",
+        _game_dir / "UmamusumePrettyDerby_Data" / "Plugins" / "x86_64" / "libnative.dll",
     ]
-    dll_names = ["sqlite3mc_x64.dll", "sqlite3mc.dll"]
-
-    log.debug("sqlite3mc DLL search dirs: %s", [str(d) for d in search_dirs if d])
+    # Also try common Steam path
+    import winreg as _wr
+    try:
+        with _wr.OpenKey(_wr.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Valve\Steam") as k:
+            steam_path = Path(_wr.QueryValueEx(k, "InstallPath")[0])
+        _libnative_candidates.append(
+            steam_path / "steamapps" / "common" / "UmamusumePrettyDerby"
+            / "UmamusumePrettyDerby_Data" / "Plugins" / "x86_64" / "libnative.dll"
+        )
+    except Exception:
+        pass
 
     dll = None
-    for d in search_dirs:
-        if d is None or not d.is_dir():
-            continue
-        for name in dll_names:
-            candidate = d / name
-            if candidate.is_file():
-                try:
-                    dll = ctypes.CDLL(str(candidate))
-                    log.info("Loaded %s from %s", name, d)
-                    break
-                except OSError:
-                    continue
-        if dll:
-            break
+    dll_name_loaded = None
+    for candidate in _libnative_candidates:
+        if candidate.is_file():
+            try:
+                dll = ctypes.CDLL(str(candidate))
+                dll_name_loaded = str(candidate)
+                log.info("Loaded libnative.dll from %s", candidate)
+                break
+            except OSError:
+                continue
 
-    # Also try bare name (system PATH)
+    if dll is None:
+        search_dirs = [
+            APP_DIR,
+            _exe_dir,
+            _meipass,
+            APP_DIR / "_internal",
+        ]
+        dll_names = ["sqlite3mc_x64.dll", "sqlite3mc.dll"]
+        log.debug("sqlite3mc DLL search dirs: %s", [str(d) for d in search_dirs if d])
+        for d in search_dirs:
+            if d is None or not d.is_dir():
+                continue
+            for name in dll_names:
+                candidate = d / name
+                if candidate.is_file():
+                    try:
+                        dll = ctypes.CDLL(str(candidate))
+                        dll_name_loaded = name
+                        log.info("Loaded %s from %s", name, d)
+                        break
+                    except OSError:
+                        continue
+            if dll:
+                break
+
     if dll is None:
         for name in ["sqlite3mc_x64", "sqlite3mc_x64.dll", "sqlite3mc"]:
             try:
                 dll = ctypes.CDLL(name)
+                dll_name_loaded = name
                 log.info("Loaded %s from system PATH", name)
                 break
             except OSError:
@@ -314,6 +283,13 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
     if dll is None:
         log.debug("sqlite3mc DLL not found — cannot decrypt meta natively")
         return None
+
+    # libnative.dll does not export sqlite3_errmsg; use a safe wrapper.
+    _has_errmsg = hasattr(dll, "sqlite3_errmsg")
+    try:
+        dll.sqlite3_errmsg.argtypes  # probe
+    except AttributeError:
+        _has_errmsg = False
 
     try:
         log.info("Decrypting meta via sqlite3mc DLL...")
@@ -335,22 +311,16 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
         dll.sqlite3_exec.argtypes = [_vp, _cp, _vp, _vp, _pp]
         dll.sqlite3_exec.restype = _ci
 
-        dll.sqlite3_errmsg.argtypes = [_vp]
-        dll.sqlite3_errmsg.restype = _cp
-
-        dll.sqlite3_backup_init.argtypes = [_vp, _cp, _vp, _cp]
-        dll.sqlite3_backup_init.restype = _vp
-
-        dll.sqlite3_backup_step.argtypes = [_vp, _ci]
-        dll.sqlite3_backup_step.restype = _ci
-
-        dll.sqlite3_backup_finish.argtypes = [_vp]
-        dll.sqlite3_backup_finish.restype = _ci
+        if _has_errmsg:
+            dll.sqlite3_errmsg.argtypes = [_vp]
+            dll.sqlite3_errmsg.restype = _cp
 
         dll.sqlite3_close.argtypes = [_vp]
         dll.sqlite3_close.restype = _ci
 
         def _errmsg(db: ctypes.c_void_p) -> str:
+            if not _has_errmsg:
+                return "(unavailable)"
             msg = dll.sqlite3_errmsg(db)
             return msg.decode("utf-8", errors="replace") if msg else "(null)"
 
@@ -431,47 +401,106 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
             return None
         db_ptr = validated_db_ptr
 
-        # ── Create plaintext copy via backup API ─────────────────────
+        # ── Create plaintext copy ─────────────────────────────────────
         decrypted_path = meta_path.parent / "meta_decrypted"
-        # Remove stale file from a previous run so backup starts fresh
         if decrypted_path.exists():
             decrypted_path.unlink()
-        dest_ptr = ctypes.c_void_p()
-        rc = dll.sqlite3_open_v2(
-            str(decrypted_path).encode("utf-8"),
-            ctypes.byref(dest_ptr),
-            SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
-            None,
-        )
-        if rc != 0:
-            log.error("sqlite3mc open dest failed rc=%d errmsg=%s", rc, _errmsg(dest_ptr))
-            dll.sqlite3_close(db_ptr)
-            return None
 
-        backup = dll.sqlite3_backup_init(dest_ptr, b"main", db_ptr, b"main")
-        if not backup:
-            log.error("sqlite3_backup_init failed errmsg=%s", _errmsg(dest_ptr))
+        # Prefer sqlite3_backup_* if available (our bundled sqlite3mc_x64.dll).
+        # libnative.dll (game's sqlite3mc, used since v1.22.1) lacks backup API;
+        # fall back to ATTACH + CREATE TABLE AS SELECT for each table.
+        try:
+            ctypes.CDLL.__getitem__(dll, "sqlite3_backup_init")
+            _has_backup = True
+            dll.sqlite3_backup_init.argtypes = [_vp, _cp, _vp, _cp]
+            dll.sqlite3_backup_init.restype = _vp
+            dll.sqlite3_backup_step.argtypes = [_vp, _ci]
+            dll.sqlite3_backup_step.restype = _ci
+            dll.sqlite3_backup_finish.argtypes = [_vp]
+            dll.sqlite3_backup_finish.restype = _ci
+        except (AttributeError, OSError):
+            _has_backup = False
+
+        if _has_backup:
+            dest_ptr = ctypes.c_void_p()
+            rc = dll.sqlite3_open_v2(
+                str(decrypted_path).encode("utf-8"),
+                ctypes.byref(dest_ptr),
+                SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+                None,
+            )
+            if rc != 0:
+                log.error("sqlite3mc open dest failed rc=%d errmsg=%s", rc, _errmsg(dest_ptr))
+                dll.sqlite3_close(db_ptr)
+                return None
+
+            backup = dll.sqlite3_backup_init(dest_ptr, b"main", db_ptr, b"main")
+            if not backup:
+                log.error("sqlite3_backup_init failed errmsg=%s", _errmsg(dest_ptr))
+                dll.sqlite3_close(dest_ptr)
+                dll.sqlite3_close(db_ptr)
+                return None
+
+            SQLITE_OK = 0
+            SQLITE_DONE = 101
+            while True:
+                rc = dll.sqlite3_backup_step(backup, 5)
+                if rc == SQLITE_DONE:
+                    break
+                if rc != SQLITE_OK:
+                    log.error("sqlite3_backup_step failed rc=%d", rc)
+                    break
+
+            dll.sqlite3_backup_finish(backup)
             dll.sqlite3_close(dest_ptr)
-            dll.sqlite3_close(db_ptr)
-            return None
+        else:
+            # ATTACH a new unencrypted DB and copy each table with CREATE AS SELECT.
+            # sqlite_stat1 is a system table and cannot be created this way; skip it.
+            dp_escaped = str(decrypted_path).replace("'", "''")
+            err_ptr2 = ctypes.c_void_p()
+            rc = dll.sqlite3_exec(
+                db_ptr,
+                f"ATTACH DATABASE '{dp_escaped}' AS _plain KEY '';".encode(),
+                None, None, ctypes.byref(err_ptr2),
+            )
+            if rc != 0:
+                log.error("ATTACH plaintext DB failed rc=%d", rc)
+                dll.sqlite3_close(db_ptr)
+                return None
 
-        SQLITE_OK = 0
-        SQLITE_DONE = 101
-        while True:
-            rc = dll.sqlite3_backup_step(backup, 5)
-            if rc == SQLITE_DONE:
-                break
-            if rc != SQLITE_OK:
-                log.error("sqlite3_backup_step failed rc=%d", rc)
-                break
+            # Collect user tables
+            _tables: list[str] = []
+            CB = ctypes.CFUNCTYPE(
+                ctypes.c_int, ctypes.c_void_p, ctypes.c_int,
+                ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_char_p),
+            )
+            def _collect(_, _n, vals, _cols):
+                if vals[0]:
+                    _tables.append(vals[0].decode())
+                return 0
+            cb = CB(_collect)
+            dll.sqlite3_exec(
+                db_ptr,
+                b"SELECT name FROM sqlite_master WHERE type='table' AND name != 'sqlite_stat1';",
+                cb, None, ctypes.byref(err_ptr2),
+            )
 
-        dll.sqlite3_backup_finish(backup)
-        dll.sqlite3_close(dest_ptr)
+            for tbl in _tables:
+                rc = dll.sqlite3_exec(
+                    db_ptr,
+                    f"CREATE TABLE _plain.{tbl} AS SELECT * FROM {tbl};".encode(),
+                    None, None, ctypes.byref(err_ptr2),
+                )
+                if rc != 0:
+                    log.warning("Copy table %s failed rc=%d", tbl, rc)
+                else:
+                    log.debug("Copied table %s", tbl)
+
+            dll.sqlite3_exec(db_ptr, b"DETACH _plain;", None, None, ctypes.byref(err_ptr2))
+
         dll.sqlite3_close(db_ptr)
-
         log.info("Decrypted meta -> %s", decrypted_path)
 
-        # Open the decrypted copy with standard sqlite3
         conn = sqlite3.connect(f"file:{decrypted_path}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
         conn.execute("SELECT name FROM sqlite_master LIMIT 1")
