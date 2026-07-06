@@ -1,0 +1,5 @@
+difficulty_id,guide_id,consume_tp_ratio,consume_tp_bonus_ratio,chara_id,dress_id,in_motion,stand_motion,play_motion,gauge_motion,gauge_motion2,gauge_motion3,popout_motion,firstclear_motion,prize_motion1,prize_motion2,prize_motion3,bgm_cue_name,bgm_cuesheet_name,reward_type,reward_set_id,gauge_max,gauge_up,item_category,item_id,max_num
+1000,0,0,0,1007,100701,1,1,50,50,50,50,14,0,0,0,0,,,1,0,10000,100,91,59,1200000
+1001,90001,0,0,1005,100501,600004,1,600001,600002,600003,600005,600006,0,0,0,0,snd_bgm_GM056_sys,snd_bgm_GM056,2,1,10000,100,0,0,0
+1002,90002,0,0,1007,100701,600012,600009,0,0,0,0,0,600008,600011,600007,600013,,,3,2,0,0,91,59,1200000
+1003,90001,20000,20000,1005,100501,600004,1,600001,600002,600003,600005,600006,0,0,0,0,snd_bgm_GM056_sys,snd_bgm_GM056,2,3,10000,100,0,0,0

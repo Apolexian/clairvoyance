@@ -1,0 +1,2 @@
+fan_raid_id,condition_type,condition_value,chara_id,dress_id,result_se_cue_name,result_se_cuesheet_name,start_date,calc_start_date,calc_end_date,end_date
+1001,2,2,1046,104601,snd_sfx_raid_result_heart_effect,snd_sfx_raid_event_000,1775512800,1775771999,1775858400,1776117599

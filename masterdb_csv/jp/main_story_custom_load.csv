@@ -1,0 +1,8 @@
+main_story_data_id,story_type_order,custom_load_type,keep_cue_name,custom_load_effect_pattern,image_effect_asset_name,use_action_cue,wait_time,target_story_id
+2315,2,0,snd_voi_storyrace_020203122_bg01,0,,0,0,0
+2315,3,1,,1,butterfly,1,7000,0
+2315,3,3,,0,,0,0,2316
+2316,1,2,,2,wait_butterfly,0,0,0
+2316,2,1,,3,,0,0,0
+2316,3,1,,3,,0,0,0
+2316,4,1,,3,,0,0,0

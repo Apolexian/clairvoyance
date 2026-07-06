@@ -1,0 +1,16 @@
+id,collect_raid_id,cut_id,cut_sub_id,random_chara_group_id,bgm_cue_name,bgm_cuesheet_name,env_cue_name,env_cuesheet_name,segment_cutt_id,condition_type,condition_value
+1,1001,2,1,0,snd_bgm_CS1033_sys,snd_bgm_CS1033_sys,snd_sfx_atmos_training_stand_n,snd_sfx_atmos_training_stand_n,0,0,0
+2,1001,2,2,0,snd_bgm_CS1033_sys,snd_bgm_CS1033_sys,snd_sfx_atmos_training_stand_n,snd_sfx_atmos_training_stand_n,1,1,2
+3,1001,2,3,0,snd_bgm_CS1033_sys,snd_bgm_CS1033_sys,snd_sfx_atmos_training_stand_n,snd_sfx_atmos_training_stand_n,2,1,4
+4,1001,2,4,0,snd_bgm_CS1033_sys,snd_bgm_CS1033_sys,snd_sfx_atmos_training_stand_n,snd_sfx_atmos_training_stand_n,3,1,7
+5,1001,2,5,0,snd_bgm_CS1033_sys,snd_bgm_CS1033_sys,snd_sfx_atmos_training_stand_n,snd_sfx_atmos_training_stand_n,0,2,2
+6,1002,3,1,0,snd_bgm_CS1093_sys,snd_bgm_CS1093_sys,snd_sfx_atmos_seiteikoumon_d,snd_sfx_atmos_seiteikoumon_d,0,0,0
+7,1002,3,2,0,snd_bgm_CS1093_sys,snd_bgm_CS1093_sys,snd_sfx_atmos_seiteikoumon_d,snd_sfx_atmos_seiteikoumon_d,0,3,4
+8,1002,3,3,0,snd_bgm_CS1093_sys,snd_bgm_CS1093_sys,snd_sfx_atmos_stand_d_sys,snd_sfx_atmos_stand_d_sys,0,3,5
+9,1003,4,1,0,snd_bgm_CS1156_Intro_sys,snd_bgm_CS1156_sys,0,0,0,0,0
+10,1003,4,2,0,snd_bgm_CS1156_Intro_sys,snd_bgm_CS1156_sys,0,0,0,3,7
+11,1003,4,3,0,snd_bgm_CS1156_Intro_sys,snd_bgm_CS1156_sys,0,0,0,3,8
+12,1003,4,4,0,snd_bgm_CS1156_sys,snd_bgm_CS1156_sys,0,0,0,3,9
+13,1004,5,1,1,snd_bgm_CS1175_sys,snd_bgm_CS1175_sys,0,0,0,0,0
+14,1004,5,2,2,snd_bgm_CS1175_sys,snd_bgm_CS1175_sys,0,0,0,3,11
+15,1004,5,3,3,snd_bgm_CS1175_sys,snd_bgm_CS1175_sys,0,0,0,3,12

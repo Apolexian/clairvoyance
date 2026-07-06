@@ -1,0 +1,5 @@
+id,fan_raid_id,bg_id,bg_sub_id,bgm_cue_name,bgm_cuesheet_name,env_cue_name,env_cuesheet_name,start_date,end_date
+1,1001,187,0,snd_bgm_CS012_sys,snd_bgm_CS012,snd_sfx_atmos_gym,snd_sfx_atmos_gym,1775512800,1775599199
+2,1001,187,1,snd_bgm_CS012_sys,snd_bgm_CS012,snd_sfx_atmos_hiroba_d,snd_sfx_atmos_hiroba_d,1775599200,1775685599
+3,1001,187,2,snd_bgm_CS012_sys,snd_bgm_CS012,snd_sfx_atmos_room_d_noext,snd_sfx_atmos_room_d_noext,1775685600,1775771999
+4,1001,187,3,snd_bgm_CS014_sys,snd_bgm_CS014,snd_sfx_atmos_aozora_c,snd_sfx_atmos_aozora_c,1775772000,1776081599

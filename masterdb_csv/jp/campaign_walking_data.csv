@@ -1,0 +1,6 @@
+id,campaign_id,special_campaign_type,logo_id,map_id,icon_id_location_1,icon_id_location_2,icon_id_location_3,walking_limit,gauge_consume_num,gauge_max,gauge_up_singlemode,gauge_up_teamstadium,gauge_up_dailyrace,gauge_up_dailylegendrace,gauge_up_login
+1,226,0,1,1,3,2,1,2,10,20,10,2,2,2,10
+2,279,0,1,1,3,2,1,2,10,20,10,2,2,2,10
+3,333,0,2,2,6,4,5,2,10,20,10,2,2,2,10
+4,370,0,1,3,7,3,1,2,10,20,10,2,2,2,10
+5,663,1,3,4,9,10,8,2,10,20,10,2,2,2,10

@@ -1,0 +1,2 @@
+id,race_start_date,race_start_time,race_end_date,race_end_time,interval_start_date,interval_start_time,interval_end_date,interval_end_time,calc_start_date,calc_start_time,calc_end_date,calc_end_time,start_date,end_date
+1,2,05:00:00,1,23:59:59,2,00:00:00,2,00:04:59,2,00:05:00,2,04:59:59,2017/1/1 0:00:00,2050/1/1 0:00:00

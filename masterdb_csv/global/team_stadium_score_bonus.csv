@@ -1,0 +1,8 @@
+id,priority,condition_type,condition_value_1,condition_value_2,score_rate
+1,1,1,1,0,1000
+2,2,3,0,0,200000
+4,4,4,2,0,200
+5,4,4,3,0,300
+6,4,4,4,0,400
+7,4,4,5,0,500
+8,3,5,0,0,0

@@ -1,0 +1,5 @@
+id,scenario_id,value_min,value_max
+1,0,1,5
+2,0,6,19
+3,0,20,100
+4,0,101,999

@@ -1,0 +1,7 @@
+id,team_stadium_id,team_class,unit_max_num,class_up_range,class_down_range
+1,1,1,1,100,0
+2,1,2,2,90,0
+3,1,3,3,80,0
+4,1,4,3,60,15
+5,1,5,3,30,30
+6,1,6,3,0,60

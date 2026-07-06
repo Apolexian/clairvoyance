@@ -1,0 +1,3 @@
+id,rotation_start_day,rotation_start_time,base_date,start_date,end_date
+1,1,05:00:00,1692561600,1692846000,1759694399
+2,1,05:00:00,1759694400,1759694400,2524593599

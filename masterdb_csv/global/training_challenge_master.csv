@@ -1,0 +1,3 @@
+id,target_main_scenario,exam_id_1,exam_id_2,exam_id_3,exam_id_4,exam_id_5,ex_exam_id,free_exam_id,shop_id,rental_value,consume_tp_ratio,bonus_reward_ratio,notice_date,start_date,end_date,start_result_date,end_result_date
+2001,2,1,2,3,4,5,6,7,11000,3000,20000,20000,1768428000,1768514400,1769205599,1769205600,1769464799
+4001,4,0,0,0,0,0,0,8,11001,3000,0,0,1774735200,1774821600,1775253599,1775253600,1775512799

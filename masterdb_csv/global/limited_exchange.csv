@@ -1,0 +1,4 @@
+id,item_exchange_top_id,open_value,item_lineup_value,odds_id,daily_race_odds,daily_race_ceiling,legend_race_odds,legend_race_ceiling,single_mode_odds,single_mode_ceiling,team_stadium_odds,team_stadium_ceiling,start_date,end_date
+1,9000,3,6,1000,350000,3,400000,2,0,0,300000,4,1496275200,1761515999
+2,9000,3,7,1001,350000,3,400000,2,0,0,300000,4,1761516000,1772488799
+3,9000,3,7,1002,350000,3,400000,2,0,0,300000,4,1772488800,2556143999

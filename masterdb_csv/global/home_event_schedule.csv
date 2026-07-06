@@ -1,0 +1,4 @@
+id,event_id,start_date,end_date,event_story_type,event_walk_type,event_footer_type
+1,20001,1761516000,1765317599,0,0,0
+2,20002,1772488800,1776203999,0,0,0
+3,20003,1777240800,1778943599,0,0,0

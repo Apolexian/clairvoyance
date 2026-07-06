@@ -1,0 +1,4 @@
+id,min_turn,max_turn,audience_effect
+1,1,24,2
+2,25,48,1
+3,49,72,0
