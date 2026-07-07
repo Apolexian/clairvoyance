@@ -1,0 +1,1091 @@
+<title>Umamusume master.mdb — Entity Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* ── Schematic / drafting identity ─────────────────────────────
+     ground = drafting paper w/ engineering grid; entities = crisp
+     boxed relations in classic ERD notation (name row + rule, PK
+     gutter), domain encoded as a solid left spine — no rounded
+     accent-bar cards. Mono throughout: it's a schema. */
+  :root{
+    color-scheme: light dark;
+    --paper:#e4dfd0;
+    --paper-line:#00000010;
+    --paper-line-strong:#0000001c;
+    --entity:#f6f3ea;
+    --entity-head:#eae4d4;
+    --rule:#a89e86;
+    --rule-soft:#c4bba4;
+    --ink:#242019;
+    --ink-dim:#5c5647;
+    --ink-faint:#8a8270;
+    --accent:#9a5b1e;
+    --accent-ink:#7a4715;
+    --tag-bg:#ddd4bd;
+    --panel:#f3efe4;
+    --edge-verified:#9a6a2c;
+    --edge-convention:#a89e86;
+    --edge-dim:#0000000f;
+    --dom-core:#3f6b93;
+    --dom-race:#4f7a3c;
+    --dom-story:#8f4372;
+    --dom-items:#8a5a2b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#14150f;
+      --paper-line:#ffffff09;
+      --paper-line-strong:#ffffff12;
+      --entity:#1d1f18;
+      --entity-head:#262820;
+      --rule:#454a3a;
+      --rule-soft:#33372b;
+      --ink:#e5e1d3;
+      --ink-dim:#a8a390;
+      --ink-faint:#6f6a58;
+      --accent:#d09a4f;
+      --accent-ink:#e2b16a;
+      --tag-bg:#33372a;
+      --panel:#1a1c15;
+      --edge-verified:#c99248;
+      --edge-convention:#565b47;
+      --edge-dim:#ffffff0d;
+      --dom-core:#6f9ac4;
+      --dom-race:#82ab6a;
+      --dom-story:#c07aa2;
+      --dom-items:#c0894f;
+    }
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --paper:#e4dfd0; --paper-line:#00000010; --paper-line-strong:#0000001c;
+    --entity:#f6f3ea; --entity-head:#eae4d4; --rule:#a89e86; --rule-soft:#c4bba4;
+    --ink:#242019; --ink-dim:#5c5647; --ink-faint:#8a8270; --accent:#9a5b1e; --accent-ink:#7a4715;
+    --tag-bg:#ddd4bd; --panel:#f3efe4; --edge-verified:#9a6a2c; --edge-convention:#a89e86; --edge-dim:#0000000f;
+    --dom-core:#3f6b93; --dom-race:#4f7a3c; --dom-story:#8f4372; --dom-items:#8a5a2b;
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --paper:#14150f; --paper-line:#ffffff09; --paper-line-strong:#ffffff12;
+    --entity:#1d1f18; --entity-head:#262820; --rule:#454a3a; --rule-soft:#33372b;
+    --ink:#e5e1d3; --ink-dim:#a8a390; --ink-faint:#6f6a58; --accent:#d09a4f; --accent-ink:#e2b16a;
+    --tag-bg:#33372a; --panel:#1a1c15; --edge-verified:#c99248; --edge-convention:#565b47; --edge-dim:#ffffff0d;
+    --dom-core:#6f9ac4; --dom-race:#82ab6a; --dom-story:#c07aa2; --dom-items:#c0894f;
+  }
+
+  *{ box-sizing:border-box; }
+  html, body{ height:100%; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    line-height:1.45;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  #app{ display:flex; flex-direction:column; height:100vh; }
+
+  header{
+    flex:0 0 auto;
+    background:var(--paper);
+    border-bottom:1px solid var(--rule);
+    padding:11px 18px 10px;
+    z-index:20;
+  }
+  h1{
+    font-size:0.82rem; font-weight:700; margin:0 0 9px;
+    letter-spacing:0.02em; text-transform:uppercase;
+    color:var(--ink);
+    display:flex; align-items:baseline; gap:9px;
+  }
+  h1::before{
+    content:"◱"; color:var(--accent); font-size:0.9rem;
+  }
+  h1 .sub{
+    font-weight:400; text-transform:none; letter-spacing:0;
+    font-size:0.68rem; color:var(--ink-faint);
+  }
+  .toolbar{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  #search{
+    flex:0 0 210px;
+    background:var(--entity); border:1px solid var(--rule); color:var(--ink);
+    border-radius:2px; padding:5px 9px; font-size:0.72rem; font-family:inherit;
+  }
+  #search::placeholder{ color:var(--ink-faint); }
+  #search:focus-visible, .chip:focus-visible, button:focus-visible{
+    outline:2px solid var(--accent); outline-offset:1px;
+  }
+  .chip{
+    background:var(--entity); border:1px solid var(--rule); color:var(--ink-dim);
+    border-radius:2px; padding:4px 9px; font-size:0.68rem; cursor:pointer;
+    user-select:none; white-space:nowrap; font-family:inherit; letter-spacing:0.01em;
+  }
+  .chip:hover{ border-color:var(--ink-dim); }
+  .chip[aria-pressed="true"]{ font-weight:700; color:var(--ink); background:var(--tag-bg); border-color:var(--ink-dim); }
+  .chip[data-domain="core"][aria-pressed="true"]{ box-shadow:inset 3px 0 0 var(--dom-core); }
+  .chip[data-domain="race"][aria-pressed="true"]{ box-shadow:inset 3px 0 0 var(--dom-race); }
+  .chip[data-domain="story"][aria-pressed="true"]{ box-shadow:inset 3px 0 0 var(--dom-story); }
+  .chip[data-domain="items"][aria-pressed="true"]{ box-shadow:inset 3px 0 0 var(--dom-items); }
+  .spacer{ flex:1 1 auto; }
+  .zoom-controls{ display:flex; gap:0; border:1px solid var(--rule); border-radius:2px; overflow:hidden; }
+  .icon-btn{
+    background:var(--entity); border:none; border-right:1px solid var(--rule); color:var(--ink-dim);
+    width:26px; height:26px; font-size:0.85rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-family:inherit;
+  }
+  .icon-btn:last-child{ border-right:none; }
+  .icon-btn:hover{ background:var(--tag-bg); color:var(--ink); }
+
+  .legend{
+    display:flex; gap:13px; flex-wrap:wrap; margin-top:8px;
+    font-size:0.64rem; color:var(--ink-faint); letter-spacing:0.01em;
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend .swatch{ width:17px; height:0; border-top:2px solid var(--edge-verified); display:inline-block; }
+  .legend .swatch.convention{ border-top:2px dashed var(--edge-convention); }
+  .legend .dot{ width:3px; height:11px; display:inline-block; }
+
+  #stage-wrap{
+    flex:1 1 auto; position:relative; overflow:hidden;
+    background:
+      linear-gradient(var(--paper-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px),
+      linear-gradient(var(--paper-line-strong) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-line-strong) 1px, transparent 1px);
+    background-size:24px 24px, 24px 24px, 120px 120px, 120px 120px;
+    cursor:grab;
+  }
+  #stage-wrap:active{ cursor:grabbing; }
+  #edge-canvas{ position:absolute; inset:0; width:100%; height:100%; }
+  #node-layer{ position:absolute; top:0; left:0; transform-origin:0 0; }
+
+  /* ── Entity box: classic ERD relation, domain spine on the left ── */
+  .node{
+    position:absolute; width:178px;
+    background:var(--entity);
+    border:1px solid var(--rule);
+    border-left:4px solid var(--dom);
+    border-radius:2px;
+    box-shadow:1px 1px 0 var(--paper-line-strong);
+    cursor:grab; user-select:none;
+    transition:box-shadow .1s, border-color .1s, opacity .12s;
+  }
+  .node:active{ cursor:grabbing; }
+  .node h3{
+    font-size:0.72rem; margin:0; padding:5px 9px 4px;
+    font-weight:700; word-break:break-all; line-height:1.2;
+    border-bottom:1px solid var(--rule-soft);
+    background:var(--entity-head);
+    color:var(--ink);
+  }
+  .node .pk{
+    font-size:0.63rem; color:var(--ink-dim); padding:4px 9px 5px;
+    display:flex; align-items:center; gap:5px; letter-spacing:0.01em;
+  }
+  .node .pk-tag{
+    font-size:0.55rem; font-weight:700; letter-spacing:0.05em;
+    background:var(--tag-bg); color:var(--accent-ink);
+    padding:0 4px; border-radius:1px;
+  }
+  .node .deg{
+    position:absolute; top:5px; right:6px; font-size:0.55rem; color:var(--ink-faint);
+    font-weight:700;
+  }
+  .node.dim{ opacity:0.16; }
+  .node.active{
+    border-color:var(--accent); box-shadow:0 0 0 2px var(--accent), 2px 2px 0 var(--paper-line-strong);
+    z-index:15;
+  }
+  .node.hidden-filter{ display:none; }
+
+  #tooltip{
+    position:fixed; pointer-events:none; z-index:100;
+    background:var(--panel); border:1px solid var(--ink-dim); border-radius:2px;
+    padding:7px 10px; font-size:0.66rem; max-width:300px;
+    box-shadow:2px 2px 0 var(--paper-line-strong);
+    color:var(--ink); display:none; line-height:1.4;
+  }
+  #tooltip .t-path{ font-weight:700; margin-bottom:2px; color:var(--accent-ink); }
+  #tooltip .t-note{ color:var(--ink-dim); }
+  #tooltip .t-tag{ display:inline-block; margin-top:4px; font-size:0.6rem; color:var(--ink-faint); }
+
+  #sidepanel{
+    position:absolute; top:12px; right:12px; width:290px; max-height:calc(100% - 24px);
+    background:var(--panel); border:1px solid var(--ink-dim); border-radius:2px;
+    box-shadow:3px 3px 0 var(--paper-line-strong); padding:13px 15px; overflow-y:auto;
+    font-size:0.72rem; display:none; z-index:30;
+  }
+  #sidepanel.show{ display:block; }
+  #sidepanel h2{ font-size:0.8rem; margin:0 0 3px; font-weight:700; word-break:break-all; }
+  #sidepanel .close{
+    position:absolute; top:9px; right:11px; background:none; border:none; color:var(--ink-faint);
+    font-size:0.85rem; cursor:pointer; font-family:inherit; line-height:1;
+  }
+  #sidepanel .close:hover{ color:var(--ink); }
+  #sidepanel .pk-line{ font-size:0.65rem; color:var(--ink-dim); margin-bottom:11px; letter-spacing:0.01em; }
+  #sidepanel .pk-line b{ color:var(--accent-ink); }
+  #sidepanel .sec-label{
+    font-size:0.58rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint);
+    margin:13px 0 7px; padding-bottom:3px; border-bottom:1px solid var(--rule-soft); font-weight:700;
+  }
+  #sidepanel .edge-row{ font-size:0.69rem; margin-bottom:8px; }
+  #sidepanel .edge-row .path{ font-weight:700; }
+  #sidepanel .edge-row .path .col{ color:var(--accent-ink); }
+  #sidepanel .edge-row .note{ color:var(--ink-dim); display:block; margin-top:1px; font-size:0.66rem; font-weight:400; }
+  #sidepanel .edge-row.convention .note::before{ content:"~ by convention · "; color:var(--ink-faint); }
+
+  #hint{
+    position:absolute; bottom:12px; left:12px; font-size:0.63rem; color:var(--ink-faint);
+    background:var(--panel); border:1px solid var(--rule); border-radius:2px;
+    padding:5px 9px; letter-spacing:0.01em;
+  }
+
+  #lookup-panel{
+    position:absolute; bottom:12px; right:12px; width:352px; max-height:48%;
+    background:var(--panel); border:1px solid var(--ink-dim); border-radius:2px;
+    box-shadow:3px 3px 0 var(--paper-line-strong); padding:11px 13px; overflow-y:auto;
+    font-size:0.68rem; display:none;
+  }
+  #lookup-panel.show{ display:block; }
+  #lookup-panel h2{ font-size:0.74rem; margin:0 0 4px; font-weight:700; }
+  #lookup-panel p{ color:var(--ink-dim); margin:0 0 8px; font-size:0.65rem; }
+  .cat-table{ width:100%; border-collapse:collapse; font-size:0.64rem; }
+  .cat-table th{
+    text-align:left; font-size:0.56rem; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--ink-faint); font-weight:700; padding:3px 6px; border-bottom:1px solid var(--rule); position:sticky; top:0; background:var(--panel);
+  }
+  .cat-table td{ padding:3px 6px; border-bottom:1px solid var(--rule-soft); vertical-align:top; }
+  .cat-table td:first-child{ font-weight:700; color:var(--accent-ink); white-space:nowrap; }
+  .cat-table tr:last-child td{ border-bottom:none; }
+  .table-scroll{ overflow-x:auto; }
+
+  @media (prefers-reduced-motion: reduce){ .node{ transition:none; } }
+</style>
+
+<div id="app">
+  <header>
+    <div class="toolbar">
+      <input id="search" type="text" placeholder="Find table or column…" aria-label="Filter nodes">
+      <button class="chip" data-domain="all" aria-pressed="true">All</button>
+      <button class="chip" data-domain="core">Core</button>
+      <button class="chip" data-domain="race">Races / Live / NPCs</button>
+      <button class="chip" data-domain="story">Story / Events</button>
+      <button class="chip" data-domain="items">Items / Gacha / Shop</button>
+      <button class="chip" id="lookup-toggle" data-domain="lookup">text_data lookup</button>
+      <div class="spacer"></div>
+      <div class="zoom-controls">
+        <button class="icon-btn" id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+        <button class="icon-btn" id="zoom-reset" title="Reset view" aria-label="Reset view">⟲</button>
+        <button class="icon-btn" id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="swatch"></span> verified against live data</span>
+      <span><span class="swatch convention"></span> by naming convention</span>
+      <span><span class="dot" style="background:var(--dom-core)"></span> Core</span>
+      <span><span class="dot" style="background:var(--dom-race)"></span> Races/Live/NPCs</span>
+      <span><span class="dot" style="background:var(--dom-story)"></span> Story/Events</span>
+      <span><span class="dot" style="background:var(--dom-items)"></span> Items/Gacha/Shop</span>
+    </div>
+  </header>
+
+  <div id="stage-wrap">
+    <canvas id="edge-canvas"></canvas>
+    <div id="node-layer"></div>
+    <div id="hint">Drag canvas to pan · scroll to zoom · drag a node to reposition · click a node for details</div>
+    <div id="sidepanel">
+      <button class="close" id="sidepanel-close" aria-label="Close">✕</button>
+      <div id="sidepanel-body"></div>
+    </div>
+    <div id="lookup-panel">
+      <h2>text_data — shared name/description table</h2>
+      <p>Almost every entity's display text resolves through one composite lookup: <code>text_data(category, index) → text</code>. Ground truth from <code>lib/master_db.py</code>.</p>
+      <div id="lookup-table"></div>
+      <h2 style="margin-top:12px">reward tuples — the other universal pattern</h2>
+      <p>Every reward/cost column across missions, story events, login bonuses, gacha, shop exchange and career mode uses one polymorphic <code>(category, id, num)</code> tuple. The <code>id</code>'s target table is set by the sibling <code>*_category</code> code — the same map everywhere:</p>
+      <div class="table-scroll"><table class="cat-table">
+        <thead><tr><th>Category code</th><th>id points to</th></tr></thead>
+        <tbody>
+          <tr><td>11 / 20-40 / 90-97 / 150 / 163-170</td><td>item_data.id</td></tr>
+          <tr><td>50 / 55</td><td>card_data.id</td></tr>
+          <tr><td>51 / 102</td><td>support_card_data.id</td></tr>
+          <tr><td>70</td><td>dress_data.id</td></tr>
+          <tr><td>55 (honor context)</td><td>honor_data.id</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+window.__ERD_DATA__ = {
+domains: [
+
+{ id:"core", name:"Core Entities", color:"#5688b8", tables:[
+  { t:"chara_data", pk:"id", edges:[
+    { a:"id", b:"text_data.index (cat 6)", n:"character (uma) display name" },
+  ]},
+  { t:"chara_data_group", pk:"id", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"alt-form / seasonal variant grouping" },
+  ]},
+  { t:"card_data", pk:"id", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 61/61: card belongs to this character" },
+    { a:"available_skill_set_id", b:"available_skill_set.available_skill_set_id", n:"verified 91/91: innate-skill pool this card learns (group key)" },
+    { a:"get_piece_id", b:"card_data.id", n:"verified 91/91: self-ref — shard/piece shares card's own id range" },
+    { a:"talent_group_id", b:"card_talent_upgrade.talent_group_id", n:"verified 91/91: shared talent-upgrade group", v:false },
+    { a:"bg_id", b:"background_data.id", n:"verified 50/50: card detail-screen background art" },
+    { a:"id", b:"text_data.index (cat 4/5)", n:"full name '[Title] Name' (cat4) or bare title (cat5)" },
+  ]},
+  { t:"card_rarity_data", pk:"—", edges:[
+    { a:"card_id", b:"card_data.id", n:"verified 91/91: per-rarity stats for a card" },
+    { a:"skill_set", b:"skill_set.id", n:"verified 298/298: NPC-style skill loadout (NOT available_skill_set)" },
+    { a:"race_dress_id", b:"dress_data.id", n:"verified 92/92: race outfit at this rarity" },
+    { a:"get_dress_id_2", b:"dress_data.id", n:"verified 91/91: unlockable outfit" },
+  ]},
+  { t:"available_skill_set", pk:"available_skill_set_id", edges:[
+    { a:"skill_id", b:"skill_data.id", n:"verified 247/247: skill offered in this innate pool" },
+  ]},
+  { t:"skill_set", pk:"id", edges:[
+    { a:"skill_id1..20", b:"skill_data.id", n:"verified 313/313: fixed skill loadout used by NPCs & card_rarity_data (large ids 8001+)" },
+  ]},
+  { t:"skill_data", pk:"id", edges:[
+    { a:"unique_skill_id_1", b:"skill_data.id", n:"verified 91/91: self-ref — evolved/unique upgrade" },
+    { a:"unique_skill_id_2", b:"skill_data.id", n:"verified 17/17: self-ref" },
+    { a:"group_id", b:"(self group-key)", n:"verified 448/448: skill-family grouping", v:false },
+    { a:"tag_id", b:"(self group-key)", n:"verified 157/157: skill tag grouping (no separate tag table)", v:false },
+    { a:"id", b:"text_data.index (cat 47/48)", n:"skill name (47) / description (48)" },
+  ]},
+  { t:"support_card_data", pk:"id", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 79/79: support card belongs to this character" },
+    { a:"effect_table_id", b:"support_card_effect_table.id", n:"verified 229/229: stat-bonus curve by level (group key)" },
+    { a:"unique_effect_id", b:"support_card_unique_effect.id", n:"verified 150/150: support-specific unique bonus (group key)" },
+    { a:"exchange_item_id", b:"item_data.id", n:"verified 3/3: friendship-point exchange cost item" },
+    { a:"id", b:"text_data.index (cat 75/76)", n:"full name (cat75) or bare title (cat76)" },
+  ]},
+  { t:"support_card_group", pk:"id", edges:[
+    { a:"support_card_id", b:"support_card_data.id", n:"verified 2/2: training outing/date-event grouping" },
+    { a:"chara_id", b:"chara_data.id", n:"verified 9/9: character on the card" },
+  ]},
+  { t:"support_card_effect_table", pk:"id", edges:[
+    { a:"id", b:"support_card_data.effect_table_id", n:"verified: reverse of support_card_data edge above" },
+  ]},
+  { t:"single_mode_scout_chara", pk:"—", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 75/75: recruitable career-mode uma" },
+    { a:"support_card_id", b:"support_card_data.id", n:"verified 219/219" },
+    { a:"tag_support_card_id", b:"support_card_data.id", n:"verified 75/75" },
+  ]},
+  { t:"succession_relation_member", pk:"—", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 74/74: inheritance-affinity roster" },
+  ]},
+  { t:"succession_factor", pk:"—", edges:[
+    { a:"effect_group_id", b:"succession_factor_effect.id", n:"verified 15/15" },
+    { a:"factor_group_id", b:"succession_factor_effect.factor_group_id", n:"verified 366/366: factor→effect group join", v:false },
+  ]},
+  { t:"dress_data", pk:"id", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 87/87: outfit belongs to this character" },
+    { a:"id", b:"text_data.index (cat 14)", n:"dress/outfit display name" },
+  ]},
+]},
+
+{ id:"race", name:"Races, Live &amp; NPCs", color:"#6a9c4d", tables:[
+  { t:"race", pk:"id", edges:[
+    { a:"course_set", b:"race_course_set.id", n:"verified: variant course per condition" },
+    { a:"audience_group_id", b:"audience_data.audience_id", n:"crowd visual set", v:false },
+    { a:"id", b:"text_data.index (cat 32)", n:"verified: race name" },
+  ]},
+  { t:"race_instance", pk:"id", edges:[
+    { a:"race_id", b:"race.id", n:"verified 1416/1416: which race this scheduled instance runs" },
+    { a:"npc_group_id", b:"*_npc.npc_group_id", n:"shared many-to-one group key across single_mode_npc/daily_race_npc/legend_race_npc/… — each NPC table holds that group's roster", v:false },
+    { a:"id", b:"text_data.index (cat 28)", n:"verified: race instance name" },
+  ]},
+  { t:"race_track", pk:"id", edges:[
+    { a:"id", b:"text_data.index (cat 34)", n:"verified: track name" },
+  ]},
+  { t:"race_course_set", pk:"id", edges:[
+    { a:"race_track_id", b:"race_track.id", n:"verified 12/12" },
+    { a:"course_set_status_id", b:"race_course_set_status.course_set_status_id", n:"verified 10/10" },
+    { a:"fence_set", b:"race_fence_set.id", n:"verified 108/108: hurdle layout" },
+  ]},
+  { t:"race_course_set_status", pk:"course_set_status_id", edges:[]},
+  { t:"race_condition", pk:"id", edges:[]},
+  { t:"race_fence_set", pk:"id", edges:[]},
+  { t:"race_trophy", pk:"—", edges:[
+    { a:"race_instance_id", b:"race_instance.id", n:"verified 262/262: trophy awarded for this race" },
+  ]},
+  { t:"race_bgm", pk:"—", edges:[
+    { a:"race_instance_id", b:"race_instance.id", n:"verified 41/42 (1 stale id)" },
+    { a:"first_bgm_pattern", b:"race_bgm_pattern.id", n:"verified 16/16" },
+    { a:"second_bgm_pattern", b:"race_bgm_pattern.id", n:"verified 18/18" },
+    { a:"single_mode_program_id", b:"single_mode_program.id", n:"verified 167/168" },
+  ]},
+  { t:"race_bgm_pattern", pk:"id", edges:[]},
+  { t:"race_bgm_cutin", pk:"—", edges:[
+    { a:"card_id", b:"card_data.id", n:"verified 3/3: card whose skill-cutin plays this BGM" },
+  ]},
+  { t:"race_bgm_cutin_extension_time", pk:"—", edges:[
+    { a:"card_id", b:"card_data.id", n:"verified 93/93" },
+    { a:"chara_id", b:"chara_data.id", n:"verified 61/61" },
+  ]},
+  { t:"main_story_race_data", pk:"id", edges:[
+    { a:"race_instance_id", b:"race_instance.id", n:"verified 26/26: race run during this story episode" },
+    { a:"race_condition_id", b:"race_condition.id", n:"verified 12/12" },
+    { a:"group_id", b:"main_story_race_chara_data.group_id", n:"verified 28/28: participant roster (group key)", v:false },
+    { a:"bonus_group_id", b:"main_story_race_bonus.group_id", n:"verified 16/16 (group key)", v:false },
+  ]},
+  { t:"main_story_race_chara_data", pk:"id", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 29/30: player-controlled slot (val=1 sentinel)" },
+    { a:"mob_id", b:"mob_data.mob_id", n:"verified 195/195: generic NPC opponent slot" },
+    { a:"dress_id", b:"dress_data.id", n:"verified 32/32" },
+    { a:"skill_set_id", b:"skill_set.id", n:"verified 156/156: this racer's skill loadout" },
+  ]},
+  { t:"daily_race_npc", pk:"—", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 14/15 (val=1 sentinel)" },
+    { a:"mob_id", b:"mob_data.mob_id", n:"verified 60/60" },
+    { a:"skill_set_id", b:"skill_set.id", n:"verified 176/176: NPC skill loadout" },
+    { a:"race_dress_id", b:"dress_data.id", n:"outfit worn by NPC", v:false },
+  ]},
+  { t:"legend_race", pk:"id", edges:[
+    { a:"race_instance_id", b:"race_instance.id", n:"verified 40/40" },
+    { a:"legend_race_boss_npc_id", b:"legend_race_boss_npc.id", n:"verified 40/40: boss opponent" },
+  ]},
+  { t:"legend_race_boss_npc", pk:"id", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"which uma the boss NPC is", v:false },
+    { a:"skill_set_id", b:"skill_set.id", n:"verified 45/45: boss skill loadout" },
+  ]},
+  { t:"champions_race_condition", pk:"—", edges:[
+    { a:"race_instance_id", b:"race_instance.id", n:"verified 32/32" },
+    { a:"race_condition_id", b:"race_condition.id", n:"verified 9/9" },
+    { a:"champions_id", b:"champions_schedule.id", n:"verified 16/16: which Champions Meeting cup" },
+    { a:"round_id", b:"champions_round_detail.round_id", n:"verified 6/6", v:false },
+  ]},
+  { t:"champions_schedule", pk:"id", edges:[
+    { a:"id", b:"text_data.index (cat 206)", n:"cup name, by convention", v:false },
+  ]},
+  { t:"champions_round_detail", pk:"round_id", edges:[
+    { a:"champions_id", b:"champions_schedule.id", n:"verified 16/16: rounds within a cup" },
+  ]},
+  { t:"single_mode_race_live", pk:"—", edges:[
+    { a:"race_instance_id", b:"race_instance.id", n:"verified 118/118" },
+    { a:"music_id", b:"live_data.music_id", n:"verified 11/11: song played on this race win" },
+  ]},
+  { t:"single_mode_npc", pk:"—", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"career-mode rival roster", v:false },
+    { a:"mob_id", b:"mob_data.mob_id", n:"generic opponent", v:false },
+    { a:"skill_set_id", b:"skill_set.id", n:"verified 340/340: NPC skill loadout" },
+  ]},
+  { t:"single_mode_program", pk:"id", edges:[
+    { a:"race_instance_id", b:"race_instance.id", n:"verified: race scheduled on a career turn" },
+  ]},
+  { t:"single_mode_team_race_set", pk:"—", edges:[
+    { a:"race_instance_id_1..5", b:"race_instance.id", n:"verified 68/68 each: 5-slot team race schedule" },
+  ]},
+  { t:"live_data", pk:"music_id", edges:[
+    { a:"music_id", b:"text_data.index (cat 16)", n:"verified: song title" },
+    { a:"music_id", b:"text_data.index (cat 128)", n:"song description" },
+    { a:"default_main_dress", b:"dress_data.id", n:"verified 3/3: main performer outfit" },
+    { a:"default_mob_dress", b:"dress_data.id", n:"verified 3/3: backup dancer outfit" },
+    { a:"backdancer_dress", b:"dress_data.id", n:"verified 4/4", v:false },
+  ]},
+  { t:"live_permission_data", pk:"—", edges:[
+    { a:"music_id", b:"live_data.music_id", n:"verified 21/21: which uma can perform this song" },
+    { a:"chara_id", b:"chara_data.id", n:"verified 66/66" },
+  ]},
+  { t:"story_live_position", pk:"—", edges:[
+    { a:"music_id", b:"live_data.music_id", n:"verified 12/12: stage-position layout for a song" },
+    { a:"chara_id", b:"chara_data.id / mob_data.mob_id", n:"verified 81/81 combined (split chara/mob)", v:false },
+    { a:"dress_id", b:"dress_data.id", n:"verified 23/23" },
+  ]},
+  { t:"jukebox_music_data", pk:"—", edges:[
+    { a:"music_id", b:"live_data.music_id", n:"verified 34/34: song unlocked for jukebox" },
+  ]},
+  { t:"challenge_match_race", pk:"—", edges:[
+    { a:"race_instance_id", b:"race_instance.id", n:"verified 12/12" },
+    { a:"challenge_match_race_boss_npc_id", b:"challenge_match_boss_npc.id", n:"verified 12/12" },
+  ]},
+  { t:"challenge_match_boss_npc", pk:"id", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 10/10" },
+    { a:"skill_set_id", b:"skill_set.id", n:"boss skill loadout", v:false },
+  ]},
+  { t:"team_building_collection_chara", pk:"—", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 60/60" },
+    { a:"team_building_event_id", b:"team_building_data.team_building_event_id", n:"verified 1/1", v:false },
+  ]},
+  { t:"team_stadium_class_reward", pk:"—", edges:[
+    { a:"team_stadium_id", b:"team_stadium.id", n:"verified 1/1: class-up reward tier" },
+    { a:"item_id", b:"item_data.id", n:"reward item (polymorphic tuple)", v:false },
+  ]},
+  { t:"mob_data", pk:"mob_id", edges:[
+    { a:"dress_id", b:"dress_data.id", n:"verified 3/3" },
+    { a:"dress_color_id", b:"mob_dress_color_set.id", n:"verified 800/800: recolor palette" },
+    { a:"chara_hair_color", b:"mob_hair_color_set.id", n:"verified 101/101" },
+    { a:"mob_id", b:"text_data.index (cat 59)", n:"verified: generic NPC name" },
+  ]},
+  { t:"audience_data", pk:"audience_id", edges:[
+    { a:"dress_id", b:"dress_data.id", n:"verified 10/10: crowd member outfit" },
+    { a:"dress_color_id", b:"audience_dress_color_set.id", n:"verified 78/78" },
+    { a:"chara_hair_color", b:"audience_hair_color_set.id", n:"verified 78/78" },
+  ]},
+]},
+
+{ id:"story", name:"Story &amp; Events", color:"#b0568f", tables:[
+  { t:"single_mode_story_data", pk:"id (= event_id)", edges:[
+    { a:"card_id", b:"card_data.id", n:"verified 91/91: card that triggers this training event" },
+    { a:"card_chara_id", b:"chara_data.id", n:"verified 61/61" },
+    { a:"support_card_id", b:"support_card_data.id", n:"verified 146/146" },
+    { a:"support_chara_id", b:"chara_data.id", n:"verified 79/79" },
+    { a:"story_id", b:"text_data.index (cat 181)", n:"verified: event/story title" },
+  ]},
+  { t:"single_mode_story_guide", pk:"—", edges:[
+    { a:"story_id", b:"single_mode_story_data.story_id", n:"verified: tutorial overlay for a story" },
+  ]},
+  { t:"single_mode_route", pk:"—", edges:[
+    { a:"scenario_id", b:"single_mode_scenario.id", n:"verified: career route within a scenario" },
+    { a:"chara_id", b:"chara_data.id", n:"verified" },
+    { a:"condition_set_id", b:"single_mode_route_condition.condition_set_id", n:"verified 6/6 (group key)", v:false },
+  ]},
+  { t:"single_mode_rival", pk:"—", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified: scenario rival" },
+    { a:"rival_chara_id", b:"chara_data.id", n:"verified" },
+  ]},
+  { t:"single_mode_conclusion_set", pk:"—", edges:[
+    { a:"story_id", b:"single_mode_story_data.story_id", n:"verified 819/819: one row per outcome branch" },
+  ]},
+  { t:"single_mode_event_conclusion", pk:"id", edges:[
+    { a:"id", b:"single_mode_conclusion_set.conclusion_id", n:"verified 244/244: branch outcome detail" },
+    { a:"chara_id", b:"chara_data.id", n:"verified 244/244" },
+  ]},
+  { t:"main_story_data", pk:"id", edges:[
+    { a:"id", b:"text_data.index (cat 94)", n:"verified 118/118: episode title" },
+    { a:"part_id", b:"main_story_part.id", n:"verified 118/118: chapter grouping" },
+    { a:"story_id_1..5", b:"[polymorphic via story_type_N]", n:"discriminated union — not a plain FK", v:false },
+  ]},
+  { t:"main_story_part", pk:"id", edges:[]},
+  { t:"story_event_data", pk:"story_event_id", edges:[
+    { a:"story_event_id", b:"text_data.index (cat 189)", n:"verified 16/16: event title" },
+    { a:"announce_id", b:"story_event_announce_detail.announce_id", n:"verified 173/173" },
+  ]},
+  { t:"story_event_story_data", pk:"—", edges:[
+    { a:"story_event_id", b:"story_event_data.story_event_id", n:"verified 130/130" },
+    { a:"story_id_1..5", b:"text_data.index (cat 191)", n:"episode/chapter title, discriminated by story_type_N" },
+  ]},
+  { t:"story_event_mission", pk:"—", edges:[
+    { a:"story_event_id", b:"story_event_data.story_event_id", n:"verified 703/703" },
+    { a:"item_id", b:"item_data.id", n:"mission clear reward" },
+  ]},
+  { t:"story_event_bonus_card", pk:"—", edges:[
+    { a:"story_event_id", b:"story_event_data.story_event_id", n:"verified 103/103" },
+    { a:"card_id", b:"card_data.id", n:"verified 98/103 (0 = wildcard slot)" },
+    { a:"chara_id", b:"chara_data.id", n:"verified 103/103" },
+  ]},
+  { t:"story_event_bonus_support_card", pk:"—", edges:[
+    { a:"story_event_id", b:"story_event_data.story_event_id", n:"event this bonus applies to", v:false },
+    { a:"support_card_id", b:"support_card_data.id", n:"verified 221 matches" },
+    { a:"chara_id", b:"chara_data.id", n:"verified 244 matches" },
+  ]},
+  { t:"story_event_top_chara", pk:"—", edges:[
+    { a:"story_event_id", b:"story_event_data.story_event_id", n:"banner-page event", v:false },
+    { a:"character_id", b:"chara_data.id", n:"verified 188/188" },
+    { a:"dress_id", b:"dress_data.id", n:"verified 188/188" },
+  ]},
+  { t:"story_event_roulette_bingo", pk:"—", edges:[
+    { a:"story_event_id", b:"story_event_data.story_event_id", n:"verified 64/64" },
+    { a:"character_id", b:"chara_data.id", n:"verified 64/64" },
+    { a:"reward_set_id", b:"story_event_bingo_reward.reward_set_id", n:"bingo line-clear rewards" },
+  ]},
+  { t:"story_event_bingo_reward", pk:"reward_set_id", edges:[
+    { a:"item_id", b:"item_data.id / card_data.id / support_card_data.id", n:"polymorphic reward tuple: target set by item_category (see reward-tuple note)", v:false },
+  ]},
+  { t:"story_event_point_reward", pk:"—", edges:[
+    { a:"story_event_id", b:"story_event_data.story_event_id", n:"verified 16/16" },
+    { a:"item_id", b:"item_data.id / card_data.id / support_card_data.id", n:"polymorphic reward tuple (category-discriminated)", v:false },
+  ]},
+  { t:"story_event_nickname_bonus", pk:"—", edges:[
+    { a:"story_event_id", b:"story_event_data.story_event_id", n:"verified 16/16: title-point bonus" },
+  ]},
+  { t:"transfer_event_data", pk:"transfer_event_id", edges:[
+    { a:"tutorial_guide_id", b:"tutorial_guide_data.group_id", n:"onboarding tutorial shown at event start", v:false },
+  ]},
+  { t:"transfer_event_detail", pk:"—", edges:[
+    { a:"transfer_event_id", b:"transfer_event_data.transfer_event_id", n:"verified 93/93: difficulty tier" },
+  ]},
+  { t:"transfer_event_reward", pk:"—", edges:[
+    { a:"transfer_detail_id", b:"transfer_event_detail.transfer_detail_id", n:"verified 227/227" },
+    { a:"item_id", b:"item_data.id", n:"verified 195/227" },
+  ]},
+  { t:"campaign_chara_story_schedule", pk:"—", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 260/260" },
+    { a:"story_id", b:"single_mode_story_data.story_id", n:"schema-inferred, currently 0 rows to verify", v:false },
+  ]},
+  { t:"chara_story_data", pk:"—", edges:[
+    { a:"chara_id", b:"chara_data.id", n:"verified 427/427: per-character bond episodes" },
+  ]},
+  { t:"single_mode_scenario", pk:"id", edges:[]},
+  { t:"single_mode_scenario_group", pk:"—", edges:[
+    { a:"scenario_id", b:"single_mode_scenario.id", n:"verified 11/11" },
+  ]},
+  { t:"single_mode_scenario_record", pk:"—", edges:[
+    { a:"scenario_id", b:"single_mode_scenario.id", n:"verified 3/3: leaderboard thresholds" },
+    { a:"reward_item_id", b:"item_data.id / honor_data.id", n:"polymorphic reward tuple (cat 55 → honor)", v:false },
+  ]},
+  { t:"single_mode_reward_set", pk:"reward_set_id", edges:[
+    { a:"item_id", b:"item_data.id / card_data.id / support_card_data.id", n:"polymorphic reward tuple; reward_set_id is a group key reused across career mode", v:false },
+  ]},
+  { t:"announce_data", pk:"announce_id", edges:[
+    { a:"announce_id", b:"announce_character.id", n:"verified 50/50 when announce_type=1 (polymorphic by type)" },
+    { a:"announce_id", b:"announce_support_card.id", n:"verified 37/37 when announce_type=2" },
+  ]},
+  { t:"announce_character", pk:"id", edges:[]},
+  { t:"announce_support_card", pk:"id", edges:[
+    { a:"support_card_id_a/b/c", b:"support_card_data.id", n:"verified 37/37: cards featured in banner" },
+  ]},
+  { t:"mission_data", pk:"id", edges:[
+    { a:"item_id", b:"item_data.id / card_data.id / support_card_data.id / dress_data.id", n:"polymorphic reward tuple (cat 51→sc, 55→card, 70→dress)", v:false },
+    { a:"event_id", b:"(distinct event namespace — NOT transfer_event_data)", n:"disproven 5/49: separate id space, target unknown", v:false },
+  ]},
+]},
+
+{ id:"items", name:"Items, Gacha &amp; Shop", color:"#b57d3f", tables:[
+  { t:"item_data", pk:"id", edges:[
+    { a:"item_place_id", b:"item_place.id", n:"shop location metadata", v:false },
+    { a:"sell_item_id", b:"item_data.id", n:"verified (e.g. id 59 = jewel): self-ref sell-for-currency target" },
+    { a:"group_id", b:"item_group.group_id", n:"shared item-family tag (e.g. carrot/ticket family)", v:false },
+    { a:"id", b:"text_data.index (cat 23)", n:"item name" },
+  ]},
+  { t:"gacha_data", pk:"id", edges:[
+    { a:"bonus_item_id_1/2", b:"item_data.id", n:"bonus for reaching draw-count threshold", v:false },
+    { a:"additional_piece_target_card_id_1..6", b:"card_data.id", n:"which card's shard this gacha grants extra copies of", v:false },
+    { a:"id", b:"text_data.index (cat 13)", n:"banner text" },
+  ]},
+  { t:"gacha_available", pk:"—", edges:[
+    { a:"gacha_id", b:"gacha_data.id", n:"verified 126/126: card pool entry for a banner" },
+    { a:"card_id", b:"card_data.id / support_card_data.id", n:"verified: pullable card — target set by card_type (1=card, 2=support)", v:false },
+  ]},
+  { t:"gacha_exchange", pk:"—", edges:[
+    { a:"gacha_id", b:"gacha_data.id", n:"verified 108/108: pity-currency point shop" },
+    { a:"card_id", b:"card_data.id / support_card_data.id", n:"verified: purchasable with gacha points (polymorphic by card_type)", v:false },
+  ]},
+  { t:"gacha_piece", pk:"—", edges:[
+    { a:"item_id", b:"item_data.id", n:"verified: shard/piece reward item" },
+  ]},
+  { t:"gacha_prize_odds", pk:"—", edges:[
+    { a:"item_id_1..6", b:"item_data.id", n:"prize-pool reward item, up to 6 slots", v:false },
+  ]},
+  { t:"login_bonus_data", pk:"id", edges:[
+    { a:"id", b:"text_data.index (cat 70)", n:"login campaign display name" },
+    { a:"gift_message_id", b:"gift_message.id", n:"mailbox message shown with reward (often unset)", v:false },
+  ]},
+  { t:"gift_message", pk:"id", edges:[
+    { a:"id", b:"text_data.index (cat 64)", n:"gift-mail message text" },
+  ]},
+  { t:"login_bonus_detail", pk:"—", edges:[
+    { a:"login_bonus_id", b:"login_bonus_data.id", n:"verified: day-N reward row belongs to this campaign" },
+    { a:"item_id..item_id_5", b:"item_data.id", n:"verified: daily reward item, up to 5 slots" },
+  ]},
+  { t:"item_exchange_top", pk:"id", edges:[]},
+  { t:"item_exchange", pk:"id", edges:[
+    { a:"item_exchange_top_id", b:"item_exchange_top.id", n:"verified: groups listings under one shop screen" },
+    { a:"pay_item_id", b:"item_data.id", n:"verified: cost item paid" },
+    { a:"change_item_id", b:"item_data.id / card_data.id", n:"verified: reward item OR card, depending on change_item_category (102 = card)" },
+  ]},
+  { t:"limited_exchange_reward", pk:"—", edges:[
+    { a:"item_exchange_id", b:"item_exchange.id", n:"which exchange listing this weighted reward draws from", v:false },
+    { a:"item_id", b:"item_data.id", n:"reward item", v:false },
+  ]},
+  { t:"honor_data", pk:"id", edges:[
+    { a:"id", b:"text_data.index (cat 130)", n:"verified: honor/epithet name" },
+    { a:"id", b:"text_data.index (cat 131)", n:"unlock condition text" },
+    { a:"step_group_id", b:"honor_data.id", n:"verified: self-ref chain linking sequential rank-up honors" },
+  ]},
+  { t:"campaign_present_bonus_detail", pk:"—", edges:[
+    { a:"card_id", b:"card_data.id", n:"card given as campaign gift", v:false },
+    { a:"item_id_1/2", b:"item_data.id", n:"gift item, 2 slots", v:false },
+  ]},
+]},
+
+],
+
+lookup: {
+  rows: [
+    ["4", "card_data.id", "Card full name — \"[Title] CharaName\""],
+    ["5", "card_data.id", "Card title only — \"[Title]\""],
+    ["6", "chara_data.id", "Character (uma) name"],
+    ["7", "chara_data.id", "Character voice actor"],
+    ["13", "gacha_data.id", "Gacha banner text"],
+    ["14", "dress_data.id", "Dress / outfit name"],
+    ["16", "live_data.music_id", "Song title"],
+    ["23", "item_data.id", "Item name"],
+    ["24", "item_data.id", "Item description"],
+    ["28", "race_instance.id", "Race instance name"],
+    ["32", "race.id", "Race name"],
+    ["34", "race_track.id", "Race track name"],
+    ["47", "skill_data.id", "Skill name (9xxxxx inherited-unique falls back to 1xxxxx)"],
+    ["48", "skill_data.id", "Skill description"],
+    ["59", "mob_data.mob_id", "Mob / generic NPC name"],
+    ["64", "gift_message.id", "Gift mail message text"],
+    ["70", "login_bonus_data.id", "Login bonus campaign name"],
+    ["75", "support_card_data.id", "Support card full name"],
+    ["76", "support_card_data.id", "Support card title only"],
+    ["94", "main_story_data.id", "Main story episode title"],
+    ["111", "—", "Epithet / saddle name"],
+    ["119", "single_mode_scenario", "Single-mode scenario name (e.g. URA Finale)"],
+    ["130 / 131", "honor_data.id", "Honor name / unlock condition"],
+    ["147", "—", "Scenario training-skill names"],
+    ["181", "single_mode_story_data.story_id", "General story/event title (primary hit for training events)"],
+    ["189", "story_event_data.story_event_id", "Story event title"],
+    ["191", "story_event_story_data.story_id_N", "Story event episode title"],
+    ["206", "champions_schedule / round", "Champions Meeting cup name"],
+  ],
+}
+};
+</script>
+<script>
+(function(){
+const DATA = window.__ERD_DATA__;
+
+// ---- flatten tables + build id-indexed lookup ----
+const nodes = [];      // {id, t, pk, color, domain, edges:[{a,b,n,v,targetId}]}
+const byName = {};
+DATA.domains.forEach(dom => {
+  dom.tables.forEach(tbl => {
+    const node = { id: tbl.t, t: tbl.t, pk: tbl.pk, color: dom.color, domain: dom.id, edges: tbl.edges || [] };
+    nodes.push(node);
+    byName[tbl.t] = node;
+  });
+});
+
+// resolve edge targets to node ids where possible (match on leading table name before the dot)
+function resolveTarget(b){
+  const m = b.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\./);
+  if (!m) return null;
+  return byName[m[1]] ? m[1] : null;
+}
+const links = []; // {source, target, v, a, b, n}
+nodes.forEach(n => {
+  n.edges.forEach(e => {
+    const targetId = resolveTarget(e.b);
+    if (targetId && targetId !== n.id) {
+      links.push({ source: n.id, target: targetId, v: e.v !== false, a: e.a, b: e.b, n: e.n });
+    }
+  });
+});
+
+// degree count for sizing
+const degree = {};
+nodes.forEach(n => degree[n.id] = 0);
+links.forEach(l => { degree[l.source] = (degree[l.source]||0)+1; degree[l.target] = (degree[l.target]||0)+1; });
+
+// ---- clustered force layout: each domain has its own gravity well ----
+const W = 2600, H = 1900;
+// core sits in the middle (it's the hub the others reference); the rest ring around it
+const DOMAIN_ANCHOR = {
+  core:  { x: W*0.50, y: H*0.50 },
+  race:  { x: W*0.20, y: H*0.26 },
+  story: { x: W*0.78, y: H*0.30 },
+  items: { x: W*0.55, y: H*0.82 },
+};
+nodes.forEach((n, i) => {
+  const anc = DOMAIN_ANCHOR[n.domain] || { x: W/2, y: H/2 };
+  const a = (i / nodes.length) * Math.PI * 2;
+  n.x = anc.x + Math.cos(a) * 180 + (Math.random()-0.5)*60;
+  n.y = anc.y + Math.sin(a) * 180 + (Math.random()-0.5)*60;
+  n.vx = 0; n.vy = 0;
+});
+
+const NODE_W = 178, NODE_H = 56;
+
+function simulate(iterations){
+  for (let iter=0; iter<iterations; iter++){
+    // pairwise repulsion — stronger for same-domain so clusters spread evenly, weaker across
+    for (let i=0;i<nodes.length;i++){
+      for (let j=i+1;j<nodes.length;j++){
+        const a = nodes[i], b = nodes[j];
+        let dx = a.x-b.x, dy = a.y-b.y;
+        let dist = Math.sqrt(dx*dx+dy*dy) || 1;
+        const minDist = a.domain === b.domain ? 205 : 150;
+        if (dist < minDist*3){
+          const force = (minDist*minDist*3.2)/dist;
+          const fx = (dx/dist)*force, fy = (dy/dist)*force;
+          a.vx += fx*0.02; a.vy += fy*0.02;
+          b.vx -= fx*0.02; b.vy -= fy*0.02;
+        }
+      }
+    }
+    // link springs — short inside a domain, longer across (lets clusters stay distinct)
+    links.forEach(l => {
+      const a = byName[l.source], b = byName[l.target];
+      let dx = b.x-a.x, dy = b.y-a.y;
+      let dist = Math.sqrt(dx*dx+dy*dy) || 1;
+      const sameDom = a.domain === b.domain;
+      const target = sameDom ? 230 : 420;
+      const k = sameDom ? 0.010 : 0.0035;
+      const force = (dist-target)*k;
+      const fx = (dx/dist)*force, fy = (dy/dist)*force;
+      a.vx += fx; a.vy += fy;
+      b.vx -= fx; b.vy -= fy;
+    });
+    // strong pull toward own domain anchor — this is what makes clusters read
+    nodes.forEach(n => {
+      const anc = DOMAIN_ANCHOR[n.domain] || { x: W/2, y: H/2 };
+      n.vx += (anc.x-n.x)*0.010;
+      n.vy += (anc.y-n.y)*0.010;
+      n.vx *= 0.80; n.vy *= 0.80;
+      n.x += n.vx; n.y += n.vy;
+    });
+  }
+}
+simulate(420);
+
+// ---- rendering ----
+const stageWrap = document.getElementById('stage-wrap');
+const nodeLayer = document.getElementById('node-layer');
+const canvas = document.getElementById('edge-canvas');
+const ctx = canvas.getContext('2d');
+
+let view = { x: 0, y: 0, scale: 1 };
+
+function fitView(){
+  const rect = stageWrap.getBoundingClientRect();
+  view.scale = Math.min(rect.width/W, rect.height/H) * 0.92;
+  view.x = (rect.width - W*view.scale)/2;
+  view.y = (rect.height - H*view.scale)/2;
+}
+
+function resizeCanvas(){
+  const rect = stageWrap.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width*dpr;
+  canvas.height = rect.height*dpr;
+  canvas.style.width = rect.width+'px';
+  canvas.style.height = rect.height+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+const nodeEls = {};
+nodes.forEach(n => {
+  const el = document.createElement('div');
+  el.className = 'node';
+  el.dataset.id = n.id;
+  el.dataset.search = (n.t + ' ' + n.edges.map(e=>e.a+' '+e.b).join(' ')).toLowerCase();
+  el.style.setProperty('--dom', n.color);
+  el.innerHTML = `
+    <div class="deg">${degree[n.id]||0}</div>
+    <h3>${n.t}</h3>
+    <div class="pk"><span class="pk-tag">PK</span> ${n.pk}</div>
+  `;
+  nodeLayer.appendChild(el);
+  nodeEls[n.id] = el;
+});
+
+function applyTransform(){
+  nodeLayer.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
+  draw();
+}
+
+function nodeCenter(n){ return { x: n.x+NODE_W/2, y: n.y+NODE_H/2 }; }
+
+let activeId = null;
+
+function draw(){
+  const rect = stageWrap.getBoundingClientRect();
+  ctx.clearRect(0,0,rect.width,rect.height);
+  ctx.save();
+  ctx.translate(view.x, view.y);
+  ctx.scale(view.scale, view.scale);
+
+  links.forEach(l => {
+    const a = byName[l.source], b = byName[l.target];
+    if (!a || !b) return;
+    const dim = activeId && (l.source !== activeId && l.target !== activeId);
+    const ca = nodeCenter(a), cb = nodeCenter(b);
+    ctx.beginPath();
+    const midx = (ca.x+cb.x)/2, midy = (ca.y+cb.y)/2 - 30;
+    ctx.moveTo(ca.x, ca.y);
+    ctx.quadraticCurveTo(midx, midy, cb.x, cb.y);
+    const rootStyle = getComputedStyle(document.documentElement);
+    ctx.strokeStyle = dim
+      ? rootStyle.getPropertyValue('--edge-dim').trim()
+      : (l.v ? rootStyle.getPropertyValue('--edge-verified').trim() : rootStyle.getPropertyValue('--edge-convention').trim());
+    ctx.lineWidth = (activeId && !dim) ? 2.2 : 1.1;
+    if (!l.v) ctx.setLineDash([5,4]); else ctx.setLineDash([]);
+    ctx.stroke();
+
+    // arrowhead near target
+    const t = 0.92;
+    const px = (1-t)*(1-t)*ca.x + 2*(1-t)*t*midx + t*t*cb.x;
+    const py = (1-t)*(1-t)*ca.y + 2*(1-t)*t*midy + t*t*cb.y;
+    const angle = Math.atan2(cb.y-py, cb.x-px);
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(px - 9*Math.cos(angle-0.32), py - 9*Math.sin(angle-0.32));
+    ctx.lineTo(px - 9*Math.cos(angle+0.32), py - 9*Math.sin(angle+0.32));
+    ctx.closePath();
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.fill();
+  });
+  ctx.restore();
+}
+
+function layoutNodes(){
+  nodes.forEach(n => {
+    const el = nodeEls[n.id];
+    el.style.left = n.x + 'px';
+    el.style.top = n.y + 'px';
+  });
+}
+layoutNodes();
+
+function frame(){ resizeCanvas(); fitView(); applyTransform(); }
+window.addEventListener('resize', frame);
+frame();
+
+// ---- pan / zoom ----
+let panning = false, panStart = {x:0,y:0}, viewStart = {x:0,y:0};
+stageWrap.addEventListener('mousedown', e => {
+  if (e.target.closest('.node')) return;
+  panning = true; panStart = {x:e.clientX, y:e.clientY}; viewStart = {x:view.x, y:view.y};
+  stageWrap.style.cursor = 'grabbing';
+});
+window.addEventListener('mousemove', e => {
+  if (!panning) return;
+  view.x = viewStart.x + (e.clientX-panStart.x);
+  view.y = viewStart.y + (e.clientY-panStart.y);
+  applyTransform();
+});
+window.addEventListener('mouseup', () => { panning=false; stageWrap.style.cursor=''; });
+
+stageWrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = stageWrap.getBoundingClientRect();
+  const mx = e.clientX-rect.left, my = e.clientY-rect.top;
+  const worldX = (mx-view.x)/view.scale, worldY = (my-view.y)/view.scale;
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  view.scale = Math.min(Math.max(view.scale*delta, 0.15), 3);
+  view.x = mx - worldX*view.scale;
+  view.y = my - worldY*view.scale;
+  applyTransform();
+}, { passive:false });
+
+document.getElementById('zoom-in').addEventListener('click', () => { view.scale = Math.min(view.scale*1.2,3); applyTransform(); });
+document.getElementById('zoom-out').addEventListener('click', () => { view.scale = Math.max(view.scale*0.8,0.15); applyTransform(); });
+document.getElementById('zoom-reset').addEventListener('click', () => { fitView(); applyTransform(); });
+
+// ---- node dragging ----
+let dragging = null, dragOff = {x:0,y:0};
+nodeLayer.addEventListener('mousedown', e => {
+  const el = e.target.closest('.node');
+  if (!el) return;
+  e.stopPropagation();
+  dragging = byName[el.dataset.id];
+  const rect = stageWrap.getBoundingClientRect();
+  const worldX = (e.clientX-rect.left-view.x)/view.scale;
+  const worldY = (e.clientY-rect.top-view.y)/view.scale;
+  dragOff = { x: worldX-dragging.x, y: worldY-dragging.y };
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const rect = stageWrap.getBoundingClientRect();
+  const worldX = (e.clientX-rect.left-view.x)/view.scale;
+  const worldY = (e.clientY-rect.top-view.y)/view.scale;
+  dragging.x = worldX-dragOff.x;
+  dragging.y = worldY-dragOff.y;
+  layoutNodes();
+  draw();
+});
+window.addEventListener('mouseup', () => { dragging = null; });
+
+// ---- click node -> sidepanel with edges ----
+const sidepanel = document.getElementById('sidepanel');
+const sidepanelBody = document.getElementById('sidepanel-body');
+document.getElementById('sidepanel-close').addEventListener('click', () => {
+  sidepanel.classList.remove('show'); activeId=null;
+  document.querySelectorAll('.node').forEach(el=>el.classList.remove('active','dim'));
+  draw();
+});
+
+nodeLayer.addEventListener('click', e => {
+  const el = e.target.closest('.node');
+  if (!el) return;
+  const n = byName[el.dataset.id];
+  activeId = n.id;
+  document.querySelectorAll('.node').forEach(nd => {
+    const isActive = nd.dataset.id === n.id;
+    const isConnected = links.some(l => (l.source===n.id && l.target===nd.dataset.id) || (l.target===n.id && l.source===nd.dataset.id));
+    nd.classList.toggle('active', isActive);
+    nd.classList.toggle('dim', !isActive && !isConnected);
+  });
+  draw();
+
+  const rows = n.edges.map(ed => `
+    <div class="edge-row ${ed.v===false?'convention':''}">
+      <div class="path"><span class="col">${ed.a}</span> → ${ed.b}</div>
+      ${ed.n ? `<span class="note">${ed.n}</span>` : ''}
+    </div>`).join('') || '<div class="edge-row">No outgoing references recorded.</div>';
+
+  // incoming refs
+  const incoming = links.filter(l => l.target === n.id && l.source !== n.id);
+  const incomingRows = incoming.map(l => `
+    <div class="edge-row ${l.v===false?'convention':''}">
+      <div class="path">${l.source}.<span class="col">${l.a}</span> → here</div>
+      ${l.n ? `<span class="note">${l.n}</span>` : ''}
+    </div>`).join('');
+
+  sidepanelBody.innerHTML = `
+    <h2>${n.t}</h2>
+    <div class="pk-line">PK <b>${n.pk}</b></div>
+    ${rows}
+    ${incoming.length ? `<h2 style="margin-top:14px;font-size:0.8rem;">Referenced by</h2>${incomingRows}` : ''}
+  `;
+  sidepanel.classList.add('show');
+});
+
+// ---- hover tooltip on node (quick peek) ----
+const tooltip = document.getElementById('tooltip');
+nodeLayer.addEventListener('mousemove', e => {
+  const el = e.target.closest('.node');
+  if (!el || dragging) { tooltip.style.display='none'; return; }
+  const n = byName[el.dataset.id];
+  tooltip.style.display = 'block';
+  tooltip.style.left = (e.clientX+14)+'px';
+  tooltip.style.top = (e.clientY+14)+'px';
+  tooltip.innerHTML = `<div class="t-path">${n.t}</div><div class="t-note">${n.edges.length} outgoing · ${degree[n.id]} total connections</div><span class="t-tag">click for full detail</span>`;
+});
+nodeLayer.addEventListener('mouseleave', () => { tooltip.style.display='none'; });
+
+// ---- domain filter chips ----
+const chips = document.querySelectorAll('.chip[data-domain]:not(#lookup-toggle)');
+const lookupPanel = document.getElementById('lookup-panel');
+chips.forEach(chip => chip.addEventListener('click', () => {
+  chips.forEach(c => c.setAttribute('aria-pressed','false'));
+  chip.setAttribute('aria-pressed','true');
+  const d = chip.dataset.domain;
+  nodes.forEach(n => {
+    const el = nodeEls[n.id];
+    el.classList.toggle('hidden-filter', d !== 'all' && n.domain !== d);
+  });
+  draw();
+}));
+
+document.getElementById('lookup-toggle').addEventListener('click', () => {
+  lookupPanel.classList.toggle('show');
+});
+document.getElementById('lookup-table').innerHTML = `<table class="cat-table">
+  <thead><tr><th>Cat</th><th>Resolves against</th><th>Meaning</th></tr></thead>
+  <tbody>${DATA.lookup.rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody>
+</table>`;
+
+// ---- search ----
+const search = document.getElementById('search');
+search.addEventListener('input', () => {
+  const q = search.value.trim().toLowerCase();
+  nodes.forEach(n => {
+    const el = nodeEls[n.id];
+    const matches = !q || el.dataset.search.includes(q);
+    el.style.opacity = matches ? '1' : '0.12';
+  });
+});
+})();
+</script>
