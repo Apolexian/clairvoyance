@@ -4,12 +4,24 @@ Dump every table in a master.mdb to individual CSV files.
 
 Usage:
     python dump_masterdb_to_csv.py <path-to-master.mdb> <output-dir>
+    python dump_masterdb_to_csv.py --all   # dump global + jp to masterdb_csv/
 """
 
 import csv
+import os
 import sqlite3
 import sys
 from pathlib import Path
+
+GLOBAL_DB = Path(os.path.expandvars(
+    r"%USERPROFILE%\AppData\LocalLow\Cygames\Umamusume\master\master.mdb"
+))
+JP_DB = Path(
+    r"C:\Program Files (x86)\Steam\steamapps\common\UmamusumePrettyDerby_Jpn"
+    r"\UmamusumePrettyDerby_Jpn_Data\Persistent\master\master.mdb"
+)
+OUT_ROOT = Path(__file__).parent / "masterdb_csv"
+
 
 def dump(db_path: Path, out_dir: Path) -> None:
     if not db_path.is_file():
@@ -53,7 +65,12 @@ def dump(db_path: Path, out_dir: Path) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) == 2 and sys.argv[1] == "--all":
+        dump(GLOBAL_DB, OUT_ROOT / "global")
+        dump(JP_DB, OUT_ROOT / "jp")
+    elif len(sys.argv) == 3:
+        dump(Path(sys.argv[1]), Path(sys.argv[2]))
+    else:
         print("Usage: python dump_masterdb_to_csv.py <path-to-master.mdb> <output-dir>")
+        print("       python dump_masterdb_to_csv.py --all")
         sys.exit(1)
-    dump(Path(sys.argv[1]), Path(sys.argv[2]))
