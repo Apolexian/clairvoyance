@@ -905,23 +905,6 @@
 
                                 // Feed into chunk reassembly
                                 _feedSslWriteChunk(args[0].toString(), s);
-
-                                // Also emit raw event
-                                send(
-                                    {
-                                        type: "collect",
-                                        domain: "network",
-                                        data: {
-                                            _seq: _seq++,
-                                            event: "unitytls_write",
-                                            direction: "out",
-                                            bytes: len,
-                                            captured: len,
-                                            truncated: false,
-                                        },
-                                    },
-                                    bytes,
-                                );
                             } catch (e) {}
                         },
                     });

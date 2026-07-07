@@ -1,0 +1,9 @@
+id,rating_race_data_id,week,phase,rating_race_condition_id_short,rating_race_condition_id_mile,rating_race_condition_id_middle,rating_race_condition_id_long,rating_race_condition_id_dirt,start_date,end_date
+1,1,1,1,1,2,3,4,5,1709521200,1709927999
+2,1,1,2,1,2,3,4,5,1709928000,1710100799
+3,1,2,1,6,7,8,9,10,1710100800,1710532799
+4,1,2,2,6,7,8,9,10,1710532800,1710705599
+5,1,3,1,11,12,13,14,15,1710705600,1711137599
+6,1,3,2,11,12,13,14,15,1711137600,1711310399
+7,1,4,1,16,17,18,19,20,1711310400,1711742399
+8,1,4,3,21,22,23,24,25,1711742400,1711915199

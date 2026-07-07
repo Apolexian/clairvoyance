@@ -1,0 +1,2 @@
+team_building_event_id,bg_id,bg_sub_id,stamina_default,stamina_max,stamina_add,stamina_add_time,start_add_scout_point,special_race_count,required_race_count,notice_date,start_date,middle_date,ending_date,end_date
+1001,56,111,5,10,5,22:00:00,2000,0,0,1782338400,1782424800,1783029600,1783115999,1783375199

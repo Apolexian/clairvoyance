@@ -1,0 +1,4 @@
+relation_rank,rank_value_min,rank_value_max
+1,0,50
+2,51,150
+3,151,9999

@@ -1,0 +1,6 @@
+id,retry_min,retry_max,bonus_rate,down_rate,resimulate_num
+1,1,1,25,5,1
+2,2,2,50,10,2
+3,3,3,75,25,2
+4,4,4,100,25,2
+5,5,2147483647,150,25,3

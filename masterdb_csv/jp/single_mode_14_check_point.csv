@@ -1,0 +1,4 @@
+id,check_point_type,turn,success_pt,great_success_pt
+1,1,24,1500,0
+2,2,48,3000,0
+3,3,72,3500,5000

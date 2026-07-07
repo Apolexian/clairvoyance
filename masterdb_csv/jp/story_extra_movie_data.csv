@@ -1,0 +1,5 @@
+id,movie_path,movie_type,sort,start_date,end_date
+1,Tutorial/tutorial_movie_01,0,1,1711681200,2556068399
+2,Tutorial/tutorial_movie_02,0,2,1711681200,2556068399
+3,,1,3,1743390000,2556068399
+4,,2,100,1774839600,2556068399

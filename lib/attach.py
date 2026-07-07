@@ -15,6 +15,8 @@ log = logging.getLogger("clairvoyance")
 TARGET_PROCESS_NAMES = [
     "UmamusumePrettyDerby.exe",
     "UmamusumePrettyDerby",
+    "UmamusumePrettyDerby_Jpn.exe",
+    "UmamusumePrettyDerby_Jpn",
 ]
 PROCESS_KEYWORDS = ["uma", "musume", "derby", "cygames"]
 MAX_WAIT_SECONDS = 120
@@ -79,6 +81,9 @@ def attach(timeout: int = MAX_WAIT_SECONDS) -> frida.core.Session | None:
                 )
             else:
                 log.info("  No matching processes found.")
+        if errors:
+            for name, err in errors:
+                log.info("  Attach error [%s]: %s", name, err)
 
         time.sleep(3)
 

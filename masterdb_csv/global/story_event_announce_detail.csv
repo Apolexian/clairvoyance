@@ -1,0 +1,174 @@
+id,announce_id,order,cue_name,text_message
+1,1,1,snd_voi_event_090004_0100,That bride just now was so beautiful!
+2,1,2,snd_voi_event_090004_0101,"Aw, I'm jealous! I wanna wear a dress like that!"
+3,1,3,snd_voi_event_090004_0102,"A wedding dress, huh? The elegant design is rather captivating..."
+4,1,4,snd_voi_event_090004_0103,"Riiight? ♪ You would look so good in one, Air Groove!"
+5,1,5,snd_voi_event_090004_0104,What do you say to bewitching everyone?
+6,1,6,snd_voi_event_090004_0105,What kind of outfit are you planning on making me wear?
+7,1,7,snd_voi_event_090004_0106,"I'm sure there are others who would look good in a wedding dress too. For example, hm... how about Dober?"
+8,1,8,snd_voi_event_090004_0107,"Yeah, true! But you know, I bet everyone would look good in one! ♪ There are so many different kinds of wedding dresses, after all!"
+9,1,9,snd_voi_event_090004_0108,"Some look fit for a princess, and some are biiiig and poofy. ♪ I wonder who from the academy they'd suit?"
+10,1,10,snd_voi_event_090004_0109,...Stop letting your weird imagination run wild.
+11,1,11,snd_voi_event_090004_0110,Stay tuned for Umamusume: Pretty Derby's newest story event—Racing Hearts Beauty in Bloom.
+12,1,12,snd_voi_event_090004_0111,Take off in a twinkly dress. ☆
+13,2,1,snd_voi_event_090002_0100,Check out the world's strongest racer! I'm peak! I'm power! I'm El—star of the Umamusume world!
+14,2,2,snd_voi_event_090002_0101,"You appear to be in good spirits, El. But being the star of one world doesn't necessarily mean you'd excel in others."
+15,2,3,snd_voi_event_090002_0102,Qué?! Other what? Are you sayin' there are other <i>worlds</i> out there?!
+16,2,4,snd_voi_event_090002_0103,"No, not quite. I've heard that Tracen Academy has new machines that let you experience games in virtual reality."
+17,2,5,snd_voi_event_090002_0104,For example... you could enter a kingdom of swords and sorcery.
+18,2,6,snd_voi_event_090002_0105,"Imagine exploring a fantasy world, with your own Umamusume body and abilities..."
+19,2,7,snd_voi_event_090002_0106,Oooooh! Kinda like an Umamusume isekai!
+20,2,8,snd_voi_event_090002_0107,"If I got isekai'd into a game world, I'd definitely be the Eternal Champion— the hero of the El-ell Saga!"
+21,2,9,snd_voi_event_090002_0108,"C'mon Grass, we've gotta go check it out! It'll be like a mini vacation, and we can brawl our way to video game glory!"
+22,2,10,snd_voi_event_090002_0109,"Oh, fine. I guess I'll have to go with you. I'd be too worried letting you go all on your own."
+23,2,11,snd_voi_event_090002_0110,"Next time on Umamusume: Pretty Derby—""Uma Quest: Epic Odyssey""!"
+24,2,12,snd_voi_event_090002_0111,Stay tuned for El's Condor punches and my healing magic! ♪
+25,3,1,snd_voi_event_090005_0100,Hmm. There are so many different kinds of swimsuits nowadays.
+26,3,2,snd_voi_event_090005_0101,No kidding! That orange one is so cute.
+27,3,3,snd_voi_event_090005_0102,They have everything from sporty ones to the classic two-piece designs.
+28,3,4,snd_voi_event_090005_0103,"Ah, I love that one with the ribbons..."
+29,3,5,snd_voi_event_090005_0104,That one's nice! I bet you would look great in it!
+30,3,6,snd_voi_event_090005_0105,"You know, I think I saw someone picking out a new swimsuit from a magazine the other day..."
+31,3,7,snd_voi_event_090005_0106,"I guess it's already swimsuit season, huh?"
+32,3,8,snd_voi_event_090005_0107,"So it is. Come to think of it, I don't have anything fun planned for the summer."
+33,3,9,snd_voi_event_090005_0108,Haha. Me neither. My training schedule is too packed for anything like that...
+34,3,10,snd_voi_event_090005_0109,"Next time on Umamusume: Pretty Derby—Beaches, Bathing Suits & Blazing Trails."
+35,3,11,snd_voi_event_090005_0110,"There'll be swimsuits, pools, and disco fever! ...Wait, disco fever?"
+36,4,1,snd_voi_event_090006_0100,
+37,4,2,snd_voi_event_090006_0101,
+38,4,3,snd_voi_event_090006_0102,
+39,4,4,snd_voi_event_090006_0103,
+40,4,5,snd_voi_event_090006_0104,
+41,4,6,snd_voi_event_090006_0105,
+42,4,7,snd_voi_event_090006_0106,
+43,4,8,snd_voi_event_090006_0107,
+44,4,9,snd_voi_event_090006_0108,
+45,4,10,snd_voi_event_090006_0109,
+46,4,11,snd_voi_event_090006_0110,
+47,4,12,snd_voi_event_090006_0111,
+48,4,13,snd_voi_event_090006_0112,
+49,5,1,snd_voi_event_090007_0100,
+50,5,2,snd_voi_event_090007_0101,
+51,5,3,snd_voi_event_090007_0102,
+52,5,4,snd_voi_event_090007_0103,
+53,5,5,snd_voi_event_090007_0104,
+54,5,6,snd_voi_event_090007_0105,
+55,5,7,snd_voi_event_090007_0106,
+56,5,8,snd_voi_event_090007_0107,
+57,5,9,snd_voi_event_090007_0108,
+58,5,10,snd_voi_event_090007_0109,
+59,5,11,snd_voi_event_090007_0110,
+60,5,12,snd_voi_event_090007_0111,
+61,5,13,snd_voi_event_090007_0112,
+62,5,14,snd_voi_event_090007_0113,
+63,6,1,snd_voi_event_090008_0100,
+64,6,2,snd_voi_event_090008_0101,
+65,6,3,snd_voi_event_090008_0102,
+66,6,4,snd_voi_event_090008_0103,
+67,6,5,snd_voi_event_090008_0104,
+68,6,6,snd_voi_event_090008_0105,
+69,6,7,snd_voi_event_090008_0106,
+70,6,8,snd_voi_event_090008_0107,
+71,6,9,snd_voi_event_090008_0108,
+72,6,10,snd_voi_event_090008_0109,
+73,6,11,snd_voi_event_090008_0110,
+74,6,12,snd_voi_event_090008_0111,
+75,6,13,snd_voi_event_090008_0112,
+76,6,14,snd_voi_event_090008_0113,
+77,9,1,snd_voi_event_090009_0100,
+78,9,2,snd_voi_event_090009_0101,
+79,9,3,snd_voi_event_090009_0102,
+80,9,4,snd_voi_event_090009_0103,
+81,9,5,snd_voi_event_090009_0104,
+82,9,6,snd_voi_event_090009_0105,
+83,9,7,snd_voi_event_090009_0106,
+84,9,8,snd_voi_event_090009_0107,
+85,9,9,snd_voi_event_090009_0108,
+86,10,1,snd_voi_event_090010_0100,
+87,10,2,snd_voi_event_090010_0101,
+88,10,3,snd_voi_event_090010_0102,
+89,10,4,snd_voi_event_090010_0103,
+90,10,5,snd_voi_event_090010_0104,
+91,10,6,snd_voi_event_090010_0105,
+92,10,7,snd_voi_event_090010_0106,
+93,10,8,snd_voi_event_090010_0107,
+94,10,9,snd_voi_event_090010_0108,
+95,10,10,snd_voi_event_090010_0109,
+96,10,11,snd_voi_event_090010_0110,
+97,10,12,snd_voi_event_090010_0111,
+98,10,13,snd_voi_event_090010_0112,
+99,10,14,snd_voi_event_090010_0113,
+100,10,15,snd_voi_event_090010_0114,
+101,10,16,snd_voi_event_090010_0115,
+102,11,1,snd_voi_event_090011_0100,
+103,11,2,snd_voi_event_090011_0101,
+104,11,3,snd_voi_event_090011_0102,
+105,11,4,snd_voi_event_090011_0103,
+106,11,5,snd_voi_event_090011_0104,
+107,11,6,snd_voi_event_090011_0105,
+108,11,7,snd_voi_event_090011_0106,
+109,11,8,snd_voi_event_090011_0107,
+110,11,9,snd_voi_event_090011_0108,
+111,11,10,snd_voi_event_090011_0109,
+112,11,11,snd_voi_event_090011_0110,
+113,11,12,snd_voi_event_090011_0111,
+114,12,1,snd_voi_event_090012_0100,
+115,12,2,snd_voi_event_090012_0101,
+116,12,3,snd_voi_event_090012_0102,
+117,12,4,snd_voi_event_090012_0103,
+118,12,5,snd_voi_event_090012_0104,
+119,12,6,snd_voi_event_090012_0105,
+120,12,7,snd_voi_event_090012_0106,
+121,12,8,snd_voi_event_090012_0107,
+122,12,9,snd_voi_event_090012_0108,
+123,12,10,snd_voi_event_090012_0109,
+124,12,11,snd_voi_event_090012_0110,
+125,12,12,snd_voi_event_090012_0111,
+126,12,13,snd_voi_event_090012_0112,
+127,12,14,snd_voi_event_090012_0113,
+128,12,15,snd_voi_event_090012_0114,
+129,12,16,snd_voi_event_090012_0115,
+130,13,1,snd_voi_event_090013_0100,
+131,13,2,snd_voi_event_090013_0101,
+132,13,3,snd_voi_event_090013_0102,
+133,13,4,snd_voi_event_090013_0103,
+134,13,5,snd_voi_event_090013_0104,
+135,13,6,snd_voi_event_090013_0105,
+136,13,7,snd_voi_event_090013_0106,
+137,13,8,snd_voi_event_090013_0107,
+138,13,9,snd_voi_event_090013_0108,
+139,13,10,snd_voi_event_090013_0109,
+140,14,1,snd_voi_event_090014_0100,
+141,14,2,snd_voi_event_090014_0101,
+142,14,3,snd_voi_event_090014_0102,
+143,14,4,snd_voi_event_090014_0103,
+144,14,5,snd_voi_event_090014_0104,
+145,14,6,snd_voi_event_090014_0105,
+146,14,7,snd_voi_event_090014_0106,
+147,14,8,snd_voi_event_090014_0107,
+148,14,9,snd_voi_event_090014_0108,
+149,14,10,snd_voi_event_090014_0109,
+150,14,11,snd_voi_event_090014_0110,
+151,14,12,snd_voi_event_090014_0111,
+152,15,1,snd_voi_event_090015_0100,
+153,15,2,snd_voi_event_090015_0101,
+154,15,3,snd_voi_event_090015_0102,
+155,15,4,snd_voi_event_090015_0103,
+156,15,5,snd_voi_event_090015_0104,
+157,15,6,snd_voi_event_090015_0105,
+158,15,7,snd_voi_event_090015_0106,
+159,15,8,snd_voi_event_090015_0107,
+160,15,9,snd_voi_event_090015_0108,
+161,15,10,snd_voi_event_090015_0109,
+162,15,11,snd_voi_event_090015_0110,
+163,15,12,snd_voi_event_090015_0111,
+164,15,13,snd_voi_event_090015_0112,
+165,16,1,snd_voi_event_090016_0100,
+166,16,2,snd_voi_event_090016_0101,
+167,16,3,snd_voi_event_090016_0102,
+168,16,4,snd_voi_event_090016_0103,
+169,16,5,snd_voi_event_090016_0104,
+170,16,6,snd_voi_event_090016_0105,
+171,16,7,snd_voi_event_090016_0106,
+172,16,8,snd_voi_event_090016_0107,
+173,16,9,snd_voi_event_090016_0108,

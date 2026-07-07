@@ -1,0 +1,6 @@
+id,live_type,turn_num,great_success_num,song_num,normal_music_id,special_music_id
+1,1,24,3,0,0,0
+2,2,36,3,0,0,0
+3,3,48,3,0,0,0
+4,4,60,3,0,0,0
+5,10,72,3,20,1036,1029

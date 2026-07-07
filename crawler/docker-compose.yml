@@ -1,0 +1,8 @@
+services:
+  crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/data
+    restart: unless-stopped

@@ -1,0 +1,4 @@
+id,chara_id,route
+1,9005,home_walk_right
+2,9005,home_walk_left
+3,9045,home_walk_left

@@ -1,0 +1,3 @@
+challenge_match_id,announce_id,bonus_skill_id,bonus_factor_id,item_exchange_top_id,challenge_match_top_bg_id,challenge_match_top_bg_sub_id,notice_date,start_date,ending_date,end_date
+1,0,1000011,4000101,20001,77,111,1769983200,1770328800,1770933599,1771192799
+2,0,1000012,4000102,20002,77,111,1776290400,1776376800,1776981599,1777240799

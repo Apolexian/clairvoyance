@@ -5,3 +5,14 @@ __pycache__/
 dist/
 build/
 **/.DS_Store
+discovery
+*.log
+*.sqlite3
+
+# Secrets
+.env
+crawler_accounts/
+crawler/data/accounts/
+crawler/node_modules/
+crawler/_ticket_gen.js
+*.db

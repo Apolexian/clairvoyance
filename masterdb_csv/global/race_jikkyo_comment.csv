@@ -1,0 +1,297 @@
+id,group_id,message,voice,per,message_group,omit_tag
+1,100000,The stage is set for a memorable race.,%w_0.3|1000101,100,0,0
+2,0,"The track is dry, so they may need to watch\ntheir feet.",1000201,100,0,0
+3,100002,But there are some Umamusume who prefer the\ntrack like this.,1000301,100,0,0
+4,100003,"When the ground is as tightly packed as it is\ntoday, it's easier to build up speed.",1000401,100,0,0
+5,100004,I hope the weather holds out for us.,%w_0.3|1000501,100,0,0
+6,100005,Japanese tracks do have good drainage.,1000601,100,0,0
+7,100006,"If the rain gets bad, it could prove to be a\nrather difficult race.",%w_0.3|1000701,100,0,0
+8,100007,"It may be easier to build speed, but I'm worried\nabout the strain on their legs.",%w_0.3|1000801,100,0,0
+9,100008,"When the track is this soft, it all depends on\nwhether or not you're good at handling it.",%w_0.3|1000901,100,0,0
+10,100009,The track is going to be fairly treacherous\ntoday. Positioning is going to play an important\nrole.,1001001,100,0,0
+11,100010,"When the track is this rough, it's impossible to\nguess how things will turn out.",%w_0.1|1001101,100,0,0
+12,100011,"These are less than ideal track conditions, to\nbe sure.",1001201,100,0,0
+13,100012,I'm concerned about how much the snow will\naffect today's race.,1001301,100,0,0
+14,100013,They can't run without taking the snow into\naccount.,1001401,100,0,0
+15,100014,"A snowy winter wonderland might sound nice,\nbut it's no good for running on.",1001501,100,0,0
+16,100015,We'll find out today who likes the snow and\nwho doesn't.,1001601,100,0,0
+18,100016,What a presence! Look at that spirit!,1001801,100,0,0
+19,100016,Let's hope for a dead heat. That's when the\nsparks fly.,1001901,100,0,0
+20,100016,I just hope the Umamusume I'm rooting for\ngives it her all today!,1002001|1002002,100,0,0
+22,100021,Those two certainly know how to make a great\nstart.,1002201,100,0,0
+23,100022,She's the master of making a good start.,1002301,100,0,0
+24,100022,That was a perfect start.,1002401,100,0,0
+25,100024,They might have been waiting to see how\neveryone else would move.,1002501,100,0,0
+26,100025,They all seem to be in the zone. This should be\na good race.,1002601,100,0,0
+28,100027,Let's hope that those who made a late start can\ncatch up.,1002801,100,0,0
+43,100043,%h_player is running smoothly.,%h_player|1004001,100,0,0
+44,100043,%h_player is skipping right along.,%h_player|1004101,100,0,0
+45,100044,They should make good rivals.,1004201,100,0,0
+59,100059,We're only just getting started. I hope she\nstays motivated!,1004601|1004602,100,0,0
+60,100059,"She's in a difficult position, but we can still\nhope for a comeback.",1004603|1004604,100,0,0
+61,100059,We're only just getting started. We can still\nhope for a comeback.,1004601|1004604,100,0,0
+62,100059,"She's in a difficult position, but I hope she\nstays motivated!",1004603|1004602,100,0,0
+67,100066,They certainly are keeping each other in check.\nIt'll all depend on when they make their move.,1004801,100,0,0
+68,100067,"Things are getting tense now, but they might\nwant to focus on their pace.",1004901,100,0,0
+70,100069,What a bold strategy! This is completely\nunexpected!,1005003|1005004,100,0,0
+72,100069,What a bold strategy! This should be an\neventful race!,1005003|1005002,100,0,0
+73,100072,This really suits\n%h_rank1's running style.,%h_rank1|1005101,100,0,0
+75,100074,"From that position, she can easily see what's\ngoing on around her. She's proceeding\nsmoothly.",1005301,100,0,0
+76,100075,This must be her strategy. Her final burst's\ngoing to be a sight to behold.,1005401,100,0,0
+78,100077,"Apparently, praying at the nearby shrine for\ngood luck with romance is all the rage these\ndays.",1005601,100,0,0
+79,100078,It's almost like she's checking the condition of\nthe track as she runs. She's not putting her all\ninto it yet.,1005701,100,0,0
+84,100083,She seems to be a little rushed. I hope she can\nget a chance to breathe.,1005901|1005902,100,0,0
+85,100083,She might be feeling rushed. I hope she finds\ntime to catch her breath.,1005903|1005904,100,0,0
+86,100083,She seems to be a little rushed. I hope she\nfinds time to catch her breath.,1005901|1005904,100,0,0
+87,100083,She might be feeling rushed. I hope she can\nget a chance to breathe.,1005903|1005902,100,0,0
+88,100087,"She looks a little strained, but it's fine. She's\nabout to start showing her real skills!",%w_0.05|1006001,100,0,0
+89,100088,It might become a little confusing with all of\nthem packed together like this.,1006101,100,0,0
+90,100089,They might have a hard time deciding when to\nmake their move in this race.,1006201,100,0,0
+121,100120,She seems to be panicking. Is she worried\nabout the distance in front of her?,2008701,100,0,0
+222,100221,It's time to put it all on the table! They're\napproaching the decisive final stretch!,1017601,100,0,0
+256,100276,She's pulled ahead a little.,2021001,100,0,0
+1040,100000,This should be a good race for her to show her\ntrue strength.,%w_0.1|1008201,100,0,0
+1041,100000,We can expect a good run from each of these\nUmamusume.,%w_0.1|1008301,100,0,0
+1042,100001,"The track is dry and sandy, so this race could\nrequire a bit more strength.",1008401,100,0,0
+1043,100001,"As an expert on the dirt, she should be able to\nshow off her full skill today.",1008501,100,0,0
+1044,100021,I'm definitely interested in seeing how these\ntwo race today.,1008601,100,0,0
+1045,100021,How will those in the rear respond to the pace\nset by these two?,1008701,100,0,0
+1046,100025,The battle for a good position should be fierce\ntoday.,1008801,100,0,0
+1047,100025,Let's see who takes the lead first.,1008901,100,0,0
+1050,100044,These two should make for a good race.,1009301,100,0,0
+1051,100044,I can see this race ramping up quickly.,1009401,100,0,0
+1052,100075,I think she's betting on a showdown during the\nfinal stretch. I'm looking forward to it!,1009501,100,0,0
+1053,100088,Making it to the front doesn't look like an easy\ntask.,1009601,100,0,0
+1054,100088,It looks like they're keeping each other in\ncheck.,1009701,100,0,0
+1055,100089,Everyone seems to be maintaining their own\npace.,%w_0.1|1009801,100,0,0
+1056,100089,I'm curious as to whether the runners in the rear\nwill make it to the front.,1009901,100,0,0
+1057,100221,Will she come from the inside or the outside?!\nWe're in the final phase now!,1010001,100,0,0
+1058,100221,I can't look away! What are these Umamusume\ngoing to do?!,1010101,100,0,0
+1059,100221,Here comes the last spurt! The race is really\nheating up now!,1010201,100,0,0
+1060,100276,I'm worried that she'll run out of stamina.,1010301,100,0,0
+1061,100276,I hope she can regain her composure.,1010401,100,0,0
+1062,112592,It might become a little confusing with all of\nthem packed together like this.,1006101,100,0,0
+1063,112592,Making it to the front doesn't look like an easy\ntask.,1009601,100,0,0
+2001,150001,I'm hoping for the birth of a star on the dirt\nhere today.,%w_0.3|0000001,100,0,0
+2002,150002,She's definitely a top contender to be spring\nstar of the sprint.,%w_0.3|0000002,100,0,0
+2003,150003,I'd love to see her prove her skills by winning the first leg of the Spring Triple Crown.,%w_0.3|0000003,100,0,0
+2004,150004,I'd love to see her win the first Triple Tiara race\nand be crowned the queen of the cherry\nblossoms.,%w_0.3|0000004,100,0,0
+2005,150005,"If it's sheer speed that wins the Classic Triple\nCrown, then it might just be her.",%w_0.3|0000005,100,0,0
+2006,150006,I'd love to see her show off her unbelievable\nskills and win the spring Tenno Sho.,%w_0.3|0000006,100,0,0
+2007,150007,I'd love to see her become the new ruler of the\nmile amongst the greenery in Fuchu.,%w_0.3|0000007,100,0,0
+2008,150008,I'd love to see her give a run that amazes even\nthe goddess of victory.,%w_0.3|0000008,100,0,0
+2009,150009,I'd love to see her win the second Triple Tiara\nrace and be crowned the queen of the oaks.,%w_0.3|0000009,100,0,0
+2010,150010,I'd love to see her realize her dreams and\nbecome the Derby champion.,%w_0.3|0000010,100,0,0
+2011,150011,I'd love to see her show off her speed and\nshine as the spring ruler of the mile.,%w_0.3|0000011,100,0,0
+2012,150012,She carries the dreams of the most fans on her\nshoulders today. I'd love to see her shine as\ngrand prix champion.,%w_0.3|0000012,100,0,0
+2013,150013,"With her popularity, I'd love to see her\ncrowned as the fall star of the sprint.",%w_0.3|0000013,100,0,0
+2014,150014,I'd love to see her amazing stride win her the\nthird Triple Tiara race.,%w_0.3|0000014,100,0,0
+2015,150015,I'd love to see her prove she's the greatest of\nher generation by winning the last race of the\nClassic Triple Crown tour.,%w_0.3|0000015,100,0,0
+2016,150016,I'd love to see her run at the top of the\nmedium-distance races and win the autumn\nTenno Sho.,%w_0.3|0000016,100,0,0
+2017,150017,She has enough skill to take the queen's crown\nfor herself.,%w_0.3|0000017,100,0,0
+2018,150018,I'd love to see her shine as the ruler of the mile\nwith her overwhelming speed.,%w_0.3|0000018,100,0,0
+2019,150019,I'd love to see her show off the stunning stride\nthat makes her the representative of Japan.,%w_0.3|0000019,100,0,0
+2020,150020,Her speed is incredible on the dirt. I'd love to\nsee her shine as the champion.,%w_0.3|0000020,100,0,0
+2021,150021,I'm hoping to see her crowned as the new\nqueen for next year's Tiara tour.,%w_0.3|0000021,100,0,0
+2022,150022,I'd love for her to show her strength and aim\nfor next year's Classics.,%w_0.3|0000022,100,0,0
+2023,150023,I'd love to see her win the last race of the year\nand live up to her name of greatest grand prix\nchampion.,%w_0.3|0000023,100,0,0
+2024,150024,I'd love to see her take this big step toward the\nClassics.,%w_0.3|0000024,100,0,0
+2025,150025,I'd love to see her run like the true champion\nof the first half of this season's dirt tour.,%w_0.3|0000025,100,0,0
+2026,150026,I'm hoping for the birth of a star on the dirt\nhere today in Oi.,%w_0.3|0000026,100,0,0
+2027,150027,I'd love to see her shine as the heroine of the\ndirt with some amazing running.,%w_0.3|0000027,100,0,0
+2028,150028,I'd love to see her show off her skills as the\nfastest Umamusume in the dirt racing world.,%w_0.3|0000028,100,0,0
+2029,150029,I'd love to see her prove her dominance as the\ngreatest Umamusume on the dirt tour.,%w_0.3|0000029,100,0,0
+2030,150030,"As the sun sets here in Oi, I'm hoping to see\nsome great running to finish off the dirt tour.",%w_0.3|0000030,100,0,0
+2031,150031,She looks like she's in perfect shape.,%w_0.3|0000031,100,0,0
+2032,150032,She seems to be in a great mood.,%w_0.3|0000032,100,0,0
+2033,150033,She's not looking on top of her game today.,%w_0.3|0000033,100,0,0
+2034,150034,She seems a little halfhearted.,%w_0.3|0000034,100,0,0
+2035,150035,It doesn't look like she's in the mood to race.,%w_0.3|0000035,100,0,0
+2036,150036,She should be able to show what she's fully\ncapable of on this turf.,%w_0.3|0000036,100,0,0
+2037,150037,I'm looking forward to seeing some powerful\nrunning on the dirt.,%w_0.3|0000037,100,0,0
+2038,150038,I'm a little worried as to whether or not she can\nshow her full potential on this turf.,%w_0.3|0000038,100,0,0
+2039,150039,I wonder how she'll handle this dirt track.,%w_0.3|0000039,100,0,0
+2040,150040,This will be a great opportunity for her to show\noff her endurance.,%w_0.3|0000040,100,0,0
+2041,150041,We can expect a good run from her on a\ndistance like this.,%w_0.3|0000041,100,0,0
+2042,150042,"Considering her great affinity for mile races,\nI'm hoping to see some amazing running from\nher.",%w_0.3|0000042,100,0,0
+2043,150043,Her explosive power is perfect for sprints.,%w_0.3|0000043,100,0,0
+2044,150044,She'll find this race challenging given the\ndistance.,%w_0.3|0000044,100,0,0
+2045,150045,I wonder if she'll be able to adjust to the pace\nof this medium-distance race.,%w_0.3|0000045,100,0,0
+2046,150046,I'm worried about whether her pace will suit\nthis mile race.,%w_0.3|0000046,100,0,0
+2047,150047,Will the split-second dynamics of a sprint suit\nher?,%w_0.3|0000047,100,0,0
+2048,150048,I'd love to see her make a dramatic late charge\nfrom the back.,%w_0.3|0000048,100,0,0
+2049,150049,I'm hoping to see her make an explosive late\nsurge.,%w_0.3|0000049,100,0,0
+2050,150050,I'd love to see her stick just behind the leader\nand seize victory at the end.,%w_0.3|0000050,100,0,0
+2051,150051,"If she can take the lead and dictate the pace,\nshe'll be hard to catch.",%w_0.3|0000051,100,0,0
+2052,150052,"If she hangs in the back, she might not make it\nin time.",%w_0.3|0000052,100,0,0
+2053,150053,"She doesn't have the turn of foot to make a\nbreak for it at the end, so I'm not sure this is\nthe strategy for her.",%w_0.3|0000053,100,0,0
+2054,150054,"She's not the best at staying in the front, so I'm a little worried.",%w_0.3|0000054,100,0,0
+2055,150055,I'm worried about whether she can stay calm\nafter taking the lead.,%w_0.3|0000055,100,0,0
+2056,150056,Her ability is definitely top class. You can feel\nthe presence radiating from her.,%w_0.3|0000056,100,0,0
+2057,150057,"With both popularity and power, this runner is\nmy personal favorite.",%w_0.3|0000057,100,0,0
+2058,150058,She has such good form that she's even\ndrawing attention in the paddock.,%w_0.3|0000058,100,0,0
+2059,150059,"She may not be the favorite, but she's equal in\ntalent.",%w_0.3|0000059,100,0,0
+2060,150060,What a magnificent presence. This runner is my\npersonal favorite.,%w_0.3|0000060,100,0,0
+2061,150061,She's in just as good shape as the favorite.,%w_0.3|0000061,100,0,0
+2062,150062,"She may be third favorite, but she's skilled\nenough to surprise everyone.",%w_0.3|0000062,100,0,0
+2063,150063,There's something about her that just shines.\nThis runner is my personal favorite.,%w_0.3|0000063,100,0,0
+2064,150064,She certainly looks as ready as the rest of the\ngroup.,%w_0.3|0000064,100,0,0
+2065,150065,"Her rivals are strong, but I'm hoping for a good\nrun regardless.",%w_0.3|0000065,100,0,0
+2066,150066,"This is a somewhat difficult matchup, but I'm\nhoping she does her best.",%w_0.3|0000066,100,0,0
+2067,150067,"It may be difficult for her to place high, but I'd\nlove to see her benefit from the experience.",%w_0.3|0000067,100,0,0
+2068,150068,She has both incredible speed and explosive\npower.,%w_0.3|0000068,100,0,0
+2069,150069,"She's running to the best of her ability, but I'd\nlike to see some more speed and power from\nher.",%w_0.3|0000069,100,0,0
+2070,150070,"One of her best qualities is her extraordinary\nendurance, which allows her to make use of her\nspeed for longer.",%w_0.3|0000070,100,0,0
+2071,150071,She needs to find a balance between her\nacceleration and endurance.,%w_0.3|0000071,100,0,0
+2072,150072,Her persistence on the final stretch is really\nnoteworthy.,%w_0.3|0000072,100,0,0
+2073,150073,She needs to be careful with her pacing. I'd\nlike to see her focus on the mental game.,%w_0.3|0000073,100,0,0
+3000,160001,She's in good shape for this race. All that training has her fit and fearless.,0000082,100,0,0
+3001,160002,Her legs seem to be in excellent shape. I think we'll see a good performance.,0000083,100,0,0
+3002,160003,"While she's not the favorite, I'm seeing a promising flexibility in her form.",0000084,100,0,0
+3003,160004,"We've got a strong lineup, so I'm hard-pressed to pick a favorite. If I had to say though, I think I'll be keeping my eyes on this one.",0000085,100,0,0
+3004,160005,"While she hasn't gotten much attention, I've got a suspicion this one's going to be a sleeper hit. I'm certainly rooting for her.",0000086,100,0,0
+3005,160006,I want to see her fly across the turf like a star shoots through the sky—and show us a beautiful burst of pure speed.,0000087,100,0,0
+3006,160007,This racer's got both power and speed—she's undeniably the star of the mile.,0000088,100,0,0
+3007,160008,I'd love to see this racer topple legends and become a true star on the turf.,0000089,100,0,0
+3008,160009,This racer's got plenty of stamina. I'm looking forward to seeing her shine—eternal as starlight.,0000090,100,0,0
+3009,160010,"Like a star on a clear desert night, this racer's sure to shower fans with hope.",0000091,100,0,0
+3010,160011,I'm seeing lots of confident faces!,1010501,100,0,0
+3011,160011,They're in the gates—and everyone is looking sharp.,1010601,100,0,0
+3012,160011,"With such an electric atmosphere, it seems like we're in for a special race today!",1010701,100,0,0
+3013,160011,"With our racers looking cool and calm at the gates, we're surely in store for an impressive race!",1010801,100,0,0
+3014,160013,This racer's got an air of determination about her. Keep your eyes peeled!,1010901,100,0,0
+3015,160014,Which runner will shine the brightest? We'll find out in the Twinkle Star Climax—starting now!,1011001,100,0,0
+3016,160014,"With all these talented runners competing today, we won't have a second to blink!",1011101,100,0,0
+3017,160014,Which of these racers will be first across the finish line? It's about time to get started!,1011201,100,0,0
+3018,160015,Glory lies ahead for the fastest... and our competitors are on their way!,1011301,100,0,0
+3019,160015,"With the brilliance of shooting stars, our runners charge around the final corner!",1011401,100,0,0
+3020,160015,Will the front-runners keep their lead? Or will the late surgers who saved their strength blast ahead? It's the moment of truth!,1011501,100,0,0
+3021,161000,"She's done it! At the pivotal moment, she's proven herself the brightest star on the track!",1100001,100,0,0
+3022,161001,Special Week! That was certainly a run befitting the Ruler of Japan!,1100101,100,0,0
+3023,161002,Silence Suzuka! It's clear just why she's known as the Otherworldly Front-Runner—that lead was <i>hers!</i>,1100201,100,0,0
+3024,161003,Tokai Teio! This miraculous runner could surpass even the Emperor herself!,1100301,100,0,0
+3025,161004,"Maruzensky! This hot rod cruised down the track, handily leaving everyone else in her dust!",1100401,100,0,0
+3026,161005,"Fuji Kiseki! What a gem of a runner she is, dazzling and inspiring us all!",1100501,100,0,0
+3027,161006,"Oguri Cap! Not only is she the crowd's beloved idol, she's also the strongest runner on this track!",1100601,100,0,0
+3028,161007,Gold Ship! The battleship has once again proven she's unsinkable! Another splendid performance by this golden racer!,1100701,100,0,0
+3029,161008,"Vodka! The Extraordinary Empress does as she pleases, striking a bold path uniquely her own!",1100801,100,0,0
+3030,161009,"Daiwa Scarlet! With another perfect run, she's proven herself number one to us all!",1100901,100,0,0
+3031,161010,"Taiki Shuttle! With speed and power alike, she's shown the crowd a rootin' tootin' good run!",1101001,100,0,0
+3032,161011,"Grass Wonder! With refined steps, this runner of pure virtue mastered today's track, politely collecting a resounding victory.",1101101,100,0,0
+3033,161012,"Hishi Amazon! Her unfaltering power and prestige is truly befitting of the title ""Queen of the Amazons!""",1101201,100,0,0
+3034,161013,"Mejiro McQueen! She's making a name for herself with elegant, unstoppable strides, never shying away from the prestige her family holds!",1101301,100,0,0
+3035,161014,El Condor Pasa! The Phantom Bird snatches the lead with a run that will carry her across the seas and skies!,1101401,100,0,0
+3036,161015,T.M. Opera O! The Centurial Overlord plays the lead role in yet another dramatic race. Can no one stop her?!,1101501,100,0,0
+3037,161016,Narita Brian! She dominated the race with strength that can only be described as ferocious. What a beast!,1101601,100,0,0
+3038,161017,"Symboli Rudolf! The Emperor honors her title with dignity, bestowing unto us another stunning race!",1101701,100,0,0
+3039,161018,"Air Groove! The Empress treated us to a breathtaking display of her abilities, showing how she aims for the highest of standards!",1101801,100,0,0
+3040,161019,"Agnes Digital! Just as a hero is always there for you, Agnes Digital never backs down from a race!",1101901,100,0,0
+3041,161020,"Seiun Sky! The elusive, cloud-like Trickster has once again fooled us all with her shrewd tactics!",1102001,100,0,0
+3042,161021,"Tamamo Cross! Like a flash of lightning, she struck the goal with blinding speed!",1102101,100,0,0
+3043,161022,Fine Motion! She couldn't resist the call of victory—the glory she seized today is priceless!,1102201,100,0,0
+3044,161023,Biwa Hayahide! She put her winning equation in motion and showed just why she's heralded as the strongest of her generation!,1102301,100,0,0
+3045,161024,Mayano Top Gun! She's got talent like no other and knows just how to show it off on the track!,1102401,100,0,0
+3046,161025,"Manhattan Cafe! Cutting through the darkness, she rises above all else as a skyscraper of victory!",1102501,100,0,0
+3047,161026,Mihono Bourbon! She saw her mission through and achieved perfect victory with the calculated precision of a cyborg!,1102601,100,0,0
+3048,161027,"Mejiro Ryan! Demonstrating the fruits of her steadfast training, she's done her family name proud!",1102701,100,0,0
+3049,161028,"Hishi Akebono! She's always taking big steps to her goals, and savored an extra big win today!",1102801,100,0,0
+3050,161029,"It's Yukino Bijin! Her incredible resilience wins her the race, bringing her closer to her ambitions!",1102901,100,0,0
+3051,161030,"Rice Shower! No matter how fearsome the race, she stays true to herself—just like a storybook hero!",1103001,100,0,0
+3052,161031,Ines Fujin! She stormed through like a raging wind and seized the crown!,1103101,100,0,0
+3053,161032,Agnes Tachyon! She looked faster than light out there! What a spectacle to see our dreams brought to life!,1103201,100,0,0
+3054,161033,Admire Vega! Her resolve is second to none. She showed a determination that shined brighter than any other star in the sky!,1103301,100,0,0
+3055,161034,"Inari One! Her sleek, refined running has shown everyone why she's the greatest there is!",1103401,100,0,0
+3056,161035,"Winning Ticket! Placing her hopes on this race, she showed us a run worthy of leading a new generation!",1103501,100,0,0
+3057,161036,"Air Shakur! Using a logic all her own, she's proven to be the undisputed best on the track!",1103601,100,0,0
+3058,161037,Eishin Flash! She truly demonstrated her perfectionism out there with all the pride and resolve in her heart!,1103701,100,0,0
+3059,161038,Curren Chan! She stole countless hearts today with that absolutely dazzling run!,1103801,100,0,0
+3060,161039,Kawakami Princess! She overcame the rivals around her and fought her way to the front like a true princess!,1103901,100,0,0
+3061,161040,"Gold City! She ran with her whole soul on the line, proving her resolve is unyielding!",1104001,100,0,0
+3062,161041,"Sakura Bakushin O! No fuss or frills—just pure, straightforward speed from the Bakushin King!",1104101,100,0,0
+3063,161042,It's Seeking the Pearl! Her world-class running proves how much natural confidence and skill she has!,1104201,100,0,0
+3064,161043,It's Shinko Windy! That wild spirit of hers has taken a huge bite out of all our hearts!,1104301,100,0,0
+3065,161044,"Sweep Tosho! With that swift explosion of speed, her run was truly magical!",1104401,100,0,0
+3066,161045,Super Creek! She set a leading example for her peers with her sound abilities and judgment!,1104501,100,0,0
+3067,161046,Smart Falcon! All eyes were on her for this race! She's a true top Umadol!,1104601,100,0,0
+3068,161047,It's Zenno Rob Roy! The brave hero runs to victory! She's the perfect star of this story!,1104701,100,0,0
+3069,161048,"Tosen Jordan! She ran today with indestructible form, proving she won't let anyone break her gutsy spirit!",1104801,100,0,0
+3070,161049,"It's Nakayama Festa! She bet big today, and it's paid out with victory!",1104901,100,0,0
+3071,161050,Narita Taishin! This runner's the fastest of her generation and her big win today further proves it!,1105001,100,0,0
+3072,161051,"Nishino Flower! With a run both beautiful and inspiring, she bloomed into a champion today!",1105101,100,0,0
+3073,161052,"Haru Urara! She took first place with indomitable determination, like a beautiful spring ending a long, bitter winter!",1105201,100,0,0
+3074,161053,"It's Bamboo Memory! With that tenacious optimism, she's won out against the toughest of opponents!",1105301,100,0,0
+3076,161055,It's Marvelous Sunday! She never fails to bring surprise and wonder! Her racing can only be described as marvelous!,1105501,100,0,0
+3077,161056,"Matikanefukukitaru! You can tell how much faith she has in herself—true to her name, she brought fortune home today!",1105601,100,0,0
+3078,161057,"It's Mr. C.B.! Her running is as unbound and carefree as she is, but the incredible results can't be denied!",1105701,100,0,0
+3079,161058,Meisho Doto! Her budding confidence blossoms further with each race. Not even the Overlord can stop her!,1105801,100,0,0
+3080,161059,Mejiro Dober! She has conviction befitting the Mejiro name. What an impressive run!,1105901,100,0,0
+3081,161060,Nice Nature! All her growth has culminated in this first-place win—the crowd is going wild!,1106001,100,0,0
+3082,161061,King Halo! The King crushes fearsome opposition to seize her gloried throne!,1106101,100,0,0
+3083,161062,"Matikanetannhauser! With her mind set on winning, this bright, eager runner heard her fans' cheers and responded in kind!",1106201,100,0,0
+3085,161064,Mejiro Palmer! Her prestigious lineage can't constrain her! She showed us what running free truly means!,1106401,100,0,0
+3086,161065,"It's Daitaku Helios! An endless ray of sunshine, her pure joy has captured our hearts!",1106501,100,0,0
+3087,161066,It's Twin Turbo! She broke away big with everything she had to speed across the finish first!,1106601,100,0,0
+3088,161067,Satono Diamond! What an amazing success! She carried all the hopes and wishes entrusted to her and blazed her own path to victory!,1106701,100,0,0
+3089,161068,Kitasan Black! She accepted everyone's expectations with open arms and brought joy and confidence to us all with her victory!,1106801,100,0,0
+3090,161069,"Sakura Chiyono O! By her earnest efforts, this bud has opened into a radiant blossom!",1106901,100,0,0
+3091,161070,It's Sirius Symboli! Her ambition to race speaks for itself! She's shown everyone that she shines at the top!,1107001,100,0,0
+3092,161071,"Mejiro Ardan! In this brief, fleeting time, she's shown everyone a beautiful, blindingly powerful run!",1107101,100,0,0
+3093,161072,"Yaeno Muteki! With courage and spirit honed through intense discipline, she gallantly triumphed over her rivals!",1107201,100,0,0
+3094,161074,"Mejiro Bright! Inheriting the prestige of a noble family, she secured victory against the greatest challengers around!",1107401,100,0,0
+3095,162001,This race is the culmination of the year's medium-distance dirt tour. I think we can expect nothing but world-class skill here.,%w_0.3|0000074,100,0,0
+3096,162002,I hope she becomes the top runner in the dirt mile tour this summer at Funabashi.,%w_0.3|0000075,100,0,0
+3097,162003,She's come a long way from Tohoku. I think she's got what it takes to claim the top spot in dirt racing.,%w_0.3|0000076,100,0,0
+3098,162004,"With that power and speed, she's sure to push the boundaries in next year's dirt tour.",%w_0.3|0000077,100,0,0
+3099,161085,Daiichi Ruby does it! What a brilliant race! Her illustrious family must be proud of that excellent run!,1108501,100,0,0
+3100,161083,Symboli Kris S wins! She lives up to the name of Jet-Black Emperor! Her mission to win big is certainly accomplished!,1108301,100,0,0
+3101,161076,"It's Sakura Laurel! With that unbreakable passion hidden within, she's made cherry blossoms bloom in this breathtaking race!",1107601,100,0,0
+3102,161105,Neo Universe takes first! Giving a supernatural performance is just another day of racing for her!,1110501,100,0,0
+3103,161106,"Hishi Miracle wins it! Ever extraordinary, she's delivered a wondrous win to all her fans hungry for a miracle!",1110601,100,0,0
+3104,161084,It's Tanino Gimlet! That powerful race shows why we can't help but be intoxicated by her combination of speed and strength!,1108401,100,0,0
+3105,161104,"Katsuragi Ace wins! Her racing defies common sense, raising the bar for what a true ace is capable of!",1110401,100,0,0
+4001,170001,She seems even more motivated than usual. That's some nice energy.,92,100,0,0
+4002,170002,"With all that hard work and experience, there's no denying her skill.",93,100,0,0
+4003,170003,"She may be second favorite, but she's got the drive to win.",94,100,0,0
+4004,170004,I'd love to see her show off that well-honed talent on the turf today.,95,100,0,0
+4005,170005,I hope we get to see her pull out all the stops in this dirt race.,96,100,0,0
+4006,170006,I'd like to see her prove she's the fastest in the sprint with that unbelievable speed.,97,100,0,0
+4007,170007,I'd love for an uncharacteristically dynamic run from her to win this mile.,98,100,0,0
+4008,170008,"With her imposing presence finally taking shape, one can hope she rises to top of medium-distance races.",99,100,0,0
+4009,170009,"Hopefully, she uses that amazing concentration and endurance to grab the win.",100,100,0,0
+4010,170010,"Her fans are expecting great things today. She's got the ironclad will, so I hope she delivers.",101,100,0,0
+9000,900000,%h_rank1、%h_rank_l1、%h_rank_no1、%h_rank_to1、%h_rank_ta1、%h_rank_a1,%h_rank1|%w_0.2|%h_rank_l1|%w_0.2|%h_rank_no1|%w_0.2|%h_rank_to1|%w_0.2|%h_rank_ta1|%w_0.2|%h_rank_a1,100,0,0
+9001,900001,%h_rank2、%h_rank_l2、%h_rank_no2、%h_rank_to2、%h_rank_ta2、%h_rank_a2,%h_rank2|%w_0.2|%h_rank_l2|%w_0.2|%h_rank_no2|%w_0.2|%h_rank_to2|%w_0.2|%h_rank_ta2|%w_0.2|%h_rank_a2,100,0,0
+9002,900002,%h_rank3、%h_rank_l3、%h_rank_no3、%h_rank_to3、%h_rank_ta3、%h_rank_a3,%h_rank3|%w_0.2|%h_rank_l3|%w_0.2|%h_rank_no3|%w_0.2|%h_rank_to3|%w_0.2|%h_rank_ta3|%w_0.2|%h_rank_a3,100,0,0
+9003,900003,%h_rank4、%h_rank_l4、%h_rank_no4、%h_rank_to4、%h_rank_ta4、%h_rank_a4,%h_rank4|%w_0.2|%h_rank_l4|%w_0.2|%h_rank_no4|%w_0.2|%h_rank_to4|%w_0.2|%h_rank_ta4|%w_0.2|%h_rank_a4,100,0,0
+9004,900004,%h_rank5、%h_rank_l5、%h_rank_no5、%h_rank_to5、%h_rank_ta5、%h_rank_a5,%h_rank5|%w_0.2|%h_rank_l5|%w_0.2|%h_rank_no5|%w_0.2|%h_rank_to5|%w_0.2|%h_rank_ta5|%w_0.2|%h_rank_a5,100,0,0
+9005,900005,%h_rank6、%h_rank_l6、%h_rank_no6、%h_rank_to6、%h_rank_ta6、%h_rank_a6,%h_rank6|%w_0.2|%h_rank_l6|%w_0.2|%h_rank_no6|%w_0.2|%h_rank_to6|%w_0.2|%h_rank_ta6|%w_0.2|%h_rank_a6,100,0,0
+9006,900006,%h_rank7、%h_rank_l7、%h_rank_no7、%h_rank_to7、%h_rank_ta7、%h_rank_a7,%h_rank7|%w_0.2|%h_rank_l7|%w_0.2|%h_rank_no7|%w_0.2|%h_rank_to7|%w_0.2|%h_rank_ta7|%w_0.2|%h_rank_a7,100,0,0
+9007,900007,%h_rank8、%h_rank_l8、%h_rank_no8、%h_rank_to8、%h_rank_ta8、%h_rank_a8,%h_rank8|%w_0.2|%h_rank_l8|%w_0.2|%h_rank_no8|%w_0.2|%h_rank_to8|%w_0.2|%h_rank_ta8|%w_0.2|%h_rank_a8,100,0,0
+9008,900008,%h_rank9、%h_rank_l9、%h_rank_no9、%h_rank_to9、%h_rank_ta9、%h_rank_a9,%h_rank9|%w_0.2|%h_rank_l9|%w_0.2|%h_rank_no9|%w_0.2|%h_rank_to9|%w_0.2|%h_rank_ta9|%w_0.2|%h_rank_a9,100,0,0
+9009,900009,%h_rank10、%h_rank_l10、%h_rank_no10、%h_rank_to10、%h_rank_ta10、%h_rank_a10,%h_rank10|%w_0.2|%h_rank_l10|%w_0.2|%h_rank_no10|%w_0.2|%h_rank_to10|%w_0.2|%h_rank_ta10|%w_0.2|%h_rank_a10,100,0,0
+9010,900010,%h_rank11、%h_rank_l11、%h_rank_no11、%h_rank_to11、%h_rank_ta11、%h_rank_a11,%h_rank11|%w_0.2|%h_rank_l11|%w_0.2|%h_rank_no11|%w_0.2|%h_rank_to11|%w_0.2|%h_rank_ta11|%w_0.2|%h_rank_a11,100,0,0
+9011,900011,%h_rank12、%h_rank_l12、%h_rank_no12、%h_rank_to12、%h_rank_ta12、%h_rank_a12,%h_rank12|%w_0.2|%h_rank_l12|%w_0.2|%h_rank_no12|%w_0.2|%h_rank_to12|%w_0.2|%h_rank_ta12|%w_0.2|%h_rank_a12,100,0,0
+9012,900012,%h_rank13、%h_rank_l13、%h_rank_no13、%h_rank_to13、%h_rank_ta13、%h_rank_a13,%h_rank13|%w_0.2|%h_rank_l13|%w_0.2|%h_rank_no13|%w_0.2|%h_rank_to13|%w_0.2|%h_rank_ta13|%w_0.2|%h_rank_a13,100,0,0
+9013,900013,%h_rank14、%h_rank_l14、%h_rank_no14、%h_rank_to14、%h_rank_ta14、%h_rank_a14,%h_rank14|%w_0.2|%h_rank_l14|%w_0.2|%h_rank_no14|%w_0.2|%h_rank_to14|%w_0.2|%h_rank_ta14|%w_0.2|%h_rank_a14,100,0,0
+9014,900014,%h_rank15、%h_rank_l15、%h_rank_no15、%h_rank_to15、%h_rank_ta15、%h_rank_a15,%h_rank15|%w_0.2|%h_rank_l15|%w_0.2|%h_rank_no15|%w_0.2|%h_rank_to15|%w_0.2|%h_rank_ta15|%w_0.2|%h_rank_a15,100,0,0
+9015,900015,%h_rank16、%h_rank_l16、%h_rank_no16、%h_rank_to16、%h_rank_ta16、%h_rank_a16,%h_rank16|%w_0.2|%h_rank_l16|%w_0.2|%h_rank_no16|%w_0.2|%h_rank_to16|%w_0.2|%h_rank_ta16|%w_0.2|%h_rank_a16,100,0,0
+9016,900016,%h_rank17、%h_rank_l17、%h_rank_no17、%h_rank_to17、%h_rank_ta17、%h_rank_a17,%h_rank17|%w_0.2|%h_rank_l17|%w_0.2|%h_rank_no17|%w_0.2|%h_rank_to17|%w_0.2|%h_rank_ta17|%w_0.2|%h_rank_a17,100,0,0
+9017,900017,%h_rank18、%h_rank_l18、%h_rank_no18、%h_rank_to18、%h_rank_ta18、%h_rank_a18,%h_rank18|%w_0.2|%h_rank_l18|%w_0.2|%h_rank_no18|%w_0.2|%h_rank_to18|%w_0.2|%h_rank_ta18|%w_0.2|%h_rank_a18,100,0,0
+9018,900018,%h_rank1、%h_rank_no1、%h_rank_to1、%h_rank_ta1、%h_rank_a1,%h_rank1|%w_0.2|%h_rank_no1|%w_0.2|%h_rank_to1|%w_0.2|%h_rank_ta1|%w_0.2|%h_rank_a1,100,0,0
+9019,900019,%h_rank2、%h_rank_no2、%h_rank_to2、%h_rank_ta2、%h_rank_a2,%h_rank2|%w_0.2|%h_rank_no2|%w_0.2|%h_rank_to2|%w_0.2|%h_rank_ta2|%w_0.2|%h_rank_a2,100,0,0
+9020,900020,%h_rank3、%h_rank_no3、%h_rank_to3、%h_rank_ta3、%h_rank_a3,%h_rank3|%w_0.2|%h_rank_no3|%w_0.2|%h_rank_to3|%w_0.2|%h_rank_ta3|%w_0.2|%h_rank_a3,100,0,0
+9021,900021,%h_rank4、%h_rank_no4、%h_rank_to4、%h_rank_ta4、%h_rank_a4,%h_rank4|%w_0.2|%h_rank_no4|%w_0.2|%h_rank_to4|%w_0.2|%h_rank_ta4|%w_0.2|%h_rank_a4,100,0,0
+9022,900022,%h_rank5、%h_rank_no5、%h_rank_to5、%h_rank_ta5、%h_rank_a5,%h_rank5|%w_0.2|%h_rank_no5|%w_0.2|%h_rank_to5|%w_0.2|%h_rank_ta5|%w_0.2|%h_rank_a5,100,0,0
+9023,900023,%h_rank6、%h_rank_no6、%h_rank_to6、%h_rank_ta6、%h_rank_a6,%h_rank6|%w_0.2|%h_rank_no6|%w_0.2|%h_rank_to6|%w_0.2|%h_rank_ta6|%w_0.2|%h_rank_a6,100,0,0
+9024,900024,%h_rank7、%h_rank_no7、%h_rank_to7、%h_rank_ta7、%h_rank_a7,%h_rank7|%w_0.2|%h_rank_no7|%w_0.2|%h_rank_to7|%w_0.2|%h_rank_ta7|%w_0.2|%h_rank_a7,100,0,0
+9025,900025,%h_rank8、%h_rank_no8、%h_rank_to8、%h_rank_ta8、%h_rank_a8,%h_rank8|%w_0.2|%h_rank_no8|%w_0.2|%h_rank_to8|%w_0.2|%h_rank_ta8|%w_0.2|%h_rank_a8,100,0,0
+9026,900026,%h_rank9、%h_rank_no9、%h_rank_to9、%h_rank_ta9、%h_rank_a9,%h_rank9|%w_0.2|%h_rank_no9|%w_0.2|%h_rank_to9|%w_0.2|%h_rank_ta9|%w_0.2|%h_rank_a9,100,0,0
+9027,900027,%h_rank10、%h_rank_no10、%h_rank_to10、%h_rank_ta10、%h_rank_a10,%h_rank10|%w_0.2|%h_rank_no10|%w_0.2|%h_rank_to10|%w_0.2|%h_rank_ta10|%w_0.2|%h_rank_a10,100,0,0
+9028,900028,%h_rank11、%h_rank_no11、%h_rank_to11、%h_rank_ta11、%h_rank_a11,%h_rank11|%w_0.2|%h_rank_no11|%w_0.2|%h_rank_to11|%w_0.2|%h_rank_ta11|%w_0.2|%h_rank_a11,100,0,0
+9029,900029,%h_rank12、%h_rank_no12、%h_rank_to12、%h_rank_ta12、%h_rank_a12,%h_rank12|%w_0.2|%h_rank_no12|%w_0.2|%h_rank_to12|%w_0.2|%h_rank_ta12|%w_0.2|%h_rank_a12,100,0,0
+9030,900030,%h_rank13、%h_rank_no13、%h_rank_to13、%h_rank_ta13、%h_rank_a13,%h_rank13|%w_0.2|%h_rank_no13|%w_0.2|%h_rank_to13|%w_0.2|%h_rank_ta13|%w_0.2|%h_rank_a13,100,0,0
+9031,900031,%h_rank14、%h_rank_no14、%h_rank_to14、%h_rank_ta14、%h_rank_a14,%h_rank14|%w_0.2|%h_rank_no14|%w_0.2|%h_rank_to14|%w_0.2|%h_rank_ta14|%w_0.2|%h_rank_a14,100,0,0
+9032,900032,%h_rank15、%h_rank_no15、%h_rank_to15、%h_rank_ta15、%h_rank_a15,%h_rank15|%w_0.2|%h_rank_no15|%w_0.2|%h_rank_to15|%w_0.2|%h_rank_ta15|%w_0.2|%h_rank_a15,100,0,0
+9033,900033,%h_rank16、%h_rank_no16、%h_rank_to16、%h_rank_ta16、%h_rank_a16,%h_rank16|%w_0.2|%h_rank_no16|%w_0.2|%h_rank_to16|%w_0.2|%h_rank_ta16|%w_0.2|%h_rank_a16,100,0,0
+9034,900034,%h_rank17、%h_rank_no17、%h_rank_to17、%h_rank_ta17、%h_rank_a17,%h_rank17|%w_0.2|%h_rank_no17|%w_0.2|%h_rank_to17|%w_0.2|%h_rank_ta17|%w_0.2|%h_rank_a17,100,0,0
+9035,900035,%h_rank18、%h_rank_no18、%h_rank_to18、%h_rank_ta18、%h_rank_a18,%h_rank18|%w_0.2|%h_rank_no18|%w_0.2|%h_rank_to18|%w_0.2|%h_rank_ta18|%w_0.2|%h_rank_a18,100,0,0

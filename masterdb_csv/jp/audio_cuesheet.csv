@@ -1,0 +1,13 @@
+id,cue_sheet,attribute
+1,snd_sfx_common,1
+2,snd_sfx_home_000,1
+3,snd_sfx_common,2
+4,snd_bgm_title,2
+5,snd_voi_title,2
+6,snd_sfx_story_000,108
+7,snd_sfx_training_000,103
+8,snd_sfx_room_000,104
+9,snd_sfx_gacha_000,105
+10,snd_sfx_race_000,106
+11,snd_sfx_preinstall,1
+12,snd_sfx_atmos_common,1

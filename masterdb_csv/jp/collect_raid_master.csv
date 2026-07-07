@@ -1,0 +1,5 @@
+id,use_mission,use_transition_dialog,story_extra_id,story_voice_type,use_all_reward_voice,ending_play_order,collect_item_id,raid_type,gain_collect_item_rate,gain_collect_item_min,individual_reward_set_id,all_reward_set_id,mission_top_chara_group_id,staging_mini_chara_group_id,story_list_bg_id,story_list_bg_sub_id,collect_event_map_master_id,notice_date,start_date,calc_start_date,calc_end_date,end_date
+1001,1,1,1010,0,0,1,189,1,10,1,1,1,1,1,217,130,1001,1671505200,1671591600,1671850800,1671872400,1672282799
+1002,0,0,1007,1,1,1,230,1,20,1,2,2,0,2,311,110,0,1724382000,1724468400,1724727600,1724749200,1724986799
+1003,0,0,1009,1,1,2,284,2,10,1,3,3,0,3,329,0,0,1755918000,1756004400,1756263600,1756285200,1756522799
+1004,0,0,1012,1,1,1,301,1,20,1,4,4,0,4,16,110,0,1765378800,1765422000,1765681200,1765702800,1765940400

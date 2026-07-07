@@ -1,0 +1,4 @@
+id,select_type,skill_id,skill_level_normal,skill_level_success,skill_level_great_success
+1,1,200761,1,1,2
+2,2,201652,1,1,2
+3,3,203851,1,1,2

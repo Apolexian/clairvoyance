@@ -1,0 +1,4 @@
+id,condition_type,value_min,value_max
+1,1,110,150
+2,1,151,200
+3,1,201,999
