@@ -124,9 +124,18 @@ GLOBAL_DB_KEY = bytes(
     ]
 )
 
-# JP key unknown post-update; fall back to Global key.
-# Update this when JP server is tested.
-DB_KEY = GLOBAL_DB_KEY
+# DB encryption key — JP. Derived from UmaViewer's Config keys via GenFinalKey
+# (DBKey[i] ^ DBBaseKey[i % 13]); verified to open the JP meta with cipher 3.
+JP_DB_KEY = bytes(
+    [
+        0x9C, 0x2B, 0xAB, 0x97, 0xBC, 0xF8, 0xC0, 0xC4,
+        0xF1, 0xA9, 0xEA, 0x78, 0x81, 0xA2, 0x13, 0xF6,
+        0xC9, 0xEB, 0xF9, 0xD8, 0xD4, 0xC6, 0xA8, 0xE4,
+        0x3C, 0xE5, 0xA2, 0x59, 0xBD, 0xE7, 0xE9, 0xFD,
+    ]
+)
+
+DB_KEY = JP_DB_KEY
 
 # Kept for API compatibility with dump_all_assets.py imports.
 DB_BASE_KEY = bytes(13)
@@ -233,56 +242,56 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
     except Exception:
         pass
 
-    dll = None
-    dll_name_loaded = None
+    # Collect ALL loadable sqlite3mc-capable DLLs. Global and JP game builds ship
+    # DIFFERENT sqlite3mc variants: the Global meta decrypts only with the game's
+    # libnative.dll, while the JP meta decrypts only with the bundled
+    # sqlite3mc_x64.dll. So we must try each DLL (× each key × each cipher) rather
+    # than stop at the first DLL that loads.
+    loaded_dlls = []  # list of (dll, label)
+
+    def _try_load(path_or_name, label):
+        try:
+            d = ctypes.CDLL(str(path_or_name))
+            loaded_dlls.append((d, label))
+            log.info("Loaded %s (%s)", label, path_or_name)
+        except OSError:
+            pass
+
     for candidate in _libnative_candidates:
         if candidate.is_file():
-            try:
-                dll = ctypes.CDLL(str(candidate))
-                dll_name_loaded = str(candidate)
-                log.info("Loaded libnative.dll from %s", candidate)
-                break
-            except OSError:
-                continue
+            _try_load(candidate, "libnative.dll")
 
-    if dll is None:
-        search_dirs = [
-            APP_DIR,
-            _exe_dir,
-            _meipass,
-            APP_DIR / "_internal",
-        ]
-        dll_names = ["sqlite3mc_x64.dll", "sqlite3mc.dll"]
-        log.debug("sqlite3mc DLL search dirs: %s", [str(d) for d in search_dirs if d])
-        for d in search_dirs:
-            if d is None or not d.is_dir():
-                continue
-            for name in dll_names:
-                candidate = d / name
-                if candidate.is_file():
-                    try:
-                        dll = ctypes.CDLL(str(candidate))
-                        dll_name_loaded = name
-                        log.info("Loaded %s from %s", name, d)
-                        break
-                    except OSError:
-                        continue
-            if dll:
-                break
+    search_dirs = [APP_DIR, _exe_dir, _meipass, APP_DIR / "_internal"]
+    for d in search_dirs:
+        if d is None or not d.is_dir():
+            continue
+        for name in ("sqlite3mc_x64.dll", "sqlite3mc.dll"):
+            candidate = d / name
+            if candidate.is_file():
+                _try_load(candidate, name)
 
-    if dll is None:
-        for name in ["sqlite3mc_x64", "sqlite3mc_x64.dll", "sqlite3mc"]:
-            try:
-                dll = ctypes.CDLL(name)
-                dll_name_loaded = name
-                log.info("Loaded %s from system PATH", name)
-                break
-            except OSError:
-                continue
+    if not loaded_dlls:
+        for name in ("sqlite3mc_x64", "sqlite3mc_x64.dll", "sqlite3mc"):
+            _try_load(name, name)
 
-    if dll is None:
+    if not loaded_dlls:
         log.debug("sqlite3mc DLL not found — cannot decrypt meta natively")
         return None
+
+    # Try each loaded DLL in turn; the Global and JP metas need different builds.
+    for dll, dll_label in loaded_dlls:
+        try:
+            conn = _decrypt_with_dll(meta_path, key, dll)
+            if conn:
+                return conn
+        except Exception as e:  # noqa: BLE001 - move on to the next DLL
+            log.debug("sqlite3mc decrypt via %s raised: %s", dll_label, e)
+    return None
+
+
+def _decrypt_with_dll(meta_path: Path, key: bytes, dll) -> "sqlite3.Connection | None":
+    """Attempt to decrypt meta_path with a specific already-loaded sqlite3mc DLL."""
+    import ctypes
 
     # libnative.dll does not export sqlite3_errmsg; use a safe wrapper.
     _has_errmsg = hasattr(dll, "sqlite3_errmsg")
