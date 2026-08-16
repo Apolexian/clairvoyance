@@ -1,94 +1,140 @@
-chara_id,chara_name,duration_sec,loop_time,sample_rate
-1001,Special Week,1.1667,False,30.0
-1002,Silence Suzuka,1.1667,False,30.0
-1003,Tokai Teio,1.1667,False,30.0
-1004,Maruzensky,1.1667,False,30.0
-1005,Fuji Kiseki,1.1667,False,30.0
-1006,Oguri Cap,1.1667,False,30.0
-1007,Gold Ship,1.1667,False,30.0
-1008,Vodka,1.1667,False,30.0
-1009,Daiwa Scarlet,1.1667,False,30.0
-1010,Taiki Shuttle,1.1667,False,30.0
-1011,Grass Wonder,1.1667,False,30.0
-1012,Hishi Amazon,1.1667,False,30.0
-1013,Mejiro McQueen,1.1667,False,30.0
-1014,El Condor Pasa,1.1667,False,30.0
-1015,T.M. Opera O,1.1667,False,30.0
-1016,Narita Brian,1.1667,False,30.0
-1017,Symboli Rudolf,1.1667,False,30.0
-1018,Air Groove,1.1667,False,30.0
-1019,Agnes Digital,1.1667,False,30.0
-1020,Seiun Sky,1.1667,False,30.0
-1021,Tamamo Cross,1.1667,False,30.0
-1022,Fine Motion,1.1667,False,30.0
-1023,Biwa Hayahide,1.1667,False,30.0
-1024,Mayano Top Gun,1.1667,False,30.0
-1025,Manhattan Cafe,1.1667,False,30.0
-1026,Mihono Bourbon,1.1667,False,30.0
-1027,Mejiro Ryan,1.1667,False,30.0
-1028,Hishi Akebono,1.1667,False,30.0
-1029,Yukino Bijin,1.1667,False,30.0
-1030,Rice Shower,1.1667,False,30.0
-1031,Ines Fujin,1.1667,False,30.0
-1032,Agnes Tachyon,1.1667,False,30.0
-1033,Admire Vega,1.1667,False,30.0
-1034,Inari One,1.1667,False,30.0
-1035,Winning Ticket,1.1667,False,30.0
-1036,Air Shakur,1.1667,False,30.0
-1037,Eishin Flash,1.1667,False,30.0
-1038,Curren Chan,1.1667,False,30.0
-1039,Kawakami Princess,1.1667,False,30.0
-1040,Gold City,1.1667,False,30.0
-1041,Sakura Bakushin O,1.1667,False,30.0
-1042,Seeking the Pearl,1.1667,False,30.0
-1043,Shinko Windy,1.1667,False,30.0
-1044,Sweep Tosho,1.1667,False,30.0
-1045,Super Creek,1.1667,False,30.0
-1046,Smart Falcon,1.1667,False,30.0
-1047,Zenno Rob Roy,1.1667,False,30.0
-1048,Tosen Jordan,1.1667,False,30.0
-1049,Nakayama Festa,1.1667,False,30.0
-1050,Narita Taishin,1.1667,False,30.0
-1051,Nishino Flower,1.1667,False,30.0
-1052,Haru Urara,1.1667,False,30.0
-1053,Bamboo Memory,1.1667,False,30.0
-1054,Biko Pegasus,1.1667,False,30.0
-1055,Marvelous Sunday,1.1667,False,30.0
-1056,Matikanefukukitaru,1.1667,False,30.0
-1057,Mr. C.B.,1.1667,False,30.0
-1058,Meisho Doto,1.1667,False,30.0
-1059,Mejiro Dober,1.1667,False,30.0
-1060,Nice Nature,1.1667,False,30.0
-1061,King Halo,1.1667,False,30.0
-1062,Matikanetannhauser,1.1667,False,30.0
-1063,Ikuno Dictus,1.1667,False,30.0
-1064,Mejiro Palmer,1.1667,False,30.0
-1065,Daitaku Helios,1.1667,False,30.0
-1066,Twin Turbo,1.1667,False,30.0
-1067,Satono Diamond,1.1667,False,30.0
-1068,Kitasan Black,1.1667,False,30.0
-1069,Sakura Chiyono O,1.1667,False,30.0
-1070,Sirius Symboli,1.1667,False,30.0
-1071,Mejiro Ardan,1.1667,False,30.0
-1072,Yaeno Muteki,1.1667,False,30.0
-1073,Tsurumaru Tsuyoshi,1.1667,False,30.0
-1074,Mejiro Bright,1.1667,False,30.0
-1076,Sakura Laurel,1.1667,False,30.0
-1077,Narita Top Road,1.1667,False,30.0
-1078,Yamanin Zephyr,1.2,False,30.0
-1083,Symboli Kris S,1.2,False,30.0
-1084,Tanino Gimlet,1.1667,False,30.0
-1085,Daiichi Ruby,1.1667,False,30.0
-1086,Mejiro Ramonu,1.1667,False,30.0
-1093,K.S.Miracle,1.1667,False,30.0
-1094,Jungle Pocket,1.1667,False,30.0
-1098,Copano Rickey,1.1333,False,30.0
-1099,Hokko Tarumae,1.1667,False,30.0
-1100,Wonder Acute,1.1667,False,30.0
-1104,Katsuragi Ace,1.1667,False,30.0
-1105,Neo Universe,1.1667,False,30.0
-1106,Hishi Miracle,1.1667,False,30.0
-1107,Tap Dance City,1.1667,False,30.0
-9040,,1.1667,False,30.0
-9041,,1.1667,False,30.0
-9042,,1.1667,False,30.0
+card_id,chara_id,chara_name,duration_sec
+100101,1001,Special Week,9.167
+100102,1001,Special Week,9.51
+100103,1001,Special Week,4.334
+100201,1002,Silence Suzuka,8.18
+100202,1002,Silence Suzuka,9.7
+100301,1003,Tokai Teio,7.67
+100302,1003,Tokai Teio,9.48
+100401,1004,Maruzensky,7.633
+100402,1004,Maruzensky,8.934
+100501,1005,Fuji Kiseki,10.5
+100502,1005,Fuji Kiseki,9.968
+100601,1006,Oguri Cap,7.37
+100602,1006,Oguri Cap,9.968
+100701,1007,Gold Ship,2.301
+100702,1007,Gold Ship,10.069
+100801,1008,Vodka,2.301
+100802,1008,Vodka,9.81
+100901,1009,Daiwa Scarlet,2.301
+100902,1009,Daiwa Scarlet,9.47
+101001,1010,Taiki Shuttle,6.334
+101002,1010,Taiki Shuttle,9.268
+101101,1011,Grass Wonder,2.31
+101102,1011,Grass Wonder,9.468
+101201,1012,Hishi Amazon,9.334
+101202,1012,Hishi Amazon,9.64
+101301,1013,Mejiro McQueen,7.31
+101302,1013,Mejiro McQueen,9.468
+101303,1013,Mejiro McQueen,9.467
+101401,1014,El Condor Pasa,2.301
+101402,1014,El Condor Pasa,9.768
+101501,1015,T.M. Opera O,8.134
+101502,1015,T.M. Opera O,9.468
+101601,1016,Narita Brian,9.21
+101602,1016,Narita Brian,9.801
+101701,1017,Symboli Rudolf,8.44
+101702,1017,Symboli Rudolf,9.268
+101801,1018,Air Groove,2.301
+101802,1018,Air Groove,10.11
+101901,1019,Agnes Digital,9.34
+101902,1019,Agnes Digital,10.0
+102001,1020,Seiun Sky,9.401
+102002,1020,Seiun Sky,9.501
+102101,1021,Tamamo Cross,8.87
+102102,1021,Tamamo Cross,9.64
+102201,1022,Fine Motion,8.91
+102202,1022,Fine Motion,9.44
+102301,1023,Biwa Hayahide,8.833
+102302,1023,Biwa Hayahide,9.51
+102401,1024,Mayano Top Gun,2.301
+102402,1024,Mayano Top Gun,9.434
+102501,1025,Manhattan Cafe,9.48
+102601,1026,Mihono Bourbon,9.0
+102602,1026,Mihono Bourbon,9.8
+102701,1027,Mejiro Ryan,2.301
+102702,1027,Mejiro Ryan,10.134
+102801,1028,Hishi Akebono,9.47
+102901,1029,Yukino Bijin,9.5
+103001,1030,Rice Shower,7.067
+103002,1030,Rice Shower,9.468
+103101,1031,Ines Fujin,9.534
+103102,1031,Ines Fujin,9.64
+103201,1032,Agnes Tachyon,2.31
+103202,1032,Agnes Tachyon,9.634
+103301,1033,Admire Vega,9.48
+103401,1034,Inari One,9.168
+103402,1034,Inari One,9.97
+103501,1035,Winning Ticket,2.301
+103502,1035,Winning Ticket,9.434
+103601,1036,Air Shakur,9.1
+103701,1037,Eishin Flash,9.434
+103702,1037,Eishin Flash,9.57
+103801,1038,Curren Chan,9.48
+103802,1038,Curren Chan,9.467
+103901,1039,Kawakami Princess,9.47
+104001,1040,Gold City,9.667
+104002,1040,Gold City,10.03
+104101,1041,Sakura Bakushin O,2.305
+104102,1041,Sakura Bakushin O,9.47
+104201,1042,Seeking the Pearl,10.54
+104301,1043,Shinko Windy,10.01
+104401,1044,Sweep Tosho,9.501
+104501,1045,Super Creek,2.301
+104502,1045,Super Creek,9.7
+104601,1046,Smart Falcon,9.967
+104602,1046,Smart Falcon,9.68
+104701,1047,Zenno Rob Roy,10.134
+104801,1048,Tosen Jordan,9.467
+104802,1048,Tosen Jordan,10.24
+104901,1049,Nakayama Festa,10.35
+105001,1050,Narita Taishin,10.71
+105002,1050,Narita Taishin,9.634
+105101,1051,Nishino Flower,9.62
+105102,1051,Nishino Flower,10.11
+105201,1052,Haru Urara,2.301
+105202,1052,Haru Urara,10.8
+105301,1053,Bamboo Memory,9.368
+105302,1053,Bamboo Memory,9.467
+105501,1055,Marvelous Sunday,9.467
+105601,1056,Matikanefukukitaru,2.301
+105602,1056,Matikanefukukitaru,9.468
+105701,1057,Mr. C.B.,9.701
+105801,1058,Meisho Doto,9.47
+105802,1058,Meisho Doto,9.81
+105901,1059,Mejiro Dober,9.97
+105902,1059,Mejiro Dober,9.801
+106001,1060,Nice Nature,2.301
+106002,1060,Nice Nature,9.668
+106101,1061,King Halo,2.301
+106102,1061,King Halo,9.134
+106201,1062,Matikanetannhauser,2.468
+106202,1062,Matikanetannhauser,10.301
+106401,1064,Mejiro Palmer,9.434
+106501,1065,Daitaku Helios,9.468
+106601,1066,Twin Turbo,2.634
+106701,1067,Satono Diamond,9.967
+106702,1067,Satono Diamond,9.573
+106801,1068,Kitasan Black,9.968
+106802,1068,Kitasan Black,10.001
+106901,1069,Sakura Chiyono O,10.134
+106902,1069,Sakura Chiyono O,9.968
+107001,1070,Sirius Symboli,9.901
+107101,1071,Mejiro Ardan,9.568
+107102,1071,Mejiro Ardan,9.64
+107201,1072,Yaeno Muteki,9.467
+107401,1074,Mejiro Bright,10.04
+107601,1076,Sakura Laurel,10.01
+107801,1078,Yamanin Zephyr,9.468
+108301,1083,Symboli Kris S,10.0
+108401,1084,Tanino Gimlet,9.67
+108501,1085,Daiichi Ruby,9.871
+108701,1087,Aston Machan,10.568
+109801,1098,Copano Rickey,9.64
+109901,1099,Hokko Tarumae,9.534
+110001,1100,Wonder Acute,10.001
+110401,1104,Katsuragi Ace,9.534
+110501,1105,Neo Universe,9.468
+110601,1106,Hishi Miracle,9.668
+9100101,91001,,15.443
+9101101,91011,,12.0

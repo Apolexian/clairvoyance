@@ -1,98 +1,314 @@
-Unique-skill cut-in body-pose animation durations (real AnimationClip length)
-Source: 3d/motion/cutin/chara/body/chr{id}_001/anm_cti_chr{id}_001 (Mecanim MuscleClip)
-Same clip plays regardless of unique-skill evolution tier.
+Unique-skill activation cut-in video durations (real, from cutscene _timeLength)
+Source: cutt/cutin/skill/crd{cardId}_001 MonoBehaviour._timeLength
+One cutscene per card (outfit), not per character.
 ==========================================================================================
 
-Special Week                 (chr1001): 1.167s  loop=False
-Silence Suzuka               (chr1002): 1.167s  loop=False
-Tokai Teio                   (chr1003): 1.167s  loop=False
-Maruzensky                   (chr1004): 1.167s  loop=False
-Fuji Kiseki                  (chr1005): 1.167s  loop=False
-Oguri Cap                    (chr1006): 1.167s  loop=False
-Gold Ship                    (chr1007): 1.167s  loop=False
-Vodka                        (chr1008): 1.167s  loop=False
-Daiwa Scarlet                (chr1009): 1.167s  loop=False
-Taiki Shuttle                (chr1010): 1.167s  loop=False
-Grass Wonder                 (chr1011): 1.167s  loop=False
-Hishi Amazon                 (chr1012): 1.167s  loop=False
-Mejiro McQueen               (chr1013): 1.167s  loop=False
-El Condor Pasa               (chr1014): 1.167s  loop=False
-T.M. Opera O                 (chr1015): 1.167s  loop=False
-Narita Brian                 (chr1016): 1.167s  loop=False
-Symboli Rudolf               (chr1017): 1.167s  loop=False
-Air Groove                   (chr1018): 1.167s  loop=False
-Agnes Digital                (chr1019): 1.167s  loop=False
-Seiun Sky                    (chr1020): 1.167s  loop=False
-Tamamo Cross                 (chr1021): 1.167s  loop=False
-Fine Motion                  (chr1022): 1.167s  loop=False
-Biwa Hayahide                (chr1023): 1.167s  loop=False
-Mayano Top Gun               (chr1024): 1.167s  loop=False
-Manhattan Cafe               (chr1025): 1.167s  loop=False
-Mihono Bourbon               (chr1026): 1.167s  loop=False
-Mejiro Ryan                  (chr1027): 1.167s  loop=False
-Hishi Akebono                (chr1028): 1.167s  loop=False
-Yukino Bijin                 (chr1029): 1.167s  loop=False
-Rice Shower                  (chr1030): 1.167s  loop=False
-Ines Fujin                   (chr1031): 1.167s  loop=False
-Agnes Tachyon                (chr1032): 1.167s  loop=False
-Admire Vega                  (chr1033): 1.167s  loop=False
-Inari One                    (chr1034): 1.167s  loop=False
-Winning Ticket               (chr1035): 1.167s  loop=False
-Air Shakur                   (chr1036): 1.167s  loop=False
-Eishin Flash                 (chr1037): 1.167s  loop=False
-Curren Chan                  (chr1038): 1.167s  loop=False
-Kawakami Princess            (chr1039): 1.167s  loop=False
-Gold City                    (chr1040): 1.167s  loop=False
-Sakura Bakushin O            (chr1041): 1.167s  loop=False
-Seeking the Pearl            (chr1042): 1.167s  loop=False
-Shinko Windy                 (chr1043): 1.167s  loop=False
-Sweep Tosho                  (chr1044): 1.167s  loop=False
-Super Creek                  (chr1045): 1.167s  loop=False
-Smart Falcon                 (chr1046): 1.167s  loop=False
-Zenno Rob Roy                (chr1047): 1.167s  loop=False
-Tosen Jordan                 (chr1048): 1.167s  loop=False
-Nakayama Festa               (chr1049): 1.167s  loop=False
-Narita Taishin               (chr1050): 1.167s  loop=False
-Nishino Flower               (chr1051): 1.167s  loop=False
-Haru Urara                   (chr1052): 1.167s  loop=False
-Bamboo Memory                (chr1053): 1.167s  loop=False
-Biko Pegasus                 (chr1054): 1.167s  loop=False
-Marvelous Sunday             (chr1055): 1.167s  loop=False
-Matikanefukukitaru           (chr1056): 1.167s  loop=False
-Mr. C.B.                     (chr1057): 1.167s  loop=False
-Meisho Doto                  (chr1058): 1.167s  loop=False
-Mejiro Dober                 (chr1059): 1.167s  loop=False
-Nice Nature                  (chr1060): 1.167s  loop=False
-King Halo                    (chr1061): 1.167s  loop=False
-Matikanetannhauser           (chr1062): 1.167s  loop=False
-Ikuno Dictus                 (chr1063): 1.167s  loop=False
-Mejiro Palmer                (chr1064): 1.167s  loop=False
-Daitaku Helios               (chr1065): 1.167s  loop=False
-Twin Turbo                   (chr1066): 1.167s  loop=False
-Satono Diamond               (chr1067): 1.167s  loop=False
-Kitasan Black                (chr1068): 1.167s  loop=False
-Sakura Chiyono O             (chr1069): 1.167s  loop=False
-Sirius Symboli               (chr1070): 1.167s  loop=False
-Mejiro Ardan                 (chr1071): 1.167s  loop=False
-Yaeno Muteki                 (chr1072): 1.167s  loop=False
-Tsurumaru Tsuyoshi           (chr1073): 1.167s  loop=False
-Mejiro Bright                (chr1074): 1.167s  loop=False
-Sakura Laurel                (chr1076): 1.167s  loop=False
-Narita Top Road              (chr1077): 1.167s  loop=False
-Yamanin Zephyr               (chr1078): 1.200s  loop=False
-Symboli Kris S               (chr1083): 1.200s  loop=False
-Tanino Gimlet                (chr1084): 1.167s  loop=False
-Daiichi Ruby                 (chr1085): 1.167s  loop=False
-Mejiro Ramonu                (chr1086): 1.167s  loop=False
-K.S.Miracle                  (chr1093): 1.167s  loop=False
-Jungle Pocket                (chr1094): 1.167s  loop=False
-Copano Rickey                (chr1098): 1.133s  loop=False
-Hokko Tarumae                (chr1099): 1.167s  loop=False
-Wonder Acute                 (chr1100): 1.167s  loop=False
-Katsuragi Ace                (chr1104): 1.167s  loop=False
-Neo Universe                 (chr1105): 1.167s  loop=False
-Hishi Miracle                (chr1106): 1.167s  loop=False
-Tap Dance City               (chr1107): 1.167s  loop=False
-                             (chr9040): 1.167s  loop=False
-                             (chr9041): 1.167s  loop=False
-                             (chr9042): 1.167s  loop=False
+
+Special Week (chr1001)
+  card 100101: 9.17s
+  card 100102: 9.51s
+  card 100103: 4.33s
+
+Silence Suzuka (chr1002)
+  card 100201: 8.18s
+  card 100202: 9.70s
+
+Tokai Teio (chr1003)
+  card 100301: 7.67s
+  card 100302: 9.48s
+
+Maruzensky (chr1004)
+  card 100401: 7.63s
+  card 100402: 8.93s
+
+Fuji Kiseki (chr1005)
+  card 100501: 10.50s
+  card 100502: 9.97s
+
+Oguri Cap (chr1006)
+  card 100601: 7.37s
+  card 100602: 9.97s
+
+Gold Ship (chr1007)
+  card 100701: 2.30s
+  card 100702: 10.07s
+
+Vodka (chr1008)
+  card 100801: 2.30s
+  card 100802: 9.81s
+
+Daiwa Scarlet (chr1009)
+  card 100901: 2.30s
+  card 100902: 9.47s
+
+Taiki Shuttle (chr1010)
+  card 101001: 6.33s
+  card 101002: 9.27s
+
+Grass Wonder (chr1011)
+  card 101101: 2.31s
+  card 101102: 9.47s
+
+Hishi Amazon (chr1012)
+  card 101201: 9.33s
+  card 101202: 9.64s
+
+Mejiro McQueen (chr1013)
+  card 101301: 7.31s
+  card 101302: 9.47s
+  card 101303: 9.47s
+
+El Condor Pasa (chr1014)
+  card 101401: 2.30s
+  card 101402: 9.77s
+
+T.M. Opera O (chr1015)
+  card 101501: 8.13s
+  card 101502: 9.47s
+
+Narita Brian (chr1016)
+  card 101601: 9.21s
+  card 101602: 9.80s
+
+Symboli Rudolf (chr1017)
+  card 101701: 8.44s
+  card 101702: 9.27s
+
+Air Groove (chr1018)
+  card 101801: 2.30s
+  card 101802: 10.11s
+
+Agnes Digital (chr1019)
+  card 101901: 9.34s
+  card 101902: 10.00s
+
+Seiun Sky (chr1020)
+  card 102001: 9.40s
+  card 102002: 9.50s
+
+Tamamo Cross (chr1021)
+  card 102101: 8.87s
+  card 102102: 9.64s
+
+Fine Motion (chr1022)
+  card 102201: 8.91s
+  card 102202: 9.44s
+
+Biwa Hayahide (chr1023)
+  card 102301: 8.83s
+  card 102302: 9.51s
+
+Mayano Top Gun (chr1024)
+  card 102401: 2.30s
+  card 102402: 9.43s
+
+Manhattan Cafe (chr1025)
+  card 102501: 9.48s
+
+Mihono Bourbon (chr1026)
+  card 102601: 9.00s
+  card 102602: 9.80s
+
+Mejiro Ryan (chr1027)
+  card 102701: 2.30s
+  card 102702: 10.13s
+
+Hishi Akebono (chr1028)
+  card 102801: 9.47s
+
+Yukino Bijin (chr1029)
+  card 102901: 9.50s
+
+Rice Shower (chr1030)
+  card 103001: 7.07s
+  card 103002: 9.47s
+
+Ines Fujin (chr1031)
+  card 103101: 9.53s
+  card 103102: 9.64s
+
+Agnes Tachyon (chr1032)
+  card 103201: 2.31s
+  card 103202: 9.63s
+
+Admire Vega (chr1033)
+  card 103301: 9.48s
+
+Inari One (chr1034)
+  card 103401: 9.17s
+  card 103402: 9.97s
+
+Winning Ticket (chr1035)
+  card 103501: 2.30s
+  card 103502: 9.43s
+
+Air Shakur (chr1036)
+  card 103601: 9.10s
+
+Eishin Flash (chr1037)
+  card 103701: 9.43s
+  card 103702: 9.57s
+
+Curren Chan (chr1038)
+  card 103801: 9.48s
+  card 103802: 9.47s
+
+Kawakami Princess (chr1039)
+  card 103901: 9.47s
+
+Gold City (chr1040)
+  card 104001: 9.67s
+  card 104002: 10.03s
+
+Sakura Bakushin O (chr1041)
+  card 104101: 2.31s
+  card 104102: 9.47s
+
+Seeking the Pearl (chr1042)
+  card 104201: 10.54s
+
+Shinko Windy (chr1043)
+  card 104301: 10.01s
+
+Sweep Tosho (chr1044)
+  card 104401: 9.50s
+
+Super Creek (chr1045)
+  card 104501: 2.30s
+  card 104502: 9.70s
+
+Smart Falcon (chr1046)
+  card 104601: 9.97s
+  card 104602: 9.68s
+
+Zenno Rob Roy (chr1047)
+  card 104701: 10.13s
+
+Tosen Jordan (chr1048)
+  card 104801: 9.47s
+  card 104802: 10.24s
+
+Nakayama Festa (chr1049)
+  card 104901: 10.35s
+
+Narita Taishin (chr1050)
+  card 105001: 10.71s
+  card 105002: 9.63s
+
+Nishino Flower (chr1051)
+  card 105101: 9.62s
+  card 105102: 10.11s
+
+Haru Urara (chr1052)
+  card 105201: 2.30s
+  card 105202: 10.80s
+
+Bamboo Memory (chr1053)
+  card 105301: 9.37s
+  card 105302: 9.47s
+
+Marvelous Sunday (chr1055)
+  card 105501: 9.47s
+
+Matikanefukukitaru (chr1056)
+  card 105601: 2.30s
+  card 105602: 9.47s
+
+Mr. C.B. (chr1057)
+  card 105701: 9.70s
+
+Meisho Doto (chr1058)
+  card 105801: 9.47s
+  card 105802: 9.81s
+
+Mejiro Dober (chr1059)
+  card 105901: 9.97s
+  card 105902: 9.80s
+
+Nice Nature (chr1060)
+  card 106001: 2.30s
+  card 106002: 9.67s
+
+King Halo (chr1061)
+  card 106101: 2.30s
+  card 106102: 9.13s
+
+Matikanetannhauser (chr1062)
+  card 106201: 2.47s
+  card 106202: 10.30s
+
+Mejiro Palmer (chr1064)
+  card 106401: 9.43s
+
+Daitaku Helios (chr1065)
+  card 106501: 9.47s
+
+Twin Turbo (chr1066)
+  card 106601: 2.63s
+
+Satono Diamond (chr1067)
+  card 106701: 9.97s
+  card 106702: 9.57s
+
+Kitasan Black (chr1068)
+  card 106801: 9.97s
+  card 106802: 10.00s
+
+Sakura Chiyono O (chr1069)
+  card 106901: 10.13s
+  card 106902: 9.97s
+
+Sirius Symboli (chr1070)
+  card 107001: 9.90s
+
+Mejiro Ardan (chr1071)
+  card 107101: 9.57s
+  card 107102: 9.64s
+
+Yaeno Muteki (chr1072)
+  card 107201: 9.47s
+
+Mejiro Bright (chr1074)
+  card 107401: 10.04s
+
+Sakura Laurel (chr1076)
+  card 107601: 10.01s
+
+Yamanin Zephyr (chr1078)
+  card 107801: 9.47s
+
+Symboli Kris S (chr1083)
+  card 108301: 10.00s
+
+Tanino Gimlet (chr1084)
+  card 108401: 9.67s
+
+Daiichi Ruby (chr1085)
+  card 108501: 9.87s
+
+Aston Machan (chr1087)
+  card 108701: 10.57s
+
+Copano Rickey (chr1098)
+  card 109801: 9.64s
+
+Hokko Tarumae (chr1099)
+  card 109901: 9.53s
+
+Wonder Acute (chr1100)
+  card 110001: 10.00s
+
+Katsuragi Ace (chr1104)
+  card 110401: 9.53s
+
+Neo Universe (chr1105)
+  card 110501: 9.47s
+
+Hishi Miracle (chr1106)
+  card 110601: 9.67s
+
+ (chr91001)
+  card 9100101: 15.44s
+
+ (chr91011)
+  card 9101101: 12.00s

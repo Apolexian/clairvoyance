@@ -1,26 +1,30 @@
 #!/usr/bin/env python3
 """
-Extract the actual unique-skill cut-in body-pose animation duration per
-character.
+Extract the real unique-skill activation cut-in video duration per card.
 
-Prior approach (dump_skill_animation_durations.py) read ParticleSystem
-lengthInSec from the charaskill VFX bundles - but most of those are
-looping, so lengthInSec is just "one loop cycle", not the real on-screen
-time (which is controlled by compiled game code, not a static field).
+Earlier attempts got this wrong:
+  1. ParticleSystem.lengthInSec from charaskill VFX bundles - most are
+     looping, so that's just "one loop cycle", not real on-screen time.
+  2. The chara/body|camera|facial "3d/motion/cutin/chara/..." AnimationClip
+     (~1.17s, suspiciously uniform across the whole cast) - turned out to
+     be a different, shorter clip; not what plays when a unique activates.
 
-This instead reads the character's cut-in body-pose AnimationClip
-directly - a single, non-looping, per-character clip at:
+The actual thing that plays when a unique skill goes off is a *cutscene*
+identified as `cutt/cutin/skill/crd{cardId}_001/crd{cardId}_001`. That
+bundle holds a MonoBehaviour (the cutscene "director") named after the
+card id with a `_timeLength` field - the authoritative full sequence
+duration (camera + character + effects + name-flash, all driven by
+frame-indexed events inside it). Verified against real gameplay: card
+101702 reads 9.27s in-data vs ~8s counted by eye - matches (well within
+counting-by-eye margin), unlike the earlier ~1.17s figure which was
+flatly wrong.
 
-  3d/motion/cutin/chara/body/chr{charaId}_001/anm_cti_chr{charaId}_001
-
-This clip plays once during the unique-skill cut-in camera cutscene
-(same clip regardless of unique-skill evolution tier - the pose is
-fixed per character, only the background/effects change between tiers).
-Its Mecanim MuscleClip m_StartTime/m_StopTime/m_LoopTime give a real,
-authoritative animation duration - not a proxy or a loop cycle length.
+Card id format: {charaId}{outfit:02d}, e.g. 100101 = Special Week's
+base outfit. Each individual card release has its own cut-in cutscene
+(more or less flashy per rarity/era), not just one per unique-skill tier.
 
 Usage:
-  uv run dump_skill_cutin_durations.py [--chara-id 1001] [--out FILE]
+  uv run dump_skill_cutin_durations.py [--card-id 101702] [--out FILE]
 """
 
 from __future__ import annotations
@@ -51,9 +55,7 @@ DEFAULT_JP_CHARA_DATA = (
     Path.home() / "Documents/work/umaguide/docs/.vitepress/theme/data/jpumas.json"
 )
 
-NAME_RE = re.compile(
-    r"^3d/motion/cutin/chara/body/chr(\d+)_001/anm_cti_chr\d+_001$"
-)
+NAME_RE = re.compile(r"^cutt/cutin/skill/crd(\d+)_001/crd\d+_001$")
 
 
 def derive_bundle_key(entry_key: int) -> bytes:
@@ -85,11 +87,11 @@ def load_meta_entries(game_dir: Path) -> list[dict]:
             conn = sqlite3.connect(f"file:{candidate}?mode=ro", uri=True)
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
-                "SELECT n, h, e FROM a WHERE n LIKE '3d/motion/cutin/chara/body/chr%_001/anm_cti_chr%_001'"
+                "SELECT n, h, e FROM a WHERE n LIKE 'cutt/cutin/skill/crd%_001/crd%_001'"
             ).fetchall()
             conn.close()
             if rows:
-                log.info("Loaded %d cut-in body motion entries from %s", len(rows), candidate.name)
+                log.info("Loaded %d skill cut-in cutscene entries from %s", len(rows), candidate.name)
                 return [{"name": r["n"], "hash": r["h"], "key": r["e"]} for r in rows]
         except Exception as e:
             log.warning("Could not read %s as plain sqlite: %s", candidate, e)
@@ -130,26 +132,17 @@ def load_chara_names(chara_data_path: Path, jp_chara_data_path: Path) -> dict[in
     return names
 
 
-def read_clip_duration(data: bytes) -> dict | None:
-    """Return {duration_sec, loop_time, sample_rate} for the AnimationClip in this bundle."""
+def read_time_length(data: bytes, expected_name: str) -> float | None:
     env = UnityPy.load(data)
     for obj in env.objects:
-        if obj.type.name != "AnimationClip":
+        if obj.type.name != "MonoBehaviour":
             continue
         try:
             tree = obj.read_typetree()
         except Exception:
             continue
-        muscle = tree.get("m_MuscleClip") or {}
-        start = muscle.get("m_StartTime")
-        stop = muscle.get("m_StopTime")
-        loop = muscle.get("m_LoopTime")
-        if isinstance(start, (int, float)) and isinstance(stop, (int, float)):
-            return {
-                "duration_sec": round(stop - start, 4),
-                "loop_time": bool(loop),
-                "sample_rate": tree.get("m_SampleRate"),
-            }
+        if tree.get("m_Name") == expected_name and "_timeLength" in tree:
+            return float(tree["_timeLength"])
     return None
 
 
@@ -158,7 +151,7 @@ def main() -> int:
     parser.add_argument("--game-dir", type=Path, default=DEFAULT_GAME_DIR)
     parser.add_argument("--chara-data", type=Path, default=DEFAULT_CHARA_DATA)
     parser.add_argument("--jp-chara-data", type=Path, default=DEFAULT_JP_CHARA_DATA)
-    parser.add_argument("--chara-id", type=int, default=None)
+    parser.add_argument("--card-id", type=int, default=None, help="Only process this cardId (e.g. 101702)")
     parser.add_argument(
         "--out",
         type=Path,
@@ -178,53 +171,57 @@ def main() -> int:
         m = NAME_RE.match(e["name"])
         if not m:
             continue
-        chara_id = int(m.group(1))
-        if args.chara_id is not None and chara_id != args.chara_id:
+        card_id = int(m.group(1))
+        if args.card_id is not None and card_id != args.card_id:
             continue
+        chara_id = card_id // 100
 
         h = e["hash"]
         fp = args.game_dir / "dat" / h[:2] / h
         if not fp.is_file():
-            log.warning("Missing bundle for chr%s at %s", chara_id, fp)
+            log.warning("Missing bundle for crd%s at %s", card_id, fp)
             continue
         try:
             data = decrypt_bundle(fp, e["key"])
-            info = read_clip_duration(data)
+            duration = read_time_length(data, f"crd{card_id}_001")
         except Exception as exc:
-            log.warning("Failed to read chr%s: %s", chara_id, exc)
+            log.warning("Failed to read crd%s: %s", card_id, exc)
             continue
-        if info is None:
-            log.warning("No AnimationClip muscle data found for chr%s", chara_id)
+        if duration is None:
+            log.warning("No _timeLength found for crd%s", card_id)
             continue
 
         name = chara_names.get(chara_id, "")
-        results.append({"chara_id": chara_id, "chara_name": name, **info})
-        log.info(
-            "chr%s (%s): %.3fs (loop=%s)",
-            chara_id, name, info["duration_sec"], info["loop_time"],
+        results.append(
+            {
+                "card_id": card_id,
+                "chara_id": chara_id,
+                "chara_name": name,
+                "duration_sec": round(duration, 3),
+            }
         )
+        log.info("crd%s (%s): %.2fs", card_id, name, duration)
 
     csv_path = args.out.with_suffix(".csv")
     with csv_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(
-            f, fieldnames=["chara_id", "chara_name", "duration_sec", "loop_time", "sample_rate"]
-        )
+        writer = csv.DictWriter(f, fieldnames=["card_id", "chara_id", "chara_name", "duration_sec"])
         writer.writeheader()
         writer.writerows(results)
 
     txt_path = args.out.with_suffix(".txt")
     with txt_path.open("w", encoding="utf-8") as f:
-        f.write("Unique-skill cut-in body-pose animation durations (real AnimationClip length)\n")
-        f.write("Source: 3d/motion/cutin/chara/body/chr{id}_001/anm_cti_chr{id}_001 (Mecanim MuscleClip)\n")
-        f.write("Same clip plays regardless of unique-skill evolution tier.\n")
+        f.write("Unique-skill activation cut-in video durations (real, from cutscene _timeLength)\n")
+        f.write("Source: cutt/cutin/skill/crd{cardId}_001 MonoBehaviour._timeLength\n")
+        f.write("One cutscene per card (outfit), not per character.\n")
         f.write("=" * 90 + "\n\n")
+        current_chara = None
         for r in results:
-            f.write(
-                f"{r['chara_name']:<28} (chr{r['chara_id']}): "
-                f"{r['duration_sec']:.3f}s  loop={r['loop_time']}\n"
-            )
+            if r["chara_id"] != current_chara:
+                current_chara = r["chara_id"]
+                f.write(f"\n{r['chara_name']} (chr{r['chara_id']})\n")
+            f.write(f"  card {r['card_id']}: {r['duration_sec']:.2f}s\n")
 
-    log.info("Wrote %s and %s (%d characters)", csv_path, txt_path, len(results))
+    log.info("Wrote %s and %s (%d cards)", csv_path, txt_path, len(results))
     return 0
 
 
