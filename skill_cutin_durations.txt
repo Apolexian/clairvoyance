@@ -1,314 +1,315 @@
-Unique-skill activation cut-in video durations (real, from cutscene _timeLength)
-Source: cutt/cutin/skill/crd{cardId}_001 MonoBehaviour._timeLength
+Unique-skill activation cut-in video durations (Full and Short variants)
+Source: cutt/cutin/skill/crd{cardId}_001 - _timeLength (Full) and
+runtime_crd{cardId}_001._resumePointFrame/_resumeEndPointFrame (Short), 30fps.
 One cutscene per card (outfit), not per character.
 ==========================================================================================
 
 
 Special Week (chr1001)
-  card 100101: 9.17s
-  card 100102: 9.51s
-  card 100103: 4.33s
+  card 100101: full=9.17s short=9.17s  (no separate short cut authored)
+  card 100102: full=9.51s short=9.51s  (no separate short cut authored)
+  card 100103: full=4.33s short=2.33s
 
 Silence Suzuka (chr1002)
-  card 100201: 8.18s
-  card 100202: 9.70s
+  card 100201: full=8.18s short=8.18s  (no separate short cut authored)
+  card 100202: full=9.70s short=2.33s
 
 Tokai Teio (chr1003)
-  card 100301: 7.67s
-  card 100302: 9.48s
+  card 100301: full=7.67s short=7.67s  (no separate short cut authored)
+  card 100302: full=9.48s short=2.70s
 
 Maruzensky (chr1004)
-  card 100401: 7.63s
-  card 100402: 8.93s
+  card 100401: full=7.63s short=7.63s  (no separate short cut authored)
+  card 100402: full=8.93s short=2.67s
 
 Fuji Kiseki (chr1005)
-  card 100501: 10.50s
-  card 100502: 9.97s
+  card 100501: full=10.50s short=10.50s  (no separate short cut authored)
+  card 100502: full=9.97s short=2.70s
 
 Oguri Cap (chr1006)
-  card 100601: 7.37s
-  card 100602: 9.97s
+  card 100601: full=7.37s short=7.37s  (no separate short cut authored)
+  card 100602: full=9.97s short=2.30s
 
 Gold Ship (chr1007)
-  card 100701: 2.30s
-  card 100702: 10.07s
+  card 100701: full=2.30s short=2.30s  (no separate short cut authored)
+  card 100702: full=10.07s short=2.30s
 
 Vodka (chr1008)
-  card 100801: 2.30s
-  card 100802: 9.81s
+  card 100801: full=2.30s short=2.30s  (no separate short cut authored)
+  card 100802: full=9.81s short=2.50s
 
 Daiwa Scarlet (chr1009)
-  card 100901: 2.30s
-  card 100902: 9.47s
+  card 100901: full=2.30s short=2.30s  (no separate short cut authored)
+  card 100902: full=9.47s short=3.00s
 
 Taiki Shuttle (chr1010)
-  card 101001: 6.33s
-  card 101002: 9.27s
+  card 101001: full=6.33s short=6.33s  (no separate short cut authored)
+  card 101002: full=9.27s short=9.27s  (no separate short cut authored)
 
 Grass Wonder (chr1011)
-  card 101101: 2.31s
-  card 101102: 9.47s
+  card 101101: full=2.31s short=2.31s  (no separate short cut authored)
+  card 101102: full=9.47s short=2.67s
 
 Hishi Amazon (chr1012)
-  card 101201: 9.33s
-  card 101202: 9.64s
+  card 101201: full=9.33s short=9.33s  (no separate short cut authored)
+  card 101202: full=9.64s short=2.37s
 
 Mejiro McQueen (chr1013)
-  card 101301: 7.31s
-  card 101302: 9.47s
-  card 101303: 9.47s
+  card 101301: full=7.31s short=7.31s  (no separate short cut authored)
+  card 101302: full=9.47s short=2.70s
+  card 101303: full=9.47s short=9.47s  (no separate short cut authored)
 
 El Condor Pasa (chr1014)
-  card 101401: 2.30s
-  card 101402: 9.77s
+  card 101401: full=2.30s short=2.30s  (no separate short cut authored)
+  card 101402: full=9.77s short=2.67s
 
 T.M. Opera O (chr1015)
-  card 101501: 8.13s
-  card 101502: 9.47s
+  card 101501: full=8.13s short=8.13s  (no separate short cut authored)
+  card 101502: full=9.47s short=2.30s
 
 Narita Brian (chr1016)
-  card 101601: 9.21s
-  card 101602: 9.80s
+  card 101601: full=9.21s short=9.21s  (no separate short cut authored)
+  card 101602: full=9.80s short=2.33s
 
 Symboli Rudolf (chr1017)
-  card 101701: 8.44s
-  card 101702: 9.27s
+  card 101701: full=8.44s short=8.44s  (no separate short cut authored)
+  card 101702: full=9.27s short=2.30s
 
 Air Groove (chr1018)
-  card 101801: 2.30s
-  card 101802: 10.11s
+  card 101801: full=2.30s short=2.30s  (no separate short cut authored)
+  card 101802: full=10.11s short=10.11s  (no separate short cut authored)
 
 Agnes Digital (chr1019)
-  card 101901: 9.34s
-  card 101902: 10.00s
+  card 101901: full=9.34s short=3.00s
+  card 101902: full=10.00s short=3.03s
 
 Seiun Sky (chr1020)
-  card 102001: 9.40s
-  card 102002: 9.50s
+  card 102001: full=9.40s short=2.67s
+  card 102002: full=9.50s short=2.33s
 
 Tamamo Cross (chr1021)
-  card 102101: 8.87s
-  card 102102: 9.64s
+  card 102101: full=8.87s short=2.10s
+  card 102102: full=9.64s short=2.23s
 
 Fine Motion (chr1022)
-  card 102201: 8.91s
-  card 102202: 9.44s
+  card 102201: full=8.91s short=8.91s  (no separate short cut authored)
+  card 102202: full=9.44s short=9.44s  (no separate short cut authored)
 
 Biwa Hayahide (chr1023)
-  card 102301: 8.83s
-  card 102302: 9.51s
+  card 102301: full=8.83s short=8.83s  (no separate short cut authored)
+  card 102302: full=9.51s short=3.23s
 
 Mayano Top Gun (chr1024)
-  card 102401: 2.30s
-  card 102402: 9.43s
+  card 102401: full=2.30s short=2.30s  (no separate short cut authored)
+  card 102402: full=9.43s short=2.30s
 
 Manhattan Cafe (chr1025)
-  card 102501: 9.48s
+  card 102501: full=9.48s short=9.48s  (no separate short cut authored)
 
 Mihono Bourbon (chr1026)
-  card 102601: 9.00s
-  card 102602: 9.80s
+  card 102601: full=9.00s short=9.00s  (no separate short cut authored)
+  card 102602: full=9.80s short=2.13s
 
 Mejiro Ryan (chr1027)
-  card 102701: 2.30s
-  card 102702: 10.13s
+  card 102701: full=2.30s short=2.30s  (no separate short cut authored)
+  card 102702: full=10.13s short=3.00s
 
 Hishi Akebono (chr1028)
-  card 102801: 9.47s
+  card 102801: full=9.47s short=2.67s
 
 Yukino Bijin (chr1029)
-  card 102901: 9.50s
+  card 102901: full=9.50s short=9.50s  (no separate short cut authored)
 
 Rice Shower (chr1030)
-  card 103001: 7.07s
-  card 103002: 9.47s
+  card 103001: full=7.07s short=7.07s  (no separate short cut authored)
+  card 103002: full=9.47s short=2.73s
 
 Ines Fujin (chr1031)
-  card 103101: 9.53s
-  card 103102: 9.64s
+  card 103101: full=9.53s short=2.67s
+  card 103102: full=9.64s short=3.27s
 
 Agnes Tachyon (chr1032)
-  card 103201: 2.31s
-  card 103202: 9.63s
+  card 103201: full=2.31s short=2.31s  (no separate short cut authored)
+  card 103202: full=9.63s short=2.27s
 
 Admire Vega (chr1033)
-  card 103301: 9.48s
+  card 103301: full=9.48s short=3.10s
 
 Inari One (chr1034)
-  card 103401: 9.17s
-  card 103402: 9.97s
+  card 103401: full=9.17s short=2.67s
+  card 103402: full=9.97s short=2.40s
 
 Winning Ticket (chr1035)
-  card 103501: 2.30s
-  card 103502: 9.43s
+  card 103501: full=2.30s short=2.30s  (no separate short cut authored)
+  card 103502: full=9.43s short=2.60s
 
 Air Shakur (chr1036)
-  card 103601: 9.10s
+  card 103601: full=9.10s short=9.10s  (no separate short cut authored)
 
 Eishin Flash (chr1037)
-  card 103701: 9.43s
-  card 103702: 9.57s
+  card 103701: full=9.43s short=9.43s  (no separate short cut authored)
+  card 103702: full=9.57s short=2.73s
 
 Curren Chan (chr1038)
-  card 103801: 9.48s
-  card 103802: 9.47s
+  card 103801: full=9.48s short=9.48s  (no separate short cut authored)
+  card 103802: full=9.47s short=9.47s  (no separate short cut authored)
 
 Kawakami Princess (chr1039)
-  card 103901: 9.47s
+  card 103901: full=9.47s short=2.40s
 
 Gold City (chr1040)
-  card 104001: 9.67s
-  card 104002: 10.03s
+  card 104001: full=9.67s short=9.67s  (no separate short cut authored)
+  card 104002: full=10.03s short=3.17s
 
 Sakura Bakushin O (chr1041)
-  card 104101: 2.31s
-  card 104102: 9.47s
+  card 104101: full=2.31s short=2.31s  (no separate short cut authored)
+  card 104102: full=9.47s short=2.43s
 
 Seeking the Pearl (chr1042)
-  card 104201: 10.54s
+  card 104201: full=10.54s short=10.54s  (no separate short cut authored)
 
 Shinko Windy (chr1043)
-  card 104301: 10.01s
+  card 104301: full=10.01s short=2.70s
 
 Sweep Tosho (chr1044)
-  card 104401: 9.50s
+  card 104401: full=9.50s short=2.33s
 
 Super Creek (chr1045)
-  card 104501: 2.30s
-  card 104502: 9.70s
+  card 104501: full=2.30s short=2.30s  (no separate short cut authored)
+  card 104502: full=9.70s short=9.70s  (no separate short cut authored)
 
 Smart Falcon (chr1046)
-  card 104601: 9.97s
-  card 104602: 9.68s
+  card 104601: full=9.97s short=9.97s  (no separate short cut authored)
+  card 104602: full=9.68s short=2.57s
 
 Zenno Rob Roy (chr1047)
-  card 104701: 10.13s
+  card 104701: full=10.13s short=3.00s
 
 Tosen Jordan (chr1048)
-  card 104801: 9.47s
-  card 104802: 10.24s
+  card 104801: full=9.47s short=2.87s
+  card 104802: full=10.24s short=2.60s
 
 Nakayama Festa (chr1049)
-  card 104901: 10.35s
+  card 104901: full=10.35s short=2.30s
 
 Narita Taishin (chr1050)
-  card 105001: 10.71s
-  card 105002: 9.63s
+  card 105001: full=10.71s short=10.71s  (no separate short cut authored)
+  card 105002: full=9.63s short=2.30s
 
 Nishino Flower (chr1051)
-  card 105101: 9.62s
-  card 105102: 10.11s
+  card 105101: full=9.62s short=3.33s
+  card 105102: full=10.11s short=3.20s
 
 Haru Urara (chr1052)
-  card 105201: 2.30s
-  card 105202: 10.80s
+  card 105201: full=2.30s short=2.30s  (no separate short cut authored)
+  card 105202: full=10.80s short=1.93s
 
 Bamboo Memory (chr1053)
-  card 105301: 9.37s
-  card 105302: 9.47s
+  card 105301: full=9.37s short=2.30s
+  card 105302: full=9.47s short=2.50s
 
 Marvelous Sunday (chr1055)
-  card 105501: 9.47s
+  card 105501: full=9.47s short=2.33s
 
 Matikanefukukitaru (chr1056)
-  card 105601: 2.30s
-  card 105602: 9.47s
+  card 105601: full=2.30s short=2.30s  (no separate short cut authored)
+  card 105602: full=9.47s short=9.47s  (no separate short cut authored)
 
 Mr. C.B. (chr1057)
-  card 105701: 9.70s
+  card 105701: full=9.70s short=2.50s
 
 Meisho Doto (chr1058)
-  card 105801: 9.47s
-  card 105802: 9.81s
+  card 105801: full=9.47s short=9.47s  (no separate short cut authored)
+  card 105802: full=9.81s short=2.27s
 
 Mejiro Dober (chr1059)
-  card 105901: 9.97s
-  card 105902: 9.80s
+  card 105901: full=9.97s short=2.30s
+  card 105902: full=9.80s short=2.67s
 
 Nice Nature (chr1060)
-  card 106001: 2.30s
-  card 106002: 9.67s
+  card 106001: full=2.30s short=2.30s  (no separate short cut authored)
+  card 106002: full=9.67s short=2.33s
 
 King Halo (chr1061)
-  card 106101: 2.30s
-  card 106102: 9.13s
+  card 106101: full=2.30s short=2.30s  (no separate short cut authored)
+  card 106102: full=9.13s short=2.33s
 
 Matikanetannhauser (chr1062)
-  card 106201: 2.47s
-  card 106202: 10.30s
+  card 106201: full=2.47s short=2.47s  (no separate short cut authored)
+  card 106202: full=10.30s short=2.30s
 
 Mejiro Palmer (chr1064)
-  card 106401: 9.43s
+  card 106401: full=9.43s short=2.50s
 
 Daitaku Helios (chr1065)
-  card 106501: 9.47s
+  card 106501: full=9.47s short=2.50s
 
 Twin Turbo (chr1066)
-  card 106601: 2.63s
+  card 106601: full=2.63s short=2.63s  (no separate short cut authored)
 
 Satono Diamond (chr1067)
-  card 106701: 9.97s
-  card 106702: 9.57s
+  card 106701: full=9.97s short=2.83s
+  card 106702: full=9.57s short=2.33s
 
 Kitasan Black (chr1068)
-  card 106801: 9.97s
-  card 106802: 10.00s
+  card 106801: full=9.97s short=2.67s
+  card 106802: full=10.00s short=2.43s
 
 Sakura Chiyono O (chr1069)
-  card 106901: 10.13s
-  card 106902: 9.97s
+  card 106901: full=10.13s short=3.00s
+  card 106902: full=9.97s short=2.33s
 
 Sirius Symboli (chr1070)
-  card 107001: 9.90s
+  card 107001: full=9.90s short=2.50s
 
 Mejiro Ardan (chr1071)
-  card 107101: 9.57s
-  card 107102: 9.64s
+  card 107101: full=9.57s short=9.57s  (no separate short cut authored)
+  card 107102: full=9.64s short=2.67s
 
 Yaeno Muteki (chr1072)
-  card 107201: 9.47s
+  card 107201: full=9.47s short=2.63s
 
 Mejiro Bright (chr1074)
-  card 107401: 10.04s
+  card 107401: full=10.04s short=3.43s
 
 Sakura Laurel (chr1076)
-  card 107601: 10.01s
+  card 107601: full=10.01s short=2.67s
 
 Yamanin Zephyr (chr1078)
-  card 107801: 9.47s
+  card 107801: full=9.47s short=2.67s
 
 Symboli Kris S (chr1083)
-  card 108301: 10.00s
+  card 108301: full=10.00s short=2.97s
 
 Tanino Gimlet (chr1084)
-  card 108401: 9.67s
+  card 108401: full=9.67s short=2.27s
 
 Daiichi Ruby (chr1085)
-  card 108501: 9.87s
+  card 108501: full=9.87s short=2.30s
 
 Aston Machan (chr1087)
-  card 108701: 10.57s
+  card 108701: full=10.57s short=3.00s
 
 Copano Rickey (chr1098)
-  card 109801: 9.64s
+  card 109801: full=9.64s short=2.73s
 
 Hokko Tarumae (chr1099)
-  card 109901: 9.53s
+  card 109901: full=9.53s short=3.00s
 
 Wonder Acute (chr1100)
-  card 110001: 10.00s
+  card 110001: full=10.00s short=2.63s
 
 Katsuragi Ace (chr1104)
-  card 110401: 9.53s
+  card 110401: full=9.53s short=2.67s
 
 Neo Universe (chr1105)
-  card 110501: 9.47s
+  card 110501: full=9.47s short=2.30s
 
 Hishi Miracle (chr1106)
-  card 110601: 9.67s
+  card 110601: full=9.67s short=2.67s
 
  (chr91001)
-  card 9100101: 15.44s
+  card 9100101: full=15.44s short=15.44s  (no separate short cut authored)
 
  (chr91011)
-  card 9101101: 12.00s
+  card 9101101: full=12.00s short=12.00s  (no separate short cut authored)

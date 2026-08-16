@@ -1,23 +1,32 @@
 #!/usr/bin/env python3
 """
-Extract the real unique-skill activation cut-in video duration per card.
+Extract the real unique-skill activation cut-in video duration per card -
+both the Full and Short (abbreviated) variants, matching the in-game
+per-uma cut-in length setting.
 
 Earlier attempts got this wrong:
   1. ParticleSystem.lengthInSec from charaskill VFX bundles - most are
      looping, so that's just "one loop cycle", not real on-screen time.
   2. The chara/body|camera|facial "3d/motion/cutin/chara/..." AnimationClip
-     (~1.17s, suspiciously uniform across the whole cast) - turned out to
-     be a different, shorter clip; not what plays when a unique activates.
+     (~1.17s, suspiciously uniform across the whole cast) - wrong asset,
+     not what plays when a unique activates.
+  3. Reading only `_timeLength` (the Full-length duration) and treating a
+     handful of ~2.3s cards as "cards that never got a long cut-in" - wrong.
+     Every card actually encodes BOTH variants in the same MonoBehaviour:
+     `_timeLength` is the Full duration, and `_resumePointFrame` /
+     `_resumeEndPointFrame` mark the Short variant's frame range within
+     the same timeline (Short = the flashy climax only, skipping the
+     intro). At 30fps (matches the clips' m_SampleRate), e.g. card 101702:
+     Full 9.27s, resume frames 191->260 => Short = (260-191)/30 = 2.30s.
+     Cards with resume frames == -1/-1 never got a separate Short cut
+     authored - Full and Short are the same ~2.3s clip for those.
 
-The actual thing that plays when a unique skill goes off is a *cutscene*
-identified as `cutt/cutin/skill/crd{cardId}_001/crd{cardId}_001`. That
-bundle holds a MonoBehaviour (the cutscene "director") named after the
-card id with a `_timeLength` field - the authoritative full sequence
-duration (camera + character + effects + name-flash, all driven by
-frame-indexed events inside it). Verified against real gameplay: card
-101702 reads 9.27s in-data vs ~8s counted by eye - matches (well within
-counting-by-eye margin), unlike the earlier ~1.17s figure which was
-flatly wrong.
+The cutscene "director" MonoBehaviour lives at
+`cutt/cutin/skill/crd{cardId}_001/crd{cardId}_001`, named after the card
+id (`crd{cardId}_001`). Verified against real gameplay: card 101702's
+Full length (9.27s) matches ~8s counted by eye (reasonable margin), and
+the game's own per-uma Full/Short setting matches the resume-frame
+mechanism found here.
 
 Card id format: {charaId}{outfit:02d}, e.g. 100101 = Special Week's
 base outfit. Each individual card release has its own cut-in cutscene
@@ -132,8 +141,19 @@ def load_chara_names(chara_data_path: Path, jp_chara_data_path: Path) -> dict[in
     return names
 
 
-def read_time_length(data: bytes, expected_name: str) -> float | None:
+CUT_FRAME_RATE = 30.0  # matches m_SampleRate on the body/camera AnimationClips
+
+
+def read_durations(data: bytes, card_id: int) -> dict | None:
+    """Return {full_duration_sec, short_duration_sec, has_separate_short} for a card's cutscene."""
     env = UnityPy.load(data)
+    director_name = f"crd{card_id}_001"
+    runtime_name = f"runtime_crd{card_id}_001"
+
+    full_duration = None
+    resume_start = None
+    resume_end = None
+
     for obj in env.objects:
         if obj.type.name != "MonoBehaviour":
             continue
@@ -141,9 +161,26 @@ def read_time_length(data: bytes, expected_name: str) -> float | None:
             tree = obj.read_typetree()
         except Exception:
             continue
-        if tree.get("m_Name") == expected_name and "_timeLength" in tree:
-            return float(tree["_timeLength"])
-    return None
+        name = tree.get("m_Name")
+        if name == director_name and "_timeLength" in tree:
+            full_duration = float(tree["_timeLength"])
+        elif name == runtime_name and "_resumePointFrame" in tree:
+            resume_start = tree.get("_resumePointFrame")
+            resume_end = tree.get("_resumeEndPointFrame")
+
+    if full_duration is None:
+        return None
+
+    has_separate_short = resume_start is not None and resume_start >= 0 and resume_end is not None and resume_end >= 0
+    short_duration = (
+        round((resume_end - resume_start) / CUT_FRAME_RATE, 3) if has_separate_short else full_duration
+    )
+
+    return {
+        "full_duration_sec": round(full_duration, 3),
+        "short_duration_sec": short_duration,
+        "has_separate_short": has_separate_short,
+    }
 
 
 def main() -> int:
@@ -183,35 +220,39 @@ def main() -> int:
             continue
         try:
             data = decrypt_bundle(fp, e["key"])
-            duration = read_time_length(data, f"crd{card_id}_001")
+            info = read_durations(data, card_id)
         except Exception as exc:
             log.warning("Failed to read crd%s: %s", card_id, exc)
             continue
-        if duration is None:
+        if info is None:
             log.warning("No _timeLength found for crd%s", card_id)
             continue
 
         name = chara_names.get(chara_id, "")
-        results.append(
-            {
-                "card_id": card_id,
-                "chara_id": chara_id,
-                "chara_name": name,
-                "duration_sec": round(duration, 3),
-            }
+        results.append({"card_id": card_id, "chara_id": chara_id, "chara_name": name, **info})
+        log.info(
+            "crd%s (%s): full=%.2fs short=%.2fs%s",
+            card_id, name, info["full_duration_sec"], info["short_duration_sec"],
+            "" if info["has_separate_short"] else " (no separate short cut authored)",
         )
-        log.info("crd%s (%s): %.2fs", card_id, name, duration)
 
     csv_path = args.out.with_suffix(".csv")
     with csv_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["card_id", "chara_id", "chara_name", "duration_sec"])
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "card_id", "chara_id", "chara_name",
+                "full_duration_sec", "short_duration_sec", "has_separate_short",
+            ],
+        )
         writer.writeheader()
         writer.writerows(results)
 
     txt_path = args.out.with_suffix(".txt")
     with txt_path.open("w", encoding="utf-8") as f:
-        f.write("Unique-skill activation cut-in video durations (real, from cutscene _timeLength)\n")
-        f.write("Source: cutt/cutin/skill/crd{cardId}_001 MonoBehaviour._timeLength\n")
+        f.write("Unique-skill activation cut-in video durations (Full and Short variants)\n")
+        f.write("Source: cutt/cutin/skill/crd{cardId}_001 - _timeLength (Full) and\n")
+        f.write("runtime_crd{cardId}_001._resumePointFrame/_resumeEndPointFrame (Short), 30fps.\n")
         f.write("One cutscene per card (outfit), not per character.\n")
         f.write("=" * 90 + "\n\n")
         current_chara = None
@@ -219,7 +260,11 @@ def main() -> int:
             if r["chara_id"] != current_chara:
                 current_chara = r["chara_id"]
                 f.write(f"\n{r['chara_name']} (chr{r['chara_id']})\n")
-            f.write(f"  card {r['card_id']}: {r['duration_sec']:.2f}s\n")
+            note = "" if r["has_separate_short"] else "  (no separate short cut authored)"
+            f.write(
+                f"  card {r['card_id']}: full={r['full_duration_sec']:.2f}s "
+                f"short={r['short_duration_sec']:.2f}s{note}\n"
+            )
 
     log.info("Wrote %s and %s (%d cards)", csv_path, txt_path, len(results))
     return 0
