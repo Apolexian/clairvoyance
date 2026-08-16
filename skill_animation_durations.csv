@@ -1,0 +1,140 @@
+chara_id,chara_name,group,num_files,num_particle_systems,max_duration_sec
+1001,Special Week,0,10,28,5.0
+1001,Special Week,2,19,77,5.0
+1001,Special Week,3,12,74,5.0
+1002,Silence Suzuka,0,17,53,5.0
+1002,Silence Suzuka,2,16,171,12.0
+1003,Tokai Teio,0,17,43,5.0
+1003,Tokai Teio,2,31,196,5.0
+1004,Maruzensky,0,10,38,5.0
+1004,Maruzensky,2,19,67,5.0
+1005,Fuji Kiseki,0,13,36,10.0
+1005,Fuji Kiseki,2,9,92,10.0
+1006,Oguri Cap,0,17,59,5.0
+1006,Oguri Cap,2,22,154,5.0
+1007,Gold Ship,0,8,32,5.0
+1007,Gold Ship,2,14,93,10.0
+1008,Vodka,0,6,15,5.0
+1008,Vodka,2,18,113,5.0
+1009,Daiwa Scarlet,0,8,24,10.0
+1009,Daiwa Scarlet,2,29,258,5.0
+1010,Taiki Shuttle,0,25,154,5.0
+1010,Taiki Shuttle,2,7,19,5.0
+1011,Grass Wonder,0,12,42,10.0
+1011,Grass Wonder,2,13,75,5.0
+1012,Hishi Amazon,0,12,43,5.0
+1012,Hishi Amazon,2,18,191,5.0
+1013,Mejiro McQueen,0,3,9,5.0
+1013,Mejiro McQueen,2,22,99,5.0
+1013,Mejiro McQueen,3,15,70,5.0
+1014,El Condor Pasa,0,11,23,5.0
+1014,El Condor Pasa,2,11,48,5.0
+1015,T.M. Opera O,0,11,41,5.0
+1015,T.M. Opera O,2,19,102,5.0
+1016,Narita Brian,0,16,41,5.0
+1016,Narita Brian,2,27,114,5.0
+1017,Symboli Rudolf,0,19,82,5.0
+1017,Symboli Rudolf,2,26,152,15.0
+1018,Air Groove,0,8,38,5.0
+1018,Air Groove,2,4,9,5.0
+1019,Agnes Digital,0,16,1235,5.0
+1019,Agnes Digital,2,23,55,5.0
+1020,Seiun Sky,0,14,54,5.0
+1020,Seiun Sky,2,17,126,5.0
+1021,Tamamo Cross,0,27,309,10.0
+1021,Tamamo Cross,2,22,133,5.0
+1022,Fine Motion,0,10,43,6.0
+1022,Fine Motion,2,9,43,5.0
+1023,Biwa Hayahide,0,5,33,5.0
+1023,Biwa Hayahide,2,18,53,5.0
+1024,Mayano Top Gun,0,7,33,10.0
+1024,Mayano Top Gun,2,7,19,10.0
+1025,Manhattan Cafe,0,6,27,5.0
+1026,Mihono Bourbon,0,16,83,10.0
+1026,Mihono Bourbon,2,22,137,5.0
+1027,Mejiro Ryan,0,8,21,5.0
+1027,Mejiro Ryan,2,9,51,5.0
+1028,Hishi Akebono,0,8,87,5.0
+1029,Yukino Bijin,0,18,207,5.0
+1030,Rice Shower,0,12,75,5.0
+1030,Rice Shower,2,7,25,5.0
+1031,Ines Fujin,0,15,101,5.0
+1031,Ines Fujin,2,38,135,5.0
+1032,Agnes Tachyon,0,9,21,5.0
+1032,Agnes Tachyon,2,27,135,5.0
+1033,Admire Vega,0,14,123,5.0
+1034,Inari One,0,9,28,5.0
+1034,Inari One,2,16,112,5.0
+1035,Winning Ticket,0,5,14,5.0
+1035,Winning Ticket,2,12,65,5.0
+1036,Air Shakur,0,15,154,5.0
+1037,Eishin Flash,0,17,50,5.0
+1037,Eishin Flash,2,7,22,5.0
+1038,Curren Chan,0,28,78,5.0
+1038,Curren Chan,2,6,17,13.0
+1039,Kawakami Princess,0,19,99,5.0
+1040,Gold City,0,8,15,10.0
+1040,Gold City,2,17,79,5.0
+1041,Sakura Bakushin O,0,8,61,5.0
+1041,Sakura Bakushin O,2,25,245,5.0
+1042,Seeking the Pearl,0,15,85,5.0
+1043,Shinko Windy,0,25,157,5.0
+1044,Sweep Tosho,0,11,55,5.0
+1045,Super Creek,0,8,51,5.0
+1045,Super Creek,2,4,24,5.0
+1046,Smart Falcon,0,8,25,5.0
+1046,Smart Falcon,2,23,110,5.0
+1047,Zenno Rob Roy,0,16,39,5.0
+1048,Tosen Jordan,0,30,118,5.0
+1048,Tosen Jordan,2,20,120,5.0
+1049,Nakayama Festa,0,24,169,5.0
+1050,Narita Taishin,0,25,77,5.0
+1050,Narita Taishin,2,19,91,10.0
+1051,Nishino Flower,0,12,77,5.0
+1051,Nishino Flower,2,16,101,5.0
+1052,Haru Urara,0,6,17,5.0
+1052,Haru Urara,2,15,36,5.0
+1053,Bamboo Memory,0,11,77,5.0
+1053,Bamboo Memory,2,24,101,10.0
+1055,Marvelous Sunday,0,32,230,10.0
+1056,Matikanefukukitaru,0,7,35,5.0
+1056,Matikanefukukitaru,2,8,23,5.0
+1057,Mr. C.B.,0,25,96,5.0
+1058,Meisho Doto,0,9,70,5.0
+1058,Meisho Doto,2,21,154,5.0
+1059,Mejiro Dober,0,10,93,5.0
+1059,Mejiro Dober,2,15,60,5.0
+1060,Nice Nature,0,10,21,5.0
+1060,Nice Nature,2,13,112,5.0
+1061,King Halo,0,5,18,5.0
+1061,King Halo,2,9,34,5.0
+1062,Matikanetannhauser,0,7,23,5.0
+1062,Matikanetannhauser,2,17,48,5.0
+1064,Mejiro Palmer,0,16,95,5.0
+1065,Daitaku Helios,0,13,302,5.0
+1066,Twin Turbo,0,5,29,5.0
+1067,Satono Diamond,0,13,80,5.0
+1067,Satono Diamond,2,13,93,5.0
+1068,Kitasan Black,0,22,227,5.0
+1068,Kitasan Black,2,14,113,5.0
+1069,Sakura Chiyono O,0,20,160,5.5
+1069,Sakura Chiyono O,2,28,159,5.0
+1070,Sirius Symboli,0,13,77,5.0
+1071,Mejiro Ardan,0,9,63,5.0
+1071,Mejiro Ardan,2,15,40,5.0
+1072,Yaeno Muteki,0,14,129,5.0
+1074,Mejiro Bright,0,12,67,5.0
+1076,Sakura Laurel,0,17,311,5.0
+1078,Yamanin Zephyr,0,22,82,5.0
+1083,Symboli Kris S,0,28,197,5.0
+1084,Tanino Gimlet,0,23,213,5.0
+1085,Daiichi Ruby,0,21,111,5.0
+1087,Aston Machan,0,11,75,10.0
+1098,Copano Rickey,0,19,141,5.0
+1099,Hokko Tarumae,0,20,51,5.0
+1100,Wonder Acute,0,17,132,5.0
+1104,Katsuragi Ace,0,22,150,5.0
+1105,Neo Universe,0,15,115,5.0
+1106,Hishi Miracle,0,16,66,5.0
+91001,,0,22,108,5.0
+91011,,0,22,94,5.0
