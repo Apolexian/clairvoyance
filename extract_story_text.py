@@ -207,7 +207,140 @@ def _try_open_encrypted_meta(meta_path: Path) -> sqlite3.Connection | None:
                 log.info("Decrypted meta via sqlite3mc (%s key)", region)
                 return conn
 
+    log.error(
+        "Could not decrypt %s with any known key (Global, JP). Either "
+        "sqlite3mc_x64.dll is missing next to the app, or the game rotated its "
+        "meta DB key again — in that case re-capture it with dump_db_key.py "
+        "while the game is running.",
+        meta_path,
+    )
     return None
+
+
+# Cache of loaded sqlite3mc-capable DLLs, keyed by game directory.  Loading the
+# same DLL once per key (Global, then JP) is wasteful and doubles the log noise.
+_SQLITE3MC_DLL_CACHE: dict[str, list] = {}
+
+
+def _find_sqlite3mc_dlls(meta_path: Path) -> list:
+    """
+    Load every sqlite3mc-capable DLL we can find, bundled build first.
+
+    Global and JP game builds ship DIFFERENT sqlite3mc variants: the Global
+    meta decrypts only with the game's libnative.dll, while the JP meta
+    decrypts only with the bundled sqlite3mc_x64.dll — libnative rejects the
+    JP key for *every* cipher ID, so falling back to it alone is what produced
+    the "no cipher ID worked" failures reported for the JP client.  The
+    bundled DLL is therefore tried first and libnative second.
+
+    Returns a list of (dll, label) tuples; cached per game directory.
+    """
+    import ctypes
+
+    _game_dir = meta_path.parent
+    cache_key = str(_game_dir)
+    cached = _SQLITE3MC_DLL_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    loaded_dlls: list = []
+    seen: set[str] = set()
+
+    def _try_load(path_or_name, label):
+        key = str(path_or_name).lower()
+        if key in seen:
+            return
+        seen.add(key)
+        try:
+            d = ctypes.CDLL(str(path_or_name))
+        except OSError as e:
+            log.debug("Could not load %s (%s): %s", label, path_or_name, e)
+            return
+        loaded_dlls.append((d, label))
+        log.info("Loaded %s (%s)", label, path_or_name)
+
+    # ── 1. Bundled sqlite3mc_x64.dll (works for the JP meta) ──────────
+    _meipass = Path(sys._MEIPASS) if _FROZEN and hasattr(sys, "_MEIPASS") else None
+    _exe_dir = Path(sys.executable).resolve().parent if _FROZEN else None
+    search_dirs = [
+        APP_DIR,
+        APP_DIR / "_internal",
+        _exe_dir,
+        _exe_dir / "_internal" if _exe_dir else None,
+        _meipass,
+        Path.cwd(),
+        Path.cwd() / "_internal",
+    ]
+    bundled_found = False
+    for d in search_dirs:
+        if d is None or not d.is_dir():
+            continue
+        for name in ("sqlite3mc_x64.dll", "sqlite3mc.dll"):
+            candidate = d / name
+            if candidate.is_file():
+                bundled_found = True
+                _try_load(candidate, name)
+
+    if not bundled_found:
+        # Last resort: let the OS loader search PATH.
+        for name in ("sqlite3mc_x64.dll", "sqlite3mc.dll"):
+            before = len(loaded_dlls)
+            _try_load(name, name)
+            if len(loaded_dlls) > before:
+                bundled_found = True
+
+    if not bundled_found:
+        log.warning(
+            "sqlite3mc_x64.dll not found next to the app — the JP meta database "
+            "cannot be decrypted without it (the game's libnative.dll only "
+            "handles the Global meta). Place sqlite3mc_x64.dll beside the "
+            "executable, or re-download the release archive in full."
+        )
+
+    # ── 2. libnative.dll from the game install (works for Global) ─────
+    # Cover the Steam layout (UmamusumePrettyDerby_Data) and the DMM layout
+    # (umamusume_Data), both as <game>/<X>_Data/Plugins/x86_64/libnative.dll,
+    # where meta lives in <X>_Data/Persistent or in LocalLow.
+    _libnative_candidates: list[Path] = []
+    for root in (_game_dir, _game_dir.parent, _game_dir.parent.parent):
+        try:
+            if not root.is_dir():
+                continue
+        except OSError:
+            continue
+        _libnative_candidates.extend(
+            sorted(root.glob("*_Data/Plugins/x86_64/libnative.dll"))
+        )
+        direct = root / "Plugins" / "x86_64" / "libnative.dll"
+        if direct.is_file():
+            _libnative_candidates.append(direct)
+
+    # Also try the Steam install, since the Global/Steam meta lives under
+    # LocalLow and gives no path back to the game directory.
+    import winreg as _wr
+
+    for _hive, _sub in (
+        (_wr.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Valve\Steam"),
+        (_wr.HKEY_CURRENT_USER, r"SOFTWARE\Valve\Steam"),
+    ):
+        try:
+            with _wr.OpenKey(_hive, _sub) as k:
+                name = "InstallPath" if _hive == _wr.HKEY_LOCAL_MACHINE else "SteamPath"
+                steam_path = Path(_wr.QueryValueEx(k, name)[0])
+        except Exception:
+            continue
+        common = steam_path / "steamapps" / "common"
+        if common.is_dir():
+            _libnative_candidates.extend(
+                sorted(common.glob("*/*_Data/Plugins/x86_64/libnative.dll"))
+            )
+
+    for candidate in _libnative_candidates:
+        if candidate.is_file():
+            _try_load(candidate, "libnative.dll")
+
+    _SQLITE3MC_DLL_CACHE[cache_key] = loaded_dlls
+    return loaded_dlls
 
 
 def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connection | None:
@@ -215,67 +348,13 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
     Use sqlite3mc DLL via ctypes to decrypt the meta DB to a plaintext copy.
     Creates meta_decrypted next to the original.
     """
-    import ctypes
+    loaded_dlls = _find_sqlite3mc_dlls(meta_path)
 
-    # Search for the DLL. Priority:
-    #   1. libnative.dll from game install (ships with sqlite3mc since v1.22.1)
-    #   2. sqlite3mc_x64.dll next to script / exe (bundled fallback)
-    _meipass = Path(sys._MEIPASS) if _FROZEN and hasattr(sys, "_MEIPASS") else None
-    _exe_dir = Path(sys.executable).resolve().parent if _FROZEN else None
-
-    # Locate libnative.dll from the game install directory.
-    # meta_path is  <game_dir>/meta  →  game_dir is meta_path.parent
-    _game_dir = meta_path.parent
-    _libnative_candidates = [
-        _game_dir.parent / "UmamusumePrettyDerby_Data" / "Plugins" / "x86_64" / "libnative.dll",
-        _game_dir / "UmamusumePrettyDerby_Data" / "Plugins" / "x86_64" / "libnative.dll",
-    ]
-    # Also try common Steam path
-    import winreg as _wr
-    try:
-        with _wr.OpenKey(_wr.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Valve\Steam") as k:
-            steam_path = Path(_wr.QueryValueEx(k, "InstallPath")[0])
-        _libnative_candidates.append(
-            steam_path / "steamapps" / "common" / "UmamusumePrettyDerby"
-            / "UmamusumePrettyDerby_Data" / "Plugins" / "x86_64" / "libnative.dll"
+    if not loaded_dlls:
+        log.error(
+            "No sqlite3mc-capable DLL could be loaded — cannot decrypt the meta "
+            "database. Put sqlite3mc_x64.dll next to the executable."
         )
-    except Exception:
-        pass
-
-    # Collect ALL loadable sqlite3mc-capable DLLs. Global and JP game builds ship
-    # DIFFERENT sqlite3mc variants: the Global meta decrypts only with the game's
-    # libnative.dll, while the JP meta decrypts only with the bundled
-    # sqlite3mc_x64.dll. So we must try each DLL (× each key × each cipher) rather
-    # than stop at the first DLL that loads.
-    loaded_dlls = []  # list of (dll, label)
-
-    def _try_load(path_or_name, label):
-        try:
-            d = ctypes.CDLL(str(path_or_name))
-            loaded_dlls.append((d, label))
-            log.info("Loaded %s (%s)", label, path_or_name)
-        except OSError:
-            pass
-
-    for candidate in _libnative_candidates:
-        if candidate.is_file():
-            _try_load(candidate, "libnative.dll")
-
-    search_dirs = [APP_DIR, _exe_dir, _meipass, APP_DIR / "_internal"]
-    for d in search_dirs:
-        if d is None or not d.is_dir():
-            continue
-        for name in ("sqlite3mc_x64.dll", "sqlite3mc.dll"):
-            candidate = d / name
-            if candidate.is_file():
-                _try_load(candidate, name)
-
-    if not loaded_dlls:
-        for name in ("sqlite3mc_x64", "sqlite3mc_x64.dll", "sqlite3mc"):
-            _try_load(name, name)
-
-    if not loaded_dlls:
-        log.debug("sqlite3mc DLL not found — cannot decrypt meta natively")
         return None
 
     # Try each loaded DLL in turn; the Global and JP metas need different builds.
@@ -286,6 +365,11 @@ def _try_decrypt_via_sqlite3mc(meta_path: Path, key: bytes) -> sqlite3.Connectio
                 return conn
         except Exception as e:  # noqa: BLE001 - move on to the next DLL
             log.debug("sqlite3mc decrypt via %s raised: %s", dll_label, e)
+
+    log.debug(
+        "None of the loaded DLLs (%s) decrypted the meta with this key",
+        ", ".join(label for _, label in loaded_dlls),
+    )
     return None
 
 
@@ -406,7 +490,10 @@ def _decrypt_with_dll(meta_path: Path, key: bytes, dll) -> "sqlite3.Connection |
             break
 
         if validated_db_ptr is None:
-            log.error("sqlite3mc: no cipher ID worked (tried %s)", _CIPHER_IDS)
+            # Expected for the DLL that does not match this region's meta
+            # (libnative.dll never opens the JP meta), so this is not an error
+            # on its own — the caller reports failure once every DLL is spent.
+            log.debug("sqlite3mc: no cipher ID worked (tried %s)", _CIPHER_IDS)
             return None
         db_ptr = validated_db_ptr
 

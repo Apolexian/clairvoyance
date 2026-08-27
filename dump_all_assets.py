@@ -535,6 +535,7 @@ def _mark_songs_encrypted(meta_path: Path, game_dir: Path) -> None:
     import shutil
 
     from extract_story_text import (
+        _find_sqlite3mc_dlls,
         _try_decrypt_via_sqlite3mc,
         DB_KEY,
         GLOBAL_DB_KEY,
@@ -553,55 +554,15 @@ def _mark_songs_encrypted(meta_path: Path, game_dir: Path) -> None:
         ("JP", _derive_db_key(DB_KEY)),
     ]
 
-    # Find sqlite3mc DLL (same logic as extract_story_text)
-    search_dirs = [APP_DIR, APP_DIR / "_internal"]
-    dll_names = ["sqlite3mc_x64.dll", "sqlite3mc.dll"]
-
-    dll = None
-    for d in search_dirs:
-        if d is None or not d.is_dir():
-            continue
-        for name in dll_names:
-            candidate = d / name
-            if candidate.is_file():
-                try:
-                    dll = ctypes.CDLL(str(candidate))
-                    break
-                except OSError:
-                    continue
-        if dll:
-            break
-
-    if dll is None:
-        for name in ["sqlite3mc_x64", "sqlite3mc_x64.dll", "sqlite3mc"]:
-            try:
-                dll = ctypes.CDLL(name)
-                break
-            except OSError:
-                continue
-
-    if dll is None:
+    dlls = _find_sqlite3mc_dlls(meta_path)
+    if not dlls:
         log.warning("Cannot modify encrypted meta: sqlite3mc DLL not found")
         return
 
-    # Setup function signatures
     _vp = ctypes.c_void_p
     _cp = ctypes.c_char_p
     _ci = ctypes.c_int
     _pp = ctypes.POINTER(ctypes.c_void_p)
-
-    dll.sqlite3_open_v2.argtypes = [_cp, _pp, _ci, _cp]
-    dll.sqlite3_open_v2.restype = _ci
-    dll.sqlite3mc_config.argtypes = [_vp, _cp, _ci]
-    dll.sqlite3mc_config.restype = _ci
-    dll.sqlite3_key.argtypes = [_vp, _cp, _ci]
-    dll.sqlite3_key.restype = _ci
-    dll.sqlite3_exec.argtypes = [_vp, _cp, _vp, _vp, _pp]
-    dll.sqlite3_exec.restype = _ci
-    dll.sqlite3_errmsg.argtypes = [_vp]
-    dll.sqlite3_errmsg.restype = _cp
-    dll.sqlite3_close.argtypes = [_vp]
-    dll.sqlite3_close.restype = _ci
 
     SQLITE_OPEN_READWRITE = 0x00000002
     _CIPHER_IDS = [3, 5, 4]
@@ -612,56 +573,78 @@ def _mark_songs_encrypted(meta_path: Path, game_dir: Path) -> None:
         shutil.copy2(meta_path, backup_path)
         log.info("Backed up meta → %s", backup_path.name)
 
-    for region, key in keys_to_try:
-        for cipher_id in _CIPHER_IDS:
-            db_ptr = ctypes.c_void_p()
-            rc = dll.sqlite3_open_v2(
-                str(meta_path).encode("utf-8"),
-                ctypes.byref(db_ptr),
-                SQLITE_OPEN_READWRITE,
-                None,
-            )
-            if rc != 0:
-                continue
+    # Global and JP metas need different sqlite3mc builds, so try every DLL.
+    for dll, dll_label in dlls:
+        dll.sqlite3_open_v2.argtypes = [_cp, _pp, _ci, _cp]
+        dll.sqlite3_open_v2.restype = _ci
+        dll.sqlite3mc_config.argtypes = [_vp, _cp, _ci]
+        dll.sqlite3mc_config.restype = _ci
+        dll.sqlite3_key.argtypes = [_vp, _cp, _ci]
+        dll.sqlite3_key.restype = _ci
+        dll.sqlite3_exec.argtypes = [_vp, _cp, _vp, _vp, _pp]
+        dll.sqlite3_exec.restype = _ci
+        dll.sqlite3_close.argtypes = [_vp]
+        dll.sqlite3_close.restype = _ci
 
-            rc = dll.sqlite3mc_config(db_ptr, b"cipher", cipher_id)
-            rc = dll.sqlite3_key(db_ptr, key, len(key))
-            if rc != 0:
-                dll.sqlite3_close(db_ptr)
-                continue
+        # libnative.dll does not export sqlite3_errmsg.
+        _has_errmsg = hasattr(dll, "sqlite3_errmsg")
+        if _has_errmsg:
+            dll.sqlite3_errmsg.argtypes = [_vp]
+            dll.sqlite3_errmsg.restype = _cp
 
-            # Validate access
-            err_ptr = ctypes.c_void_p()
-            rc = dll.sqlite3_exec(
-                db_ptr,
-                b"SELECT name FROM sqlite_master LIMIT 1;",
-                None, None, ctypes.byref(err_ptr),
-            )
-            if rc != 0:
-                dll.sqlite3_close(db_ptr)
-                continue
+        def _errmsg(db):
+            if not _has_errmsg:
+                return "(unavailable)"
+            msg = dll.sqlite3_errmsg(db)
+            return msg.decode("utf-8", errors="replace") if msg else "(null)"
 
-            # Key works — do the update
-            rc = dll.sqlite3_exec(
-                db_ptr,
-                b"UPDATE a SET g = 0 WHERE n LIKE 'sound/l/%' AND g != 0",
-                None, None, ctypes.byref(err_ptr),
-            )
-
-            if rc == 0:
-                log.info(
-                    "Marked song entries for download (%s key, cipher %d). "
-                    "Launch the game to trigger downloads, then run --songs again.",
-                    region, cipher_id,
+        for region, key in keys_to_try:
+            for cipher_id in _CIPHER_IDS:
+                db_ptr = ctypes.c_void_p()
+                rc = dll.sqlite3_open_v2(
+                    str(meta_path).encode("utf-8"),
+                    ctypes.byref(db_ptr),
+                    SQLITE_OPEN_READWRITE,
+                    None,
                 )
+                if rc != 0:
+                    continue
+
+                dll.sqlite3mc_config(db_ptr, b"cipher", cipher_id)
+                rc = dll.sqlite3_key(db_ptr, key, len(key))
+                if rc != 0:
+                    dll.sqlite3_close(db_ptr)
+                    continue
+
+                # Validate access
+                err_ptr = ctypes.c_void_p()
+                rc = dll.sqlite3_exec(
+                    db_ptr,
+                    b"SELECT name FROM sqlite_master LIMIT 1;",
+                    None, None, ctypes.byref(err_ptr),
+                )
+                if rc != 0:
+                    dll.sqlite3_close(db_ptr)
+                    continue
+
+                # Key works — do the update
+                rc = dll.sqlite3_exec(
+                    db_ptr,
+                    b"UPDATE a SET g = 0 WHERE n LIKE 'sound/l/%' AND g != 0",
+                    None, None, ctypes.byref(err_ptr),
+                )
+
+                if rc == 0:
+                    log.info(
+                        "Marked song entries for download (%s key, cipher %d, %s). "
+                        "Launch the game to trigger downloads, then run --songs again.",
+                        region, cipher_id, dll_label,
+                    )
+                    dll.sqlite3_close(db_ptr)
+                    return
+
+                log.debug("UPDATE failed: rc=%d err=%s", rc, _errmsg(db_ptr))
                 dll.sqlite3_close(db_ptr)
-                return
-            else:
-                msg = dll.sqlite3_errmsg(db_ptr)
-                log.debug("UPDATE failed: rc=%d err=%s", rc,
-                         msg.decode() if msg else "unknown")
-                dll.sqlite3_close(db_ptr)
-                continue
 
     log.warning(
         "Could not modify encrypted meta DB. "
@@ -2105,6 +2088,15 @@ def _progress(
 
 
 def main():
+    # Windows consoles default to cp1252, which cannot encode the box-drawing
+    # and arrow characters used in log messages and the progress frame — that
+    # raised UnicodeEncodeError mid-dump. Degrade unencodable chars instead.
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, OSError):
+            pass
+
     logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
     # Console handler stays at INFO (don't spam terminal with debug)
     logging.getLogger().handlers[0].setLevel(logging.INFO)
